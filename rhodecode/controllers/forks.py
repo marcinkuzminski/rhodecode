@@ -99,8 +99,8 @@ class ForksController(BaseRepoController):
                                             c.repo_last_rev) * 100)
 
         defaults = RepoModel()._get_defaults(repo_name)
-        # add prefix to fork
-        defaults['repo_name'] = 'fork-' + defaults['repo_name']
+        # add suffix to fork
+        defaults['repo_name'] = '%s-fork' % defaults['repo_name']
         return defaults
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',

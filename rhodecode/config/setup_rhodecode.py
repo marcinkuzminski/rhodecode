@@ -50,6 +50,16 @@ class SetupCommand(AbstractInstallCommand):
                       dest='section_name',
                       default=None,
                       help='The name of the section to set up (default: app:main)')
+    parser.add_option('--force-yes',
+                       action='store_true',
+                       dest='force_ask',
+                       default=None,
+                       help='Force yes to every question')
+    parser.add_option('--force-no',
+                       action='store_false',
+                       dest='force_ask',
+                       default=None,
+                       help='Force no to every question')
 
     def command(self):
         config_spec = self.args[0]
@@ -61,7 +71,7 @@ class SetupCommand(AbstractInstallCommand):
                 section = 'main'
         if not ':' in section:
             plain_section = section
-            section = 'app:'+section
+            section = 'app:' + section
         else:
             plain_section = section.split(':', 1)[0]
         if not config_spec.startswith('config:'):

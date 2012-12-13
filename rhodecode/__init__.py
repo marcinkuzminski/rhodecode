@@ -26,7 +26,7 @@
 import sys
 import platform
 
-VERSION = (1, 4, 4)
+VERSION = (1, 5, 0)
 
 try:
     from rhodecode.lib import get_current_revision
@@ -38,7 +38,7 @@ except ImportError:
 
 __version__ = ('.'.join((str(each) for each in VERSION[:3])) +
                '.'.join(VERSION[3:]))
-__dbversion__ = 7  # defines current db version for migrations
+__dbversion__ = 8  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 __py_version__ = sys.version_info

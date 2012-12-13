@@ -2,7 +2,7 @@
 <div class="container">
   <table class="compare_view_commits noborder">
   %if not c.cs_ranges:
-    <tr><td>${_('No changesets')}</td></tr>
+    <span class="empty_data">${_('No changesets')}</span>
   %else:
     %for cnt, cs in enumerate(c.cs_ranges):
         <tr>
@@ -18,10 +18,11 @@
         %endif
         </td>
         <td><div class="author">${h.person(cs.author)}</div></td>
-        <td><span class="tooltip" title="${h.age(cs.date)}">${cs.date}</span></td>
-        <td><div class="message">${h.urlify_commit(h.wrap_paragraphs(cs.message),c.repo_name)}</div></td>
+        <td><span class="tooltip" title="${h.tooltip(h.age(cs.date))}">${cs.date}</span></td>
+        <td><div class="message tooltip" title="${h.tooltip(cs.message)}" style="white-space:normal">${h.urlify_commit(h.shorter(cs.message, 60),c.repo_name)}</div></td>
         </tr>
     %endfor
+
   %endif
   </table>
 </div>

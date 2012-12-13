@@ -372,6 +372,15 @@ class BaseChangeset(object):
     def __eq__(self, other):
         return self.raw_id == other.raw_id
 
+    def __json__(self):
+        return dict(
+            short_id=self.short_id,
+            raw_id=self.raw_id,
+            message=self.message,
+            date=self.date,
+            author=self.author,
+        )
+
     @LazyProperty
     def last(self):
         if self.repository is None:
@@ -382,6 +391,13 @@ class BaseChangeset(object):
     def parents(self):
         """
         Returns list of parents changesets.
+        """
+        raise NotImplementedError
+
+    @LazyProperty
+    def children(self):
+        """
+        Returns list of children changesets.
         """
         raise NotImplementedError
 
@@ -414,6 +430,30 @@ class BaseChangeset(object):
 
         """
         raise NotImplementedError
+
+    @LazyProperty
+    def commiter(self):
+        """
+        Returns Commiter for given commit
+        """
+
+        raise NotImplementedError
+
+    @LazyProperty
+    def commiter_name(self):
+        """
+        Returns Author name for given commit
+        """
+
+        return author_name(self.commiter)
+
+    @LazyProperty
+    def commiter_email(self):
+        """
+        Returns Author email address for given commit
+        """
+
+        return author_email(self.commiter)
 
     @LazyProperty
     def author(self):
@@ -918,12 +958,12 @@ class EmptyChangeset(BaseChangeset):
     """
 
     def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
-                 alias=None):
+                 alias=None, revision=-1, message='', author='', date=''):
         self._empty_cs = cs
-        self.revision = -1
-        self.message = ''
-        self.author = ''
-        self.date = ''
+        self.revision = revision
+        self.message = message
+        self.author = author
+        self.date = date
         self.repository = repo
         self.requested_revision = requested_revision
         self.alias = alias

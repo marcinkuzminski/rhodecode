@@ -770,7 +770,6 @@ class ApiController(JSONRPCController):
                 success=True
             )
         except Exception:
-            print traceback.format_exc()
             log.error(traceback.format_exc())
             raise JSONRPCError(
                 'failed to edit permission for users group: `%s` in '

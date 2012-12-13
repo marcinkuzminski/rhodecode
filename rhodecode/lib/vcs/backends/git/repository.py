@@ -18,7 +18,7 @@ import traceback
 import urllib
 import urllib2
 from dulwich.repo import Repo, NotGitRepository
-#from dulwich.config import ConfigFile
+from dulwich.objects import Tag
 from string import Template
 from subprocess import Popen, PIPE
 from rhodecode.lib.vcs.backends.base import BaseRepository
@@ -29,7 +29,7 @@ from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.exceptions import TagAlreadyExistError
 from rhodecode.lib.vcs.exceptions import TagDoesNotExistError
 from rhodecode.lib.vcs.utils import safe_unicode, makedate, date_fromtimestamp
-from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.lazy import LazyProperty, ThreadLocalLazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
 from rhodecode.lib.vcs.utils.paths import get_user_home
@@ -54,7 +54,18 @@ class GitRepository(BaseRepository):
                  update_after_clone=False, bare=False):
 
         self.path = abspath(repo_path)
-        self._repo = self._get_repo(create, src_url, update_after_clone, bare)
+        repo = self._get_repo(create, src_url, update_after_clone, bare)
+        self.bare = repo.bare
+
+        self._config_files = [
+            bare and abspath(self.path, 'config')
+                     or abspath(self.path, '.git', 'config'),
+            abspath(get_user_home(), '.gitconfig'),
+        ]
+
+    @ThreadLocalLazyProperty
+    def _repo(self):
+        repo = Repo(self.path)
         #temporary set that to now at later we will move it to constructor
         baseui = None
         if baseui is None:
@@ -62,19 +73,15 @@ class GitRepository(BaseRepository):
             baseui = ui()
         # patch the instance of GitRepo with an "FAKE" ui object to add
         # compatibility layer with Mercurial
-        setattr(self._repo, 'ui', baseui)
+        setattr(repo, 'ui', baseui)
+        return repo
 
+    @property
+    def head(self):
         try:
-            self.head = self._repo.head()
+            return self._repo.head()
         except KeyError:
-            self.head = None
-
-        self._config_files = [
-            bare and abspath(self.path, 'config') or abspath(self.path, '.git',
-                'config'),
-            abspath(get_user_home(), '.gitconfig'),
-        ]
-        self.bare = self._repo.bare
+            return None
 
     @LazyProperty
     def revisions(self):
@@ -401,6 +408,10 @@ class GitRepository(BaseRepository):
             for k, type_ in keys:
                 if ref.startswith(k):
                     _key = ref[len(k):]
+                    if type_ == 'T':
+                        obj = self._repo.get_object(sha)
+                        if isinstance(obj, Tag):
+                            sha = self._repo.get_object(sha).object[1]
                     _refs[_key] = [sha, type_]
                     break
         return _refs
@@ -516,7 +527,7 @@ class GitRepository(BaseRepository):
         :param context: How many lines before/after changed lines should be
           shown. Defaults to ``3``.
         """
-        flags = ['-U%s' % context]
+        flags = ['-U%s' % context, '--full-index', '--binary', '-p', '-M', '--abbrev=40']
         if ignore_whitespace:
             flags.append('-w')
 
@@ -536,6 +547,7 @@ class GitRepository(BaseRepository):
 
         if path:
             cmd += ' -- "%s"' % path
+
         stdout, stderr = self.run_git_command(cmd)
         # If we used 'show' command, strip first few lines (until actual diff
         # starts)

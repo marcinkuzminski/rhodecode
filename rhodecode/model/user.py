@@ -26,6 +26,8 @@
 import logging
 import traceback
 import itertools
+import collections
+import functools
 from pylons import url
 from pylons.i18n.translation import _
 
@@ -246,7 +248,7 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def update(self, user_id, form_data):
+    def update(self, user_id, form_data, skip_attrs=[]):
         from rhodecode.lib.auth import get_crypt_password
         try:
             user = self.get(user_id, cache=False)
@@ -256,6 +258,8 @@ class UserModel(BaseModel):
                                   " crucial for entire application"))
 
             for k, v in form_data.items():
+                if k in skip_attrs:
+                    continue
                 if k == 'new_password' and v:
                     user.password = get_crypt_password(v)
                     user.api_key = generate_api_key(user.username)
@@ -377,13 +381,21 @@ class UserModel(BaseModel):
 
         return True
 
-    def fill_perms(self, user):
+    def fill_perms(self, user, explicit=True, algo='higherwin'):
         """
         Fills user permission attribute with permissions taken from database
         works for permissions given for repositories, and for permissions that
         are granted to groups
 
         :param user: user instance to fill his perms
+        :param explicit: In case there are permissions both for user and a group
+            that user is part of, explicit flag will defiine if user will
+            explicitly override permissions from group, if it's False it will
+            make decision based on the algo
+        :param algo: algorithm to decide what permission should be choose if
+            it's multiple defined, eg user in two different groups. It also
+            decides if explicit flag is turned off how to specify the permission
+            for case when user is in a group + have defined separate permission
         """
         RK = 'repositories'
         GK = 'repositories_groups'
@@ -391,6 +403,18 @@ class UserModel(BaseModel):
         user.permissions[RK] = {}
         user.permissions[GK] = {}
         user.permissions[GLOBAL] = set()
+
+        def _choose_perm(new_perm, cur_perm):
+            new_perm_val = PERM_WEIGHTS[new_perm]
+            cur_perm_val = PERM_WEIGHTS[cur_perm]
+            if algo == 'higherwin':
+                if new_perm_val > cur_perm_val:
+                    return new_perm
+                return cur_perm
+            elif algo == 'lowerwin':
+                if new_perm_val < cur_perm_val:
+                    return new_perm
+                return cur_perm
 
         #======================================================================
         # fetch default permissions
@@ -501,12 +525,14 @@ class UserModel(BaseModel):
                 user.permissions[GLOBAL].add(perm.permission.permission_name)
 
         #======================================================================
-        # !! REPO PERMISSIONS !!
+        # !! PERMISSIONS FOR REPOSITORIES !!
         #======================================================================
         #======================================================================
         # check if user is part of user groups for this repository and
-        # fill in (or NOT replace with higher `or 1` permissions
+        # fill in his permission from it. _choose_perm decides of which
+        # permission should be selected based on selected method
         #======================================================================
+
         # users group for repositories permissions
         user_repo_perms_from_users_groups = \
          self.sa.query(UsersGroupRepoToPerm, Permission, Repository,)\
@@ -519,20 +545,23 @@ class UserModel(BaseModel):
             .filter(UsersGroupMember.user_id == uid)\
             .all()
 
+        multiple_counter = collections.defaultdict(int)
         for perm in user_repo_perms_from_users_groups:
             r_k = perm.UsersGroupRepoToPerm.repository.repo_name
+            multiple_counter[r_k] += 1
             p = perm.Permission.permission_name
             cur_perm = user.permissions[RK][r_k]
-            # overwrite permission only if it's greater than permission
-            # given from other sources - disabled with `or 1` now
-            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm] or 1:  # disable check
-                if perm.Repository.user_id == uid:
-                    # set admin if owner
-                    p = 'repository.admin'
 
-                user.permissions[RK][r_k] = p
+            if perm.Repository.user_id == uid:
+                # set admin if owner
+                p = 'repository.admin'
+            else:
+                if multiple_counter[r_k] > 1:
+                    p = _choose_perm(p, cur_perm)
+            user.permissions[RK][r_k] = p
 
-        # user explicit permissions for repositories
+        # user explicit permissions for repositories, overrides any specified
+        # by the group permission
         user_repo_perms = \
          self.sa.query(UserRepoToPerm, Permission, Repository)\
             .join((Repository, UserRepoToPerm.repository_id ==
@@ -543,24 +572,52 @@ class UserModel(BaseModel):
             .all()
 
         for perm in user_repo_perms:
-            # set admin if owner
             r_k = perm.UserRepoToPerm.repository.repo_name
+            cur_perm = user.permissions[RK][r_k]
+            # set admin if owner
             if perm.Repository.user_id == uid:
                 p = 'repository.admin'
             else:
                 p = perm.Permission.permission_name
+                if not explicit:
+                    p = _choose_perm(p, cur_perm)
             user.permissions[RK][r_k] = p
 
-        # REPO GROUP
-        #==================================================================
-        # get access for this user for repos group and override defaults
-        #==================================================================
+        #======================================================================
+        # !! PERMISSIONS FOR REPOSITORIES GROUPS !!
+        #======================================================================
+        #======================================================================
+        # check if user is part of user groups for this repository groups and
+        # fill in his permission from it. _choose_perm decides of which
+        # permission should be selected based on selected method
+        #======================================================================
+        # users group for repo groups permissions
+        user_repo_group_perms_from_users_groups = \
+         self.sa.query(UsersGroupRepoGroupToPerm, Permission, RepoGroup)\
+         .join((RepoGroup, UsersGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\
+         .join((Permission, UsersGroupRepoGroupToPerm.permission_id
+                == Permission.permission_id))\
+         .join((UsersGroupMember, UsersGroupRepoGroupToPerm.users_group_id
+                == UsersGroupMember.users_group_id))\
+         .filter(UsersGroupMember.user_id == uid)\
+         .all()
 
-        # user explicit permissions for repository
+        multiple_counter = collections.defaultdict(int)
+        for perm in user_repo_group_perms_from_users_groups:
+            g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
+            multiple_counter[g_k] += 1
+            p = perm.Permission.permission_name
+            cur_perm = user.permissions[GK][g_k]
+            if multiple_counter[g_k] > 1:
+                p = _choose_perm(p, cur_perm)
+            user.permissions[GK][g_k] = p
+
+        # user explicit permissions for repository groups
         user_repo_groups_perms = \
          self.sa.query(UserRepoGroupToPerm, Permission, RepoGroup)\
          .join((RepoGroup, UserRepoGroupToPerm.group_id == RepoGroup.group_id))\
-         .join((Permission, UserRepoGroupToPerm.permission_id == Permission.permission_id))\
+         .join((Permission, UserRepoGroupToPerm.permission_id
+                == Permission.permission_id))\
          .filter(UserRepoGroupToPerm.user_id == uid)\
          .all()
 
@@ -568,32 +625,9 @@ class UserModel(BaseModel):
             rg_k = perm.UserRepoGroupToPerm.group.group_name
             p = perm.Permission.permission_name
             cur_perm = user.permissions[GK][rg_k]
-            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm] or 1:  # disable check
-                user.permissions[GK][rg_k] = p
-
-        # REPO GROUP + USER GROUP
-        #==================================================================
-        # check if user is part of user groups for this repo group and
-        # fill in (or replace with higher) permissions
-        #==================================================================
-
-        # users group for repositories permissions
-        user_repo_group_perms_from_users_groups = \
-         self.sa.query(UsersGroupRepoGroupToPerm, Permission, RepoGroup)\
-         .join((RepoGroup, UsersGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\
-         .join((Permission, UsersGroupRepoGroupToPerm.permission_id == Permission.permission_id))\
-         .join((UsersGroupMember, UsersGroupRepoGroupToPerm.users_group_id == UsersGroupMember.users_group_id))\
-         .filter(UsersGroupMember.user_id == uid)\
-         .all()
-
-        for perm in user_repo_group_perms_from_users_groups:
-            g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
-            p = perm.Permission.permission_name
-            cur_perm = user.permissions[GK][g_k]
-            # overwrite permission only if it's greater than permission
-            # given from other sources
-            if PERM_WEIGHTS[p] > PERM_WEIGHTS[cur_perm] or 1:  # disable check
-                user.permissions[GK][g_k] = p
+            if not explicit:
+                p = _choose_perm(p, cur_perm)
+            user.permissions[GK][rg_k] = p
 
         return user
 

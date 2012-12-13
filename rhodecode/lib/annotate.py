@@ -142,14 +142,15 @@ class AnnotateHtmlFormatter(HtmlFormatter):
                     lines.append('')
             ls = '\n'.join(lines)
 
-        annotate_changesets = [tup[1] for tup in self.filenode.annotate]
-        # If pygments cropped last lines break we need do that too
-        ln_cs = len(annotate_changesets)
-        ln_ = len(ls.splitlines())
-        if  ln_cs > ln_:
-            annotate_changesets = annotate_changesets[:ln_ - ln_cs]
-        annotate = ''.join((self.annotate_from_changeset(changeset)
-            for changeset in annotate_changesets))
+#        annotate_changesets = [tup[1] for tup in self.filenode.annotate]
+##        TODO: not sure what that fixes
+#        # If pygments cropped last lines break we need do that too
+#        ln_cs = len(annotate_changesets)
+#        ln_ = len(ls.splitlines())
+#        if  ln_cs > ln_:
+#            annotate_changesets = annotate_changesets[:ln_ - ln_cs]
+        annotate = ''.join((self.annotate_from_changeset(el[2]())
+                            for el in self.filenode.annotate))
         # in case you wonder about the seemingly redundant <div> here:
         # since the content in the other cell also is wrapped in a div,
         # some browsers in some configurations seem to mess up the formatting.

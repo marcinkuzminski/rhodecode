@@ -57,26 +57,26 @@
                     <label for="landing_rev">${_('Landing revision')}:</label>
                 </div>
                 <div class="input">
-                    ${h.select('landing_rev','',c.landing_revs,class_="medium")}
+                    ${h.select('repo_landing_rev','',c.landing_revs,class_="medium")}
                     <span class="help-block">${_('Default revision for files page, downloads, whoosh and readme')}</span>
                 </div>
             </div>
             <div class="field">
                 <div class="label label-textarea">
-                    <label for="description">${_('Description')}:</label>
+                    <label for="repo_description">${_('Description')}:</label>
                 </div>
                 <div class="textarea text-area editor">
-                    ${h.textarea('description')}
+                    ${h.textarea('repo_description')}
                     <span class="help-block">${_('Keep it short and to the point. Use a README file for longer descriptions.')}</span>
                 </div>
             </div>
 
             <div class="field">
                 <div class="label label-checkbox">
-                    <label for="private">${_('Private repository')}:</label>
+                    <label for="repo_private">${_('Private repository')}:</label>
                 </div>
                 <div class="checkboxes">
-                    ${h.checkbox('private',value="True")}
+                    ${h.checkbox('repo_private',value="True")}
                     <span class="help-block">${_('Private repositories are only visible to people explicitly added as collaborators.')}</span>
                 </div>
             </div>
@@ -88,14 +88,45 @@
                 <div class="input">
                     <%include file="../admin/repos/repo_edit_perms.html"/>
                 </div>
+            </div>
 
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-btn large")}
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
-        </div>
+        
     </div>
     ${h.end_form()}
 </div>
+
+<h3>${_('Delete repository')}</h3>
+<div class="form">
+    <!-- fields -->
+    <div class="fields">
+
+        <div class="field">
+            <div class="label">
+                <label for="">${_('Remove repo')}:</label>
+            </div>
+            <div class="checkboxes">
+              ${h.form(url('repo_settings_delete', repo_name=c.repo_info.repo_name),method='delete')}
+              <div class="">
+                 <div class="fields">
+                     ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
+                 </div>
+                 <div class="field" style="border:none;color:#888">
+                 <ul>
+                      <li>${_('''This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems.
+                               If you need fully delete it from file system please do it manually''')}
+                      </li>
+                 </ul>
+                 </div>
+              </div>
+              ${h.end_form()}
+            </div>
+        </div>
+   </div>
+</div>
+
 </div>
 </%def>

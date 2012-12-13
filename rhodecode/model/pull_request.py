@@ -26,6 +26,7 @@
 import logging
 import binascii
 import datetime
+import re
 
 from pylons.i18n.translation import _
 
@@ -144,52 +145,71 @@ class PullRequestModel(BaseModel):
         pull_request.updated_on = datetime.datetime.now()
         self.sa.add(pull_request)
 
-    def _get_changesets(self, org_repo, org_ref, other_repo, other_ref,
+    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref,
                         discovery_data):
         """
         Returns a list of changesets that are incoming from org_repo@org_ref
         to other_repo@other_ref
 
         :param org_repo:
-        :type org_repo:
         :param org_ref:
-        :type org_ref:
         :param other_repo:
-        :type other_repo:
         :param other_ref:
-        :type other_ref:
         :param tmp:
-        :type tmp:
         """
+
         changesets = []
         #case two independent repos
         common, incoming, rheads = discovery_data
-        if org_repo != other_repo and incoming:
+        if org_repo != other_repo:
+            revs = [
+                org_repo._repo.lookup(org_ref[1]),
+                org_repo._repo.lookup(other_ref[1]),
+            ]
+
             obj = findcommonoutgoing(org_repo._repo,
                         localrepo.locallegacypeer(other_repo._repo.local()),
+                        revs,
                         force=True)
             revs = obj.missing
 
-            for cs in reversed(map(binascii.hexlify, revs)):
-                changesets.append(org_repo.get_changeset(cs))
+            for cs in map(binascii.hexlify, revs):
+                _cs = org_repo.get_changeset(cs)
+                changesets.append(_cs)
+            # in case we have revisions filter out the ones not in given range
+            if org_ref[0] == 'rev' and other_ref[0] == 'rev':
+                revs = [x.raw_id for x in changesets]
+                start = org_ref[1]
+                stop = other_ref[1]
+                changesets = changesets[revs.index(start):revs.index(stop) + 1]
         else:
-            _revset_predicates = {
-                    'branch': 'branch',
-                    'book': 'bookmark',
-                    'tag': 'tag',
-                    'rev': 'id',
-                }
+            #no remote compare do it on the same repository
+            if alias == 'hg':
+                _revset_predicates = {
+                        'branch': 'branch',
+                        'book': 'bookmark',
+                        'tag': 'tag',
+                        'rev': 'id',
+                    }
 
-            revs = [
-                "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
-                    _revset_predicates[org_ref[0]], org_ref[1],
-                    _revset_predicates[other_ref[0]], other_ref[1]
-               )
-            ]
+                revs = [
+                    "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
+                        _revset_predicates[other_ref[0]], other_ref[1],
+                        _revset_predicates[org_ref[0]], org_ref[1],
+                   )
+                ]
 
-            out = scmutil.revrange(org_repo._repo, revs)
-            for cs in reversed(out):
-                changesets.append(org_repo.get_changeset(cs))
+                out = scmutil.revrange(org_repo._repo, revs)
+                for cs in (out):
+                    changesets.append(org_repo.get_changeset(cs))
+            elif alias == 'git':
+                so, se = org_repo.run_git_command(
+                    'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
+                                                                     other_ref[1])
+                )
+                ids = re.findall(r'[0-9a-fA-F]{40}', so)
+                for cs in (ids):
+                    changesets.append(org_repo.get_changeset(cs))
 
         return changesets
 
@@ -223,15 +243,16 @@ class PullRequestModel(BaseModel):
         tmp = discovery.findcommonincoming(
                   repo=_other_repo,  # other_repo we check for incoming
                   remote=org_peer,  # org_repo source for incoming
-                  heads=[_other_repo[other_rev].node(),
-                         _org_repo[org_rev].node()],
+#                  heads=[_other_repo[other_rev].node(),
+#                         _org_repo[org_rev].node()],
                   force=True
         )
         return tmp
 
     def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
         """
-        Returns a tuple of incomming changesets, and discoverydata cache
+        Returns a tuple of incomming changesets, and discoverydata cache for
+        mercurial repositories
 
         :param org_repo:
         :type org_repo:
@@ -249,14 +270,16 @@ class PullRequestModel(BaseModel):
         if len(other_ref) != 2 or not isinstance(org_ref, (list, tuple)):
             raise Exception('other_ref must be a two element list/tuple')
 
-        discovery_data = self._get_discovery(org_repo.scm_instance,
-                                           org_ref,
-                                           other_repo.scm_instance,
-                                           other_ref)
-        cs_ranges = self._get_changesets(org_repo.scm_instance,
-                                         org_ref,
-                                         other_repo.scm_instance,
-                                         other_ref,
-                                         discovery_data)
+        org_repo_scm = org_repo.scm_instance
+        other_repo_scm = other_repo.scm_instance
 
+        alias = org_repo.scm_instance.alias
+        discovery_data = [None, None, None]
+        if alias == 'hg':
+            discovery_data = self._get_discovery(org_repo_scm, org_ref,
+                                               other_repo_scm, other_ref)
+        cs_ranges = self._get_changesets(alias,
+                                         org_repo_scm, org_ref,
+                                         other_repo_scm, other_ref,
+                                         discovery_data)
         return cs_ranges, discovery_data

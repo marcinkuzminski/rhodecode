@@ -1,0 +1,26 @@
+<dl>
+    <dt class="file_history">${_('History')}</dt>
+    <dd>
+        <div>
+            <div style="float:left">
+            ${h.form(h.url('files_diff_home',repo_name=c.repo_name,f_path=c.f_path),method='get')}
+            ${h.hidden('diff2',c.file_changeset.raw_id)}
+            ${h.select('diff1',c.file_changeset.raw_id,c.file_history)}
+            ${h.submit('diff',_('diff to revision'),class_="ui-btn")}
+            ${h.submit('show_rev',_('show at revision'),class_="ui-btn")}
+            ${h.link_to(_('show full history'),h.url('shortlog_file_home',repo_name=c.repo_name, revision=c.file_changeset.raw_id, f_path=c.f_path),class_="ui-btn")}
+            ${h.hidden('annotate', c.annotate)}
+            ${h.end_form()}
+            </div>
+            <div class="file_author">
+                <div class="item">${h.literal(ungettext(u'%s author',u'%s authors',len(c.authors)) % ('<b>%s</b>' % len(c.authors))) }</div>
+                %for email, user in c.authors:
+                  <div class="contributor tooltip" style="float:left" title="${h.tooltip(user)}">
+                    <div class="gravatar" style="margin:1px"><img alt="gravatar" src="${h.gravatar_url(email, 20)}"/> </div>
+                  </div>
+                %endfor
+            </div>
+        </div>
+        <div style="clear:both"></div>
+    </dd>
+</dl>

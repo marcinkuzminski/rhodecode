@@ -79,7 +79,7 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
     HTTPBadRequest, HTTPNotAcceptable
 
-from rhodecode.lib.utils2 import safe_str, fix_PATH
+from rhodecode.lib.utils2 import safe_str, fix_PATH, get_server_url
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
@@ -189,6 +189,7 @@ class SimpleGit(BaseVCSController):
         # extras are injected into UI object and later available
         # in hooks executed by rhodecode
         from rhodecode import CONFIG
+        server_url = get_server_url(environ)
         extras = {
             'ip': ipaddr,
             'username': username,
@@ -196,6 +197,7 @@ class SimpleGit(BaseVCSController):
             'repository': repo_name,
             'scm': 'git',
             'config': CONFIG['__file__'],
+            'server_url': server_url,
             'make_lock': None,
             'locked_by': [None, None]
         }

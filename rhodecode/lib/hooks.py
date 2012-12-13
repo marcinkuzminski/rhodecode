@@ -36,7 +36,7 @@ from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.compat import json
 from rhodecode.lib.exceptions import HTTPLockedRC
-from rhodecode.lib.utils2 import safe_str
+from rhodecode.lib.utils2 import safe_str, datetime_to_time
 from rhodecode.model.db import Repository, User
 
 
@@ -46,7 +46,7 @@ def _get_scm_size(alias, root_path):
         alias += '.'
 
     size_scm, size_root = 0, 0
-    for path, dirs, files in os.walk(root_path):
+    for path, dirs, files in os.walk(safe_str(root_path)):
         if path.find(alias) != -1:
             for f in files:
                 try:
@@ -159,16 +159,18 @@ def log_pull_action(ui, repo, **kwargs):
         repository = extras['repository']
         scm = extras['scm']
         make_lock = extras['make_lock']
+        ip = extras['ip']
     elif 'username' in rc_extras:
         username = rc_extras['username']
         repository = rc_extras['repository']
         scm = rc_extras['scm']
         make_lock = rc_extras['make_lock']
+        ip = rc_extras['ip']
     else:
         raise Exception('Missing data in repo.ui and os.environ')
     user = User.get_by_username(username)
     action = 'pull'
-    action_logger(user, action, repository, extras['ip'], commit=True)
+    action_logger(user, action, repository, ip, commit=True)
     # extension hook call
     from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'PULL_HOOK', None)
@@ -412,11 +414,17 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
                                          heads.splitlines()))
                     cmd = (('log %(new_rev)s' % push_ref) +
                            ' --reverse --pretty=format:"%H" --not ' + heads)
+                    git_revs += repo.run_git_command(cmd)[0].splitlines()
+
+                elif push_ref['new_rev'] == EmptyChangeset().raw_id:
+                    #delete branch case
+                    git_revs += ['delete_branch=>%s' % push_ref['name']]
                 else:
                     cmd = (('log %(old_rev)s..%(new_rev)s' % push_ref) +
                            ' --reverse --pretty=format:"%H"')
-                git_revs += repo.run_git_command(cmd)[0].splitlines()
+                    git_revs += repo.run_git_command(cmd)[0].splitlines()
+
             elif _type == 'tags':
-                git_revs += [push_ref['name']]
+                git_revs += ['tag=>%s' % push_ref['name']]
 
         log_push_action(baseui, repo, _git_revs=git_revs)

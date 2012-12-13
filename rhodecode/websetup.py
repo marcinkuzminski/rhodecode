@@ -37,15 +37,15 @@ def setup_app(command, conf, vars):
     """Place any commands to setup rhodecode here"""
     dbconf = conf['sqlalchemy.db1.url']
     dbmanage = DbManage(log_sql=True, dbconf=dbconf, root=conf['here'],
-                        tests=False)
-    dbmanage.create_tables(override=True, defaults=command.options.__dict__)
+                        tests=False, cli_args=command.options.__dict__)
+    dbmanage.create_tables(override=True)
     dbmanage.set_db_version()
-    opts = dbmanage.config_prompt(None, defaults=command.options.__dict__)
+    opts = dbmanage.config_prompt(None)
     dbmanage.create_settings(opts)
     dbmanage.create_default_user()
-    dbmanage.admin_prompt(defaults=command.options.__dict__)
+    dbmanage.admin_prompt()
     dbmanage.create_permissions()
     dbmanage.populate_default_permissions()
-    Session.commit()
+    Session().commit()
     load_environment(conf.global_conf, conf.local_conf, initial=True)
     dbmanage.finish()

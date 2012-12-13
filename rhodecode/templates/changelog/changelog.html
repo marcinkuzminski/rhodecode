@@ -34,11 +34,13 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 				<div id="graph_content">
                     <div class="info_box" style="clear: both;padding: 10px 6px;vertical-align: right;text-align: right;">
                     <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
+                    <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
+
                     %if c.rhodecode_db_repo.fork:
-                        <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name)}" class="ui-btn small">${_('Compare fork')}</a>
+                        <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref=request.GET.get('branch') or 'default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name)}" class="ui-btn small">${_('Compare fork with parent')}</a>
                     %endif
                     %if h.is_hg(c.rhodecode_repo):
-                    <a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
+                    <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
                     %endif
                     </div>
 					<div class="container_header">
@@ -148,31 +150,74 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     var checkboxes = YUD.getElementsByClassName('changeset_range');
                     var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
                     YUE.on(checkboxes,'click',function(e){
+                    	var clicked_cb = e.currentTarget;
                         var checked_checkboxes = [];
                         for (pos in checkboxes){
                             if(checkboxes[pos].checked){
                                 checked_checkboxes.push(checkboxes[pos]);
                             }
                         }
-                        if(checked_checkboxes.length>1){
+                        if(YUD.get('open_new_pr')){
+                          if(checked_checkboxes.length>0){
+                            // modify open pull request to show we have selected cs
+                            YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
+
+                          }else{
+                            YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
+                          }
+                        }
+
+                        if(checked_checkboxes.length>0){
                         	var rev_end = checked_checkboxes[0].name;
                         	var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
+
+                        	// now select all checkboxes in the middle.
+                        	var checked = false;
+                        	for (var i=0; i<checkboxes.length; i++){
+                        		var cb = checkboxes[i];
+                        		var rev = cb.name;
+
+                        		if (rev == rev_end){
+                        			checked = true;
+                        		}
+                                if (checked){
+                                    cb.checked = true;
+                                }
+                                else{
+                                    cb.checked = false;
+                                }
+                        		if (rev == rev_start){
+                                    checked = false;
+                                }
+
+                        	}
 
                             var url = url_tmpl.replace('__REVRANGE__',
                             		rev_start+'...'+rev_end);
 
-                        var link = "${_('Show selected changes __S -> __E')}";
-                        link = link.replace('__S',rev_start.substr(0,6));
-                        link = link.replace('__E',rev_end.substr(0,6));
-                        YUD.get('rev_range_container').href = url;
-                        YUD.get('rev_range_container').innerHTML = link;
-                        YUD.setStyle('rev_range_container','display','');
+                            var link = _TM['Show selected changes __S -> __E'];
+                            link = link.replace('__S',rev_start.substr(0,6));
+                            link = link.replace('__E',rev_end.substr(0,6));
+                            YUD.get('rev_range_container').href = url;
+                            YUD.get('rev_range_container').innerHTML = link;
+                            YUD.setStyle('rev_range_container','display','');
+                            YUD.setStyle('rev_range_clear','display','');
+
+                            YUD.get('open_new_pr').href += '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
+
                         }
                         else{
                         	YUD.setStyle('rev_range_container','display','none');
+                        	YUD.setStyle('rev_range_clear','display','none');
                         }
                     });
-
+                    YUE.on('rev_range_clear','click',function(e){
+                        for (var i=0; i<checkboxes.length; i++){
+                            var cb = checkboxes[i];
+                            cb.checked = false;
+                        }
+                        YUE.preventDefault(e);
+                    })
                     var msgs = YUQ('.message');
                     // get first element height
                     var el = YUQ('#graph_content .container')[0];
@@ -193,11 +238,11 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     	YUD.setStyle(e.currentTarget,'display','none');
                     	YUD.setStyle(elem,'height','auto');
 
-                    	//redraw the graph, max_w and jsdata are global vars
-                        set_canvas(max_w);
+                    	//redraw the graph, line_count and jsdata are global vars
+                        set_canvas(100);
 
                         var r = new BranchRenderer();
-                        r.render(jsdata,max_w);
+                        r.render(jsdata,100,line_count);
 
                     })
 
@@ -223,31 +268,32 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 
                     });
 
-					function set_canvas(heads) {
+					function set_canvas(width) {
 						var c = document.getElementById('graph_nodes');
 						var t = document.getElementById('graph_content');
 						canvas = document.getElementById('graph_canvas');
 						var div_h = t.clientHeight;
 						c.style.height=div_h+'px';
 						canvas.setAttribute('height',div_h);
-						c.style.height=max_w+'px';
-						canvas.setAttribute('width',max_w);
+						c.style.height=width+'px';
+						canvas.setAttribute('width',width);
 					};
 					var heads = 1;
-					var max_heads = 0;
+					var line_count = 0;
 					var jsdata = ${c.jsdata|n};
 
-					for( var i=0;i<jsdata.length;i++){
-					    var m = Math.max.apply(Math, jsdata[i][1]);
-					    if (m>max_heads){
-					        max_heads = m;
-					    }
+					for (var i=0;i<jsdata.length;i++) {
+                        var in_l = jsdata[i][2];
+                        for (var j in in_l) {
+                            var m = in_l[j][1];
+                            if (m > line_count)
+                                line_count = m;
+                        }
 					}
-					var max_w = Math.max(100,max_heads*25);
-					set_canvas(max_w);
+					set_canvas(100);
 
 					var r = new BranchRenderer();
-					r.render(jsdata,max_w);
+					r.render(jsdata,100,line_count);
 
 				});
 			</script>

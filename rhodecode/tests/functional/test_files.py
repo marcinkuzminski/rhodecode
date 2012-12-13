@@ -1,10 +1,19 @@
 from rhodecode.tests import *
+from rhodecode.model.db import Repository
+from rhodecode.model.meta import Session
 
 ARCHIVE_SPECS = {
     '.tar.bz2': ('application/x-bzip2', 'tbz2', ''),
     '.tar.gz': ('application/x-gzip', 'tgz', ''),
     '.zip': ('application/zip', 'zip', ''),
 }
+
+
+def _set_downloads(repo_name, set_to):
+    repo = Repository.get_by_repo_name(repo_name)
+    repo.enable_downloads = set_to
+    Session().add(repo)
+    Session().commit()
 
 
 class TestFilesController(TestController):
@@ -73,9 +82,25 @@ class TestFilesController(TestController):
                                     revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
                                     f_path='vcs/nodes.py'))
 
+        response.mustcontain("""<div class="commit">Partially implemented <a class="issue-tracker-link" href="https://myissueserver.com/vcs_test_hg/issue/16">#16</a>. filecontent/commit message/author/node name are safe_unicode now.
+In addition some other __str__ are unicode as well
+Added test for unicode
+Improved test to clone into uniq repository.
+removed extra unicode conversion in diff.</div>
+""")
+
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
+
+    def test_file_source_history(self):
+        self.log_user()
+        response = self.app.get(url(controller='files', action='history',
+                                    repo_name=HG_REPO,
+                                    revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
+                                    f_path='vcs/nodes.py'),
+                                extra_environ={'HTTP_X_PARTIAL_XHR': '1'},)
         #test or history
         response.mustcontain("""<optgroup label="Changesets">
-<option value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
+<option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
 <option value="aa957ed78c35a1541f508d2ec90e501b0a9e3167">r165:aa957ed78c35 (default)</option>
 <option value="48e11b73e94c0db33e736eaeea692f990cb0b5f1">r140:48e11b73e94c (default)</option>
 <option value="adf3cbf483298563b968a6c673cd5bde5f7d5eea">r126:adf3cbf48329 (default)</option>
@@ -110,22 +135,18 @@ class TestFilesController(TestController):
 <option value="3803844fdbd3b711175fc3da9bdacfcd6d29a6fb">r7:3803844fdbd3 (default)</option>
 </optgroup>
 <optgroup label="Branches">
-<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
+<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
 <option value="97e8b885c04894463c51898e14387d80c30ed1ee">git</option>
 <option value="2e6a2bf9356ca56df08807f4ad86d480da72a8f4">web</option>
 </optgroup>
 <optgroup label="Tags">
-<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
+<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
 <option value="fd4bdb5e9b2a29b4393a4ac6caef48c17ee1a200">0.1.4</option>
 <option value="17544fbfcd33ffb439e2b728b5d526b1ef30bfcf">0.1.3</option>
 <option value="a7e60bff65d57ac3a1a1ce3b12a70f8a9e8a7720">0.1.2</option>
 <option value="eb3a60fc964309c1a318b8dfe26aa2d1586c85ae">0.1.1</option>
 </optgroup>
 """)
-
-        response.mustcontain("""<div class="commit">merge</div>""")
-
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
 
     def test_file_annotation(self):
         self.log_user()
@@ -135,9 +156,19 @@ class TestFilesController(TestController):
                                     f_path='vcs/nodes.py',
                                     annotate=True))
 
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
+
+    def test_file_annotation_history(self):
+        self.log_user()
+        response = self.app.get(url(controller='files', action='history',
+                                    repo_name=HG_REPO,
+                                    revision='27cd5cce30c96924232dffcd24178a07ffeb5dfc',
+                                    f_path='vcs/nodes.py',
+                                    annotate=True),
+                                extra_environ={'HTTP_X_PARTIAL_XHR': '1'})
 
         response.mustcontain("""<optgroup label="Changesets">
-<option value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
+<option selected="selected" value="8911406ad776fdd3d0b9932a2e89677e57405a48">r167:8911406ad776 (default)</option>
 <option value="aa957ed78c35a1541f508d2ec90e501b0a9e3167">r165:aa957ed78c35 (default)</option>
 <option value="48e11b73e94c0db33e736eaeea692f990cb0b5f1">r140:48e11b73e94c (default)</option>
 <option value="adf3cbf483298563b968a6c673cd5bde5f7d5eea">r126:adf3cbf48329 (default)</option>
@@ -172,19 +203,17 @@ class TestFilesController(TestController):
 <option value="3803844fdbd3b711175fc3da9bdacfcd6d29a6fb">r7:3803844fdbd3 (default)</option>
 </optgroup>
 <optgroup label="Branches">
-<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
+<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">default</option>
 <option value="97e8b885c04894463c51898e14387d80c30ed1ee">git</option>
 <option value="2e6a2bf9356ca56df08807f4ad86d480da72a8f4">web</option>
 </optgroup>
 <optgroup label="Tags">
-<option selected="selected" value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
+<option value="27cd5cce30c96924232dffcd24178a07ffeb5dfc">tip</option>
 <option value="fd4bdb5e9b2a29b4393a4ac6caef48c17ee1a200">0.1.4</option>
 <option value="17544fbfcd33ffb439e2b728b5d526b1ef30bfcf">0.1.3</option>
 <option value="a7e60bff65d57ac3a1a1ce3b12a70f8a9e8a7720">0.1.2</option>
 <option value="eb3a60fc964309c1a318b8dfe26aa2d1586c85ae">0.1.1</option>
 </optgroup>""")
-
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
 
     def test_file_annotation_git(self):
         self.log_user()
@@ -196,7 +225,7 @@ class TestFilesController(TestController):
 
     def test_archival(self):
         self.log_user()
-
+        _set_downloads(HG_REPO, set_to=True)
         for arch_ext, info in ARCHIVE_SPECS.items():
             short = '27cd5cce30c9%s' % arch_ext
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
@@ -217,7 +246,7 @@ class TestFilesController(TestController):
 
     def test_archival_wrong_ext(self):
         self.log_user()
-
+        _set_downloads(HG_REPO, set_to=True)
         for arch_ext in ['tar', 'rar', 'x', '..ax', '.zipz']:
             fname = '27cd5cce30c96924232dffcd24178a07ffeb5dfc%s' % arch_ext
 
@@ -229,7 +258,7 @@ class TestFilesController(TestController):
 
     def test_archival_wrong_revision(self):
         self.log_user()
-
+        _set_downloads(HG_REPO, set_to=True)
         for rev in ['00x000000', 'tar', 'wrong', '@##$@$42413232', '232dffcd']:
             fname = '%s.zip' % rev
 

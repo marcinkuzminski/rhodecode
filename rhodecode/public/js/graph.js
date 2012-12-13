@@ -32,18 +32,8 @@ function BranchRenderer() {
 	this.ctx.strokeStyle = 'rgb(0, 0, 0)';
 	this.ctx.fillStyle = 'rgb(0, 0, 0)';
 	this.cur = [0, 0];
-	this.max_column = 1;
-	this.line_width = 2.5;
-	this.dot_radius = 5.5;
-	this.bg = [0, 4];
-	this.cell = [2, 0];
-	this.revlink = '';
-	
-	this.scale = function(height) {
-		this.box_size = Math.floor(height/1.2);
-		this.cell_height = this.box_size;
-		this.bg_height = height;
-	}
+	this.line_width = 2.0;
+	this.dot_radius = 3.5;
 	
 	this.setColor = function(color, bg, fg) {
 		color %= colors.length;
@@ -58,14 +48,18 @@ function BranchRenderer() {
 		this.ctx.fillStyle = s;
 	}
 
-	this.render = function(data,pad) {
+	this.render = function(data,canvasWidth,lineCount) {
 		var idx = 1;
 		var rela = document.getElementById('graph');
-		var pad = pad;
-		var scale = 22;
+
+		if (lineCount == 0)
+			lineCount = 1;
+
+		var edge_pad = this.dot_radius + 2;
+		var box_size = Math.min(18, Math.floor((canvasWidth - edge_pad*2)/(lineCount)));
+		var base_x = canvasWidth - edge_pad;
 
 		for (var i in data) {
-			this.scale(scale);
 
 			var row = document.getElementById("chg_"+idx);
 			if (row == null)
@@ -73,11 +67,7 @@ function BranchRenderer() {
 			var	next = document.getElementById("chg_"+(idx+1));
 			var extra = 0;
 			
-			this.cell[1] += row.clientWidth;
-			this.bg[1] += this.bg_height;
-			
 			cur = data[i];
-			nodeid = cur[0];
 			node = cur[1];
 			in_l = cur[2];
 
@@ -91,44 +81,34 @@ function BranchRenderer() {
 				end = line[1];
 				color = line[2];
 
-				if (start > this.max_column) {
-					this.max_column = start;
-				}
-				
-				if (end > this.max_column) {
-					this.max_column = end;
-				}
-				
 				this.setColor(color, 0.0, 0.65);
 
 				
-				x = pad-((this.cell[0] + this.box_size * start - 1) + this.bg_height-2);
+				x = base_x - box_size * start;
 				
 				this.ctx.lineWidth=this.line_width;
 				this.ctx.beginPath();
 				this.ctx.moveTo(x, rowY);
 
-				
 				if (start == end)
 				{
-					x = pad-((1 + this.box_size * end) + this.bg_height-2);
 					this.ctx.lineTo(x,nextY+extra,3);
 				}
 				else
 				{
-					var x2 = pad-((1 + this.box_size * end) + this.bg_height-2);
+					var x2 = base_x - box_size * end;
 					var ymid = (rowY+nextY) / 2;
 					this.ctx.bezierCurveTo (x,ymid,x2,ymid,x2,nextY);
 				}
 				this.ctx.stroke();
 			}
 			
-			column = node[0]
-			color = node[1]
+			column = node[0];
+			color = node[1];
 			
 			radius = this.dot_radius;
 
-			x = pad-(Math.round(this.cell[0] * scale/2 * column + radius) + 15 - (column*4));
+			x = base_x - box_size * column;
 		
 			this.ctx.beginPath();
 			this.setColor(color, 0.25, 0.75);

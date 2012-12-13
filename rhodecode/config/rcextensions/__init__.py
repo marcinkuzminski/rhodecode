@@ -75,18 +75,21 @@ DELETE_REPO_HOOK = _dlhook
 # POST PUSH HOOK
 #==============================================================================
 
-# this function will be executed after each push it's runned after the build-in
-# hook that rhodecode uses for logging pushes
+# this function will be executed after each push it's executed after the
+# build-in hook that RhodeCode uses for logging pushes
 def _pushhook(*args, **kwargs):
     """
     Post push hook
     kwargs available:
 
+      :param server_url: url of instance that triggered this hook
+      :param config: path to .ini config used
+      :param scm: type of VS 'git' or 'hg'
       :param username: name of user who pushed
       :param ip: ip of who pushed
-      :param action: pull
+      :param action: push
       :param repository: repository name
-      :param pushed_revs: generator of pushed revisions
+      :param pushed_revs: list of pushed revisions
     """
     return 0
 PUSH_HOOK = _pushhook
@@ -96,15 +99,18 @@ PUSH_HOOK = _pushhook
 # POST PULL HOOK
 #==============================================================================
 
-# this function will be executed after each push it's runned after the build-in
-# hook that rhodecode uses for logging pushes
+# this function will be executed after each push it's executed after the
+# build-in hook that RhodeCode uses for logging pulls
 def _pullhook(*args, **kwargs):
     """
     Post pull hook
     kwargs available::
 
+      :param server_url: url of instance that triggered this hook
+      :param config: path to .ini config used
+      :param scm: type of VS 'git' or 'hg'
       :param username: name of user who pulled
-      :param ip: ip of who pushed
+      :param ip: ip of who pulled
       :param action: pull
       :param repository: repository name
     """

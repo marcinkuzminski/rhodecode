@@ -204,7 +204,8 @@ Enable LDAP : required
 .. _ldap_host:
 
 Host : required
-    LDAP server hostname or IP address.
+    LDAP server hostname or IP address. Can be also a comma separated
+    list of servers to support LDAP fail-over.
 
 .. _Port:
 

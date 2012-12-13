@@ -176,16 +176,17 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         filter_extra_fields = False
         repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                         v.SlugifyName())
-        clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
         repo_group = All(v.CanWriteGroup(),
                          v.OneOf(repo_groups, hideList=True))
         repo_type = v.OneOf(supported_backends)
-        description = v.UnicodeString(strip=True, min=1, not_empty=False)
-        private = v.StringBoolean(if_missing=False)
-        enable_statistics = v.StringBoolean(if_missing=False)
-        enable_downloads = v.StringBoolean(if_missing=False)
-        enable_locking = v.StringBoolean(if_missing=False)
-        landing_rev = v.OneOf(landing_revs, hideList=True)
+        repo_description = v.UnicodeString(strip=True, min=1, not_empty=False)
+        repo_private = v.StringBoolean(if_missing=False)
+        repo_landing_rev = v.OneOf(landing_revs, hideList=True)
+        clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
+
+        repo_enable_statistics = v.StringBoolean(if_missing=False)
+        repo_enable_downloads = v.StringBoolean(if_missing=False)
+        repo_enable_locking = v.StringBoolean(if_missing=False)
 
         if edit:
             #this is repo owner
@@ -194,6 +195,27 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
         chained_validators = [v.ValidCloneUri(),
                               v.ValidRepoName(edit, old_data),
                               v.ValidPerms()]
+    return _RepoForm
+
+
+def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
+                     repo_groups=[], landing_revs=[]):
+    class _RepoForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
+                        v.SlugifyName())
+        repo_group = All(v.CanWriteGroup(),
+                         v.OneOf(repo_groups, hideList=True))
+        repo_description = v.UnicodeString(strip=True, min=1, not_empty=False)
+        repo_private = v.StringBoolean(if_missing=False)
+        repo_landing_rev = v.OneOf(landing_revs, hideList=True)
+        clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
+
+        chained_validators = [v.ValidCloneUri(),
+                              v.ValidRepoName(edit, old_data),
+                              v.ValidPerms(),
+                              v.ValidSettings()]
     return _RepoForm
 
 
@@ -218,23 +240,6 @@ def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
     return _RepoForkForm
 
 
-def RepoSettingsForm(edit=False, old_data={},
-                     supported_backends=BACKENDS.keys(), repo_groups=[],
-                     landing_revs=[]):
-    class _RepoForm(formencode.Schema):
-        allow_extra_fields = True
-        filter_extra_fields = False
-        repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
-                        v.SlugifyName())
-        description = v.UnicodeString(strip=True, min=1, not_empty=True)
-        repo_group = v.OneOf(repo_groups, hideList=True)
-        private = v.StringBoolean(if_missing=False)
-        landing_rev = v.OneOf(landing_revs, hideList=True)
-        chained_validators = [v.ValidRepoName(edit, old_data), v.ValidPerms(),
-                              v.ValidSettings()]
-    return _RepoForm
-
-
 def ApplicationSettingsForm():
     class _ApplicationSettingsForm(formencode.Schema):
         allow_extra_fields = True
@@ -253,6 +258,9 @@ def ApplicationVisualisationForm():
         rhodecode_show_public_icon = v.StringBoolean(if_missing=False)
         rhodecode_show_private_icon = v.StringBoolean(if_missing=False)
         rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
+
+        rhodecode_lightweight_dashboard = v.StringBoolean(if_missing=False)
+        rhodecode_lightweight_journal = v.StringBoolean(if_missing=False)
 
     return _ApplicationVisualisationForm
 
@@ -278,19 +286,34 @@ def ApplicationUiSettingsForm():
     return _ApplicationUiSettingsForm
 
 
-def DefaultPermissionsForm(perms_choices, register_choices, create_choices,
-                           fork_choices):
+def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
+                           register_choices, create_choices, fork_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
-        overwrite_default = v.StringBoolean(if_missing=False)
+        overwrite_default_repo = v.StringBoolean(if_missing=False)
+        overwrite_default_group = v.StringBoolean(if_missing=False)
         anonymous = v.StringBoolean(if_missing=False)
-        default_perm = v.OneOf(perms_choices)
+        default_repo_perm = v.OneOf(repo_perms_choices)
+        default_group_perm = v.OneOf(group_perms_choices)
         default_register = v.OneOf(register_choices)
         default_create = v.OneOf(create_choices)
         default_fork = v.OneOf(fork_choices)
 
     return _DefaultPermissionsForm
+
+
+def DefaultsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
+    class _DefaultsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = True
+        default_repo_type = v.OneOf(supported_backends)
+        default_repo_private = v.StringBoolean(if_missing=False)
+        default_repo_enable_statistics = v.StringBoolean(if_missing=False)
+        default_repo_enable_downloads = v.StringBoolean(if_missing=False)
+        default_repo_enable_locking = v.StringBoolean(if_missing=False)
+
+    return _DefaultsForm
 
 
 def LdapSettingsForm(tls_reqcert_choices, search_scope_choices,

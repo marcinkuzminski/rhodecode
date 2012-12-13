@@ -6,7 +6,13 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${_('Admin journal')}
+    <form id="filter_form">
+    <input class="q_filter_box ${'' if c.search_term else 'initial'}" id="j_filter" size="15" type="text" name="filter" value="${c.search_term or _('journal filter...')}"/>
+    <span class="tooltip" title="${h.tooltip(h.journal_filter_help())}">?</span>
+    <input type='submit' value="${_('filter')}" class="ui-btn" style="padding:0px 2px 0px 2px;margin:0px"/>
+    ${_('Admin journal')} - ${ungettext('%s entry', '%s entries', c.users_log.item_count) % (c.users_log.item_count)}
+    </form>
+    ${h.end_form()}
 </%def>
 
 <%def name="page_nav()">
@@ -25,4 +31,26 @@
 	    </div>
 	</div>
 </div>
+
+<script>
+YUE.on('j_filter','click',function(){
+	var jfilter = YUD.get('j_filter');
+	if(YUD.hasClass(jfilter, 'initial')){
+		jfilter.value = '';
+	}
+});
+var fix_j_filter_width = function(len){
+    YUD.setStyle(YUD.get('j_filter'),'width',Math.max(80, len*6.50)+'px');
+}
+YUE.on('j_filter','keyup',function(){
+	fix_j_filter_width(YUD.get('j_filter').value.length);
+});
+YUE.on('filter_form','submit',function(e){
+	YUE.preventDefault(e)
+    var val = YUD.get('j_filter').value;
+	window.location = "${url.current(filter='__FILTER__')}".replace('__FILTER__',val);
+});
+fix_j_filter_width(YUD.get('j_filter').value.length);
+</script>
 </%def>
+

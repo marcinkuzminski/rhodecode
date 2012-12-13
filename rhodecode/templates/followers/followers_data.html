@@ -19,7 +19,11 @@
 <script type="text/javascript">
 YUE.onDOMReady(function(){
     YUE.delegate("followers","click",function(e, matchedEl, container){
-        ypjax(e.target.href,"followers",function(){show_more_event();tooltip_activate();});
+        ypjax(e.target.href,"followers",function(){
+        	show_more_event();
+        	tooltip_activate();
+        	show_changeset_tooltip();
+        });
         YUE.preventDefault(e);
     },'.pager_link');
 });

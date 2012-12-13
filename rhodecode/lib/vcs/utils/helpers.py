@@ -15,14 +15,14 @@ from rhodecode.lib.vcs.utils.paths import abspath
 ALIASES = ['hg', 'git']
 
 
-def get_scm(path, search_recursively=False, explicit_alias=None):
+def get_scm(path, search_up=False, explicit_alias=None):
     """
     Returns one of alias from ``ALIASES`` (in order of precedence same as
     shortcuts given in ``ALIASES``) and top working dir path for the given
     argument. If no scm-specific directory is found or more than one scm is
     found at that directory, ``VCSError`` is raised.
 
-    :param search_recursively: if set to ``True``, this function would try to
+    :param search_up: if set to ``True``, this function would try to
       move up to parent directory every time no scm is recognized for the
       currently checked path. Default: ``False``.
     :param explicit_alias: can be one of available backend aliases, when given
@@ -37,7 +37,7 @@ def get_scm(path, search_recursively=False, explicit_alias=None):
         return [(scm, path) for scm in get_scms_for_path(path)]
 
     found_scms = get_scms(path)
-    while  not found_scms and search_recursively:
+    while not found_scms and search_up:
         newpath = abspath(path, '..')
         if newpath == path:
             break
@@ -78,6 +78,9 @@ def get_scms_for_path(path):
         if os.path.isdir(dirname):
             result.append(key)
             continue
+        dirname = os.path.join(path, 'rm__.' + key)
+        if os.path.isdir(dirname):
+            return [None]
         # We still need to check if it's not bare repository as
         # bare repos don't have working directories
         try:
@@ -91,21 +94,6 @@ def get_scms_for_path(path):
             # No backend at all
             pass
     return result
-
-
-def get_repo_paths(path):
-    """
-    Returns path's subdirectories which seems to be a repository.
-    """
-    repo_paths = []
-    dirnames = (os.path.abspath(dirname) for dirname in os.listdir(path))
-    for dirname in dirnames:
-        try:
-            get_scm(dirname)
-            repo_paths.append(dirname)
-        except VCSError:
-            pass
-    return repo_paths
 
 
 def run_command(cmd, *args):

@@ -1,7 +1,8 @@
 import time
 from rhodecode.tests import *
 from rhodecode.model.meta import Session
-from rhodecode.model.db import User
+from rhodecode.model.db import User, RhodeCodeSetting, Repository
+from rhodecode.lib.utils import set_rhodecode_config
 
 
 class TestHomeController(TestController):
@@ -59,3 +60,19 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
             anon.active = True
             Session().add(anon)
             Session().commit()
+
+    def test_index_with_lightweight_dashboard(self):
+        self.log_user()
+
+        def set_l_dash(set_to):
+            self.app.post(url('admin_setting', setting_id='visual'),
+                          params=dict(_method='put',
+                                      rhodecode_lightweight_dashboard=set_to,))
+
+        set_l_dash(True)
+
+        try:
+            response = self.app.get(url(controller='home', action='index'))
+            response.mustcontain("""var data = {"totalRecords": %s""" % len(Repository.getAll()))
+        finally:
+            set_l_dash(False)

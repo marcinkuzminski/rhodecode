@@ -11,6 +11,7 @@ import math
 import logging
 import re
 import urlparse
+import textwrap
 
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
@@ -42,10 +43,10 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
-    get_changeset_safe, datetime_to_time, time_to_datetime
+    get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
-from rhodecode.lib.vcs.backends.base import BaseChangeset
+from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
 from rhodecode.config.conf import DATE_FORMAT, DATETIME_FORMAT
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.db import URL_SEP, Permission
@@ -64,7 +65,7 @@ html_escape_table = {
 
 def html_escape(text):
     """Produce entities within text."""
-    return "".join(html_escape_table.get(c,c) for c in text)
+    return "".join(html_escape_table.get(c, c) for c in text)
 
 
 def shorter(text, size=20):
@@ -465,7 +466,7 @@ def desc_stylize(value):
                    '<div class="metatag" tag="license"><a href="http:\/\/www.opensource.org/licenses/\\1">\\1</a></div>', value)
     value = re.sub(r'\[(requires|recommends|conflicts|base)\ \=\>\ *([a-zA-Z\-\/]*)\]',
                    '<div class="metatag" tag="\\1">\\1 =&gt; <a href="/\\2">\\2</a></div>', value)
-    value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+    value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/\#\+]*)\]',
                    '<div class="metatag" tag="lang">\\2</div>', value)
     value = re.sub(r'\[([a-z]+)\]',
                   '<div class="metatag" tag="\\1">\\1</div>', value)
@@ -491,13 +492,14 @@ def bool2icon(value):
     return value
 
 
-def action_parser(user_log, feed=False):
+def action_parser(user_log, feed=False, parse_cs=False):
     """
     This helper will action_map the specified string action into translated
     fancy names with icons and links
 
     :param user_log: user log instance
     :param feed: use output for feeds (no html and fancy icons)
+    :param parse_cs: parse Changesets into VCS instances
     """
 
     action = user_log.action
@@ -518,32 +520,63 @@ def action_parser(user_log, feed=False):
 
         repo_name = user_log.repository.repo_name
 
-        repo = user_log.repository.scm_instance
-
         def lnk(rev, repo_name):
+            if isinstance(rev, BaseChangeset) or isinstance(rev, AttributeDict):
+                lazy_cs = True
+                if getattr(rev, 'op', None) and getattr(rev, 'ref_name', None):
+                    lazy_cs = False
+                    lbl = '?'
+                    if rev.op == 'delete_branch':
+                        lbl = '%s' % _('Deleted branch: %s') % rev.ref_name
+                        title = ''
+                    elif rev.op == 'tag':
+                        lbl = '%s' % _('Created tag: %s') % rev.ref_name
+                        title = ''
+                    _url = '#'
 
-            if isinstance(rev, BaseChangeset):
-                lbl = 'r%s:%s' % (rev.revision, rev.short_id)
-                _url = url('changeset_home', repo_name=repo_name,
-                           revision=rev.raw_id)
-                title = tooltip(rev.message)
+                else:
+                    lbl = '%s' % (rev.short_id[:8])
+                    _url = url('changeset_home', repo_name=repo_name,
+                               revision=rev.raw_id)
+                    title = tooltip(rev.message)
             else:
-                lbl = '%s' % rev
+                ## changeset cannot be found/striped/removed etc.
+                lbl = ('%s' % rev)[:12]
                 _url = '#'
                 title = _('Changeset not found')
-
-            return link_to(lbl, _url, title=title, class_='tooltip',)
+            if parse_cs:
+                return link_to(lbl, _url, title=title, class_='tooltip')
+            return link_to(lbl, _url, raw_id=rev.raw_id, repo_name=repo_name,
+                           class_='lazy-cs' if lazy_cs else '')
 
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
+            repo = None
             for rev in revs_ids[:revs_top_limit]:
-                try:
-                    rev = repo.get_changeset(rev)
-                    revs.append(rev)
-                except ChangesetDoesNotExistError:
-                    log.error('cannot find revision %s in this repo' % rev)
-                    revs.append(rev)
-                    continue
+                _op = _name = None
+                if len(rev.split('=>')) == 2:
+                    _op, _name = rev.split('=>')
+
+                # we want parsed changesets, or new log store format is bad
+                if parse_cs:
+                    try:
+                        if repo is None:
+                            repo = user_log.repository.scm_instance
+                        _rev = repo.get_changeset(rev)
+                        revs.append(_rev)
+                    except ChangesetDoesNotExistError:
+                        log.error('cannot find revision %s in this repo' % rev)
+                        revs.append(rev)
+                        continue
+                else:
+                    _rev = AttributeDict({
+                        'short_id': rev[:12],
+                        'raw_id': rev,
+                        'message': '',
+                        'op': _op,
+                        'ref_name': _name
+                    })
+                    revs.append(_rev)
         cs_links = []
         cs_links.append(" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
@@ -554,7 +587,7 @@ def action_parser(user_log, feed=False):
             ' <div class="compare_view tooltip" title="%s">'
             '<a href="%s">%s</a> </div>' % (
                 _('Show all combined changesets %s->%s') % (
-                    revs_ids[0], revs_ids[-1]
+                    revs_ids[0][:12], revs_ids[-1][:12]
                 ),
                 url('changeset_home', repo_name=repo_name,
                     revision='%s...%s' % (revs_ids[0], revs_ids[-1])
@@ -604,8 +637,8 @@ def action_parser(user_log, feed=False):
 
     def get_fork_name():
         repo_name = action_params
-        return _('fork name ') + str(link_to(action_params, url('summary_home',
-                                          repo_name=repo_name,)))
+        _url = url('summary_home', repo_name=repo_name)
+        return _('fork name %s') % link_to(action_params, _url)
 
     def get_user_name():
         user_name = action_params
@@ -617,7 +650,11 @@ def action_parser(user_log, feed=False):
 
     def get_pull_request():
         pull_request_id = action_params
-        repo_name = user_log.repository.repo_name
+        deleted = user_log.repository is None
+        if deleted:
+            repo_name = user_log.repository_name
+        else:
+            repo_name = user_log.repository.repo_name
         return link_to(_('Pull request #%s') % pull_request_id,
                     url('pullrequest_show', repo_name=repo_name,
                     pull_request_id=pull_request_id))
@@ -712,7 +749,13 @@ HasRepoPermissionAny, HasRepoPermissionAll
 #==============================================================================
 
 def gravatar_url(email_address, size=30):
-    from pylons import url  ## doh, we need to re-import url to mock it later
+    from pylons import url  # doh, we need to re-import url to mock it later
+
+    if (not str2bool(config['app_conf'].get('use_gravatar')) or
+        not email_address or email_address == 'anonymous@rhodecode.org'):
+        f = lambda a, l: min(l, key=lambda x: abs(x - a))
+        return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
+
     if(str2bool(config['app_conf'].get('use_gravatar')) and
        config['app_conf'].get('alternative_gravatar_url')):
         tmpl = config['app_conf'].get('alternative_gravatar_url', '')
@@ -723,11 +766,6 @@ def gravatar_url(email_address, size=30):
                    .replace('{scheme}', parsed_url.scheme)\
                    .replace('{size}', str(size))
         return tmpl
-
-    if (not str2bool(config['app_conf'].get('use_gravatar')) or
-        not email_address or email_address == 'anonymous@rhodecode.org'):
-        f = lambda a, l: min(l, key=lambda x: abs(x - a))
-        return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
 
     ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
@@ -849,7 +887,7 @@ def changed_tooltip(nodes):
         return ': ' + _('No Files')
 
 
-def repo_link(groups_and_repos):
+def repo_link(groups_and_repos, last_url=None):
     """
     Makes a breadcrumbs link to repo within a group
     joins &raquo; on each group to create a fancy link
@@ -858,17 +896,20 @@ def repo_link(groups_and_repos):
         group >> subgroup >> repo
 
     :param groups_and_repos:
+    :param last_url:
     """
     groups, repo_name = groups_and_repos
+    last_link = link_to(repo_name, last_url) if last_url else repo_name
 
     if not groups:
+        if last_url:
+            return last_link
         return repo_name
     else:
         def make_link(group):
-            return link_to(group.name, url('repos_group_home',
-                                           group_name=group.group_name))
-        return literal(' &raquo; '.join(map(make_link, groups)) + \
-                       " &raquo; " + repo_name)
+            return link_to(group.name,
+                           url('repos_group_home', group_name=group.group_name))
+        return literal(' &raquo; '.join(map(make_link, groups) + [last_link]))
 
 
 def fancy_file_stats(stats):
@@ -878,27 +919,7 @@ def fancy_file_stats(stats):
 
     :param stats: two element list of added/deleted lines of code
     """
-
-    a, d, t = stats[0], stats[1], stats[0] + stats[1]
-    width = 100
-    unit = float(width) / (t or 1)
-
-    # needs > 9% of width to be visible or 0 to be hidden
-    a_p = max(9, unit * a) if a > 0 else 0
-    d_p = max(9, unit * d) if d > 0 else 0
-    p_sum = a_p + d_p
-
-    if p_sum > width:
-        #adjust the percentage to be == 100% since we adjusted to 9
-        if a_p > d_p:
-            a_p = a_p - (p_sum - width)
-        else:
-            d_p = d_p - (p_sum - width)
-
-    a_v = a if a > 0 else ''
-    d_v = d if d > 0 else ''
-
-    def cgen(l_type):
+    def cgen(l_type, a_v, d_v):
         mapping = {'tr': 'top-right-rounded-corner-mid',
                    'tl': 'top-left-rounded-corner-mid',
                    'br': 'bottom-right-rounded-corner-mid',
@@ -918,17 +939,43 @@ def fancy_file_stats(stats):
         if l_type == 'd' and not a_v:
             return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
 
+    a, d = stats[0], stats[1]
+    width = 100
+
+    if a == 'b':
+        #binary mode
+        b_d = '<div class="bin%s %s" style="width:100%%">%s</div>' % (d, cgen('a', a_v='', d_v=0), 'bin')
+        b_a = '<div class="bin1" style="width:0%%">%s</div>' % ('bin')
+        return literal('<div style="width:%spx">%s%s</div>' % (width, b_a, b_d))
+
+    t = stats[0] + stats[1]
+    unit = float(width) / (t or 1)
+
+    # needs > 9% of width to be visible or 0 to be hidden
+    a_p = max(9, unit * a) if a > 0 else 0
+    d_p = max(9, unit * d) if d > 0 else 0
+    p_sum = a_p + d_p
+
+    if p_sum > width:
+        #adjust the percentage to be == 100% since we adjusted to 9
+        if a_p > d_p:
+            a_p = a_p - (p_sum - width)
+        else:
+            d_p = d_p - (p_sum - width)
+
+    a_v = a if a > 0 else ''
+    d_v = d if d > 0 else ''
+
     d_a = '<div class="added %s" style="width:%s%%">%s</div>' % (
-        cgen('a'), a_p, a_v
+        cgen('a', a_v, d_v), a_p, a_v
     )
     d_d = '<div class="deleted %s" style="width:%s%%">%s</div>' % (
-        cgen('d'), d_p, d_v
+        cgen('d', a_v, d_v), d_p, d_v
     )
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
 
 def urlify_text(text_):
-    import re
 
     url_pat = re.compile(r'''(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'''
                          '''|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)''')
@@ -947,7 +994,7 @@ def urlify_changesets(text_, repository):
     :param text_:
     :param repository:
     """
-    import re
+
     URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
 
     def url_func(match_obj):
@@ -982,7 +1029,6 @@ def urlify_commit(text_, repository=None, link_=None):
     :param repository:
     :param link_: changeset link
     """
-    import re
     import traceback
 
     def escaper(string):
@@ -1056,17 +1102,14 @@ def urlify_commit(text_, repository=None, link_=None):
             log.debug('processed prefix:`%s` => %s' % (pattern_index, newtext))
 
         # if we actually did something above
-        if valid_indices:
-            if link_:
-                # wrap not links into final link => link_
-                newtext = linkify_others(newtext, link_)
-
-            return literal(newtext)
+        if link_:
+            # wrap not links into final link => link_
+            newtext = linkify_others(newtext, link_)
     except:
         log.error(traceback.format_exc())
         pass
 
-    return newtext
+    return literal(newtext)
 
 
 def rst(source):
@@ -1094,3 +1137,23 @@ def changeset_status_lbl(changeset_status):
 
 def get_permission_name(key):
     return dict(Permission.PERMS).get(key)
+
+
+def journal_filter_help():
+    return _(textwrap.dedent('''
+        Example filter terms:
+            repository:vcs
+            username:marcin
+            action:*push*
+            ip:127.0.0.1
+            date:20120101
+            date:[20120101100000 TO 20120102]
+
+        Generate wildcards using '*' character:
+            "repositroy:vcs*" - search everything starting with 'vcs'
+            "repository:*vcs*" - search for repository containing 'vcs'
+
+        Optional AND / OR operators in queries
+            "repository:vcs OR repository:test"
+            "username:test AND repository:test*"
+    '''))

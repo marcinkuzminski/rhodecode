@@ -470,9 +470,11 @@ class GitChangesetTest(unittest.TestCase):
         for fname, revision_dict in files.items():
             for rev, data in revision_dict.items():
                 cs = self.repo.get_changeset(rev)
-                ann = cs.get_file_annotate(fname)
 
-                l1 = [x[1].raw_id for x in ann]
+                l1_1 = [x[1] for x in cs.get_file_annotate(fname)]
+                l1_2 = [x[2]().raw_id for x in cs.get_file_annotate(fname)]
+                self.assertEqual(l1_1, l1_2)
+                l1 = l1_1
                 l2 = files[fname][rev]['changesets']
                 self.assertTrue(l1 == l2 , "The lists of revision for %s@rev %s"
                                 "from annotation list should match each other, "
@@ -640,19 +642,22 @@ class GitSpecificWithRepoTest(BackendTestMixin, unittest.TestCase):
     def test_get_diff_runs_git_command_with_hashes(self):
         self.repo.run_git_command = mock.Mock(return_value=['', ''])
         self.repo.get_diff(0, 1)
-        self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s' %
+        self.repo.run_git_command.assert_called_once_with(
+          'diff -U%s --full-index --binary -p -M --abbrev=40 %s %s' %
             (3, self.repo._get_revision(0), self.repo._get_revision(1)))
 
     def test_get_diff_runs_git_command_with_str_hashes(self):
         self.repo.run_git_command = mock.Mock(return_value=['', ''])
         self.repo.get_diff(self.repo.EMPTY_CHANGESET, 1)
-        self.repo.run_git_command.assert_called_once_with('show -U%s %s' %
+        self.repo.run_git_command.assert_called_once_with(
+            'show -U%s --full-index --binary -p -M --abbrev=40 %s' %
             (3, self.repo._get_revision(1)))
 
     def test_get_diff_runs_git_command_with_path_if_its_given(self):
         self.repo.run_git_command = mock.Mock(return_value=['', ''])
         self.repo.get_diff(0, 1, 'foo')
-        self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s -- "foo"'
+        self.repo.run_git_command.assert_called_once_with(
+          'diff -U%s --full-index --binary -p -M --abbrev=40 %s %s -- "foo"'
             % (3, self.repo._get_revision(0), self.repo._get_revision(1)))
 
 

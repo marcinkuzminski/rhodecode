@@ -78,16 +78,21 @@ class PermissionModel(BaseModel):
         u2p = self.sa.query(UserToPerm).filter(UserToPerm.user ==
                                                perm_user).all()
         if len(u2p) != len(User.DEFAULT_PERMISSIONS):
-            raise Exception('Defined: %s should be 4  permissions for default'
+            raise Exception('Defined: %s should be %s  permissions for default'
                             ' user. This should not happen please verify'
-                            ' your database' % len(u2p))
+                            ' your database' % (len(u2p), len(User.DEFAULT_PERMISSIONS)))
 
         try:
             # stage 1 change defaults
             for p in u2p:
                 if p.permission.permission_name.startswith('repository.'):
                     p.permission = self.get_permission_by_name(
-                                       form_result['default_perm'])
+                                       form_result['default_repo_perm'])
+                    self.sa.add(p)
+
+                elif p.permission.permission_name.startswith('group.'):
+                    p.permission = self.get_permission_by_name(
+                                       form_result['default_group_perm'])
                     self.sa.add(p)
 
                 elif p.permission.permission_name.startswith('hg.register.'):
@@ -105,9 +110,9 @@ class PermissionModel(BaseModel):
                                         form_result['default_fork'])
                     self.sa.add(p)
 
-            _def_name = form_result['default_perm'].split('repository.')[-1]
             #stage 2 update all default permissions for repos if checked
-            if form_result['overwrite_default'] == True:
+            if form_result['overwrite_default_repo'] == True:
+                _def_name = form_result['default_repo_perm'].split('repository.')[-1]
                 _def = self.get_permission_by_name('repository.' + _def_name)
                 # repos
                 for r2p in self.sa.query(UserRepoToPerm)\
@@ -115,6 +120,9 @@ class PermissionModel(BaseModel):
                                .all():
                     r2p.permission = _def
                     self.sa.add(r2p)
+
+            if form_result['overwrite_default_group'] == True:
+                _def_name = form_result['default_group_perm'].split('group.')[-1]
                 # groups
                 _def = self.get_permission_by_name('group.' + _def_name)
                 for g2p in self.sa.query(UserRepoGroupToPerm)\

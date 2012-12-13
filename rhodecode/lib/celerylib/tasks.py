@@ -50,6 +50,7 @@ from rhodecode.lib.compat import json, OrderedDict
 from rhodecode.lib.hooks import log_create_repository
 
 from rhodecode.model.db import Statistics, Repository, User
+from rhodecode.model.scm import ScmModel
 
 
 add_cache(config)
@@ -91,7 +92,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
     DBS = get_session()
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
                             ts_max_y)
-    lockkey_path = config['here']
+    lockkey_path = config['app_conf']['cache_dir']
 
     log.info('running task with lockkey %s' % lockkey)
 
@@ -402,12 +403,14 @@ def create_repo_fork(form_data, cur_user):
     backend = get_backend(repo_type)
 
     if repo_type == 'git':
-        backend(safe_str(destination_fork_path), create=True,
+        r = backend(safe_str(destination_fork_path), create=True,
                 src_url=safe_str(source_repo_path),
                 update_after_clone=update_after_clone,
                 bare=True)
+        # add rhodecode hook into this repo
+        ScmModel().install_git_hook(repo=r)
     elif repo_type == 'hg':
-        backend(safe_str(destination_fork_path), create=True,
+        r = backend(safe_str(destination_fork_path), create=True,
                 src_url=safe_str(source_repo_path),
                 update_after_clone=update_after_clone)
     else:

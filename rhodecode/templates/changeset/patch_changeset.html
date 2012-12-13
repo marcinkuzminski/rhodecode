@@ -1,0 +1,17 @@
+%if h.is_hg(c.rhodecode_repo):
+# ${c.rhodecode_repo.alias.upper()} changeset patch
+# User ${c.changeset.author|n}
+# Date ${c.changeset.date}
+# Node ID ${c.changeset.raw_id}
+${c.parent_tmpl}
+${c.changeset.message}
+
+%elif h.is_git(c.rhodecode_repo):
+From 35d9475598be9f807cd800e51212b8f1efbeacd9 Mon Sep 17 00:00:00 2001
+From: ${c.changeset.author}
+Date: ${c.changeset.date}
+Subject: [PATCH] ${c.changeset.message}
+---
+
+%endif
+${c.diff|n}

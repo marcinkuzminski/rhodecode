@@ -8,16 +8,15 @@ GIT support
 Git support in RhodeCode 1.3 was enabled by default. You need to have a git
 client installed on the machine to make git fully work.
 
-Although There are some limitations on git usage.
+Although There is one limitation on git usage.
 
-- hooks that are executed on pull/push are not *real* hooks, they are 
-  just emulating the behavior, and are executed **BEFORE** action takes place.
-- large pushes needs http server with chunked encoding support.
+- large pushes requires a http server with chunked encoding support.
  
 if you plan to use git you need to run RhodeCode with some
 http server that supports chunked encoding which git http protocol uses, 
 i recommend using waitress_ or gunicorn_ (linux only) for `paste` wsgi app 
-replacement.
+replacement. Starting from version 1.4 waitress_ is the default wsgi server
+used in RhodeCode.
 
 To use, simply change change the following in the .ini file::
 

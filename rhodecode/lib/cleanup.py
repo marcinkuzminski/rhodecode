@@ -31,7 +31,7 @@ import datetime
 
 from os.path import dirname as dn, join as jn
 from rhodecode.model import init_model
-from rhodecode.lib.utils2 import engine_from_config
+from rhodecode.lib.utils2 import engine_from_config, safe_str
 from rhodecode.model.db import RhodeCodeUi
 
 
@@ -88,9 +88,10 @@ class CleanupCommand(BasePasterCommand):
 
         repos_location = RhodeCodeUi.get_repos_location()
         to_remove = []
-        for loc in os.listdir(repos_location):
-            if REMOVED_REPO_PAT.match(loc):
-                to_remove.append([loc, self._extract_date(loc)])
+        for dn, dirs, f in os.walk(safe_str(repos_location)):
+            for loc in dirs:
+                if REMOVED_REPO_PAT.match(loc):
+                    to_remove.append([loc, self._extract_date(loc)])
 
         #filter older than (if present)!
         now = datetime.datetime.now()
@@ -114,8 +115,8 @@ class CleanupCommand(BasePasterCommand):
             remove = True
         else:
             remove = ask_ok('are you sure to remove listed repos \n%s [y/n]?'
-                            % ', \n'.join(['%s removed on %s' % (x[0], x[1])
-                                           for x in to_remove]))
+                            % ', \n'.join(['%s removed on %s'
+                    % (safe_str(x[0]), safe_str(x[1])) for x in to_remove]))
 
         if remove:
             for name, date_ in to_remove:

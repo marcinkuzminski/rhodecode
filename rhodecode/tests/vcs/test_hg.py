@@ -392,13 +392,13 @@ class MercurialChangesetTest(unittest.TestCase):
                                  55: {'lines_no': 3,
                                      'changesets': [7, 7, 7]}}}
 
-
         for fname, revision_dict in files.items():
             for rev, data in revision_dict.items():
                 cs = self.repo.get_changeset(rev)
-                ann = cs.get_file_annotate(fname)
-
-                l1 = [x[1].revision for x in ann]
+                l1_1 = [x[1] for x in cs.get_file_annotate(fname)]
+                l1_2 = [x[2]().raw_id for x in cs.get_file_annotate(fname)]
+                self.assertEqual(l1_1, l1_2)
+                l1 = l1_2 = [x[2]().revision for x in cs.get_file_annotate(fname)]
                 l2 = files[fname][rev]['changesets']
                 self.assertTrue(l1 == l2 , "The lists of revision for %s@rev%s"
                                 "from annotation list should match each other,"

@@ -129,6 +129,8 @@ class TestLibs(unittest.TestCase):
         self.assertEqual(age(n - delt(hours=1)), u'1 hour ago')
         self.assertEqual(age(n - delt(hours=24)), u'1 day ago')
         self.assertEqual(age(n - delt(hours=24 * 5)), u'5 days ago')
+        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[n.month - 1]))),
+                         u'1 month ago')
         self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[n.month - 1] + 2))),
                          u'1 month and 2 days ago')
         self.assertEqual(age(n - delt(hours=24 * 400)), u'1 year and 1 month ago')
@@ -144,7 +146,9 @@ class TestLibs(unittest.TestCase):
         self.assertEqual(age(n + delt(hours=1)), u'in 1 hour')
         self.assertEqual(age(n + delt(hours=24)), u'in 1 day')
         self.assertEqual(age(n + delt(hours=24 * 5)), u'in 5 days')
-        self.assertEqual(age(n + delt(hours=24 * (calendar.mdays[n.month - 1] + 2))),
+        self.assertEqual(age(n + delt(hours=24 * (calendar.mdays[n.month]))),
+                         u'in 1 month')
+        self.assertEqual(age(n + delt(hours=24 * (calendar.mdays[n.month] + 1))),
                          u'in 1 month and 1 day')
         self.assertEqual(age(n + delt(hours=24 * 400)), u'in 1 year and 1 month')
 

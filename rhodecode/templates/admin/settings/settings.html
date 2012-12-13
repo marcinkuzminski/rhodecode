@@ -122,6 +122,17 @@
         <!-- fields -->
 
         <div class="fields">
+             <div class="field">
+                <div class="label label-checkbox">
+                    <label>${_('General')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_lightweight_dashboard','True')}
+                        <label for="rhodecode_lightweight_dashboard">${_('Use lightweight dashboard')}</label>
+                    </div>
+                 </div>
+             </div>
 
              <div class="field">
                 <div class="label label-checkbox">

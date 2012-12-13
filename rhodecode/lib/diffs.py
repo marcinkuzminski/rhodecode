@@ -27,8 +27,8 @@
 
 import re
 import difflib
-import markupsafe
 import logging
+import traceback
 
 from itertools import tee, imap
 
@@ -128,52 +128,106 @@ def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True, context=3):
     new_raw_id = getattr(filenode_new.changeset, 'raw_id', repo.EMPTY_CHANGESET)
 
     vcs_gitdiff = repo.get_diff(old_raw_id, new_raw_id, filenode_new.path,
-                                 ignore_whitespace, context)
+                                ignore_whitespace, context)
     return vcs_gitdiff
+
+NEW_FILENODE = 1
+DEL_FILENODE = 2
+MOD_FILENODE = 3
+RENAMED_FILENODE = 4
+CHMOD_FILENODE = 5
+
+
+class DiffLimitExceeded(Exception):
+    pass
+
+
+class LimitedDiffContainer(object):
+
+    def __init__(self, diff_limit, cur_diff_size, diff):
+        self.diff = diff
+        self.diff_limit = diff_limit
+        self.cur_diff_size = cur_diff_size
+
+    def __iter__(self):
+        for l in self.diff:
+            yield l
 
 
 class DiffProcessor(object):
     """
-    Give it a unified diff and it returns a list of the files that were
+    Give it a unified or git diff and it returns a list of the files that were
     mentioned in the diff together with a dict of meta information that
     can be used to render it in a HTML template.
     """
-    _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
-    _newline_marker = '\\ No newline at end of file\n'
+    _chunk_re = re.compile(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)')
+    _newline_marker = re.compile(r'^\\ No newline at end of file')
+    _git_header_re = re.compile(r"""
+        #^diff[ ]--git
+            [ ]a/(?P<a_path>.+?)[ ]b/(?P<b_path>.+?)\n
+        (?:^similarity[ ]index[ ](?P<similarity_index>\d+)%\n
+           ^rename[ ]from[ ](?P<rename_from>\S+)\n
+           ^rename[ ]to[ ](?P<rename_to>\S+)(?:\n|$))?
+        (?:^old[ ]mode[ ](?P<old_mode>\d+)\n
+           ^new[ ]mode[ ](?P<new_mode>\d+)(?:\n|$))?
+        (?:^new[ ]file[ ]mode[ ](?P<new_file_mode>.+)(?:\n|$))?
+        (?:^deleted[ ]file[ ]mode[ ](?P<deleted_file_mode>.+)(?:\n|$))?
+        (?:^index[ ](?P<a_blob_id>[0-9A-Fa-f]+)
+            \.\.(?P<b_blob_id>[0-9A-Fa-f]+)[ ]?(?P<b_mode>.+)?(?:\n|$))?
+        (?:^---[ ](a/(?P<a_file>.+)|/dev/null)(?:\n|$))?
+        (?:^\+\+\+[ ](b/(?P<b_file>.+)|/dev/null)(?:\n|$))?
+    """, re.VERBOSE | re.MULTILINE)
+    _hg_header_re = re.compile(r"""
+        #^diff[ ]--git
+            [ ]a/(?P<a_path>.+?)[ ]b/(?P<b_path>.+?)\n
+        (?:^similarity[ ]index[ ](?P<similarity_index>\d+)%(?:\n|$))?
+        (?:^rename[ ]from[ ](?P<rename_from>\S+)\n
+           ^rename[ ]to[ ](?P<rename_to>\S+)(?:\n|$))?
+        (?:^old[ ]mode[ ](?P<old_mode>\d+)\n
+           ^new[ ]mode[ ](?P<new_mode>\d+)(?:\n|$))?
+        (?:^new[ ]file[ ]mode[ ](?P<new_file_mode>.+)(?:\n|$))?
+        (?:^deleted[ ]file[ ]mode[ ](?P<deleted_file_mode>.+)(?:\n|$))?
+        (?:^index[ ](?P<a_blob_id>[0-9A-Fa-f]+)
+            \.\.(?P<b_blob_id>[0-9A-Fa-f]+)[ ]?(?P<b_mode>.+)?(?:\n|$))?
+        (?:^---[ ](a/(?P<a_file>.+)|/dev/null)(?:\n|$))?
+        (?:^\+\+\+[ ](b/(?P<b_file>.+)|/dev/null)(?:\n|$))?
+    """, re.VERBOSE | re.MULTILINE)
 
-    def __init__(self, diff, differ='diff', format='gitdiff'):
+    #used for inline highlighter word split
+    _token_re = re.compile(r'()(&gt;|&lt;|&amp;|\W+?)')
+
+    def __init__(self, diff, vcs='hg', format='gitdiff', diff_limit=None):
         """
-        :param diff:   a text in diff format or generator
+        :param diff:   a text in diff format
+        :param vcs: type of version controll hg or git
         :param format: format of diff passed, `udiff` or `gitdiff`
+        :param diff_limit: define the size of diff that is considered "big"
+            based on that parameter cut off will be triggered, set to None
+            to show full diff
         """
-        if isinstance(diff, basestring):
-            diff = [diff]
+        if not isinstance(diff, basestring):
+            raise Exception('Diff must be a basestring got %s instead' % type(diff))
 
-        self.__udiff = diff
-        self.__format = format
+        self._diff = diff
+        self._format = format
         self.adds = 0
         self.removes = 0
+        # calculate diff size
+        self.diff_size = len(diff)
+        self.diff_limit = diff_limit
+        self.cur_diff_size = 0
+        self.parsed = False
+        self.parsed_diff = []
+        self.vcs = vcs
 
-        if isinstance(self.__udiff, basestring):
-            self.lines = iter(self.__udiff.splitlines(1))
-
-        elif self.__format == 'gitdiff':
-            udiff_copy = self.copy_iterator()
-            self.lines = imap(self.escaper, self._parse_gitdiff(udiff_copy))
-        else:
-            udiff_copy = self.copy_iterator()
-            self.lines = imap(self.escaper, udiff_copy)
-
-        # Select a differ.
-        if differ == 'difflib':
+        if format == 'gitdiff':
             self.differ = self._highlight_line_difflib
+            self._parser = self._parse_gitdiff
         else:
             self.differ = self._highlight_line_udiff
+            self._parser = self._parse_udiff
 
-    def escaper(self, string):
-        return markupsafe.escape(string)
-
-    def copy_iterator(self):
+    def _copy_iterator(self):
         """
         make a fresh copy of generator, we should not iterate thru
         an original as it's needed for repeating operations on
@@ -182,58 +236,36 @@ class DiffProcessor(object):
         self.__udiff, iterator_copy = tee(self.__udiff)
         return iterator_copy
 
-    def _extract_rev(self, line1, line2):
+    def _escaper(self, string):
         """
-        Extract the operation (A/M/D), filename and revision hint from a line.
+        Escaper for diff escapes special chars and checks the diff limit
+
+        :param string:
+        :type string:
         """
 
-        try:
-            if line1.startswith('--- ') and line2.startswith('+++ '):
-                l1 = line1[4:].split(None, 1)
-                old_filename = (l1[0].replace('a/', '', 1)
-                                if len(l1) >= 1 else None)
-                old_rev = l1[1] if len(l1) == 2 else 'old'
+        self.cur_diff_size += len(string)
 
-                l2 = line2[4:].split(None, 1)
-                new_filename = (l2[0].replace('b/', '', 1)
-                                if len(l1) >= 1 else None)
-                new_rev = l2[1] if len(l2) == 2 else 'new'
+        # escaper get's iterated on each .next() call and it checks if each
+        # parsed line doesn't exceed the diff limit
+        if self.diff_limit is not None and self.cur_diff_size > self.diff_limit:
+            raise DiffLimitExceeded('Diff Limit Exceeded')
 
-                filename = (old_filename
-                            if old_filename != '/dev/null' else new_filename)
+        return safe_unicode(string).replace('&', '&amp;')\
+                .replace('<', '&lt;')\
+                .replace('>', '&gt;')
 
-                operation = 'D' if new_filename == '/dev/null' else None
-                if not operation:
-                    operation = 'M' if old_filename != '/dev/null' else 'A'
+    def _line_counter(self, l):
+        """
+        Checks each line and bumps total adds/removes for this diff
 
-                return operation, filename, new_rev, old_rev
-        except (ValueError, IndexError):
-            pass
-
-        return None, None, None, None
-
-    def _parse_gitdiff(self, diffiterator):
-        def line_decoder(l):
-            if l.startswith('+') and not l.startswith('+++'):
-                self.adds += 1
-            elif l.startswith('-') and not l.startswith('---'):
-                self.removes += 1
-            return safe_unicode(l)
-
-        output = list(diffiterator)
-        size = len(output)
-
-        if size == 2:
-            l = []
-            l.extend([output[0]])
-            l.extend(output[1].splitlines(1))
-            return map(line_decoder, l)
-        elif size == 1:
-            return  map(line_decoder, output[0].splitlines(1))
-        elif size == 0:
-            return []
-
-        raise Exception('wrong size of diff %s' % size)
+        :param l:
+        """
+        if l.startswith('+') and not l.startswith('+++'):
+            self.adds += 1
+        elif l.startswith('-') and not l.startswith('---'):
+            self.removes += 1
+        return safe_unicode(l)
 
     def _highlight_line_difflib(self, line, next_):
         """
@@ -245,9 +277,8 @@ class DiffProcessor(object):
         else:
             old, new = next_, line
 
-        oldwords = re.split(r'(\W)', old['line'])
-        newwords = re.split(r'(\W)', new['line'])
-
+        oldwords = self._token_re.split(old['line'])
+        newwords = self._token_re.split(new['line'])
         sequence = difflib.SequenceMatcher(None, oldwords, newwords)
 
         oldfragments, newfragments = [], []
@@ -295,120 +326,114 @@ class DiffProcessor(object):
             do(line)
             do(next_)
 
-    def _parse_udiff(self, inline_diff=True):
+    def _get_header(self, diff_chunk):
         """
-        Parse the diff an return data for the template.
-        """
-        lineiter = self.lines
-        files = []
-        try:
-            line = lineiter.next()
-            while 1:
-                # continue until we found the old file
-                if not line.startswith('--- '):
-                    line = lineiter.next()
-                    continue
+        parses the diff header, and returns parts, and leftover diff
+        parts consists of 14 elements::
 
+            a_path, b_path, similarity_index, rename_from, rename_to,
+            old_mode, new_mode, new_file_mode, deleted_file_mode,
+            a_blob_id, b_blob_id, b_mode, a_file, b_file
+
+        :param diff_chunk:
+        :type diff_chunk:
+        """
+
+        if self.vcs == 'git':
+            match = self._git_header_re.match(diff_chunk)
+            diff = diff_chunk[match.end():]
+            return match.groupdict(), imap(self._escaper, diff.splitlines(1))
+        elif self.vcs == 'hg':
+            match = self._hg_header_re.match(diff_chunk)
+            diff = diff_chunk[match.end():]
+            return match.groupdict(), imap(self._escaper, diff.splitlines(1))
+        else:
+            raise Exception('VCS type %s is not supported' % self.vcs)
+
+    def _clean_line(self, line, command):
+        if command in ['+', '-', ' ']:
+            #only modify the line if it's actually a diff thing
+            line = line[1:]
+        return line
+
+    def _parse_gitdiff(self, inline_diff=True):
+        _files = []
+        diff_container = lambda arg: arg
+
+        ##split the diff in chunks of separate --git a/file b/file chunks
+        for raw_diff in ('\n' + self._diff).split('\ndiff --git')[1:]:
+            binary = False
+            binary_msg = 'unknown binary'
+            head, diff = self._get_header(raw_diff)
+
+            if not head['a_file'] and head['b_file']:
+                op = 'A'
+            elif head['a_file'] and head['b_file']:
+                op = 'M'
+            elif head['a_file'] and not head['b_file']:
+                op = 'D'
+            else:
+                #probably we're dealing with a binary file 1
+                binary = True
+                if head['deleted_file_mode']:
+                    op = 'D'
+                    stats = ['b', DEL_FILENODE]
+                    binary_msg = 'deleted binary file'
+                elif head['new_file_mode']:
+                    op = 'A'
+                    stats = ['b', NEW_FILENODE]
+                    binary_msg = 'new binary file %s' % head['new_file_mode']
+                else:
+                    if head['new_mode'] and head['old_mode']:
+                        stats = ['b', CHMOD_FILENODE]
+                        op = 'M'
+                        binary_msg = ('modified binary file chmod %s => %s'
+                                      % (head['old_mode'], head['new_mode']))
+                    elif (head['rename_from'] and head['rename_to']
+                          and head['rename_from'] != head['rename_to']):
+                        stats = ['b', RENAMED_FILENODE]
+                        op = 'M'
+                        binary_msg = ('file renamed from %s to %s'
+                                      % (head['rename_from'], head['rename_to']))
+                    else:
+                        stats = ['b', MOD_FILENODE]
+                        op = 'M'
+                        binary_msg = 'modified binary file'
+
+            if not binary:
+                try:
+                    chunks, stats = self._parse_lines(diff)
+                except DiffLimitExceeded:
+                    diff_container = lambda _diff: LimitedDiffContainer(
+                                                self.diff_limit,
+                                                self.cur_diff_size,
+                                                _diff)
+                    break
+            else:
                 chunks = []
-                stats = [0, 0]
-                operation, filename, old_rev, new_rev = \
-                    self._extract_rev(line, lineiter.next())
-                files.append({
-                    'filename':         filename,
-                    'old_revision':     old_rev,
-                    'new_revision':     new_rev,
-                    'chunks':           chunks,
-                    'operation':        operation,
-                    'stats':            stats,
-                })
+                chunks.append([{
+                    'old_lineno': '',
+                    'new_lineno': '',
+                    'action':     'binary',
+                    'line':       binary_msg,
+                }])
 
-                line = lineiter.next()
-                while line:
-                    match = self._chunk_re.match(line)
-                    if not match:
-                        break
-
-                    lines = []
-                    chunks.append(lines)
-
-                    old_line, old_end, new_line, new_end = \
-                        [int(x or 1) for x in match.groups()[:-1]]
-                    old_line -= 1
-                    new_line -= 1
-                    gr = match.groups()
-                    context = len(gr) == 5
-                    old_end += old_line
-                    new_end += new_line
-
-                    if context:
-                        # skip context only if it's first line
-                        if int(gr[0]) > 1:
-                            lines.append({
-                                'old_lineno': '...',
-                                'new_lineno': '...',
-                                'action':     'context',
-                                'line':       line,
-                            })
-
-                    line = lineiter.next()
-
-                    while old_line < old_end or new_line < new_end:
-                        if line:
-                            command = line[0]
-                            if command in ['+', '-', ' ']:
-                                #only modify the line if it's actually a diff
-                                # thing
-                                line = line[1:]
-                        else:
-                            command = ' '
-
-                        affects_old = affects_new = False
-
-                        # ignore those if we don't expect them
-                        if command in '#@':
-                            continue
-                        elif command == '+':
-                            affects_new = True
-                            action = 'add'
-                            stats[0] += 1
-                        elif command == '-':
-                            affects_old = True
-                            action = 'del'
-                            stats[1] += 1
-                        else:
-                            affects_old = affects_new = True
-                            action = 'unmod'
-
-                        if line != self._newline_marker:
-                            old_line += affects_old
-                            new_line += affects_new
-                            lines.append({
-                                'old_lineno':   affects_old and old_line or '',
-                                'new_lineno':   affects_new and new_line or '',
-                                'action':       action,
-                                'line':         line
-                            })
-
-                        line = lineiter.next()
-                        if line == self._newline_marker:
-                            # we need to append to lines, since this is not
-                            # counted in the line specs of diff
-                            lines.append({
-                                'old_lineno':   '...',
-                                'new_lineno':   '...',
-                                'action':       'context',
-                                'line':         line
-                            })
-
-        except StopIteration:
-            pass
+            _files.append({
+                'filename':         head['b_path'],
+                'old_revision':     head['a_blob_id'],
+                'new_revision':     head['b_blob_id'],
+                'chunks':           chunks,
+                'operation':        op,
+                'stats':            stats,
+            })
 
         sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
+
         if inline_diff is False:
-            return sorted(files, key=sorter)
+            return diff_container(sorted(_files, key=sorter))
 
         # highlight inline changes
-        for diff_data in files:
+        for diff_data in _files:
             for chunk in diff_data['chunks']:
                 lineiter = iter(chunk)
                 try:
@@ -423,14 +448,101 @@ class DiffProcessor(object):
                 except StopIteration:
                     pass
 
-        return sorted(files, key=sorter)
+        return diff_container(sorted(_files, key=sorter))
 
-    def prepare(self, inline_diff=True):
+    def _parse_udiff(self, inline_diff=True):
+        raise NotImplementedError()
+
+    def _parse_lines(self, diff):
         """
-        Prepare the passed udiff for HTML rendering. It'l return a list
-        of dicts
+        Parse the diff an return data for the template.
         """
-        return self._parse_udiff(inline_diff=inline_diff)
+
+        lineiter = iter(diff)
+        stats = [0, 0]
+
+        try:
+            chunks = []
+            line = lineiter.next()
+
+            while line:
+                lines = []
+                chunks.append(lines)
+
+                match = self._chunk_re.match(line)
+
+                if not match:
+                    break
+
+                gr = match.groups()
+                (old_line, old_end,
+                 new_line, new_end) = [int(x or 1) for x in gr[:-1]]
+                old_line -= 1
+                new_line -= 1
+
+                context = len(gr) == 5
+                old_end += old_line
+                new_end += new_line
+
+                if context:
+                    # skip context only if it's first line
+                    if int(gr[0]) > 1:
+                        lines.append({
+                            'old_lineno': '...',
+                            'new_lineno': '...',
+                            'action':     'context',
+                            'line':       line,
+                        })
+
+                line = lineiter.next()
+
+                while old_line < old_end or new_line < new_end:
+                    command = ' '
+                    if line:
+                        command = line[0]
+
+                    affects_old = affects_new = False
+
+                    # ignore those if we don't expect them
+                    if command in '#@':
+                        continue
+                    elif command == '+':
+                        affects_new = True
+                        action = 'add'
+                        stats[0] += 1
+                    elif command == '-':
+                        affects_old = True
+                        action = 'del'
+                        stats[1] += 1
+                    else:
+                        affects_old = affects_new = True
+                        action = 'unmod'
+
+                    if not self._newline_marker.match(line):
+                        old_line += affects_old
+                        new_line += affects_new
+                        lines.append({
+                            'old_lineno':   affects_old and old_line or '',
+                            'new_lineno':   affects_new and new_line or '',
+                            'action':       action,
+                            'line':         self._clean_line(line, command)
+                        })
+
+                    line = lineiter.next()
+
+                    if self._newline_marker.match(line):
+                        # we need to append to lines, since this is not
+                        # counted in the line specs of diff
+                        lines.append({
+                            'old_lineno':   '...',
+                            'new_lineno':   '...',
+                            'action':       'context',
+                            'line':         self._clean_line(line, command)
+                        })
+
+        except StopIteration:
+            pass
+        return chunks, stats
 
     def _safe_id(self, idstring):
         """Make a string safe for including in an id attribute.
@@ -453,18 +565,26 @@ class DiffProcessor(object):
         idstring = re.sub(r'(?!-)\W', "", idstring).lower()
         return idstring
 
-    def raw_diff(self):
+    def prepare(self, inline_diff=True):
         """
-        Returns raw string as udiff
+        Prepare the passed udiff for HTML rendering. It'l return a list
+        of dicts with diff information
         """
-        udiff_copy = self.copy_iterator()
-        if self.__format == 'gitdiff':
-            udiff_copy = self._parse_gitdiff(udiff_copy)
-        return u''.join(udiff_copy)
+        parsed = self._parser(inline_diff=inline_diff)
+        self.parsed = True
+        self.parsed_diff = parsed
+        return parsed
+
+    def as_raw(self, diff_lines=None):
+        """
+        Returns raw string diff
+        """
+        return self._diff
+        #return u''.join(imap(self._line_counter, self._diff.splitlines(1)))
 
     def as_html(self, table_class='code-difftable', line_class='line',
                 new_lineno_class='lineno old', old_lineno_class='lineno new',
-                code_class='code', enable_comments=False, diff_lines=None):
+                code_class='code', enable_comments=False, parsed_lines=None):
         """
         Return given diff as html table with customized css classes
         """
@@ -480,13 +600,19 @@ class DiffProcessor(object):
                 }
             else:
                 return label
-        if diff_lines is None:
-            diff_lines = self.prepare()
+        if not self.parsed:
+            self.prepare()
+
+        diff_lines = self.parsed_diff
+        if parsed_lines:
+            diff_lines = parsed_lines
+
         _html_empty = True
         _html = []
         _html.append('''<table class="%(table_class)s">\n''' % {
             'table_class': table_class
         })
+
         for diff in diff_lines:
             for line in diff['chunks']:
                 _html_empty = False
@@ -551,6 +677,7 @@ class DiffProcessor(object):
                     _html.append('''\n\t\t<pre>%(code)s</pre>\n''' % {
                         'code': change['line']
                     })
+
                     _html.append('''\t</td>''')
                     _html.append('''\n</tr>\n''')
         _html.append('''</table>''')
@@ -578,44 +705,47 @@ class InMemoryBundleRepo(bundlerepository):
 
 
 def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
-           bundle_compare=False):
+           remote_compare=False, context=3, ignore_whitespace=False):
     """
-    General differ between branches, bookmarks or separate but releated
-    repositories
+    General differ between branches, bookmarks, revisions of two remote or
+    local but related repositories
 
     :param org_repo:
-    :type org_repo:
     :param org_ref:
-    :type org_ref:
     :param other_repo:
     :type other_repo:
-    :param other_ref:
     :type other_ref:
     """
 
-    bundlerepo = None
-    ignore_whitespace = False
-    context = 3
-    org_repo = org_repo.scm_instance._repo
-    other_repo = other_repo.scm_instance._repo
-    opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
+    org_repo_scm = org_repo.scm_instance
+    other_repo_scm = other_repo.scm_instance
+
+    org_repo = org_repo_scm._repo
+    other_repo = other_repo_scm._repo
+
     org_ref = org_ref[1]
     other_ref = other_ref[1]
 
-    if org_repo != other_repo and bundle_compare:
+    if org_repo_scm == other_repo_scm:
+        log.debug('running diff between %s@%s and %s@%s'
+                  % (org_repo.path, org_ref, other_repo.path, other_ref))
+        _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
+            ignore_whitespace=ignore_whitespace, context=context)
+        return _diff
 
+    elif remote_compare:
+        opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
         common, incoming, rheads = discovery_data
-        other_repo_peer = localrepo.locallegacypeer(other_repo.local())
+        org_repo_peer = localrepo.locallegacypeer(org_repo.local())
         # create a bundle (uncompressed if other repo is not local)
-        if other_repo_peer.capable('getbundle') and incoming:
+        if org_repo_peer.capable('getbundle'):
             # disable repo hooks here since it's just bundle !
             # patch and reset hooks section of UI config to not run any
             # hooks on fetching archives with subrepos
-            for k, _ in other_repo.ui.configitems('hooks'):
-                other_repo.ui.setconfig('hooks', k, None)
-
-            unbundle = other_repo.getbundle('incoming', common=common,
-                                            heads=None)
+            for k, _ in org_repo.ui.configitems('hooks'):
+                org_repo.ui.setconfig('hooks', k, None)
+            unbundle = org_repo.getbundle('incoming', common=None,
+                                          heads=None)
 
             buf = BytesIO()
             while True:
@@ -632,12 +762,9 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
             bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
                                             bundlestream=unbundle)
 
-        return ''.join(patch.diff(bundlerepo or org_repo,
-                                  node1=org_repo[org_ref].node(),
-                                  node2=other_repo[other_ref].node(),
-                                  opts=opts))
-    else:
-        log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo, org_ref, other_repo, other_ref))
-        return ''.join(patch.diff(org_repo, node1=org_ref, node2=other_ref,
-                                  opts=opts))
+            return ''.join(patch.diff(bundlerepo,
+                                      node1=other_repo[other_ref].node(),
+                                      node2=org_repo[org_ref].node(),
+                                      opts=opts))
+
+    return ''

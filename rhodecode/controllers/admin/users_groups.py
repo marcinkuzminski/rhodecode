@@ -40,10 +40,12 @@ from rhodecode.lib.base import BaseController, render
 
 from rhodecode.model.users_group import UsersGroupModel
 
-from rhodecode.model.db import User, UsersGroup
+from rhodecode.model.db import User, UsersGroup, UsersGroupToPerm,\
+    UsersGroupRepoToPerm, UsersGroupRepoGroupToPerm
 from rhodecode.model.forms import UsersGroupForm
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
+from sqlalchemy.orm import joinedload
 
 log = logging.getLogger(__name__)
 
@@ -102,6 +104,38 @@ class UsersGroupsController(BaseController):
         # url('new_users_group')
         return render('admin/users_groups/users_group_add.html')
 
+    def _load_data(self, id):
+        c.users_group.permissions = {
+            'repositories': {},
+            'repositories_groups': {}
+        }
+
+        ugroup_repo_perms = UsersGroupRepoToPerm.query()\
+            .options(joinedload(UsersGroupRepoToPerm.permission))\
+            .options(joinedload(UsersGroupRepoToPerm.repository))\
+            .filter(UsersGroupRepoToPerm.users_group_id == id)\
+            .all()
+
+        for gr in ugroup_repo_perms:
+            c.users_group.permissions['repositories'][gr.repository.repo_name]  \
+                = gr.permission.permission_name
+
+        ugroup_group_perms = UsersGroupRepoGroupToPerm.query()\
+            .options(joinedload(UsersGroupRepoGroupToPerm.permission))\
+            .options(joinedload(UsersGroupRepoGroupToPerm.group))\
+            .filter(UsersGroupRepoGroupToPerm.users_group_id == id)\
+            .all()
+
+        for gr in ugroup_group_perms:
+            c.users_group.permissions['repositories_groups'][gr.group.group_name] \
+                = gr.permission.permission_name
+
+        c.group_members_obj = [x.user for x in c.users_group.members]
+        c.group_members = [(x.user_id, x.username) for x in
+                           c.group_members_obj]
+        c.available_members = [(x.user_id, x.username) for x in
+                               User.query().all()]
+
     def update(self, id):
         """PUT /users_groups/id: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -111,13 +145,8 @@ class UsersGroupsController(BaseController):
         #           method='put')
         # url('users_group', id=ID)
 
-        c.users_group = UsersGroup.get(id)
-        c.group_members_obj = [x.user for x in c.users_group.members]
-        c.group_members = [(x.user_id, x.username) for x in
-                           c.group_members_obj]
-
-        c.available_members = [(x.user_id, x.username) for x in
-                               User.query().all()]
+        c.users_group = UsersGroup.get_or_404(id)
+        self._load_data(id)
 
         available_members = [safe_unicode(x[0]) for x in c.available_members]
 
@@ -189,13 +218,8 @@ class UsersGroupsController(BaseController):
         # url('edit_users_group', id=ID)
 
         c.users_group = UsersGroup.get_or_404(id)
+        self._load_data(id)
 
-        c.users_group.permissions = {}
-        c.group_members_obj = [x.user for x in c.users_group.members]
-        c.group_members = [(x.user_id, x.username) for x in
-                           c.group_members_obj]
-        c.available_members = [(x.user_id, x.username) for x in
-                               User.query().all()]
         ug_model = UsersGroupModel()
         defaults = c.users_group.get_dict()
         defaults.update({

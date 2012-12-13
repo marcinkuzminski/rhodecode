@@ -4,7 +4,15 @@
     ${_('Journal')} - ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
-	${c.rhodecode_name}
+    <h5>
+    <form id="filter_form">
+    <input class="q_filter_box ${'' if c.search_term else 'initial'}" id="j_filter" size="15" type="text" name="filter" value="${c.search_term or _('quick filter...')}"/>
+    <span class="tooltip" title="${h.tooltip(h.journal_filter_help())}">?</span>
+    <input type='submit' value="${_('filter')}" class="ui-btn" style="padding:0px 2px 0px 2px;margin:0px"/>
+    ${_('journal')} - ${ungettext('%s entry', '%s entries', c.journal_pager.item_count) % (c.journal_pager.item_count)}
+    </form>
+    ${h.end_form()}
+    </h5>
 </%def>
 <%def name="page_nav()">
 	${self.menu('home')}
@@ -18,18 +26,18 @@
     <div class="box box-left">
 	    <!-- box / title -->
 	    <div class="title">
-	        <h5>${_('Journal')}</h5>
-             <ul class="links">
-               <li>
-                 <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/></a></span>
-               </li>
-               <li>
-                 <span><a href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
-               </li>
-               <li>
-                 <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
-               </li>
-             </ul>
+         ${self.breadcrumbs()}
+         <ul class="links">
+           <li>
+             <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/></a></span>
+           </li>
+           <li>
+             <span><a href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
+           </li>
+           <li>
+             <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
+           </li>
+         </ul>
 	    </div>
 	    <div id="journal">${c.journal_data}</div>
     </div>
@@ -38,7 +46,7 @@
         <div class="title">
             <h5>
             <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-            <a id="show_my" class="link-white" href="#my">${_('My repos')}</a> / <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a>
+            <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a> / <a id="show_my" class="link-white" href="#my">${_('My repos')}</a>
             </h5>
              %if h.HasPermissionAny('hg.admin','hg.create.repository')():
              <ul class="links">
@@ -49,57 +57,12 @@
              %endif
         </div>
         <!-- end box / title -->
-        <div id="my" class="table">
-            %if c.user_repos:
-            <div id='repos_list_wrap' class="yui-skin-sam">
-            <table id="repos_list">
-             <thead>
-                  <tr>
-                  <th></th>
-                  <th class="left">${_('Name')}</th>
-                  <th class="left">${_('Revision')}</th>
-                  <th class="left">${_('Action')}</th>
-                  <th class="left">${_('Action')}</th>
-             </thead>
-             <tbody>
-                 <%namespace name="dt" file="/data_table/_dt_elements.html"/>
-                 %for repo in c.user_repos:
-                    <tr>
-                        ##QUICK MENU
-                        <td class="quick_repo_menu">
-                          ${dt.quick_menu(repo['name'])}
-                        </td>
-                        ##REPO NAME AND ICONS
-                        <td class="reponame">
-                          ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],repo['dbrepo_fork'].get('repo_name'))}
-                        </td>
-                        ##LAST REVISION
-                        <td>
-                            ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
-                        </td>
-                        ##
-                        <td><a href="${h.url('repo_settings_home',repo_name=repo['name'])}" title="${_('edit')}"><img class="icon" alt="${_('private')}" src="${h.url('/images/icons/application_form_edit.png')}"/></a></td>
-                        <td>
-                          ${h.form(url('repo_settings_delete', repo_name=repo['name']),method='delete')}
-                            ${h.submit('remove_%s' % repo['name'],'',class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
-                          ${h.end_form()}
-                        </td>
-                    </tr>
-                 %endfor
-             </tbody>
-             </table>
-             </div>
-             %else:
-                <div style="padding:5px 0px 10px 0px;">
-                ${_('No repositories yet')}
-                %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-                    ${h.link_to(_('create one now'),h.url('admin_settings_create_repository'),class_="ui-btn")}
-                %endif
-                </div>
-             %endif
+        <div id="my" class="table" style="display:none">
+        ## loaded via AJAX
+        ${_('Loading...')}
         </div>
 
-        <div id="watched" class="table" style="display:none">
+        <div id="watched" class="table">
           %if c.following:
             <table>
             <thead>
@@ -151,20 +114,47 @@
     </div>
 
     <script type="text/javascript">
-
-    YUE.on('show_my','click',function(e){
+    
+    YUE.on('j_filter','click',function(){
+        var jfilter = YUD.get('j_filter');
+        if(YUD.hasClass(jfilter, 'initial')){
+            jfilter.value = '';
+        }
+    });
+    var fix_j_filter_width = function(len){
+        YUD.setStyle(YUD.get('j_filter'),'width',Math.max(80, len*6.50)+'px');
+    }
+    YUE.on('j_filter','keyup',function(){
+        fix_j_filter_width(YUD.get('j_filter').value.length);
+    });
+    YUE.on('filter_form','submit',function(e){
+        YUE.preventDefault(e)
+        var val = YUD.get('j_filter').value;
+        window.location = "${url.current(filter='__FILTER__')}".replace('__FILTER__',val);
+    });
+    fix_j_filter_width(YUD.get('j_filter').value.length);    
+    
+    var show_my = function(e){
         YUD.setStyle('watched','display','none');
         YUD.setStyle('my','display','');
-        var nodes = YUQ('#my tr td a.repo_name');
-        var target = 'q_filter';
-        var func = function(node){
-            return node.parentNode.parentNode.parentNode.parentNode;
-        }
-        q_filter(target,nodes,func);
-        YUE.preventDefault(e);
+
+        var url = "${h.url('admin_settings_my_repos')}";
+        ypjax(url, 'my', function(){
+            tooltip_activate();
+            quick_repo_menu();
+            var nodes = YUQ('#my tr td a.repo_name');
+            var func = function(node){
+                return node.parentNode.parentNode.parentNode;
+            }
+            q_filter('q_filter',nodes,func);
+        });
+
+    }
+    YUE.on('show_my','click',function(e){
+        show_my(e);
     })
-    YUE.on('show_watched','click',function(e){
-        YUD.setStyle('my','display','none');
+    var show_watched = function(e){
+    	YUD.setStyle('my','display','none');
         YUD.setStyle('watched','display','');
         var nodes = YUQ('#watched .watched_repo a');
         var target = 'q_filter';
@@ -172,10 +162,30 @@
             return node.parentNode.parentNode;
         }
         q_filter(target,nodes,func);
-        YUE.preventDefault(e);
+    }
+    YUE.on('show_watched','click',function(e){
+        show_watched(e);
     })
+    //init watched
+    show_watched();
+
+    var tabs = {
+        'watched': show_watched,
+        'my': show_my,
+    }
+    var url = location.href.split('#');
+    if (url[1]) {
+        //We have a hash
+        var tabHash = url[1];
+        tabs[tabHash]();
+    }
+
     YUE.on('refresh','click',function(e){
-        ypjax(e.currentTarget.href,"journal",function(){show_more_event();tooltip_activate();});
+        ypjax("${h.url.current(filter=c.search_term)}","journal",function(){
+        	show_more_event();
+        	tooltip_activate();
+        	show_changeset_tooltip();
+        	});
         YUE.preventDefault(e);
     });
 
@@ -223,7 +233,6 @@
         }
         q_filter('q_filter',YUQ('#my tr td a.repo_name'),func);
     });
-
 
     </script>
 </%def>

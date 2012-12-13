@@ -211,6 +211,9 @@
                     %if h.is_hg(c.rhodecode_repo):
                      <li>${h.link_to(_('Open new pull request'),h.url('pullrequest_home',repo_name=c.repo_name),class_='pull_request')}</li>
                     %endif
+                    %if c.rhodecode_db_repo.fork:
+                     <li>${h.link_to(_('Compare fork'),h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref=request.GET.get('branch') or 'default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name),class_='compare_request')}</li>
+                    %endif
                    	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
 
                     %if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name) and c.rhodecode_db_repo.enable_locking:
@@ -233,6 +236,7 @@
                             <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
                             <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
                             <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
+                            <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
                             <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
                         </ul>
                         </%def>

@@ -1,0 +1,416 @@
+diff --git a/vcs/backends/base.py b/vcs/backends/base.py
+index 212267ca23949807b8d89fa8ca495827dcfab3b1..ad17f16634da602503ed4ddd7cdd2e1ccdf4bed4 100644
+--- a/vcs/backends/base.py
++++ b/vcs/backends/base.py
+@@ -54,6 +54,7 @@ class BaseRepository(object):
+     """
+     scm = None
+     DEFAULT_BRANCH_NAME = None
++    EMPTY_CHANGESET = '0' * 40
+ 
+     def __init__(self, repo_path, create=False, **kwargs):
+         """
+@@ -204,6 +205,23 @@ class BaseRepository(object):
+         """
+         raise NotImplementedError
+ 
++    def get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
++            context=3):
++        """
++        Returns (git like) *diff*, as plain text. Shows changes introduced by
++        ``rev2`` since ``rev1``.
++
++        :param rev1: Entry point from which diff is shown. Can be
++          ``self.EMPTY_CHANGESET`` - in this case, patch showing all
++          the changes since empty state of the repository until ``rev2``
++        :param rev2: Until which revision changes should be shown.
++        :param ignore_whitespace: If set to ``True``, would not show whitespace
++          changes. Defaults to ``False``.
++        :param context: How many lines before/after changed lines should be
++          shown. Defaults to ``3``.
++        """
++        raise NotImplementedError
++
+     # ========== #
+     # COMMIT API #
+     # ========== #
+@@ -341,7 +359,6 @@ class BaseChangeset(object):
+             otherwise; trying to access this attribute while there is no
+             changesets would raise ``EmptyRepositoryError``
+     """
+-
+     def __str__(self):
+         return '<%s at %s:%s>' % (self.__class__.__name__, self.revision,
+             self.short_id)
+@@ -591,7 +608,6 @@ class BaseChangeset(object):
+         return data
+ 
+ 
+-
+ class BaseWorkdir(object):
+     """
+     Working directory representation of single repository.
+diff --git a/vcs/backends/git/repository.py b/vcs/backends/git/repository.py
+index 8b9d1247fdee44e7a021b80e4965d8609cfd5720..e9f04e74dedd2f57417eb91dd2f4f7c61ec7e097 100644
+--- a/vcs/backends/git/repository.py
++++ b/vcs/backends/git/repository.py
+@@ -12,6 +12,7 @@
+ import os
+ import re
+ import time
++import inspect
+ import posixpath
+ from dulwich.repo import Repo, NotGitRepository
+ #from dulwich.config import ConfigFile
+@@ -101,21 +102,6 @@ class GitRepository(BaseRepository):
+                 "stderr:\n%s" % (cmd, se))
+         return so, se
+ 
+-    def _get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
+-            context=3):
+-        rev1 = self._get_revision(rev1)
+-        rev2 = self._get_revision(rev2)
+-        
+-        if ignore_whitespace:
+-            cmd = 'diff -U%s -w %s %s' % (context, rev1, rev2)
+-        else:
+-            cmd = 'diff -U%s %s %s' % (context, rev1, rev2)
+-        if path:
+-            cmd += ' -- "%s"' % path
+-        so, se = self.run_git_command(cmd)
+-
+-        return so
+-
+     def _check_url(self, url):
+         """
+         Functon will check given url and try to verify if it's a valid
+@@ -322,6 +308,8 @@ class GitRepository(BaseRepository):
+         Returns ``GitChangeset`` object representing commit from git repository
+         at the given revision or head (most recent commit) if None given.
+         """
++        if isinstance(revision, GitChangeset):
++            return revision
+         revision = self._get_revision(revision)
+         changeset = GitChangeset(repository=self, revision=revision)
+         return changeset
+@@ -398,6 +386,49 @@ class GitRepository(BaseRepository):
+         for rev in revs:
+             yield self.get_changeset(rev)
+ 
++    def get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
++            context=3):
++        """
++        Returns (git like) *diff*, as plain text. Shows changes introduced by
++        ``rev2`` since ``rev1``.
++
++        :param rev1: Entry point from which diff is shown. Can be
++          ``self.EMPTY_CHANGESET`` - in this case, patch showing all
++          the changes since empty state of the repository until ``rev2``
++        :param rev2: Until which revision changes should be shown.
++        :param ignore_whitespace: If set to ``True``, would not show whitespace
++          changes. Defaults to ``False``.
++        :param context: How many lines before/after changed lines should be
++          shown. Defaults to ``3``.
++        """
++        flags = ['-U%s' % context]
++        if ignore_whitespace:
++            flags.append('-w')
++
++        if rev1 == self.EMPTY_CHANGESET:
++            rev2 = self.get_changeset(rev2).raw_id
++            cmd = ' '.join(['show'] + flags + [rev2])
++        else:
++            rev1 = self.get_changeset(rev1).raw_id
++            rev2 = self.get_changeset(rev2).raw_id
++            cmd = ' '.join(['diff'] + flags + [rev1, rev2])
++
++        if path:
++            cmd += ' -- "%s"' % path
++        stdout, stderr = self.run_git_command(cmd)
++        # If we used 'show' command, strip first few lines (until actual diff
++        # starts)
++        if rev1 == self.EMPTY_CHANGESET:
++            lines = stdout.splitlines()
++            x = 0
++            for line in lines:
++                if line.startswith('diff'):
++                    break
++                x += 1
++            # Append new line just like 'diff' command do
++            stdout = '\n'.join(lines[x:]) + '\n'
++        return stdout
++
+     @LazyProperty
+     def in_memory_changeset(self):
+         """
+diff --git a/vcs/backends/hg.py b/vcs/backends/hg.py
+index f1f9f95e4d476ab01d8e7b02a8b59034c0740a3b..b7d63c552c39b2f8aaec17ef46551369c8b8e793 100644
+--- a/vcs/backends/hg.py
++++ b/vcs/backends/hg.py
+@@ -256,13 +256,32 @@ class MercurialRepository(BaseRepository):
+ 
+         return map(lambda x: hex(x[7]), self._repo.changelog.index)[:-1]
+ 
+-    def _get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
++    def get_diff(self, rev1, rev2, path='', ignore_whitespace=False,
+                   context=3):
++        """
++        Returns (git like) *diff*, as plain text. Shows changes introduced by
++        ``rev2`` since ``rev1``.
++
++        :param rev1: Entry point from which diff is shown. Can be
++          ``self.EMPTY_CHANGESET`` - in this case, patch showing all
++          the changes since empty state of the repository until ``rev2``
++        :param rev2: Until which revision changes should be shown.
++        :param ignore_whitespace: If set to ``True``, would not show whitespace
++          changes. Defaults to ``False``.
++        :param context: How many lines before/after changed lines should be
++          shown. Defaults to ``3``.
++        """
++        # Check if given revisions are present at repository (may raise
++        # ChangesetDoesNotExistError)
++        if rev1 != self.EMPTY_CHANGESET:
++            self.get_changeset(rev1)
++        self.get_changeset(rev2)
++
+         file_filter = match(self.path, '', [path])
+-        return patch.diff(self._repo, rev1, rev2, match=file_filter,
++        return ''.join(patch.diff(self._repo, rev1, rev2, match=file_filter,
+                           opts=diffopts(git=True,
+                                         ignorews=ignore_whitespace,
+-                                        context=context))
++                                        context=context)))
+ 
+     def _check_url(self, url):
+         """
+diff --git a/vcs/tests/test_git.py b/vcs/tests/test_git.py
+index 30da035a2a35c3dca14064778e97188b6d4ce5d6..d4b82b9e612af8bb5bf490a827377c7c2567735a 100644
+--- a/vcs/tests/test_git.py
++++ b/vcs/tests/test_git.py
+@@ -639,19 +639,19 @@ class GitSpecificWithRepoTest(BackendTestMixin, unittest.TestCase):
+ 
+     def test_get_diff_runs_git_command_with_hashes(self):
+         self.repo.run_git_command = mock.Mock(return_value=['', ''])
+-        self.repo._get_diff(0, 1)
++        self.repo.get_diff(0, 1)
+         self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s' %
+             (3, self.repo._get_revision(0), self.repo._get_revision(1)))
+ 
+     def test_get_diff_runs_git_command_with_str_hashes(self):
+         self.repo.run_git_command = mock.Mock(return_value=['', ''])
+-        self.repo._get_diff('0' * 40, 1)
+-        self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s' %
+-            (3, self.repo._get_revision(0), self.repo._get_revision(1)))
++        self.repo.get_diff(self.repo.EMPTY_CHANGESET, 1)
++        self.repo.run_git_command.assert_called_once_with('show -U%s %s' %
++            (3, self.repo._get_revision(1)))
+ 
+     def test_get_diff_runs_git_command_with_path_if_its_given(self):
+         self.repo.run_git_command = mock.Mock(return_value=['', ''])
+-        self.repo._get_diff(0, 1, 'foo')
++        self.repo.get_diff(0, 1, 'foo')
+         self.repo.run_git_command.assert_called_once_with('diff -U%s %s %s -- "foo"'
+             % (3, self.repo._get_revision(0), self.repo._get_revision(1)))
+ 
+diff --git a/vcs/tests/test_repository.py b/vcs/tests/test_repository.py
+index e34033e29fa9b3d3366b723beab129cee73869b9..b6e3f419778d6009229e9108824acaf83eea1784 100644
+--- a/vcs/tests/test_repository.py
++++ b/vcs/tests/test_repository.py
+@@ -1,9 +1,12 @@
+ from __future__ import with_statement
++import datetime
+ from base import BackendTestMixin
+ from conf import SCM_TESTS
++from conf import TEST_USER_CONFIG_FILE
++from vcs.nodes import FileNode
+ from vcs.utils.compat import unittest
++from vcs.exceptions import ChangesetDoesNotExistError
+ 
+-from conf import TEST_USER_CONFIG_FILE
+ 
+ class RepositoryBaseTest(BackendTestMixin):
+     recreate_repo_per_test = False
+@@ -29,6 +32,176 @@ class RepositoryBaseTest(BackendTestMixin):
+             'foo.bar@example.com')
+ 
+ 
++
++class RepositoryGetDiffTest(BackendTestMixin):
++
++    @classmethod
++    def _get_commits(cls):
++        commits = [
++            {
++                'message': 'Initial commit',
++                'author': 'Joe Doe <joe.doe@example.com>',
++                'date': datetime.datetime(2010, 1, 1, 20),
++                'added': [
++                    FileNode('foobar', content='foobar'),
++                    FileNode('foobar2', content='foobar2'),
++                ],
++            },
++            {
++                'message': 'Changed foobar, added foobar3',
++                'author': 'Jane Doe <jane.doe@example.com>',
++                'date': datetime.datetime(2010, 1, 1, 21),
++                'added': [
++                    FileNode('foobar3', content='foobar3'),
++                ],
++                'changed': [
++                    FileNode('foobar', 'FOOBAR'),
++                ],
++            },
++            {
++                'message': 'Removed foobar, changed foobar3',
++                'author': 'Jane Doe <jane.doe@example.com>',
++                'date': datetime.datetime(2010, 1, 1, 22),
++                'changed': [
++                    FileNode('foobar3', content='FOOBAR\nFOOBAR\nFOOBAR\n'),
++                ],
++                'removed': [FileNode('foobar')],
++            },
++        ]
++        return commits
++
++    def test_raise_for_wrong(self):
++        with self.assertRaises(ChangesetDoesNotExistError):
++            self.repo.get_diff('a' * 40, 'b' * 40)
++
++class GitRepositoryGetDiffTest(RepositoryGetDiffTest, unittest.TestCase):
++    backend_alias = 'git'
++
++    def test_initial_commit_diff(self):
++        initial_rev = self.repo.revisions[0]
++        self.assertEqual(self.repo.get_diff(self.repo.EMPTY_CHANGESET, initial_rev), '''diff --git a/foobar b/foobar
++new file mode 100644
++index 0000000..f6ea049
++--- /dev/null
+++++ b/foobar
++@@ -0,0 +1 @@
+++foobar
++\ No newline at end of file
++diff --git a/foobar2 b/foobar2
++new file mode 100644
++index 0000000..e8c9d6b
++--- /dev/null
+++++ b/foobar2
++@@ -0,0 +1 @@
+++foobar2
++\ No newline at end of file
++''')
++
++    def test_second_changeset_diff(self):
++        revs = self.repo.revisions
++        self.assertEqual(self.repo.get_diff(revs[0], revs[1]), '''diff --git a/foobar b/foobar
++index f6ea049..389865b 100644
++--- a/foobar
+++++ b/foobar
++@@ -1 +1 @@
++-foobar
++\ No newline at end of file
+++FOOBAR
++\ No newline at end of file
++diff --git a/foobar3 b/foobar3
++new file mode 100644
++index 0000000..c11c37d
++--- /dev/null
+++++ b/foobar3
++@@ -0,0 +1 @@
+++foobar3
++\ No newline at end of file
++''')
++
++    def test_third_changeset_diff(self):
++        revs = self.repo.revisions
++        self.assertEqual(self.repo.get_diff(revs[1], revs[2]), '''diff --git a/foobar b/foobar
++deleted file mode 100644
++index 389865b..0000000
++--- a/foobar
+++++ /dev/null
++@@ -1 +0,0 @@
++-FOOBAR
++\ No newline at end of file
++diff --git a/foobar3 b/foobar3
++index c11c37d..f932447 100644
++--- a/foobar3
+++++ b/foobar3
++@@ -1 +1,3 @@
++-foobar3
++\ No newline at end of file
+++FOOBAR
+++FOOBAR
+++FOOBAR
++''')
++
++
++class HgRepositoryGetDiffTest(RepositoryGetDiffTest, unittest.TestCase):
++    backend_alias = 'hg'
++
++    def test_initial_commit_diff(self):
++        initial_rev = self.repo.revisions[0]
++        self.assertEqual(self.repo.get_diff(self.repo.EMPTY_CHANGESET, initial_rev), '''diff --git a/foobar b/foobar
++new file mode 100755
++--- /dev/null
+++++ b/foobar
++@@ -0,0 +1,1 @@
+++foobar
++\ No newline at end of file
++diff --git a/foobar2 b/foobar2
++new file mode 100755
++--- /dev/null
+++++ b/foobar2
++@@ -0,0 +1,1 @@
+++foobar2
++\ No newline at end of file
++''')
++
++    def test_second_changeset_diff(self):
++        revs = self.repo.revisions
++        self.assertEqual(self.repo.get_diff(revs[0], revs[1]), '''diff --git a/foobar b/foobar
++--- a/foobar
+++++ b/foobar
++@@ -1,1 +1,1 @@
++-foobar
++\ No newline at end of file
+++FOOBAR
++\ No newline at end of file
++diff --git a/foobar3 b/foobar3
++new file mode 100755
++--- /dev/null
+++++ b/foobar3
++@@ -0,0 +1,1 @@
+++foobar3
++\ No newline at end of file
++''')
++
++    def test_third_changeset_diff(self):
++        revs = self.repo.revisions
++        self.assertEqual(self.repo.get_diff(revs[1], revs[2]), '''diff --git a/foobar b/foobar
++deleted file mode 100755
++--- a/foobar
+++++ /dev/null
++@@ -1,1 +0,0 @@
++-FOOBAR
++\ No newline at end of file
++diff --git a/foobar3 b/foobar3
++--- a/foobar3
+++++ b/foobar3
++@@ -1,1 +1,3 @@
++-foobar3
++\ No newline at end of file
+++FOOBAR
+++FOOBAR
+++FOOBAR
++''')
++
++
+ # For each backend create test case class
+ for alias in SCM_TESTS:
+     attrs = {
+@@ -38,7 +211,6 @@ for alias in SCM_TESTS:
+     bases = (RepositoryBaseTest, unittest.TestCase)
+     globals()[cls_name] = type(cls_name, bases, attrs)
+ 
+-
+ if __name__ == '__main__':
+     unittest.main()

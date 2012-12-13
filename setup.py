@@ -39,15 +39,15 @@ requirements = [
     "Beaker==1.6.4",
     "WebHelpers==1.3",
     "formencode==1.2.4",
-    "SQLAlchemy==0.7.8",
-    "Mako==0.7.2",
+    "SQLAlchemy==0.7.9",
+    "Mako==0.7.3",
     "pygments>=1.5",
     "whoosh>=2.4.0,<2.5",
     "celery>=2.2.5,<2.3",
     "babel",
     "python-dateutil>=1.5.0,<2.0.0",
-    "dulwich>=0.8.5,<0.9.0",
-    "markdown==2.1.1",
+    "dulwich>=0.8.7,<0.9.0",
+    "markdown==2.2.1",
     "docutils==0.8.1",
     "simplejson==2.5.2",
     "mock",
@@ -60,10 +60,10 @@ if sys.version_info < (2, 7):
     requirements.append("unittest2")
 
 if is_windows:
-    requirements.append("mercurial==2.3.2")
+    requirements.append("mercurial==2.4.1")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial==2.3.2")
+    requirements.append("mercurial==2.4.1")
 
 
 dependency_links = [
@@ -158,6 +158,7 @@ setup(
     [paste.global_paster_command]
     setup-rhodecode=rhodecode.config.setup_rhodecode:SetupCommand
     cleanup-repos=rhodecode.lib.cleanup:CleanupCommand
+    update-repoinfo=rhodecode.lib.update_repoinfo:UpdateCommand
     make-index=rhodecode.lib.indexers:MakeIndex
     make-rcext=rhodecode.config.rcextensions.make_rcextensions:MakeRcExt
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb

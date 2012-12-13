@@ -40,6 +40,7 @@
                 ## REPO GROUPS
 
                 % for gr in c.groups:
+                    <% gr_cn = gr.repositories.count() %>
                   <tr>
                       <td>
                           <div style="white-space: nowrap">
@@ -48,10 +49,10 @@
                           </div>
                       </td>
                       <td>${gr.group_description}</td>
-                      <td><b>${gr.repositories.count()}</b></td>
+                      <td><b>${gr_cn}</b></td>
 		               <td>
 		                 ${h.form(url('repos_group', id=gr.group_id),method='delete')}
-		                   ${h.submit('remove_%s' % gr.name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this group: %s') % gr.name+"');")}
+		                   ${h.submit('remove_%s' % gr.name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+ungettext('Confirm to delete this group: %s with %s repository','Confirm to delete this group: %s with %s repositories',gr_cn) % (gr.name,gr_cn)+"');")}
 		                 ${h.end_form()}
 		               </td>
                   </tr>

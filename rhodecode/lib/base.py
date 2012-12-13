@@ -8,8 +8,7 @@ import traceback
 
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpexceptions import HTTPUnauthorized, HTTPForbidden
-from webob.exc import HTTPClientError
-from paste.httpheaders import WWW_AUTHENTICATE
+from paste.httpheaders import WWW_AUTHENTICATE, AUTHORIZATION
 
 from pylons import config, tmpl_context as c, request, session, url
 from pylons.controllers import WSGIController
@@ -19,13 +18,13 @@ from pylons.templating import render_mako as render
 from rhodecode import __version__, BACKENDS
 
 from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
-    safe_str
+    safe_str, safe_int
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
-from rhodecode.model.db import Repository, RhodeCodeUi, User
+from rhodecode.model.db import Repository, RhodeCodeUi, User, RhodeCodeSetting
 from rhodecode.model.notification import NotificationModel
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.meta import Session
@@ -73,6 +72,23 @@ class BasicAuth(AuthBasicAuthenticator):
             # RhodeCode config
             return HTTPForbidden(headers=head)
         return HTTPUnauthorized(headers=head)
+
+    def authenticate(self, environ):
+        authorization = AUTHORIZATION(environ)
+        if not authorization:
+            return self.build_authentication()
+        (authmeth, auth) = authorization.split(' ', 1)
+        if 'basic' != authmeth.lower():
+            return self.build_authentication()
+        auth = auth.strip().decode('base64')
+        _parts = auth.split(':', 1)
+        if len(_parts) == 2:
+            username, password = _parts
+            if self.authfunc(environ, username, password):
+                return username
+        return self.build_authentication()
+
+    __call__ = authenticate
 
 
 class BaseVCSController(object):
@@ -226,9 +242,13 @@ class BaseController(WSGIController):
         c.ga_code = config.get('rhodecode_ga_code')
         # Visual options
         c.visual = AttributeDict({})
-        c.visual.show_public_icon = str2bool(config.get('rhodecode_show_public_icon'))
-        c.visual.show_private_icon = str2bool(config.get('rhodecode_show_private_icon'))
-        c.visual.stylify_metatags = str2bool(config.get('rhodecode_stylify_metatags'))
+        rc_config = RhodeCodeSetting.get_app_settings()
+
+        c.visual.show_public_icon = str2bool(rc_config.get('rhodecode_show_public_icon'))
+        c.visual.show_private_icon = str2bool(rc_config.get('rhodecode_show_private_icon'))
+        c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
+        c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
+        c.visual.lightweight_dashboard_items = safe_int(config.get('dashboard_items', 100))
 
         c.repo_name = get_repo_slug(request)
         c.backends = BACKENDS.keys()
@@ -290,7 +310,8 @@ class BaseRepoController(BaseController):
 
             dbr = c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
-
+            # update last change according to VCS data
+            dbr.update_last_change(c.rhodecode_repo.last_change)
             if c.rhodecode_repo is None:
                 log.error('%s this repository is present in database but it '
                           'cannot be created as an scm instance', c.repo_name)

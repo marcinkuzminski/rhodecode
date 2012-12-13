@@ -4,6 +4,71 @@
 Changelog
 =========
 
+
+1.5.0 (**2012-12-12**)
+----------------------
+
+news
+++++
+
+- new rewritten from scratch diff engine. 10x faster in edge cases. Handling
+  of file renames, copies, change flags and binary files
+- added lightweight dashboard option. ref #500. New version of dashboard
+  page that doesn't use any VCS data and is super fast to render. Recommended
+  for large amount of repositories.
+- implements #648 write Script for updating last modification time for
+  lightweight dashboard
+- implemented compare engine for git repositories.
+- LDAP failover, option to specify multiple servers
+- added Errormator and Sentry support for monitoring RhodeCode
+- implemented #628: Pass server URL to rc-extensions hooks
+- new tooltip implementation - added lazy loading of changesets from journal
+  pages. This can significantly improve speed of rendering the page
+- implements #632,added branch/tag/bookmarks info into feeds
+  added changeset link to body of message
+- implemented #638 permissions overview to groups
+- implements #636, lazy loading of history and authors to speed up source
+  pages rendering
+- implemented #647, option to pass list of default encoding used to 
+  encode to/decode from unicode
+- added caching layer into RSS/ATOM feeds.
+- basic implementation of cherry picking changesets for pull request, ref #575
+- implemented #661 Add option to include diff in RSS feed
+- implemented file history page for showing detailed changelog for a given file
+- implemented #663 Admin/permission: specify default repogroup perms
+- implemented #379 defaults settings page for creation of repositories, locking
+  statistics, downloads, repository type
+- implemented #210 filtering of admin journal based on Whoosh Query language
+- added parents/children links in changeset viewref #650
+
+fixes
++++++
+
+- fixed git version checker
+- #586 patched basic auth handler to fix issues with git behind proxy
+- #589 search urlgenerator didn't properly escape special characters
+- fixed issue #614 Include repo name in delete confirmation dialog
+- fixed #623: Lang meta-tag doesn't work with C#/C++
+- fixes #612 Double quotes to Single quotes result in bad html in diff
+- fixes #630 git statistics do too much work making them slow.
+- fixes #625 Git-Tags are not displayed in Shortlog
+- fix for issue #602, enforce str when setting mercurial UI object. 
+  When this is used together with mercurial internal translation system
+  it can lead to UnicodeDecodeErrors
+- fixes #645 Fix git handler when doing delete remote branch
+- implements #649 added two seperate method for author and commiter to VCS
+  changeset class switch author for git backed to be the real author not commiter
+- fix issue #504 RhodeCode is showing different versions of README on
+  different summary page loads
+- implemented #658 Changing username in LDAP-Mode should not be allowed.
+- fixes #652 switch to generator approach when doing file annotation to prevent
+  huge memory consumption 
+- fixes #666 move lockkey path location to cache_dir to ensure this path is
+  always writable for rhodecode server
+- many more small fixes and improvements
+- fixed issues with recursive scans on removed repositories that could take
+  long time on instance start
+
 1.4.4 (**2012-10-08**)
 ----------------------
 

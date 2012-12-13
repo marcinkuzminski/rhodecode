@@ -32,6 +32,10 @@ def make_map(config):
         from rhodecode.model.db import Repository
         repo_name = match_dict.get('repo_name')
 
+        if match_dict.get('f_path'):
+            #fix for multiple initial slashes that causes errors
+            match_dict['f_path'] = match_dict['f_path'].lstrip('/')
+
         try:
             by_id = repo_name.split('_')
             if len(by_id) == 2 and by_id[1].isdigit() and by_id[0] == '':
@@ -258,6 +262,10 @@ def make_map(config):
     rmap.resource('permission', 'permissions',
                   controller='admin/permissions', path_prefix=ADMIN_PREFIX)
 
+    #ADMIN DEFAULTS REST ROUTES
+    rmap.resource('default', 'defaults',
+                  controller='admin/defaults', path_prefix=ADMIN_PREFIX)
+
     ##ADMIN LDAP SETTINGS
     rmap.connect('ldap_settings', '%s/ldap' % ADMIN_PREFIX,
                  controller='admin/ldap_settings', action='ldap_settings',
@@ -347,6 +355,8 @@ def make_map(config):
         m.connect('api', '/api')
 
     #USER JOURNAL
+    rmap.connect('journal_my_repos', '%s/journal_my_repos' % ADMIN_PREFIX,
+                 controller='journal', action='index_my_repos')
     rmap.connect('journal', '%s/journal' % ADMIN_PREFIX,
                  controller='journal', action='index')
     rmap.connect('journal_rss', '%s/journal/rss' % ADMIN_PREFIX,
@@ -419,6 +429,28 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
+    #still working url for backward compat.
+    rmap.connect('raw_changeset_home_depraced',
+                 '/{repo_name:.*?}/raw-changeset/{revision}',
+                 controller='changeset', action='changeset_raw',
+                 revision='tip', conditions=dict(function=check_repo))
+
+    ## new URLs
+    rmap.connect('changeset_raw_home',
+                 '/{repo_name:.*?}/changeset-diff/{revision}',
+                 controller='changeset', action='changeset_raw',
+                 revision='tip', conditions=dict(function=check_repo))
+
+    rmap.connect('changeset_patch_home',
+                 '/{repo_name:.*?}/changeset-patch/{revision}',
+                 controller='changeset', action='changeset_patch',
+                 revision='tip', conditions=dict(function=check_repo))
+
+    rmap.connect('changeset_download_home',
+                 '/{repo_name:.*?}/changeset-download/{revision}',
+                 controller='changeset', action='changeset_download',
+                 revision='tip', conditions=dict(function=check_repo))
+
     rmap.connect('changeset_comment',
                  '/{repo_name:.*?}/changeset/{revision}/comment',
                 controller='changeset', revision='tip', action='comment',
@@ -429,13 +461,11 @@ def make_map(config):
                 controller='changeset', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
 
-    rmap.connect('raw_changeset_home',
-                 '/{repo_name:.*?}/raw-changeset/{revision}',
-                 controller='changeset', action='raw_changeset',
-                 revision='tip', conditions=dict(function=check_repo))
+    rmap.connect('changeset_info', '/changeset_info/{repo_name:.*?}/{revision}',
+                 controller='changeset', action='changeset_info')
 
     rmap.connect('compare_url',
-                 '/{repo_name:.*?}/compare/{org_ref_type}@{org_ref}...{other_ref_type}@{other_ref}',
+                 '/{repo_name:.*?}/compare/{org_ref_type}@{org_ref:.*?}...{other_ref_type}@{other_ref:.*?}',
                  controller='compare', action='index',
                  conditions=dict(function=check_repo),
                  requirements=dict(
@@ -492,6 +522,10 @@ def make_map(config):
     rmap.connect('shortlog_home', '/{repo_name:.*?}/shortlog',
                 controller='shortlog', conditions=dict(function=check_repo))
 
+    rmap.connect('shortlog_file_home', '/{repo_name:.*?}/shortlog/{revision}/{f_path:.*}',
+                controller='shortlog', f_path=None,
+                conditions=dict(function=check_repo))
+
     rmap.connect('branches_home', '/{repo_name:.*?}/branches',
                 controller='branches', conditions=dict(function=check_repo))
 
@@ -511,6 +545,11 @@ def make_map(config):
     rmap.connect('files_home', '/{repo_name:.*?}/files/{revision}/{f_path:.*}',
                 controller='files', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
+
+    rmap.connect('files_history_home',
+                 '/{repo_name:.*?}/history/{revision}/{f_path:.*}',
+                 controller='files', action='history', revision='tip', f_path='',
+                 conditions=dict(function=check_repo))
 
     rmap.connect('files_diff_home', '/{repo_name:.*?}/diff/{f_path:.*}',
                 controller='files', action='diff', revision='tip', f_path='',

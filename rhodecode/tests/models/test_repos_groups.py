@@ -4,7 +4,7 @@ from rhodecode.tests import *
 
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup, User, Repository
+from rhodecode.model.db import RepoGroup, User
 from rhodecode.model.meta import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -125,17 +125,7 @@ class TestReposGroups(unittest.TestCase):
         g2 = _make_group('g2')
 
         # create new repo
-        form_data = dict(repo_name='john',
-                         repo_name_full='john',
-                         fork_name=None,
-                         description=None,
-                         repo_group=None,
-                         private=False,
-                         repo_type='hg',
-                         clone_uri=None,
-                         landing_rev='tip',
-                         enable_locking=False,
-                         recursive=False)
+        form_data = _get_repo_create_params(repo_name='john')
         cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
         r = RepoModel().create(form_data, cur_user)
 
@@ -146,7 +136,7 @@ class TestReposGroups(unittest.TestCase):
         form_data['repo_group'] = g1.group_id
         form_data['perms_new'] = []
         form_data['perms_updates'] = []
-        RepoModel().update(r.repo_name, form_data)
+        RepoModel().update(r.repo_name, **form_data)
         self.assertEqual(r.repo_name, 'g1/john')
 
         self.__update_group(g1.group_id, 'g1', parent_id=g2.group_id)

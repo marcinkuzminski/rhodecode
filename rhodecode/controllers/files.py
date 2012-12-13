@@ -31,20 +31,22 @@ import tempfile
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-from pylons.decorators import jsonify
+from rhodecode.lib.utils import jsonify
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
 
 from rhodecode.lib.compat import OrderedDict
-from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str
+from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str,\
+    str2bool
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError, EmptyRepositoryError, \
-    ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError
+    ImproperArchiveTypeError, VCSError, NodeAlreadyExistsError,\
+    NodeDoesNotExistError, ChangesetError, NodeError
 from rhodecode.lib.vcs.nodes import FileNode
 
 from rhodecode.model.repo import RepoModel
@@ -153,9 +155,16 @@ class FilesController(BaseRepoController):
             c.file = c.changeset.get_node(f_path)
 
             if c.file.is_file():
-                _hist = c.changeset.get_file_history(f_path)
-                c.file_history = self._get_node_history(c.changeset, f_path,
-                                                        _hist)
+                c.load_full_history = False
+                file_last_cs = c.file.last_changeset
+                c.file_changeset = (c.changeset
+                                    if c.changeset.revision < file_last_cs.revision
+                                    else file_last_cs)
+                _hist = []
+                c.file_history = []
+                if c.load_full_history:
+                    c.file_history, _hist = self._get_node_history(c.changeset, f_path)
+
                 c.authors = []
                 for a in set([x.author for x in _hist]):
                     c.authors.append((h.email(a), h.person(a)))
@@ -170,6 +179,23 @@ class FilesController(BaseRepoController):
             return render('files/files_ypjax.html')
 
         return render('files/files.html')
+
+    def history(self, repo_name, revision, f_path, annotate=False):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            c.changeset = self.__get_cs_or_redirect(revision, repo_name)
+            c.f_path = f_path
+            c.annotate = annotate
+            c.file = c.changeset.get_node(f_path)
+            if c.file.is_file():
+                file_last_cs = c.file.last_changeset
+                c.file_changeset = (c.changeset
+                                    if c.changeset.revision < file_last_cs.revision
+                                    else file_last_cs)
+                c.file_history, _hist = self._get_node_history(c.changeset, f_path)
+                c.authors = []
+                for a in set([x.author for x in _hist]):
+                    c.authors.append((h.email(a), h.person(a)))
+                return render('files/files_history_box.html')
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -430,21 +456,47 @@ class FilesController(BaseRepoController):
         c.context_url = _context_url
         c.changes = OrderedDict()
         c.changes[diff2] = []
+
+        #special case if we want a show rev only, it's impl here
+        #to reduce JS and callbacks
+
+        if request.GET.get('show_rev'):
+            if str2bool(request.GET.get('annotate', 'False')):
+                _url = url('files_annotate_home', repo_name=c.repo_name,
+                           revision=diff1, f_path=c.f_path)
+            else:
+                _url = url('files_home', repo_name=c.repo_name,
+                           revision=diff1, f_path=c.f_path)
+
+            return redirect(_url)
         try:
             if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
-                node1 = c.changeset_1.get_node(f_path)
+                try:
+                    node1 = c.changeset_1.get_node(f_path)
+                except NodeDoesNotExistError:
+                    c.changeset_1 = EmptyChangeset(cs=diff1,
+                                                   revision=c.changeset_1.revision,
+                                                   repo=c.rhodecode_repo)
+                    node1 = FileNode(f_path, '', changeset=c.changeset_1)
             else:
                 c.changeset_1 = EmptyChangeset(repo=c.rhodecode_repo)
-                node1 = FileNode('.', '', changeset=c.changeset_1)
+                node1 = FileNode(f_path, '', changeset=c.changeset_1)
 
             if diff2 not in ['', None, 'None', '0' * 12, '0' * 40]:
                 c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
-                node2 = c.changeset_2.get_node(f_path)
+                try:
+                    node2 = c.changeset_2.get_node(f_path)
+                except NodeDoesNotExistError:
+                    c.changeset_2 = EmptyChangeset(cs=diff2,
+                                                   revision=c.changeset_2.revision,
+                                                   repo=c.rhodecode_repo)
+                    node2 = FileNode(f_path, '', changeset=c.changeset_2)
             else:
                 c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
-                node2 = FileNode('.', '', changeset=c.changeset_2)
-        except RepositoryError:
+                node2 = FileNode(f_path, '', changeset=c.changeset_2)
+        except (RepositoryError, NodeError):
+            log.error(traceback.format_exc())
             return redirect(url('files_home', repo_name=c.repo_name,
                                 f_path=f_path))
 
@@ -459,7 +511,7 @@ class FilesController(BaseRepoController):
             response.content_disposition = (
                 'attachment; filename=%s' % diff_name
             )
-            return diff.raw_diff()
+            return diff.as_raw()
 
         elif c.action == 'raw':
             _diff = diffs.get_gitdiff(node1, node2,
@@ -467,7 +519,7 @@ class FilesController(BaseRepoController):
                                       context=line_context)
             diff = diffs.DiffProcessor(_diff, format='gitdiff')
             response.content_type = 'text/plain'
-            return diff.raw_diff()
+            return diff.as_raw()
 
         else:
             fid = h.FID(diff2, node2.path)
@@ -481,14 +533,32 @@ class FilesController(BaseRepoController):
                                          ignore_whitespace=ign_whitespace_lcl,
                                          line_context=line_context_lcl,
                                          enable_comments=False)
-
-            c.changes = [('', node2, diff, cs1, cs2, st,)]
+            op = ''
+            filename = node1.path
+            cs_changes = {
+                'fid': [cs1, cs2, op, filename, diff, st]
+            }
+            c.changes = cs_changes
 
         return render('files/file_diff.html')
 
     def _get_node_history(self, cs, f_path, changesets=None):
+        """
+        get changesets history for given node
+
+        :param cs: changeset to calculate history
+        :param f_path: path for node to calculate history for
+        :param changesets: if passed don't calculate history and take
+            changesets defined in this list
+        """
+        # calculate history based on tip
+        tip_cs = c.rhodecode_repo.get_changeset()
         if changesets is None:
-            changesets = cs.get_file_history(f_path)
+            try:
+                changesets = tip_cs.get_file_history(f_path)
+            except (NodeDoesNotExistError, ChangesetError):
+                #this node is not present at tip !
+                changesets = cs.get_file_history(f_path)
         hist_l = []
 
         changesets_group = ([], _("Changesets"))
@@ -496,10 +566,10 @@ class FilesController(BaseRepoController):
         tags_group = ([], _("Tags"))
         _hg = cs.repository.alias == 'hg'
         for chs in changesets:
-            _branch = '(%s)' % chs.branch if _hg else ''
-            n_desc = 'r%s:%s %s' % (chs.revision, chs.short_id, _branch)
+            #_branch = '(%s)' % chs.branch if _hg else ''
+            _branch = chs.branch
+            n_desc = 'r%s:%s (%s)' % (chs.revision, chs.short_id, _branch)
             changesets_group[0].append((chs.raw_id, n_desc,))
-
         hist_l.append(changesets_group)
 
         for name, chs in c.rhodecode_repo.branches.items():
@@ -510,7 +580,7 @@ class FilesController(BaseRepoController):
             tags_group[0].append((chs, name),)
         hist_l.append(tags_group)
 
-        return hist_l
+        return hist_l, changesets
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',

@@ -44,6 +44,10 @@ class MercurialChangeset(BaseChangeset):
         return safe_unicode(self._ctx.description())
 
     @LazyProperty
+    def commiter(self):
+        return safe_unicode(self.auhtor)
+
+    @LazyProperty
     def author(self):
         return safe_unicode(self._ctx.user())
 
@@ -94,6 +98,14 @@ class MercurialChangeset(BaseChangeset):
         """
         return [self.repository.get_changeset(parent.rev())
                 for parent in self._ctx.parents() if parent.rev() >= 0]
+
+    @LazyProperty
+    def children(self):
+        """
+        Returns list of children changesets.
+        """
+        return [self.repository.get_changeset(child.rev())
+                for child in self._ctx.children() if child.rev() >= 0]
 
     def next(self, branch=None):
 
@@ -169,7 +181,7 @@ class MercurialChangeset(BaseChangeset):
         path = self._fix_path(path)
         if self._get_kind(path) != NodeKind.FILE:
             raise ChangesetError("File does not exist for revision %r at "
-                " %r" % (self.revision, path))
+                " %r" % (self.raw_id, path))
         return self._ctx.filectx(path)
 
     def _extract_submodules(self):
@@ -223,17 +235,15 @@ class MercurialChangeset(BaseChangeset):
 
     def get_file_annotate(self, path):
         """
-        Returns a list of three element tuples with lineno,changeset and line
+        Returns a generator of four element tuples with
+            lineno, sha, changeset lazy loader and line
         """
+
         fctx = self._get_filectx(path)
-        annotate = []
         for i, annotate_data in enumerate(fctx.annotate()):
             ln_no = i + 1
-            annotate.append((ln_no, self.repository\
-                             .get_changeset(hex(annotate_data[0].node())),
-                             annotate_data[1],))
-
-        return annotate
+            sha = hex(annotate_data[0].node())
+            yield (ln_no, sha, lambda: self.repository.get_changeset(sha), annotate_data[1],)
 
     def fill_archive(self, stream=None, kind='tgz', prefix=None,
                      subrepos=False):

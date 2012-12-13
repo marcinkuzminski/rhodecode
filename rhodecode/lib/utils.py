@@ -32,6 +32,8 @@ import paste
 import beaker
 import tarfile
 import shutil
+import decorator
+import warnings
 from os.path import abspath
 from os.path import dirname as dn, join as jn
 
@@ -132,7 +134,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
 
     try:
         if hasattr(user, 'user_id'):
-            user_obj = user
+            user_obj = User.get(user.user_id)
         elif isinstance(user, basestring):
             user_obj = User.get_by_username(user)
         else:
@@ -150,6 +152,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
 
         user_log = UserLog()
         user_log.user_id = user_obj.user_id
+        user_log.username = user_obj.username
         user_log.action = safe_unicode(action)
 
         user_log.repository = repo_obj
@@ -307,7 +310,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
         for section in ui_sections:
             for k, v in cfg.items(section):
                 log.debug('settings ui from file[%s]%s:%s' % (section, k, v))
-                baseui.setconfig(section, k, v)
+                baseui.setconfig(safe_str(section), safe_str(k), safe_str(v))
 
     elif read_from == 'db':
         sa = meta.Session()
@@ -320,11 +323,13 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
             if ui_.ui_active:
                 log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
+                baseui.setconfig(safe_str(ui_.ui_section), safe_str(ui_.ui_key),
+                                 safe_str(ui_.ui_value))
             if ui_.ui_key == 'push_ssl':
                 # force set push_ssl requirement to False, rhodecode
                 # handles that
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
+                baseui.setconfig(safe_str(ui_.ui_section), safe_str(ui_.ui_key),
+                                 False)
         if clear_session:
             meta.Session.remove()
     return baseui
@@ -446,8 +451,10 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         # during starting install all cache keys for all repositories in the
         # system, this will register all repos and multiple instances
         key, _prefix, _org_key = CacheInvalidation._get_key(name)
-        log.debug("Creating a cache key for %s instance_id:`%s`" % (name, _prefix))
-        CacheInvalidation._get_or_create_key(key, _prefix, _org_key, commit=False)
+        CacheInvalidation.invalidate(name)
+        log.debug("Creating a cache key for %s instance_id=>`%s`"
+                  % (name, _prefix or '-'))
+
     sa.commit()
     removed = []
     if remove_obsolete:
@@ -684,9 +691,12 @@ def check_git_version():
     from rhodecode import BACKENDS
 
     p = subprocess.Popen('git --version', shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     ver = (stdout.split(' ')[-1] or '').strip() or '0.0.0'
+    if len(ver.split('.')) > 3:
+        #StrictVersion needs to be only 3 element type
+        ver = '.'.join(ver.split('.')[:3])
     try:
         _ver = StrictVersion(ver)
     except:
@@ -695,7 +705,7 @@ def check_git_version():
 
     req_ver = '1.7.4'
     to_old_git = False
-    if  _ver <= StrictVersion(req_ver):
+    if  _ver < StrictVersion(req_ver):
         to_old_git = True
 
     if 'git' in BACKENDS:
@@ -707,3 +717,27 @@ def check_git_version():
                         'for the system to function properly. Make sure '
                         'its version is at least %s' % (ver, req_ver))
     return _ver
+
+
+@decorator.decorator
+def jsonify(func, *args, **kwargs):
+    """Action decorator that formats output for JSON
+
+    Given a function that will return content, this decorator will turn
+    the result into JSON, with a content-type of 'application/json' and
+    output it.
+
+    """
+    from pylons.decorators.util import get_pylons
+    from rhodecode.lib.ext_json import json
+    pylons = get_pylons(args)
+    pylons.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    data = func(*args, **kwargs)
+    if isinstance(data, (list, tuple)):
+        msg = "JSON responses with Array envelopes are susceptible to " \
+              "cross-site data leak attacks, see " \
+              "http://wiki.pylonshq.com/display/pylonsfaq/Warnings"
+        warnings.warn(msg, Warning, 2)
+        log.warning(msg)
+    log.debug("Returning JSON wrapped action output")
+    return json.dumps(data, encoding='utf-8')

@@ -1,0 +1,93 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Repositories defaults')} - ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    &raquo;
+    ${_('Defaults')}
+</%def>
+
+<%def name="page_nav()">
+	${self.menu('admin')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+
+    <h3>${_('Repositories defaults')}</h3>
+
+    ${h.form(url('default', id='defaults'),method='put')}
+    <div class="form">
+        <!-- fields -->
+
+        <div class="fields">
+
+            <div class="field">
+                <div class="label">
+                    <label for="default_repo_type">${_('Type')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('default_repo_type','hg',c.backends,class_="medium")}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="default_repo_private">${_('Private repository')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('default_repo_private',value="True")}
+                    <span class="help-block">${_('Private repositories are only visible to people explicitly added as collaborators.')}</span>
+                </div>
+            </div>
+
+
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="default_repo_enable_statistics">${_('Enable statistics')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('default_repo_enable_statistics',value="True")}
+                    <span class="help-block">${_('Enable statistics window on summary page.')}</span>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="default_repo_enable_downloads">${_('Enable downloads')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('default_repo_enable_downloads',value="True")}
+                    <span class="help-block">${_('Enable download menu on summary page.')}</span>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="default_repo_enable_locking">${_('Enable locking')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.checkbox('default_repo_enable_locking',value="True")}
+                    <span class="help-block">${_('Enable lock-by-pulling on repository.')}</span>
+                </div>
+            </div>
+
+            <div class="buttons">
+            ${h.submit('save',_('Save'),class_="ui-btn large")}
+            </div>
+        </div>
+    </div>
+    ${h.end_form()}
+
+    ##<h3>${_('Groups defaults')}</h3>
+
+</div>
+</%def>

@@ -26,6 +26,8 @@
 import re
 import time
 import datetime
+import webob
+
 from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
@@ -64,6 +66,7 @@ def __get_lem():
 
     return dict(d)
 
+
 def str2bool(_str):
     """
     returs True/False value from given string, it tries to translate the
@@ -79,6 +82,27 @@ def str2bool(_str):
         return _str
     _str = str(_str).strip().lower()
     return _str in ('t', 'true', 'y', 'yes', 'on', '1')
+
+
+def aslist(obj, sep=None, strip=True):
+    """
+    Returns given string separated by sep as list
+
+    :param obj:
+    :param sep:
+    :param strip:
+    """
+    if isinstance(obj, (basestring)):
+        lst = obj.split(sep)
+        if strip:
+            lst = [v.strip() for v in lst]
+        return lst
+    elif isinstance(obj, (list, tuple)):
+        return obj
+    elif obj is None:
+        return []
+    else:
+        return [obj]
 
 
 def convert_line_endings(line, mode):
@@ -180,18 +204,23 @@ def safe_unicode(str_, from_encoding=None):
 
     if not from_encoding:
         import rhodecode
-        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
-        from_encoding = DEFAULT_ENCODING
+        DEFAULT_ENCODINGS = aslist(rhodecode.CONFIG.get('default_encoding',
+                                                        'utf8'), sep=',')
+        from_encoding = DEFAULT_ENCODINGS
+
+    if not isinstance(from_encoding, (list, tuple)):
+        from_encoding = [from_encoding]
 
     try:
         return unicode(str_)
     except UnicodeDecodeError:
         pass
 
-    try:
-        return unicode(str_, from_encoding)
-    except UnicodeDecodeError:
-        pass
+    for enc in from_encoding:
+        try:
+            return unicode(str_, enc)
+        except UnicodeDecodeError:
+            pass
 
     try:
         import chardet
@@ -200,7 +229,7 @@ def safe_unicode(str_, from_encoding=None):
             raise Exception()
         return str_.decode(encoding)
     except (ImportError, UnicodeDecodeError, Exception):
-        return unicode(str_, from_encoding, 'replace')
+        return unicode(str_, from_encoding[0], 'replace')
 
 
 def safe_str(unicode_, to_encoding=None):
@@ -224,13 +253,18 @@ def safe_str(unicode_, to_encoding=None):
 
     if not to_encoding:
         import rhodecode
-        DEFAULT_ENCODING = rhodecode.CONFIG.get('default_encoding','utf8')
-        to_encoding = DEFAULT_ENCODING
+        DEFAULT_ENCODINGS = aslist(rhodecode.CONFIG.get('default_encoding',
+                                                        'utf8'), sep=',')
+        to_encoding = DEFAULT_ENCODINGS
 
-    try:
-        return unicode_.encode(to_encoding)
-    except UnicodeEncodeError:
-        pass
+    if not isinstance(to_encoding, (list, tuple)):
+        to_encoding = [to_encoding]
+
+    for enc in to_encoding:
+        try:
+            return unicode_.encode(enc)
+        except UnicodeEncodeError:
+            pass
 
     try:
         import chardet
@@ -240,9 +274,21 @@ def safe_str(unicode_, to_encoding=None):
 
         return unicode_.encode(encoding)
     except (ImportError, UnicodeEncodeError):
-        return unicode_.encode(to_encoding, 'replace')
+        return unicode_.encode(to_encoding[0], 'replace')
 
     return safe_str
+
+
+def remove_suffix(s, suffix):
+    if s.endswith(suffix):
+        s = s[:-1 * len(suffix)]
+    return s
+
+
+def remove_prefix(s, prefix):
+    if s.startswith(prefix):
+        s = s[len(prefix):]
+    return s
 
 
 def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
@@ -516,3 +562,8 @@ def obfuscate_url_pw(engine):
     if url.password:
         url.password = 'XXXXX'
     return str(url)
+
+
+def get_server_url(environ):
+    req = webob.Request(environ)
+    return req.host_url + req.script_name

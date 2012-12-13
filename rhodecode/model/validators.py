@@ -566,9 +566,18 @@ def ValidPerms(type_='repo'):
 def ValidSettings():
     class _validator(formencode.validators.FancyValidator):
         def _to_python(self, value, state):
-            # settings  form can't edit user
-            if 'user' in value:
-                del value['user']
+            # settings  form for users that are not admin 
+            # can't edit certain parameters, it's extra backup if they mangle
+            # with forms
+
+            forbidden_params = [
+                'user', 'repo_type', 'repo_enable_locking',
+                'repo_enable_downloads', 'repo_enable_statistics'
+            ]
+
+            for param in forbidden_params:
+                if param in value:
+                    del value[param]
             return value
 
         def validate_python(self, value, state):

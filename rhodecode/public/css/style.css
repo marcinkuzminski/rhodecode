@@ -61,32 +61,33 @@ a:hover {
 	text-decoration: underline;
 }
 
-h1,h2,h3,h4,h5,h6 {
+h1,h2,h3,h4,h5,h6,
+div.h1,div.h2,div.h3,div.h4,div.h5,div.h6 {
 	color: #292929;
 	font-weight: 700;
 }
 
-h1 {
+h1,div.h1 {
 	font-size: 22px;
 }
 
-h2 {
+h2,div.h2 {
 	font-size: 20px;
 }
 
-h3 {
+h3,div.h3 {
 	font-size: 18px;
 }
 
-h4 {
+h4,div.h4 {
 	font-size: 16px;
 }
 
-h5 {
+h5,div.h5 {
 	font-size: 14px;
 }
 
-h6 {
+h6,div.h6 {
 	font-size: 11px;
 }
 
@@ -352,9 +353,9 @@ div:hover > a.permalink {
     z-index: auto !important;
 }
 
-.header-pos-fix{
-	margin-top: -44px;
-	padding-top: 44px;
+.header-pos-fix, .anchor{
+	margin-top: -46px;
+	padding-top: 46px;
 }
 
 #header #header-inner #home a {
@@ -540,7 +541,7 @@ div:hover > a.permalink {
 
 #header #header-inner #quick li ul ul {
 	right: 200px;
-	max-height: 275px;
+	max-height: 290px;
 	overflow: auto;
 	overflow-x: hidden;
 	white-space: normal;
@@ -625,6 +626,14 @@ div:hover > a.permalink {
 	padding: 12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.defaults,#header #header-inner #quick li ul li a.defaults:hover
+    {
+    background: #FFF url("../images/icons/wrench.png") no-repeat 4px 9px;
+    width: 167px;
+    margin: 0;
+    padding: 12px 9px 7px 24px;
+}
+
 #header #header-inner #quick li ul li a.settings,#header #header-inner #quick li ul li a.settings:hover
 	{
 	background: #FFF url("../images/icons/cog.png") no-repeat 4px 9px;
@@ -679,6 +688,15 @@ div:hover > a.permalink {
 #header #header-inner #quick li ul li a.pull_request,#header #header-inner #quick li ul li a.pull_request:hover
     {
     background: #FFF url("../images/icons/arrow_join.png") no-repeat 4px
+        9px;
+    width: 167px;
+    margin: 0;
+    padding: 12px 9px 7px 24px;
+}
+
+#header #header-inner #quick li ul li a.compare_request,#header #header-inner #quick li ul li a.compare_request:hover
+    {
+    background: #FFF url("../images/icons/arrow_inout.png") no-repeat 4px
         9px;
     width: 167px;
     margin: 0;
@@ -1143,7 +1161,9 @@ tbody .yui-dt-editable { cursor: pointer }
 	text-decoration: none;
 }
 
-#content div.box h1,#content div.box h2,#content div.box h3,#content div.box h4,#content div.box h5,#content div.box h6
+#content div.box h1,#content div.box h2,#content div.box h3,#content div.box h4,#content div.box h5,#content div.box h6,
+#content div.box div.h1,#content div.box div.h2,#content div.box div.h3,#content div.box div.h4,#content div.box div.h5,#content div.box div.h6
+
 	{
 	clear: both;
 	overflow: hidden;
@@ -1615,6 +1635,7 @@ div.form div.fields div.field div.button {
 	background: #eee;
 	border-bottom: 1px solid #ddd;
 	padding: 5px 0px 5px 5px;
+	text-align: left;
 }
 
 #content div.box table th.left {
@@ -2306,6 +2327,15 @@ a.metatag[tag="license"]:hover {
 	height: 30px;
 }
 
+#journal .journal_user.deleted {
+    color: #747474;
+    font-size: 14px;
+    font-weight: normal;
+    height: 30px;
+    font-style: italic;
+}
+
+
 #journal .journal_icon {
 	clear: both;
 	float: left;
@@ -2494,6 +2524,42 @@ h3.files_location {
 	font-size: 9px;
     padding: 2px 0px 2px 0px;
 }
+/*new binary*/
+.cs_files .changes .bin1 {
+    background-color: #BBFFBB;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
+/*deleted binary*/
+.cs_files .changes .bin2 {
+    background-color: #FF8888;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
+/*mod binary*/
+.cs_files .changes .bin3 {
+    background-color: #DDDDDD;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
+/*rename file*/
+.cs_files .changes .bin4 {
+    background-color: #6D99FF;
+    float: left;
+    text-align: center;
+    font-size: 9px;
+    padding: 2px 0px 2px 0px;
+}
+
 
 .cs_files .cs_added,.cs_files .cs_A {
 	background: url("../images/icons/page_white_add.png") no-repeat scroll
@@ -2528,7 +2594,7 @@ h3.files_location {
 
 #graph_nodes {
 	float: left;
-	margin-right: -6px;
+	margin-right: 0px;
 	margin-top: 0px;
 }
 
@@ -2546,6 +2612,11 @@ h3.files_location {
 #graph_content #rev_range_container {
 	float: left;
 	margin: 0px 0px 0px 3px;
+}
+
+#graph_content #rev_range_clear {
+    float: left;
+    margin: 0px 0px 0px 3px;
 }
 
 #graph_content .container {
@@ -2596,15 +2667,14 @@ h3.files_location {
 #graph_content .container .mid .message a:hover{
 	text-decoration: none;
 }
-#content #graph_content .message .revision-link,
-#changeset_content .container .message .revision-link
+
+.revision-link
  {
 	color:#3F6F9F;
     font-weight: bold !important;
 }
 
-#content #graph_content .message .issue-tracker-link,
-#changeset_content .container .message .issue-tracker-link{
+.issue-tracker-link{
     color:#3F6F9F;
     font-weight: bold !important;
 }
@@ -2984,23 +3054,44 @@ table.code-browser .submodule-dir {
 	z-index: 2;
 }
 
-.yui-tt {
-	visibility: hidden;
+#tip-box {
 	position: absolute;
-	color: #666;
+	
 	background-color: #FFF;
 	border: 2px solid #003367;
 	font: 100% sans-serif;
 	width: auto;
 	opacity: 1px;
 	padding: 8px;
+	
 	white-space: pre-wrap;
 	-webkit-border-radius: 8px 8px 8px 8px;
 	-khtml-border-radius: 8px 8px 8px 8px;
 	-moz-border-radius: 8px 8px 8px 8px;
 	border-radius: 8px 8px 8px 8px;
 	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+	-moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+	-webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
+
+.hl-tip-box {
+    visibility: hidden;
+    position: absolute;
+    color: #666;
+    background-color: #FFF;
+    border: 2px solid #003367;
+    font: 100% sans-serif;
+    width: auto;
+    opacity: 1px;
+    padding: 8px;
+    white-space: pre-wrap;
+    -webkit-border-radius: 8px 8px 8px 8px;
+    -khtml-border-radius: 8px 8px 8px 8px;
+    -moz-border-radius: 8px 8px 8px 8px;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
 
 .mentions-container{
 	width: 90% !important;
@@ -3105,6 +3196,26 @@ table.code-browser .submodule-dir {
 	display: block;
 	float: right;
 	margin-top: 2px;
+}
+
+.locking_locked{
+    background: #FFF url("../images/icons/block_16.png") no-repeat scroll 3px;
+    height: 16px;
+    width: 20px;
+    cursor: pointer;
+    display: block;
+    float: right;
+    margin-top: 2px;    
+}
+
+.locking_unlocked{
+    background: #FFF url("../images/icons/accept.png") no-repeat scroll 3px;
+    height: 16px;
+    width: 20px;
+    cursor: pointer;
+    display: block;
+    float: right;
+    margin-top: 2px;	
 }
 
 .currently_following {
@@ -3896,12 +4007,13 @@ div#legend_container table td,div#legend_choices table td {
 
 
 .group_members_wrap{
-	
+	min-height: 85px;
+	padding-left: 20px;
 }
 
 .group_members .group_member{
 	height: 30px;
-	padding:0px 0px 0px 10px;
+	padding:0px 0px 0px 0px;
 }
 
 .reviewers_member{
@@ -4014,6 +4126,14 @@ div.readme .readme_box pre {
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+}
+
+div.readme .readme_box table {
+    display: table;
+	border-collapse: separate;
+	border-spacing: 2px;
+	border-color: gray;
+	width: auto !important;
 }
 
 
@@ -4545,6 +4665,15 @@ div.diffblock .code-header{
     padding:10px 0 10px 0;
     height: 14px;
 }
+
+div.diffblock .code-header.banner{
+    border-bottom: 1px solid #CCCCCC;
+    background: #EEEEEE;
+    height: 14px;
+    margin: 0px 95px 0px 95px;
+    padding: 3px 3px 11px 3px;
+}
+
 div.diffblock .code-header.cv{
     height: 34px;
 }
@@ -4566,6 +4695,32 @@ div.diffblock .code-header div{
     font-weight: bold;
     font-size: 14px;
 }
+
+div.diffblock .parents {
+    float: left;
+    height: 26px;
+    width:100px;
+    font-size: 10px;
+    font-weight: 400;
+    vertical-align: middle;
+    padding: 0px 2px 2px 2px;
+    background-color:#eeeeee;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+div.diffblock .children {
+    float: right;
+    height: 26px;
+    width:100px;
+    font-size: 10px;
+    font-weight: 400;
+    vertical-align: middle;
+    text-align: right;
+    padding: 0px 2px 2px 2px;
+    background-color:#eeeeee;
+    border-bottom: 1px solid #CCCCCC;
+}
+
 div.diffblock .code-body{
     background: #FFFFFF;
 }

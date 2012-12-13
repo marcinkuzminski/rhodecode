@@ -28,12 +28,15 @@ import logging
 from pylons import url, response, tmpl_context as c
 from pylons.i18n.translation import _
 
+from beaker.cache import cache_region, region_invalidate
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController
-from rhodecode.lib.diffs import DiffProcessor
+from rhodecode.lib.diffs import DiffProcessor, LimitedDiffContainer
+from rhodecode.model.db import CacheInvalidation
+from rhodecode.lib.utils2 import safe_int, str2bool
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +53,13 @@ class FeedController(BaseRepoController):
         self.title = self.title = _('%s %s feed') % (c.rhodecode_name, '%s')
         self.language = 'en-us'
         self.ttl = "5"
-        self.feed_nr = 20
+        import rhodecode
+        CONF = rhodecode.CONFIG
+        self.include_diff = str2bool(CONF.get('rss_include_diff', False))
+        self.feed_nr = safe_int(CONF.get('rss_items_per_page', 20))
+        # we need to protect from parsing huge diffs here other way
+        # we can kill the server
+        self.feed_diff_limit = safe_int(CONF.get('rss_cut_off_limit', 32 * 1024))
 
     def _get_title(self, cs):
         return "%s" % (
@@ -59,76 +68,115 @@ class FeedController(BaseRepoController):
 
     def __changes(self, cs):
         changes = []
-        _diff = cs.diff()
-        # we need to protect from parsing huge diffs here other way
-        # we can kill the server, 32*1024 chars is a reasonable limit
-        HUGE_DIFF = 32 * 1024
-        if len(_diff) > HUGE_DIFF:
-            changes = ['\n ' + _('Changeset was too big and was cut off...')]
-            return changes
-        diffprocessor = DiffProcessor(_diff)
-        stats = diffprocessor.prepare(inline_diff=False)
-        for st in stats:
+        diff_processor = DiffProcessor(cs.diff(),
+                                       diff_limit=self.feed_diff_limit)
+        _parsed = diff_processor.prepare(inline_diff=False)
+        limited_diff = False
+        if isinstance(_parsed, LimitedDiffContainer):
+            limited_diff = True
+
+        for st in _parsed:
             st.update({'added': st['stats'][0],
                        'removed': st['stats'][1]})
             changes.append('\n %(operation)s %(filename)s '
                            '(%(added)s lines added, %(removed)s lines removed)'
                             % st)
-        return changes
+        if limited_diff:
+            changes = changes + ['\n ' +
+                                 _('Changeset was too big and was cut off...')]
+        return diff_processor, changes
 
     def __get_desc(self, cs):
         desc_msg = []
-        desc_msg.append('%s %s %s:<br/>' % (cs.author, _('commited on'),
+        desc_msg.append('%s %s %s<br/>' % (h.person(cs.author),
+                                           _('commited on'),
                                            h.fmt_date(cs.date)))
+        #branches, tags, bookmarks
+        if cs.branch:
+            desc_msg.append('branch: %s<br/>' % cs.branch)
+        if h.is_hg(c.rhodecode_repo):
+            for book in cs.bookmarks:
+                desc_msg.append('bookmark: %s<br/>' % book)
+        for tag in cs.tags:
+            desc_msg.append('tag: %s<br/>' % tag)
+        diff_processor, changes = self.__changes(cs)
+        # rev link
+        _url = url('changeset_home', repo_name=cs.repository.name,
+                   revision=cs.raw_id, qualified=True)
+        desc_msg.append('changesest: <a href="%s">%s</a>' % (_url, cs.raw_id[:8]))
+
         desc_msg.append('<pre>')
         desc_msg.append(cs.message)
         desc_msg.append('\n')
-        desc_msg.extend(self.__changes(cs))
+        desc_msg.extend(changes)
+        if self.include_diff:
+            desc_msg.append('\n\n')
+            desc_msg.append(diff_processor.as_raw())
         desc_msg.append('</pre>')
         return desc_msg
 
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
-        feed = Atom1Feed(
-             title=self.title % repo_name,
-             link=url('summary_home', repo_name=repo_name,
-                      qualified=True),
-             description=self.description % repo_name,
-             language=self.language,
-             ttl=self.ttl
-        )
 
-        for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
-            feed.add_item(title=self._get_title(cs),
-                          link=url('changeset_home', repo_name=repo_name,
-                                   revision=cs.raw_id, qualified=True),
-                          author_name=cs.author,
-                          description=''.join(self.__get_desc(cs)),
-                          pubdate=cs.date,
-                          )
+        @cache_region('long_term')
+        def _get_feed_from_cache(key):
+            feed = Atom1Feed(
+                 title=self.title % repo_name,
+                 link=url('summary_home', repo_name=repo_name,
+                          qualified=True),
+                 description=self.description % repo_name,
+                 language=self.language,
+                 ttl=self.ttl
+            )
 
-        response.content_type = feed.mime_type
-        return feed.writeString('utf-8')
+            for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+                feed.add_item(title=self._get_title(cs),
+                              link=url('changeset_home', repo_name=repo_name,
+                                       revision=cs.raw_id, qualified=True),
+                              author_name=cs.author,
+                              description=''.join(self.__get_desc(cs)),
+                              pubdate=cs.date,
+                              )
+
+            response.content_type = feed.mime_type
+            return feed.writeString('utf-8')
+
+        key = repo_name + '_ATOM'
+        inv = CacheInvalidation.invalidate(key)
+        if inv is not None:
+            region_invalidate(_get_feed_from_cache, None, key)
+            CacheInvalidation.set_valid(inv.cache_key)
+        return _get_feed_from_cache(key)
 
     def rss(self, repo_name):
         """Produce an rss2 feed via feedgenerator module"""
-        feed = Rss201rev2Feed(
-            title=self.title % repo_name,
-            link=url('summary_home', repo_name=repo_name,
-                     qualified=True),
-            description=self.description % repo_name,
-            language=self.language,
-            ttl=self.ttl
-        )
 
-        for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
-            feed.add_item(title=self._get_title(cs),
-                          link=url('changeset_home', repo_name=repo_name,
-                                   revision=cs.raw_id, qualified=True),
-                          author_name=cs.author,
-                          description=''.join(self.__get_desc(cs)),
-                          pubdate=cs.date,
-                         )
+        @cache_region('long_term')
+        def _get_feed_from_cache(key):
+            feed = Rss201rev2Feed(
+                title=self.title % repo_name,
+                link=url('summary_home', repo_name=repo_name,
+                         qualified=True),
+                description=self.description % repo_name,
+                language=self.language,
+                ttl=self.ttl
+            )
 
-        response.content_type = feed.mime_type
-        return feed.writeString('utf-8')
+            for cs in reversed(list(c.rhodecode_repo[-self.feed_nr:])):
+                feed.add_item(title=self._get_title(cs),
+                              link=url('changeset_home', repo_name=repo_name,
+                                       revision=cs.raw_id, qualified=True),
+                              author_name=cs.author,
+                              description=''.join(self.__get_desc(cs)),
+                              pubdate=cs.date,
+                             )
+
+            response.content_type = feed.mime_type
+            return feed.writeString('utf-8')
+
+        key = repo_name + '_RSS'
+        inv = CacheInvalidation.invalidate(key)
+        if inv is not None:
+            region_invalidate(_get_feed_from_cache, None, key)
+            CacheInvalidation.set_valid(inv.cache_key)
+        return _get_feed_from_cache(key)

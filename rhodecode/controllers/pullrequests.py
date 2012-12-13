@@ -33,7 +33,6 @@ from itertools import groupby
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
-from pylons.decorators import jsonify
 
 from rhodecode.lib.compat import json
 from rhodecode.lib.base import BaseRepoController, render
@@ -41,7 +40,10 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
     NotAnonymous
 from rhodecode.lib import helpers as h
 from rhodecode.lib import diffs
-from rhodecode.lib.utils import action_logger
+from rhodecode.lib.utils import action_logger, jsonify
+from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.model.db import User, PullRequest, ChangesetStatus,\
     ChangesetComment
 from rhodecode.model.pull_request import PullRequestModel
@@ -50,7 +52,6 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
-from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
 
 log = logging.getLogger(__name__)
 
@@ -149,8 +150,8 @@ class PullrequestsController(BaseRepoController):
                                  self._get_repo_refs(fork.scm_instance),
                                  class_='refs')
             }
-        #add parents of this fork also
-        if org_repo.parent:
+        #add parents of this fork also, but only if it's not empty
+        if org_repo.parent and org_repo.parent.scm_instance.revisions:
             c.default_pull_request = org_repo.parent.repo_name
             c.default_pull_request_rev = self._get_default_rev(org_repo.parent)
             c.default_revs = self._get_repo_refs(org_repo.parent.scm_instance)
@@ -194,6 +195,17 @@ class PullrequestsController(BaseRepoController):
         revisions = _form['revisions']
         reviewers = _form['review_members']
 
+        # if we have cherry picked pull request we don't care what is in
+        # org_ref/other_ref
+        rev_start = request.POST.get('rev_start')
+        rev_end = request.POST.get('rev_end')
+
+        if rev_start and rev_end:
+            # this is swapped to simulate that rev_end is a revision from
+            # parent of the fork
+            org_ref = 'rev:%s:%s' % (rev_end, rev_end)
+            other_ref = 'rev:%s:%s' % (rev_start, rev_start)
+
         title = _form['pullrequest_title']
         description = _form['pullrequest_desc']
 
@@ -227,7 +239,7 @@ class PullrequestsController(BaseRepoController):
                        request.POST.get('reviewers_ids', '').split(',')))
 
             PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
-            Session.commit()
+            Session().commit()
             return True
         raise HTTPForbidden()
 
@@ -241,7 +253,7 @@ class PullrequestsController(BaseRepoController):
             Session().commit()
             h.flash(_('Successfully deleted pull request'),
                     category='success')
-            return redirect(url('admin_settings_my_account'))
+            return redirect(url('admin_settings_my_account', anchor='pullrequests'))
         raise HTTPForbidden()
 
     def _load_compare_data(self, pull_request, enable_comments=True):
@@ -251,13 +263,15 @@ class PullrequestsController(BaseRepoController):
         :param pull_request:
         :type pull_request:
         """
+        rev_start = request.GET.get('rev_start')
+        rev_end = request.GET.get('rev_end')
 
         org_repo = pull_request.org_repo
         (org_ref_type,
          org_ref_name,
          org_ref_rev) = pull_request.org_ref.split(':')
 
-        other_repo = pull_request.other_repo
+        other_repo = org_repo
         (other_ref_type,
          other_ref_name,
          other_ref_rev) = pull_request.other_ref.split(':')
@@ -270,36 +284,48 @@ class PullrequestsController(BaseRepoController):
         c.org_repo = org_repo
         c.other_repo = other_repo
 
-        c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
-                                       org_repo, org_ref, other_repo, other_ref
-                                      )
-        if c.cs_ranges:
-            # case we want a simple diff without incoming changesets, just
-            # for review purposes. Make the diff on the forked repo, with
-            # revision that is common ancestor
-            other_ref = ('rev', c.cs_ranges[-1].parents[0].raw_id)
-            other_repo = org_repo
+        c.fulldiff = fulldiff = request.GET.get('fulldiff')
+
+        c.cs_ranges = [org_repo.get_changeset(x) for x in pull_request.revisions]
+
+        other_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
+                                  if c.cs_ranges[0].parents
+                                  else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
+        c.target_repo = c.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
 
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
-        # diff needs to have swapped org with other to generate proper diff
-        _diff = diffs.differ(other_repo, other_ref, org_repo, org_ref,
-                             discovery_data)
-        diff_processor = diffs.DiffProcessor(_diff, format='gitdiff')
+
+        diff_limit = self.cut_off_limit if not fulldiff else None
+
+        #we swap org/other ref since we run a simple diff on one repo
+        _diff = diffs.differ(org_repo, other_ref, other_repo, org_ref)
+
+        diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
+                                             diff_limit=diff_limit)
         _parsed = diff_processor.prepare()
+
+        c.limited_diff = False
+        if isinstance(_parsed, LimitedDiffContainer):
+            c.limited_diff = True
 
         c.files = []
         c.changes = {}
-
+        c.lines_added = 0
+        c.lines_deleted = 0
         for f in _parsed:
+            st = f['stats']
+            if st[0] != 'b':
+                c.lines_added += st[0]
+                c.lines_deleted += st[1]
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             diff = diff_processor.as_html(enable_comments=enable_comments,
-                                          diff_lines=[f])
+                                          parsed_lines=[f])
             c.changes[fid] = [f['operation'], f['filename'], diff]
 
     def show(self, repo_name, pull_request_id):

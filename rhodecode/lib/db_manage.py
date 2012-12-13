@@ -57,32 +57,39 @@ def notify(msg):
 
 
 class DbManage(object):
-    def __init__(self, log_sql, dbconf, root, tests=False):
+    def __init__(self, log_sql, dbconf, root, tests=False, cli_args={}):
         self.dbname = dbconf.split('/')[-1]
         self.tests = tests
         self.root = root
         self.dburi = dbconf
         self.log_sql = log_sql
         self.db_exists = False
+        self.cli_args = cli_args
         self.init_db()
+        global ask_ok
+
+        if self.cli_args.get('force_ask') is True:
+            ask_ok = lambda *args, **kwargs: True
+        elif self.cli_args.get('force_ask') is False:
+            ask_ok = lambda *args, **kwargs: False
 
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
         init_model(engine)
         self.sa = Session()
 
-    def create_tables(self, override=False, defaults={}):
+    def create_tables(self, override=False):
         """
         Create a auth database
         """
-        quiet = defaults.get('quiet')
+
         log.info("Any existing database is going to be destroyed")
-        if self.tests or quiet:
+        if self.tests:
             destroy = True
         else:
             destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
         if not destroy:
-            sys.exit()
+            sys.exit('Nothing done')
         if destroy:
             Base.metadata.drop_all()
 
@@ -264,6 +271,11 @@ class DbManage(object):
                            'Please validate and check default permissions '
                            'in admin panel')
 
+            def step_8(self):
+                self.klass.populate_default_permissions()
+                self.klass.create_default_options(skip_existing=True)
+                Session().commit()
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
@@ -328,11 +340,12 @@ class DbManage(object):
             self.sa.rollback()
             raise
 
-    def admin_prompt(self, second=False, defaults={}):
+    def admin_prompt(self, second=False):
         if not self.tests:
             import getpass
 
             # defaults
+            defaults = self.cli_args
             username = defaults.get('username')
             password = defaults.get('password')
             email = defaults.get('email')
@@ -470,6 +483,22 @@ class DbManage(object):
             setting = RhodeCodeSetting(k, v)
             self.sa.add(setting)
 
+    def create_default_options(self, skip_existing=False):
+        """Creates default settings"""
+
+        for k, v in [
+            ('default_repo_enable_locking',  False),
+            ('default_repo_enable_downloads', False),
+            ('default_repo_enable_statistics', False),
+            ('default_repo_private', False),
+            ('default_repo_type', 'hg')]:
+
+            if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
+                log.debug('Skipping option %s' % k)
+                continue
+            setting = RhodeCodeSetting(k, v)
+            self.sa.add(setting)
+
     def fixup_groups(self):
         def_usr = User.get_by_username('default')
         for g in RepoGroup.query().all():
@@ -507,7 +536,8 @@ class DbManage(object):
             self.populate_default_permissions()
         return fixed
 
-    def config_prompt(self, test_repo_path='', retries=3, defaults={}):
+    def config_prompt(self, test_repo_path='', retries=3):
+        defaults = self.cli_args
         _path = defaults.get('repos_location')
         if retries == 3:
             log.info('Setting up repositories config')
@@ -543,9 +573,9 @@ class DbManage(object):
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
 
-        real_path = os.path.realpath(path)
+        real_path = os.path.normpath(os.path.realpath(path))
 
-        if real_path != path:
+        if real_path != os.path.normpath(path):
             if not ask_ok(('Path looks like a symlink, Rhodecode will store '
                            'given path as %s ? [y/n]') % (real_path)):
                 log.error('Canceled by user')
@@ -609,6 +639,7 @@ class DbManage(object):
         self.sa.add(sett6)
 
         self.create_ldap_options()
+        self.create_default_options()
 
         log.info('created ui config')
 

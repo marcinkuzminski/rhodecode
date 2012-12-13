@@ -11,7 +11,8 @@ from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
 from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
 from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
-    RemovedFileNode, SubModuleNode
+    RemovedFileNode, SubModuleNode, ChangedFileNodesGenerator,\
+    AddedFileNodesGenerator, RemovedFileNodesGenerator
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -40,19 +41,23 @@ class GitChangeset(BaseChangeset):
 
         self._tree_id = commit.tree
         self._commiter_property = 'committer'
+        self._author_property = 'author'
         self._date_property = 'commit_time'
         self._date_tz_property = 'commit_timezone'
         self.revision = repository.revisions.index(revision)
 
         self.message = safe_unicode(commit.message)
-        #self.branch = None
-        self.tags = []
+
         self.nodes = {}
         self._paths = {}
 
     @LazyProperty
-    def author(self):
+    def commiter(self):
         return safe_unicode(getattr(self._commit, self._commiter_property))
+
+    @LazyProperty
+    def author(self):
+        return safe_unicode(getattr(self._commit, self._author_property))
 
     @LazyProperty
     def date(self):
@@ -69,6 +74,14 @@ class GitChangeset(BaseChangeset):
         Returns modified, added, removed, deleted files for current changeset
         """
         return self.changed, self.added, self.removed
+
+    @LazyProperty
+    def tags(self):
+        _tags = []
+        for tname, tsha in self.repository.tags.iteritems():
+            if tsha == self.raw_id:
+                _tags.append(tname)
+        return _tags
 
     @LazyProperty
     def branch(self):
@@ -149,6 +162,13 @@ class GitChangeset(BaseChangeset):
         elif isinstance(obj, objects.Tree):
             return NodeKind.DIR
 
+    def _get_filectx(self, path):
+        path = self._fix_path(path)
+        if self._get_kind(path) != NodeKind.FILE:
+            raise ChangesetError("File does not exist for revision %r at "
+                " %r" % (self.raw_id, path))
+        return path
+
     def _get_file_nodes(self):
         return chain(*(t[2] for t in self.walk()))
 
@@ -159,6 +179,21 @@ class GitChangeset(BaseChangeset):
         """
         return [self.repository.get_changeset(parent)
                 for parent in self._commit.parents]
+
+    @LazyProperty
+    def children(self):
+        """
+        Returns list of children changesets.
+        """
+        so, se = self.repository.run_git_command(
+            "rev-list --all --children | grep '^%s'" % self.raw_id
+        )
+
+        children = []
+        for l in so.splitlines():
+            childs = l.split(' ')[1:]
+            children.extend(childs)
+        return [self.repository.get_changeset(cs) for cs in children]
 
     def next(self, branch=None):
 
@@ -251,6 +286,8 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
+        self._get_filectx(path)
+
         cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
                   self.id, path
                )
@@ -258,9 +295,24 @@ class GitChangeset(BaseChangeset):
         ids = re.findall(r'[0-9a-fA-F]{40}', so)
         return [self.repository.get_changeset(id) for id in ids]
 
+    def get_file_history_2(self, path):
+        """
+        Returns history of file as reversed list of ``Changeset`` objects for
+        which file at given ``path`` has been modified.
+
+        """
+        self._get_filectx(path)
+        from dulwich.walk import Walker
+        include = [self.id]
+        walker = Walker(self.repository._repo.object_store, include,
+                        paths=[path], max_entries=1)
+        return [self.repository.get_changeset(sha)
+                for sha in (x.commit.id for x in walker)]
+
     def get_file_annotate(self, path):
         """
-        Returns a list of three element tuples with lineno,changeset and line
+        Returns a generator of four element tuples with
+            lineno, sha, changeset lazy loader and line
 
         TODO: This function now uses os underlying 'git' command which is
         generally not good. Should be replaced with algorithm iterating
@@ -272,12 +324,10 @@ class GitChangeset(BaseChangeset):
         # -r sha ==> blames for the given revision
         so, se = self.repository.run_git_command(cmd)
 
-        annotate = []
         for i, blame_line in enumerate(so.split('\n')[:-1]):
             ln_no = i + 1
-            id, line = re.split(r' ', blame_line, 1)
-            annotate.append((ln_no, self.repository.get_changeset(id), line))
-        return annotate
+            sha, line = re.split(r' ', blame_line, 1)
+            yield (ln_no, sha, lambda: self.repository.get_changeset(sha), line)
 
     def fill_archive(self, stream=None, kind='tgz', prefix=None,
                      subrepos=False):
@@ -468,7 +518,8 @@ class GitChangeset(BaseChangeset):
         """
         if not self.parents:
             return list(self._get_file_nodes())
-        return [self.get_node(path) for path in self._get_paths_for_status('added')]
+        return AddedFileNodesGenerator([n for n in
+                                self._get_paths_for_status('added')], self)
 
     @LazyProperty
     def changed(self):
@@ -477,7 +528,8 @@ class GitChangeset(BaseChangeset):
         """
         if not self.parents:
             return []
-        return [self.get_node(path) for path in self._get_paths_for_status('modified')]
+        return ChangedFileNodesGenerator([n for n in
+                                self._get_paths_for_status('modified')], self)
 
     @LazyProperty
     def removed(self):
@@ -486,4 +538,5 @@ class GitChangeset(BaseChangeset):
         """
         if not self.parents:
             return []
-        return [RemovedFileNode(path) for path in self._get_paths_for_status('deleted')]
+        return RemovedFileNodesGenerator([n for n in
+                                self._get_paths_for_status('deleted')], self)

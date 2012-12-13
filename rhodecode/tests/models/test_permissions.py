@@ -355,7 +355,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
-                              'repository.read']))
+                              'repository.read', 'group.read']))
 
     def test_inherited_permissions_from_default_on_user_disabled(self):
         user_model = UserModel()
@@ -373,7 +373,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.none', 'hg.fork.none',
                               'hg.register.manual_activate',
-                              'repository.read']))
+                              'repository.read', 'group.read']))
 
     def test_non_inherited_permissions_from_default_on_user_enabled(self):
         user_model = UserModel()
@@ -399,7 +399,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.none', 'hg.fork.none',
                               'hg.register.manual_activate',
-                              'repository.read']))
+                              'repository.read', 'group.read']))
 
     def test_non_inherited_permissions_from_default_on_user_disabled(self):
         user_model = UserModel()
@@ -425,7 +425,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
-                              'repository.read']))
+                              'repository.read', 'group.read']))
 
     def test_owner_permissions_doesnot_get_overwritten_by_group(self):
         #create repo as USER,

@@ -46,7 +46,7 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode
+    safe_unicode, remove_suffix, remove_prefix
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -118,11 +118,15 @@ class BaseModel(object):
 
     @classmethod
     def get_or_404(cls, id_):
-        if id_:
-            res = cls.query().get(id_)
-            if not res:
-                raise HTTPNotFound
-            return res
+        try:
+            id_ = int(id_)
+        except (TypeError, ValueError):
+            raise HTTPNotFound
+
+        res = cls.query().get(id_)
+        if not res:
+            raise HTTPNotFound
+        return res
 
     @classmethod
     def getAll(cls):
@@ -163,7 +167,11 @@ class RhodeCodeSetting(Base, BaseModel):
     @hybrid_property
     def app_settings_value(self):
         v = self._app_settings_value
-        if self.app_settings_name == 'ldap_active':
+        if self.app_settings_name in ["ldap_active",
+                                      "default_repo_enable_statistics",
+                                      "default_repo_enable_locking",
+                                      "default_repo_private",
+                                      "default_repo_enable_downloads"]:
             v = str2bool(v)
         return v
 
@@ -218,6 +226,19 @@ class RhodeCodeSetting(Base, BaseModel):
         fd = {}
         for row in ret:
             fd.update({row.app_settings_name: row.app_settings_value})
+
+        return fd
+
+    @classmethod
+    def get_default_repo_settings(cls, cache=False, strip_prefix=False):
+        ret = cls.query()\
+                .filter(cls.app_settings_name.startswith('default_')).all()
+        fd = {}
+        for row in ret:
+            key = row.app_settings_name
+            if strip_prefix:
+                key = remove_prefix(key, prefix='default_')
+            fd.update({key: row.app_settings_value})
 
         return fd
 
@@ -295,7 +316,7 @@ class User(Base, BaseModel):
     DEFAULT_USER = 'default'
     DEFAULT_PERMISSIONS = [
         'hg.register.manual_activate', 'hg.create.repository',
-        'hg.fork.repository', 'repository.read'
+        'hg.fork.repository', 'repository.read', 'group.read'
     ]
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -310,11 +331,13 @@ class User(Base, BaseModel):
     api_key = Column("api_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     inherit_default_permissions = Column("inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
-    user_log = relationship('UserLog', cascade='all')
+    user_log = relationship('UserLog')
     user_perms = relationship('UserToPerm', primaryjoin="User.user_id==UserToPerm.user_id", cascade='all')
 
     repositories = relationship('Repository')
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
+    followings = relationship('UserFollowing', primaryjoin='UserFollowing.user_id==User.user_id', cascade='all')
+
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
     repo_group_to_perm = relationship('UserRepoGroupToPerm', primaryjoin='UserRepoGroupToPerm.user_id==User.user_id', cascade='all')
 
@@ -502,7 +525,8 @@ class UserLog(Base, BaseModel):
          'mysql_charset': 'utf8'},
     )
     user_log_id = Column("user_log_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True)
     repository_name = Column("repository_name", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     user_ip = Column("user_ip", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -774,30 +798,8 @@ class Repository(Base, BaseModel):
         """
         Creates an db based ui object for this repository
         """
-        from mercurial import ui
-        from mercurial import config
-        baseui = ui.ui()
-
-        #clean the baseui object
-        baseui._ocfg = config.config()
-        baseui._ucfg = config.config()
-        baseui._tcfg = config.config()
-
-        ret = RhodeCodeUi.query()\
-            .options(FromCache("sql_cache_short", "repository_repo_ui")).all()
-
-        hg_ui = ret
-        for ui_ in hg_ui:
-            if ui_.ui_active:
-                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
-                          ui_.ui_key, ui_.ui_value)
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, ui_.ui_value)
-            if ui_.ui_key == 'push_ssl':
-                # force set push_ssl requirement to False, rhodecode
-                # handles that
-                baseui.setconfig(ui_.ui_section, ui_.ui_key, False)
-
-        return baseui
+        from rhodecode.lib.utils import make_ui
+        return make_ui('db', clear_session=False)
 
     @classmethod
     def inject_ui(cls, repo, extras={}):
@@ -856,6 +858,10 @@ class Repository(Base, BaseModel):
         Session().add(repo)
         Session().commit()
 
+    @property
+    def last_db_change(self):
+        return self.updated_on
+
     #==========================================================================
     # SCM PROPERTIES
     #==========================================================================
@@ -869,6 +875,15 @@ class Repository(Base, BaseModel):
         """
         cs = self.get_changeset(self.landing_rev) or self.get_changeset()
         return cs
+
+    def update_last_change(self, last_change=None):
+        if last_change is None:
+            last_change = datetime.datetime.now()
+        if self.updated_on is None or self.updated_on != last_change:
+            log.debug('updated repo %s with new date %s' % (self, last_change))
+            self.updated_on = last_change
+            Session().add(self)
+            Session().commit()
 
     @property
     def tip(self):
@@ -942,10 +957,14 @@ class Repository(Base, BaseModel):
         """
         set a cache for invalidation for this instance
         """
-        CacheInvalidation.set_invalidate(self.repo_name)
+        CacheInvalidation.set_invalidate(repo_name=self.repo_name)
 
     @LazyProperty
     def scm_instance(self):
+        import rhodecode
+        full_cache = str2bool(rhodecode.CONFIG.get('vcs_full_cache'))
+        if full_cache:
+            return self.scm_instance_cached()
         return self.__get_instance()
 
     def scm_instance_cached(self, cache_map=None):
@@ -1442,21 +1461,27 @@ class CacheInvalidation(Base, BaseModel):
         """
         import rhodecode
         prefix = ''
+        org_key = key
         iid = rhodecode.CONFIG.get('instance_id')
         if iid:
             prefix = iid
-        return "%s%s" % (prefix, key), prefix, key.rstrip('_README')
+
+        return "%s%s" % (prefix, key), prefix, org_key
 
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.cache_key == key).scalar()
 
     @classmethod
-    def _get_or_create_key(cls, key, prefix, org_key, commit=True):
+    def get_by_repo_name(cls, repo_name):
+        return cls.query().filter(cls.cache_args == repo_name).all()
+
+    @classmethod
+    def _get_or_create_key(cls, key, repo_name, commit=True):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
-                inv_obj = CacheInvalidation(key, org_key)
+                inv_obj = CacheInvalidation(key, repo_name)
                 Session().add(inv_obj)
                 if commit:
                     Session().commit()
@@ -1474,30 +1499,37 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
+        repo_name = key
+        repo_name = remove_suffix(repo_name, '_README')
+        repo_name = remove_suffix(repo_name, '_RSS')
+        repo_name = remove_suffix(repo_name, '_ATOM')
 
+        # adds instance prefix
         key, _prefix, _org_key = cls._get_key(key)
-        inv = cls._get_or_create_key(key, _prefix, _org_key)
+        inv = cls._get_or_create_key(key, repo_name)
 
         if inv and inv.cache_active is False:
             return inv
 
     @classmethod
-    def set_invalidate(cls, key):
+    def set_invalidate(cls, key=None, repo_name=None):
         """
-        Mark this Cache key for invalidation
+        Mark this Cache key for invalidation, either by key or whole
+        cache sets based on repo_name
 
         :param key:
         """
+        if key:
+            key, _prefix, _org_key = cls._get_key(key)
+            inv_objs = Session().query(cls).filter(cls.cache_key == key).all()
+        elif repo_name:
+            inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
-        key, _prefix, _org_key = cls._get_key(key)
-        inv_objs = Session().query(cls).filter(cls.cache_args == _org_key).all()
-        log.debug('marking %s key[s] %s for invalidation' % (len(inv_objs),
-                                                             _org_key))
+        log.debug('marking %s key[s] for invalidation based on key=%s,repo_name=%s'
+                  % (len(inv_objs), key, repo_name))
         try:
             for inv_obj in inv_objs:
-                if inv_obj:
-                    inv_obj.cache_active = False
-
+                inv_obj.cache_active = False
                 Session().add(inv_obj)
             Session().commit()
         except Exception:

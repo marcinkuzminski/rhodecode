@@ -26,16 +26,15 @@
 import logging
 import traceback
 from collections import defaultdict
-from webob.exc import HTTPForbidden
+from webob.exc import HTTPForbidden, HTTPBadRequest
 
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-from pylons.decorators import jsonify
+from rhodecode.lib.utils import jsonify
 
-from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetError, \
+from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError
-from rhodecode.lib.vcs.nodes import FileNode
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -47,10 +46,11 @@ from rhodecode.model.db import ChangesetComment, ChangesetStatus
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.meta import Session
-from rhodecode.lib.diffs import wrapped_diff
 from rhodecode.model.repo import RepoModel
+from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.utils2 import safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -109,7 +109,13 @@ def _ignorews_url(GET, fileid=None):
 
 def get_line_ctx(fid, GET):
     ln_ctx_global = GET.get('context')
-    ln_ctx = filter(lambda k: k.startswith('C'), GET.getall(fid))
+    if fid:
+        ln_ctx = filter(lambda k: k.startswith('C'), GET.getall(fid))
+    else:
+        _ln_ctx = filter(lambda k: k.startswith('C'), GET)
+        ln_ctx = GET.get(_ln_ctx[0]) if _ln_ctx  else ln_ctx_global
+        if ln_ctx:
+            ln_ctx = [ln_ctx]
 
     if ln_ctx:
         retval = ln_ctx[0].split(':')[-1]
@@ -119,7 +125,7 @@ def get_line_ctx(fid, GET):
     try:
         return int(retval)
     except:
-        return
+        return 3
 
 
 def _context_url(GET, fileid=None):
@@ -173,12 +179,11 @@ class ChangesetController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def index(self, revision):
-
+    def index(self, revision, method='show'):
         c.anchor_url = anchor_url
         c.ignorews_url = _ignorews_url
         c.context_url = _context_url
-        limit_off = request.GET.get('fulldiff')
+        c.fulldiff = fulldiff = request.GET.get('fulldiff')
         #get ranges of revisions if preset
         rev_range = revision.split('...')[:2]
         enable_comments = True
@@ -188,7 +193,7 @@ class ChangesetController(BaseRepoController):
                 rev_start = rev_range[0]
                 rev_end = rev_range[1]
                 rev_ranges = c.rhodecode_repo.get_changesets(start=rev_start,
-                                                            end=rev_end)
+                                                             end=rev_end)
             else:
                 rev_ranges = [c.rhodecode_repo.get_changeset(revision)]
 
@@ -206,95 +211,63 @@ class ChangesetController(BaseRepoController):
         c.lines_added = 0  # count of lines added
         c.lines_deleted = 0  # count of lines removes
 
-        cumulative_diff = 0
-        c.cut_off = False  # defines if cut off limit is reached
         c.changeset_statuses = ChangesetStatus.STATUSES
         c.comments = []
         c.statuses = []
         c.inline_comments = []
         c.inline_cnt = 0
+
         # Iterate over ranges (default changeset view is always one changeset)
         for changeset in c.cs_ranges:
+            inlines = []
+            if method == 'show':
+                c.statuses.extend([ChangesetStatusModel()\
+                                  .get_status(c.rhodecode_db_repo.repo_id,
+                                              changeset.raw_id)])
 
-            c.statuses.extend([ChangesetStatusModel()\
-                              .get_status(c.rhodecode_db_repo.repo_id,
-                                          changeset.raw_id)])
+                c.comments.extend(ChangesetCommentsModel()\
+                                  .get_comments(c.rhodecode_db_repo.repo_id,
+                                                revision=changeset.raw_id))
+                inlines = ChangesetCommentsModel()\
+                            .get_inline_comments(c.rhodecode_db_repo.repo_id,
+                                                 revision=changeset.raw_id)
+                c.inline_comments.extend(inlines)
 
-            c.comments.extend(ChangesetCommentsModel()\
-                              .get_comments(c.rhodecode_db_repo.repo_id,
-                                            revision=changeset.raw_id))
-            inlines = ChangesetCommentsModel()\
-                        .get_inline_comments(c.rhodecode_db_repo.repo_id,
-                                             revision=changeset.raw_id)
-            c.inline_comments.extend(inlines)
             c.changes[changeset.raw_id] = []
-            try:
-                changeset_parent = changeset.parents[0]
-            except IndexError:
-                changeset_parent = None
 
-            #==================================================================
-            # ADDED FILES
-            #==================================================================
-            for node in changeset.added:
-                fid = h.FID(revision, node.path)
-                line_context_lcl = get_line_ctx(fid, request.GET)
-                ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
-                lim = self.cut_off_limit
-                if cumulative_diff > self.cut_off_limit:
-                    lim = -1 if limit_off is None else None
-                size, cs1, cs2, diff, st = wrapped_diff(
-                    filenode_old=None,
-                    filenode_new=node,
-                    cut_off_limit=lim,
-                    ignore_whitespace=ign_whitespace_lcl,
-                    line_context=line_context_lcl,
-                    enable_comments=enable_comments
-                )
-                cumulative_diff += size
-                c.lines_added += st[0]
-                c.lines_deleted += st[1]
-                c.changes[changeset.raw_id].append(
-                    ('added', node, diff, cs1, cs2, st)
-                )
+            cs2 = changeset.raw_id
+            cs1 = changeset.parents[0].raw_id if changeset.parents else EmptyChangeset()
+            context_lcl = get_line_ctx('', request.GET)
+            ign_whitespace_lcl = ign_whitespace_lcl = get_ignore_ws('', request.GET)
 
-            #==================================================================
-            # CHANGED FILES
-            #==================================================================
-            for node in changeset.changed:
-                try:
-                    filenode_old = changeset_parent.get_node(node.path)
-                except ChangesetError:
-                    log.warning('Unable to fetch parent node for diff')
-                    filenode_old = FileNode(node.path, '', EmptyChangeset())
-
-                fid = h.FID(revision, node.path)
-                line_context_lcl = get_line_ctx(fid, request.GET)
-                ign_whitespace_lcl = get_ignore_ws(fid, request.GET)
-                lim = self.cut_off_limit
-                if cumulative_diff > self.cut_off_limit:
-                    lim = -1 if limit_off is None else None
-                size, cs1, cs2, diff, st = wrapped_diff(
-                    filenode_old=filenode_old,
-                    filenode_new=node,
-                    cut_off_limit=lim,
-                    ignore_whitespace=ign_whitespace_lcl,
-                    line_context=line_context_lcl,
-                    enable_comments=enable_comments
-                )
-                cumulative_diff += size
-                c.lines_added += st[0]
-                c.lines_deleted += st[1]
-                c.changes[changeset.raw_id].append(
-                    ('changed', node, diff, cs1, cs2, st)
-                )
-            #==================================================================
-            # REMOVED FILES
-            #==================================================================
-            for node in changeset.removed:
-                c.changes[changeset.raw_id].append(
-                    ('removed', node, None, None, None, (0, 0))
-                )
+            _diff = c.rhodecode_repo.get_diff(cs1, cs2,
+                ignore_whitespace=ign_whitespace_lcl, context=context_lcl)
+            diff_limit = self.cut_off_limit if not fulldiff else None
+            diff_processor = diffs.DiffProcessor(_diff,
+                                                 vcs=c.rhodecode_repo.alias,
+                                                 format='gitdiff',
+                                                 diff_limit=diff_limit)
+            cs_changes = OrderedDict()
+            if method == 'show':
+                _parsed = diff_processor.prepare()
+                c.limited_diff = False
+                if isinstance(_parsed, LimitedDiffContainer):
+                    c.limited_diff = True
+                for f in _parsed:
+                    st = f['stats']
+                    if st[0] != 'b':
+                        c.lines_added += st[0]
+                        c.lines_deleted += st[1]
+                    fid = h.FID(changeset.raw_id, f['filename'])
+                    diff = diff_processor.as_html(enable_comments=enable_comments,
+                                                  parsed_lines=[f])
+                    cs_changes[fid] = [cs1, cs2, f['operation'], f['filename'],
+                                       diff, st]
+            else:
+                # downloads/raw we only need RAW diff nothing else
+                diff = diff_processor.as_raw()
+                cs_changes[''] = [None, None, None, None, diff, None]
+            c.changes[changeset.raw_id] = cs_changes
 
         # count inline comments
         for __, lines in c.inline_comments:
@@ -303,74 +276,34 @@ class ChangesetController(BaseRepoController):
 
         if len(c.cs_ranges) == 1:
             c.changeset = c.cs_ranges[0]
-            c.changes = c.changes[c.changeset.raw_id]
-
-            return render('changeset/changeset.html')
-        else:
-            return render('changeset/changeset_range.html')
-
-    def raw_changeset(self, revision):
-
-        method = request.GET.get('diff', 'show')
-        ignore_whitespace = request.GET.get('ignorews') == '1'
-        line_context = request.GET.get('context', 3)
-        try:
-            c.scm_type = c.rhodecode_repo.alias
-            c.changeset = c.rhodecode_repo.get_changeset(revision)
-        except RepositoryError:
-            log.error(traceback.format_exc())
-            return redirect(url('home'))
-        else:
-            try:
-                c.changeset_parent = c.changeset.parents[0]
-            except IndexError:
-                c.changeset_parent = None
-            c.changes = []
-
-            for node in c.changeset.added:
-                filenode_old = FileNode(node.path, '')
-                if filenode_old.is_binary or node.is_binary:
-                    diff = _('binary file') + '\n'
-                else:
-                    f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace,
-                                           context=line_context)
-                    diff = diffs.DiffProcessor(f_gitdiff,
-                                                format='gitdiff').raw_diff()
-
-                cs1 = None
-                cs2 = node.changeset.raw_id
-                c.changes.append(('added', node, diff, cs1, cs2))
-
-            for node in c.changeset.changed:
-                filenode_old = c.changeset_parent.get_node(node.path)
-                if filenode_old.is_binary or node.is_binary:
-                    diff = _('binary file')
-                else:
-                    f_gitdiff = diffs.get_gitdiff(filenode_old, node,
-                                           ignore_whitespace=ignore_whitespace,
-                                           context=line_context)
-                    diff = diffs.DiffProcessor(f_gitdiff,
-                                                format='gitdiff').raw_diff()
-
-                cs1 = filenode_old.changeset.raw_id
-                cs2 = node.changeset.raw_id
-                c.changes.append(('changed', node, diff, cs1, cs2))
-
-        response.content_type = 'text/plain'
-
+            c.parent_tmpl = ''.join(['# Parent  %s\n' % x.raw_id
+                                     for x in c.changeset.parents])
         if method == 'download':
-            response.content_disposition = 'attachment; filename=%s.patch' \
-                                            % revision
+            response.content_type = 'text/plain'
+            response.content_disposition = 'attachment; filename=%s.diff' \
+                                            % revision[:12]
+            return diff
+        elif method == 'patch':
+            response.content_type = 'text/plain'
+            c.diff = safe_unicode(diff)
+            return render('changeset/patch_changeset.html')
+        elif method == 'raw':
+            response.content_type = 'text/plain'
+            return diff
+        elif method == 'show':
+            if len(c.cs_ranges) == 1:
+                return render('changeset/changeset.html')
+            else:
+                return render('changeset/changeset_range.html')
 
-        c.parent_tmpl = ''.join(['# Parent  %s\n' % x.raw_id
-                                 for x in c.changeset.parents])
+    def changeset_raw(self, revision):
+        return self.index(revision, method='raw')
 
-        c.diffs = ''
-        for x in c.changes:
-            c.diffs += x[2]
+    def changeset_patch(self, revision):
+        return self.index(revision, method='patch')
 
-        return render('changeset/raw_changeset.html')
+    def changeset_download(self, revision):
+        return self.index(revision, method='download')
 
     @jsonify
     def comment(self, repo_name, revision):
@@ -445,3 +378,13 @@ class ChangesetController(BaseRepoController):
             return True
         else:
             raise HTTPForbidden()
+
+    @jsonify
+    def changeset_info(self, repo_name, revision):
+        if request.is_xhr:
+            try:
+                return c.rhodecode_repo.get_changeset(revision)
+            except ChangesetDoesNotExistError, e:
+                return EmptyChangeset(message=str(e))
+        else:
+            raise HTTPBadRequest()

@@ -91,7 +91,6 @@ var setSelectValue = function(select, val){
 	
     // select element
     for(var i=0;i<selection.options.length;i++){
-    	console.log(selection.options[i].innerHTML);
         if (selection.options[i].innerHTML == val) {
             selection.selectedIndex = i;
             break;
@@ -250,6 +249,24 @@ function ypjax(url,container,s_call,f_call,args){
 	
 };
 
+var ajaxGET = function(url,success) {
+	// Set special header for ajax == HTTP_X_PARTIAL_XHR
+	YUC.initHeader('X-PARTIAL-XHR',true);
+
+    var sUrl = url;
+    var callback = {
+        success: success,
+        failure: function (o) {
+            alert("error");
+        },
+    };
+
+    var request = YAHOO.util.Connect.asyncRequest('GET', sUrl, callback);
+    return request;
+};
+
+
+
 var ajaxPOST = function(url,postData,success) {
 	// Set special header for ajax == HTTP_X_PARTIAL_XHR
 	YUC.initHeader('X-PARTIAL-XHR',true);
@@ -282,27 +299,8 @@ var ajaxPOST = function(url,postData,success) {
  * tooltip activate
  */
 var tooltip_activate = function(){
-    function toolTipsId(){
-        var ids = [];
-        var tts = YUQ('.tooltip');
-        for (var i = 0; i < tts.length; i++) {
-            // if element doesn't not have and id 
-        	//  autogenerate one for tooltip 
-            if (!tts[i].id){
-                tts[i].id='tt'+((i*100)+tts.length);
-            }
-            ids.push(tts[i].id);
-        }
-        return ids
-    };
-    var myToolTips = new YAHOO.widget.Tooltip("tooltip", {
-        context: [[toolTipsId()],"tl","bl",null,[0,5]],
-        monitorresize:false,
-        xyoffset :[0,0],
-        autodismissdelay:300000,
-        hidedelay:5,
-        showdelay:20,
-    });
+	yt = YAHOO.yuitip.main;
+	YUE.onDOMReady(yt.init);
 };
 
 /**
@@ -316,6 +314,190 @@ var show_more_event = function(){
     });
 };
 
+/**
+ * show changeset tooltip
+ */
+var show_changeset_tooltip = function(){
+	YUE.on(YUD.getElementsByClassName('lazy-cs'), 'mouseover', function(e){
+		var target = e.currentTarget;
+		var rid = YUD.getAttribute(target,'raw_id');
+		var repo_name = YUD.getAttribute(target,'repo_name');
+		var ttid = 'tt-'+rid;
+		var success = function(o){
+			var json = JSON.parse(o.responseText);
+			YUD.addClass(target,'tooltip')
+			YUD.setAttribute(target, 'title',json['message']);
+			YAHOO.yuitip.main.show_yuitip(e, target);
+		}
+		if(rid && !YUD.hasClass(target, 'tooltip')){
+			YUD.setAttribute(target,'id',ttid);
+			YUD.setAttribute(target, 'title',_TM['loading...']);
+			YAHOO.yuitip.main.set_listeners(target);
+			YAHOO.yuitip.main.show_yuitip(e, target);			
+			ajaxGET('/changeset_info/{0}/{1}'.format(repo_name,rid), success)
+		}
+	});
+};
+
+var onSuccessFollow = function(target){
+    var f = YUD.get(target.id);
+    var f_cnt = YUD.get('current_followers_count');
+
+    if(YUD.hasClass(f, 'follow')){
+        f.setAttribute('class','following');
+        f.setAttribute('title',_TM['Stop following this repository']);
+
+        if(f_cnt){
+            var cnt = Number(f_cnt.innerHTML)+1;
+            f_cnt.innerHTML = cnt;
+        }
+    }
+    else{
+        f.setAttribute('class','follow');
+        f.setAttribute('title',_TM['Start following this repository']);
+        if(f_cnt){
+            var cnt = Number(f_cnt.innerHTML)-1;
+            f_cnt.innerHTML = cnt;
+        }
+    }
+}
+
+var toggleFollowingUser = function(target,fallows_user_id,token,user_id){
+    args = 'follows_user_id='+fallows_user_id;
+    args+= '&amp;auth_token='+token;
+    if(user_id != undefined){
+        args+="&amp;user_id="+user_id;
+    }
+    YUC.asyncRequest('POST',TOGGLE_FOLLOW_URL,{
+        success:function(o){
+        	onSuccessFollow(target);
+        }
+    },args);
+    return false;
+}
+
+var toggleFollowingRepo = function(target,fallows_repo_id,token,user_id){
+
+    args = 'follows_repo_id='+fallows_repo_id;
+    args+= '&amp;auth_token='+token;
+    if(user_id != undefined){
+        args+="&amp;user_id="+user_id;
+    }
+    YUC.asyncRequest('POST',TOGGLE_FOLLOW_URL,{
+        success:function(o){
+        	onSuccessFollow(target);
+        }
+    },args);
+    return false;
+}
+
+
+/**
+ * TOOLTIP IMPL.
+ */
+YAHOO.namespace('yuitip');
+YAHOO.yuitip.main = {
+
+	$:			YAHOO.util.Dom.get,
+
+	bgColor:	'#000',
+	speed:		0.3,
+	opacity:	0.9,
+	offset:		[15,15],
+	useAnim:	false,
+	maxWidth:	600,
+	add_links:	false,
+	yuitips:    [],
+
+	set_listeners: function(tt){
+		YUE.on(tt, 'mouseover', yt.show_yuitip,  tt);
+		YUE.on(tt, 'mousemove', yt.move_yuitip,  tt);
+		YUE.on(tt, 'mouseout',  yt.close_yuitip, tt);		
+	},
+
+	init: function(){
+		yt._tooltip = '';
+		yt.tipBox = yt.$('tip-box');
+		if(!yt.tipBox){
+			yt.tipBox = document.createElement('div');
+			document.body.appendChild(yt.tipBox);
+			yt.tipBox.id = 'tip-box';
+		}
+
+		YUD.setStyle(yt.tipBox, 'display', 'none');
+		YUD.setStyle(yt.tipBox, 'position', 'absolute');
+		if(yt.maxWidth !== null){
+			YUD.setStyle(yt.tipBox, 'max-width', yt.maxWidth+'px');
+		}
+
+		var yuitips = YUD.getElementsByClassName('tooltip');
+
+		if(yt.add_links === true){
+			var links = document.getElementsByTagName('a');
+			var linkLen = links.length;
+			for(i=0;i<linkLen;i++){
+				yuitips.push(links[i]);
+			}
+		}
+
+		var yuiLen = yuitips.length;
+
+		for(i=0;i<yuiLen;i++){
+			yt.set_listeners(yuitips[i]);
+		}
+	},
+
+	show_yuitip: function(e, el){
+		YUE.stopEvent(e);
+		if(el.tagName.toLowerCase() === 'img'){
+			yt.tipText = el.alt ? el.alt : '';
+		} else {
+			yt.tipText = el.title ? el.title : '';
+		}
+
+		if(yt.tipText !== ''){
+			// save org title
+			yt._tooltip = yt.tipText;
+			// reset title to not show org tooltips
+			YUD.setAttribute(el, 'title', '');
+
+			yt.tipBox.innerHTML = yt.tipText;
+			YUD.setStyle(yt.tipBox, 'display', 'block');
+			if(yt.useAnim === true){
+				YUD.setStyle(yt.tipBox, 'opacity', '0');
+				var newAnim = new YAHOO.util.Anim(yt.tipBox,
+					{
+						opacity: { to: yt.opacity }
+					}, yt.speed, YAHOO.util.Easing.easeOut
+				);
+				newAnim.animate();
+			}
+		}
+	},
+
+	move_yuitip: function(e, el){
+		YUE.stopEvent(e);
+		var movePos = YUE.getXY(e);
+		YUD.setStyle(yt.tipBox, 'top', (movePos[1] + yt.offset[1]) + 'px');
+		YUD.setStyle(yt.tipBox, 'left', (movePos[0] + yt.offset[0]) + 'px');
+	},
+
+	close_yuitip: function(e, el){
+		YUE.stopEvent(e);
+	
+		if(yt.useAnim === true){
+			var newAnim = new YAHOO.util.Anim(yt.tipBox,
+				{
+					opacity: { to: 0 }
+				}, yt.speed, YAHOO.util.Easing.easeOut
+			);
+			newAnim.animate();
+		} else {
+			YUD.setStyle(yt.tipBox, 'display', 'none');
+		}
+		YUD.setAttribute(el,'title', yt._tooltip);
+	}
+}
 
 /**
  * Quick filter widget
@@ -821,54 +1003,54 @@ var getIdentNode = function(n){
 	}
 };
 
-var  getSelectionLink = function(selection_link_label) {
-	return function(){
-	    //get selection from start/to nodes    	
-	    if (typeof window.getSelection != "undefined") {
-	    	s = window.getSelection();
+var  getSelectionLink = function(e) {
+
+	//get selection from start/to nodes    	
+	if (typeof window.getSelection != "undefined") {
+		s = window.getSelection();
 	
-	       	from = getIdentNode(s.anchorNode);
-	       	till = getIdentNode(s.focusNode);
+	   	from = getIdentNode(s.anchorNode);
+	   	till = getIdentNode(s.focusNode);
+	   	
+	    f_int = parseInt(from.id.replace('L',''));
+	    t_int = parseInt(till.id.replace('L',''));
+	    
+	    if (f_int > t_int){
+	    	//highlight from bottom 
+	    	offset = -35;
+	    	ranges = [t_int,f_int];
+	    	
+	    }
+	    else{
+	    	//highligth from top 
+	    	offset = 35;
+	    	ranges = [f_int,t_int];
+	    }
+	    // if we select more than 2 lines
+	    if (ranges[0] != ranges[1]){
+	        if(YUD.get('linktt') == null){
+	            hl_div = document.createElement('div');
+	            hl_div.id = 'linktt';
+	        }
+	        hl_div.innerHTML = '';
+
+	        anchor = '#L'+ranges[0]+'-'+ranges[1];
+	        var link = document.createElement('a');
+	        link.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
+	        link.innerHTML = _TM['Selection link'];
+	        hl_div.appendChild(link);
+	        YUD.get('body').appendChild(hl_div);
 	        
-	        f_int = parseInt(from.id.replace('L',''));
-	        t_int = parseInt(till.id.replace('L',''));
-	        
-	        if (f_int > t_int){
-	        	//highlight from bottom 
-	        	offset = -35;
-	        	ranges = [t_int,f_int];
-	        	
-	        }
-	        else{
-	        	//highligth from top 
-	        	offset = 35;
-	        	ranges = [f_int,t_int];
-	        }
-	        
-	        if (ranges[0] != ranges[1]){
-	            if(YUD.get('linktt') == null){
-	                hl_div = document.createElement('div');
-	                hl_div.id = 'linktt';
-	            }
-	            anchor = '#L'+ranges[0]+'-'+ranges[1];
-	            hl_div.innerHTML = '';
-	            l = document.createElement('a');
-	            l.href = location.href.substring(0,location.href.indexOf('#'))+anchor;
-	            l.innerHTML = selection_link_label;
-	            hl_div.appendChild(l);
-	            
-	            YUD.get('body').appendChild(hl_div);
-	            
-	            xy = YUD.getXY(till.id);
-	            
-	            YUD.addClass('linktt','yui-tt');
-	            YUD.setStyle('linktt','top',xy[1]+offset+'px');
-	            YUD.setStyle('linktt','left',xy[0]+'px');
-	            YUD.setStyle('linktt','visibility','visible');
-	        }
-	        else{
-	        	YUD.setStyle('linktt','visibility','hidden');
-	        }
+	        xy = YUD.getXY(till.id);
+
+	        YUD.addClass('linktt', 'hl-tip-box');
+	        YUD.setStyle('linktt','top',xy[1]+offset+'px');
+	        YUD.setStyle('linktt','left',xy[0]+'px');
+	        YUD.setStyle('linktt','visibility','visible');
+
+	    }
+	    else{
+	    	YUD.setStyle('linktt','visibility','hidden');
 	    }
 	}
 };

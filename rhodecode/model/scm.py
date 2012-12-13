@@ -115,6 +115,7 @@ class CachedRepoList(object):
             tmp_d = {}
             tmp_d['name'] = dbr.repo_name
             tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['raw_name'] = tmp_d['name'].lower()
             tmp_d['description'] = dbr.description
             tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['last_change'] = last_change
@@ -149,6 +150,7 @@ class SimpleCachedRepoList(CachedRepoList):
             tmp_d = {}
             tmp_d['name'] = dbr.repo_name
             tmp_d['name_sort'] = tmp_d['name'].lower()
+            tmp_d['raw_name'] = tmp_d['name'].lower()
             tmp_d['description'] = dbr.description
             tmp_d['description_sort'] = tmp_d['description'].lower()
             tmp_d['dbrepo'] = dbr.get_dict()
@@ -223,7 +225,7 @@ class ScmModel(BaseModel):
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
             # skip removed repos
-            if REMOVED_REPO_PAT.match(name):
+            if REMOVED_REPO_PAT.match(name) or path[0] is None:
                 continue
 
             # name need to be decomposed and put back together using the /
@@ -289,7 +291,7 @@ class ScmModel(BaseModel):
 
         :param repo_name: this repo that should invalidation take place
         """
-        CacheInvalidation.set_invalidate(repo_name)
+        CacheInvalidation.set_invalidate(repo_name=repo_name)
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 
@@ -394,6 +396,7 @@ class ScmModel(BaseModel):
             raise Exception("This repository doesn't have a clone uri")
 
         repo = dbrepo.scm_instance
+        from rhodecode import CONFIG
         try:
             extras = {
                 'ip': '',
@@ -401,7 +404,11 @@ class ScmModel(BaseModel):
                 'action': 'push_remote',
                 'repository': dbrepo.repo_name,
                 'scm': repo.alias,
+                'config': CONFIG['__file__'],
+                'make_lock': None,
+                'locked_by': [None, None]
             }
+
             Repository.inject_ui(repo, extras=extras)
 
             if repo.alias == 'git':

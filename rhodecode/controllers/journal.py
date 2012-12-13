@@ -41,7 +41,8 @@ from rhodecode.model.db import UserLog, UserFollowing, Repository, User
 from rhodecode.model.meta import Session
 from sqlalchemy.sql.expression import func
 from rhodecode.model.scm import ScmModel
-from rhodecode.lib.utils2 import safe_int
+from rhodecode.lib.utils2 import safe_int, AttributeDict
+from rhodecode.controllers.admin.admin import _journal_filter
 
 log = logging.getLogger(__name__)
 
@@ -53,20 +54,14 @@ class JournalController(BaseController):
         self.language = 'en-us'
         self.ttl = "5"
         self.feed_nr = 20
+        c.search_term = request.GET.get('filter')
 
     @LoginRequired()
     @NotAnonymous()
     def index(self):
         # Return a rendered template
         p = safe_int(request.params.get('page', 1), 1)
-
         c.user = User.get(self.rhodecode_user.user_id)
-        all_repos = self.sa.query(Repository)\
-                     .filter(Repository.user_id == c.user.user_id)\
-                     .order_by(func.lower(Repository.repo_name)).all()
-
-        c.user_repos = ScmModel().get_repos(all_repos)
-
         c.following = self.sa.query(UserFollowing)\
             .filter(UserFollowing.user_id == self.rhodecode_user.user_id)\
             .options(joinedload(UserFollowing.follows_repository))\
@@ -74,14 +69,27 @@ class JournalController(BaseController):
 
         journal = self._get_journal_data(c.following)
 
-        c.journal_pager = Page(journal, page=p, items_per_page=20)
+        def url_generator(**kw):
+            return url.current(filter=c.search_term, **kw)
 
+        c.journal_pager = Page(journal, page=p, items_per_page=20, url=url_generator)
         c.journal_day_aggreagate = self._get_daily_aggregate(c.journal_pager)
 
         c.journal_data = render('journal/journal_data.html')
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.journal_data
         return render('journal/journal.html')
+
+    @LoginRequired()
+    @NotAnonymous()
+    def index_my_repos(self):
+        c.user = User.get(self.rhodecode_user.user_id)
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            all_repos = self.sa.query(Repository)\
+                     .filter(Repository.user_id == c.user.user_id)\
+                     .order_by(func.lower(Repository.repo_name)).all()
+            c.user_repos = ScmModel().get_repos(all_repos)
+            return render('journal/journal_page_repos.html')
 
     @LoginRequired(api_access=True)
     @NotAnonymous()
@@ -111,7 +119,8 @@ class JournalController(BaseController):
         groups = []
         for k, g in groupby(journal, lambda x: x.action_as_day):
             user_group = []
-            for k2, g2 in groupby(list(g), lambda x: x.user.email):
+            #groupby username if it's a present value, else fallback to journal username
+            for _, g2 in groupby(list(g), lambda x: x.user.username if x.user else x.username):
                 l = list(g2)
                 user_group.append((l[0].user, l))
 
@@ -137,9 +146,15 @@ class JournalController(BaseController):
         if filtering_criterion is not None:
             journal = self.sa.query(UserLog)\
                 .options(joinedload(UserLog.user))\
-                .options(joinedload(UserLog.repository))\
-                .filter(filtering_criterion)\
-                .order_by(UserLog.action_date.desc())
+                .options(joinedload(UserLog.repository))
+            #filter
+            try:
+                journal = _journal_filter(journal, c.search_term)
+            except:
+                # we want this to crash for now
+                raise
+            journal = journal.filter(filtering_criterion)\
+                        .order_by(UserLog.action_date.desc())
         else:
             journal = []
 
@@ -213,9 +228,15 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
+            user = entry.user
+            if user is None:
+                #fix deleted users
+                user = AttributeDict({'short_contact': entry.username,
+                                      'email': '',
+                                      'full_contact': ''})
             action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action(),
-                                 entry.repository.repo_name)
+            title = "%s - %s %s" % (user.short_contact, action(),
+                                    entry.repository.repo_name)
             desc = action_extra()
             _url = None
             if entry.repository is not None:
@@ -226,8 +247,8 @@ class JournalController(BaseController):
             feed.add_item(title=title,
                           pubdate=entry.action_date,
                           link=_url or url('', qualified=True),
-                          author_email=entry.user.email,
-                          author_name=entry.user.full_contact,
+                          author_email=user.email,
+                          author_name=user.full_contact,
                           description=desc)
 
         response.content_type = feed.mime_type
@@ -250,9 +271,15 @@ class JournalController(BaseController):
                          ttl=self.ttl)
 
         for entry in journal[:self.feed_nr]:
+            user = entry.user
+            if user is None:
+                #fix deleted users
+                user = AttributeDict({'short_contact': entry.username,
+                                      'email': '',
+                                      'full_contact': ''})
             action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (entry.user.short_contact, action(),
-                                 entry.repository.repo_name)
+            title = "%s - %s %s" % (user.short_contact, action(),
+                                    entry.repository.repo_name)
             desc = action_extra()
             _url = None
             if entry.repository is not None:
@@ -263,8 +290,8 @@ class JournalController(BaseController):
             feed.add_item(title=title,
                           pubdate=entry.action_date,
                           link=_url or url('', qualified=True),
-                          author_email=entry.user.email,
-                          author_name=entry.user.full_contact,
+                          author_email=user.email,
+                          author_name=user.full_contact,
                           description=desc)
 
         response.content_type = feed.mime_type

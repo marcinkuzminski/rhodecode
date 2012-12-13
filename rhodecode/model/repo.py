@@ -31,13 +31,15 @@ from datetime import datetime
 
 from rhodecode.lib.vcs.backends import get_backend
 from rhodecode.lib.compat import json
-from rhodecode.lib.utils2 import LazyProperty, safe_str, safe_unicode
+from rhodecode.lib.utils2 import LazyProperty, safe_str, safe_unicode,\
+    remove_prefix
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup
+    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
+    RhodeCodeSetting
 from rhodecode.lib import helpers as h
 
 
@@ -130,6 +132,16 @@ class RepoModel(BaseModel):
         defaults['repo_group'] = getattr(group[-1] if group else None,
                                          'group_id', None)
 
+        for strip, k in [(0, 'repo_type'), (1, 'repo_enable_downloads'),
+                  (1, 'repo_description'), (1, 'repo_enable_locking'),
+                  (1, 'repo_landing_rev'), (0, 'clone_uri'),
+                  (1, 'repo_private'), (1, 'repo_enable_statistics')]:
+            attr = k
+            if strip:
+                attr = remove_prefix(k, 'repo_')
+
+            defaults[k] = defaults[attr]
+
         # fill owner
         if repo_info.user:
             defaults.update({'user': repo_info.user.username})
@@ -150,12 +162,12 @@ class RepoModel(BaseModel):
 
         return defaults
 
-    def update(self, repo_name, form_data):
+    def update(self, org_repo_name, **kwargs):
         try:
-            cur_repo = self.get_by_repo_name(repo_name, cache=False)
+            cur_repo = self.get_by_repo_name(org_repo_name, cache=False)
 
             # update permissions
-            for member, perm, member_type in form_data['perms_updates']:
+            for member, perm, member_type in kwargs['perms_updates']:
                 if member_type == 'user':
                     # this updates existing one
                     RepoModel().grant_user_permission(
@@ -166,7 +178,7 @@ class RepoModel(BaseModel):
                         repo=cur_repo, group_name=member, perm=perm
                     )
             # set new permissions
-            for member, perm, member_type in form_data['perms_new']:
+            for member, perm, member_type in kwargs['perms_new']:
                 if member_type == 'user':
                     RepoModel().grant_user_permission(
                         repo=cur_repo, user=member, perm=perm
@@ -176,26 +188,30 @@ class RepoModel(BaseModel):
                         repo=cur_repo, group_name=member, perm=perm
                     )
 
-            # update current repo
-            for k, v in form_data.items():
-                if k == 'user':
-                    cur_repo.user = User.get_by_username(v)
-                elif k == 'repo_name':
-                    pass
-                elif k == 'repo_group':
-                    cur_repo.group = RepoGroup.get(v)
+            if 'user' in kwargs:
+                cur_repo.user = User.get_by_username(kwargs['user'])
 
-                else:
-                    setattr(cur_repo, k, v)
+            if 'repo_group' in kwargs:
+                cur_repo.group = RepoGroup.get(kwargs['repo_group'])
 
-            new_name = cur_repo.get_new_name(form_data['repo_name'])
+            for strip, k in [(0, 'repo_type'), (1, 'repo_enable_downloads'),
+                      (1, 'repo_description'), (1, 'repo_enable_locking'),
+                      (1, 'repo_landing_rev'), (0, 'clone_uri'),
+                      (1, 'repo_private'), (1, 'repo_enable_statistics')]:
+                if k in kwargs:
+                    val = kwargs[k]
+                    if strip:
+                        k = remove_prefix(k, 'repo_')
+                    setattr(cur_repo, k, val)
+
+            new_name = cur_repo.get_new_name(kwargs['repo_name'])
             cur_repo.repo_name = new_name
 
             self.sa.add(cur_repo)
 
-            if repo_name != new_name:
+            if org_repo_name != new_name:
                 # rename repository
-                self.__rename_repo(old=repo_name, new=new_name)
+                self.__rename_repo(old=org_repo_name, new=new_name)
 
             return cur_repo
         except:
@@ -205,7 +221,8 @@ class RepoModel(BaseModel):
     def create_repo(self, repo_name, repo_type, description, owner,
                     private=False, clone_uri=None, repos_group=None,
                     landing_rev='tip', just_db=False, fork_of=None,
-                    copy_fork_permissions=False):
+                    copy_fork_permissions=False, enable_statistics=False,
+                    enable_locking=False, enable_downloads=False):
         """
         Create repository
 
@@ -233,6 +250,10 @@ class RepoModel(BaseModel):
             new_repo.private = private
             new_repo.clone_uri = clone_uri
             new_repo.landing_rev = landing_rev
+
+            new_repo.enable_statistics = enable_statistics
+            new_repo.enable_locking = enable_locking
+            new_repo.enable_downloads = enable_downloads
 
             if repos_group:
                 new_repo.enable_locking = repos_group.enable_locking
@@ -307,20 +328,27 @@ class RepoModel(BaseModel):
         :param just_db:
         :param fork:
         """
-
+        owner = cur_user
         repo_name = form_data['repo_name_full']
         repo_type = form_data['repo_type']
-        description = form_data['description']
-        owner = cur_user
-        private = form_data['private']
+        description = form_data['repo_description']
+        private = form_data['repo_private']
         clone_uri = form_data.get('clone_uri')
         repos_group = form_data['repo_group']
-        landing_rev = form_data['landing_rev']
+        landing_rev = form_data['repo_landing_rev']
         copy_fork_permissions = form_data.get('copy_permissions')
         fork_of = form_data.get('fork_parent_id')
+
+        ##defaults
+        defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        enable_statistics = defs.get('repo_enable_statistic')
+        enable_locking = defs.get('repo_enable_locking')
+        enable_downloads = defs.get('repo_enable_downloads')
+
         return self.create_repo(
             repo_name, repo_type, description, owner, private, clone_uri,
-            repos_group, landing_rev, just_db, fork_of, copy_fork_permissions
+            repos_group, landing_rev, just_db, fork_of, copy_fork_permissions,
+            enable_statistics, enable_locking, enable_downloads
         )
 
     def create_fork(self, form_data, cur_user):
@@ -544,5 +572,8 @@ class RepoModel(BaseModel):
         _now = datetime.now()
         _ms = str(_now.microsecond).rjust(6, '0')
         _d = 'rm__%s__%s' % (_now.strftime('%Y%m%d_%H%M%S_' + _ms),
-                             repo.repo_name)
+                             repo.just_name)
+        if repo.group:
+            args = repo.group.full_path_splitted + [_d]
+            _d = os.path.join(*args)
         shutil.move(rm_path, os.path.join(self.repos_path, _d))
