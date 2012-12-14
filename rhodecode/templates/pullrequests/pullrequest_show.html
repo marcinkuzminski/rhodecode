@@ -109,9 +109,9 @@
                       <img src="${h.url(str('/images/icons/flag_status_%s.png' % (status[0][1].status if status else 'not_reviewed')))}"/>
                     </div>
                   <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
-                  <div style="float:left">${member.full_name} (${_('owner')})</div>
+                  <div style="float:left">${member.full_name} (${_('owner') if c.pull_request.user_id == member.user_id else _('reviewer')})</div>
                   <input type="hidden" value="${member.user_id}" name="review_members" />
-                  %if not c.pull_request.is_closed() and (h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.author.user_id == c.rhodecode_user.user_id):
+                  %if not c.pull_request.is_closed() and (h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.user_id == c.rhodecode_user.user_id):
                   <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
                   %endif
                 </div>
