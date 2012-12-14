@@ -127,7 +127,8 @@
             <div id="status_block_container" class="status-block" style="display:none">
                 %for status,lbl in c.changeset_statuses:
                     <div class="">
-                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" name="changeset_status" value="${status}"> <label>${lbl}</label>
+                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" name="changeset_status" id="${status}" value="${status}"> 
+                        <label for="${status}">${lbl}</label>
                     </div>
                 %endfor
             </div>
