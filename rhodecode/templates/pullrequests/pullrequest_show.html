@@ -198,16 +198,9 @@
           // inject comments into they proper positions
           var file_comments = YUQ('.inline-comment-placeholder');
           renderInlineComments(file_comments);
-
+          
           YUE.on(YUD.get('update_pull_request'),'click',function(e){
-
-        	  var reviewers_ids = [];
-        	  var ids = YUQ('#review_members input');
-        	  for(var i=0; i<ids.length;i++){
-        		  var id = ids[i].value
-        		  reviewers_ids.push(id);
-        	  }
-        	  updateReviewers(reviewers_ids);
+        	  updateReviewers();
           })
       })
     </script>

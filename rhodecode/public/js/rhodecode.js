@@ -712,6 +712,14 @@ var deleteComment = function(comment_id){
 }
 
 var updateReviewers = function(reviewers_ids){
+	if (reviewers_ids === undefined){
+  	  var reviewers_ids = [];
+	  var ids = YUQ('#review_members input');
+	  for(var i=0; i<ids.length;i++){
+		  var id = ids[i].value
+		  reviewers_ids.push(id);
+	  }		
+	}
 	var url = AJAX_UPDATE_PULLREQUEST;
 	var postData = {'_method':'put',
 			        'reviewers_ids': reviewers_ids};
@@ -852,6 +860,7 @@ var removeReviewer = function(reviewer_id){
 	if (el.parentNode !== undefined){
 		el.parentNode.removeChild(el);
 	}
+	updateReviewers();
 }
 
 var fileBrowserListeners = function(current_url, node_list_url, url_base){
