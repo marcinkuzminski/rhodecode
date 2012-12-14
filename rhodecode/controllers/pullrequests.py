@@ -433,10 +433,15 @@ class PullrequestsController(BaseRepoController):
                       c.rhodecode_db_repo, self.ip_addr, self.sa)
 
         if request.POST.get('save_close'):
-            PullRequestModel().close_pull_request(pull_request_id)
-            action_logger(self.rhodecode_user,
-                      'user_closed_pull_request:%s' % pull_request_id,
-                      c.rhodecode_db_repo, self.ip_addr, self.sa)
+            if status in ['rejected', 'approved']:
+                PullRequestModel().close_pull_request(pull_request_id)
+                action_logger(self.rhodecode_user,
+                          'user_closed_pull_request:%s' % pull_request_id,
+                          c.rhodecode_db_repo, self.ip_addr, self.sa)
+            else:
+                h.flash(_('Closing pull request on other statuses than '
+                          'rejected or approved forbidden'),
+                        category='warning')
 
         Session().commit()
 

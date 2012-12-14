@@ -127,7 +127,7 @@
             <div id="status_block_container" class="status-block" style="display:none">
                 %for status,lbl in c.changeset_statuses:
                     <div class="">
-                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" name="changeset_status" id="${status}" value="${status}"> 
+                        <img src="${h.url('/images/icons/flag_status_%s.png' % status)}" /> <input ${'checked="checked"' if status == cur_status else ''}" type="radio" class="status_change_radio" name="changeset_status" id="${status}" value="${status}"> 
                         <label for="${status}">${lbl}</label>
                     </div>
                 %endfor
@@ -138,7 +138,7 @@
         <div class="comment-button">
         ${h.submit('save', _('Comment'), class_="ui-btn large")}
         %if close_btn:
-           ${h.submit('save_close', _('Comment and close'), class_='ui-btn blue large')}
+           ${h.submit('save_close', _('Comment and close'), class_='ui-btn blue large %s' % 'hidden' if cur_status in ['not_reviewd','under_review'] else '')}
         %endif
         </div>
         ${h.end_form()}
@@ -157,6 +157,14 @@ YUE.onDOMReady(function () {
        else{
            YUD.setStyle('status_block_container','display','none');
        }
+   })
+   YUE.on(YUQ('.status_change_radio'), 'change',function(e){
+	   var val = e.currentTarget.value;
+	   if (val == 'approved' || val == 'rejected') {
+		   YUD.removeClass('save_close', 'hidden');
+	   }else{
+		   YUD.addClass('save_close', 'hidden');
+	   }
    })
 
 });
