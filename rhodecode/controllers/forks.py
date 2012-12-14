@@ -71,12 +71,7 @@ class ForksController(BaseRepoController):
         repo = db_repo.scm_instance
 
         if c.repo_info is None:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the filesystem'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
+            h.not_mapped_error(repo_name)
             return redirect(url('repos'))
 
         c.default_user_id = User.get_by_username('default').user_id
@@ -131,12 +126,7 @@ class ForksController(BaseRepoController):
     def fork(self, repo_name):
         c.repo_info = Repository.get_by_repo_name(repo_name)
         if not c.repo_info:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the file system'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
+            h.not_mapped_error(repo_name)
             return redirect(url('home'))
 
         defaults = self.__load_data(repo_name)
