@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.1.5\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-12-14 04:02+0100\n"
+"POT-Creation-Date: 2012-12-14 04:19+0100\n"
 "PO-Revision-Date: 2012-10-02 11:32+0100\n"
 "Last-Translator: Vincent Duvert <vincent@duvert.net>\n"
 "Language-Team: fr <LL@li.org>\n"
@@ -186,35 +186,12 @@ msgstr "Branches"
 msgid "Tags"
 msgstr "Tags"
 
-#: rhodecode/controllers/forks.py:74 rhodecode/controllers/settings.py:80
-#: rhodecode/controllers/admin/repos.py:92
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"Le dépôt %s n’est pas représenté dans la base de données. Il a "
-"probablement été créé ou renommé manuellement. Veuillez relancer "
-"l’application pour rescanner les dépôts."
-
-#: rhodecode/controllers/forks.py:134
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the file system please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"Le dépôt %s n’est pas représenté dans la base de données. Il a "
-"probablement été créé ou renommé manuellement. Veuillez relancer "
-"l’application pour rescanner les dépôts."
-
-#: rhodecode/controllers/forks.py:168
+#: rhodecode/controllers/forks.py:158
 #, python-format
 msgid "forked %s repository as %s"
 msgstr "dépôt %s forké en tant que %s"
 
-#: rhodecode/controllers/forks.py:182
+#: rhodecode/controllers/forks.py:172
 #, python-format
 msgid "An error occurred during repository forking %s"
 msgstr "Une erreur est survenue durant le fork du dépôt %s."
@@ -287,58 +264,46 @@ msgstr ""
 msgid "An error occurred during this search operation"
 msgstr "Une erreur est survenue durant l’opération de recherche."
 
-#: rhodecode/controllers/settings.py:124
-#: rhodecode/controllers/admin/repos.py:277
+#: rhodecode/controllers/settings.py:119
+#: rhodecode/controllers/admin/repos.py:272
 #, python-format
 msgid "Repository %s updated successfully"
 msgstr "Dépôt %s mis à jour avec succès."
 
-#: rhodecode/controllers/settings.py:142
-#: rhodecode/controllers/admin/repos.py:295
+#: rhodecode/controllers/settings.py:137
+#: rhodecode/controllers/admin/repos.py:290
 #, python-format
 msgid "error occurred during update of repository %s"
 msgstr "Une erreur est survenue lors de la mise à jour du dépôt %s."
 
-#: rhodecode/controllers/settings.py:160
-#: rhodecode/controllers/admin/repos.py:313
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was moved or renamed  from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"Le dépôt %s n’est pas représenté dans la base de données. Il a "
-"probablement été déplacé ou renommé manuellement. Veuillez relancer "
-"l’application pour rescanner les dépôts."
-
-#: rhodecode/controllers/settings.py:172
-#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/settings.py:162
+#: rhodecode/controllers/admin/repos.py:315
 #, python-format
 msgid "deleted repository %s"
 msgstr "Dépôt %s supprimé"
 
-#: rhodecode/controllers/settings.py:176
-#: rhodecode/controllers/admin/repos.py:335
-#: rhodecode/controllers/admin/repos.py:341
+#: rhodecode/controllers/settings.py:166
+#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/admin/repos.py:331
 #, python-format
 msgid "An error occurred during deletion of %s"
 msgstr "Erreur pendant la suppression de %s"
 
-#: rhodecode/controllers/settings.py:195
+#: rhodecode/controllers/settings.py:185
 msgid "unlocked"
 msgstr "déverrouillé"
 
-#: rhodecode/controllers/settings.py:198
+#: rhodecode/controllers/settings.py:188
 msgid "locked"
 msgstr "verrouillé"
 
-#: rhodecode/controllers/settings.py:200
+#: rhodecode/controllers/settings.py:190
 #, python-format
 msgid "Repository has been %s"
 msgstr "Le dépôt a été %s."
 
-#: rhodecode/controllers/settings.py:204
-#: rhodecode/controllers/admin/repos.py:433
+#: rhodecode/controllers/settings.py:194
+#: rhodecode/controllers/admin/repos.py:423
 msgid "An error occurred during unlocking"
 msgstr "Une erreur est survenue durant le déverrouillage."
 
@@ -489,80 +454,80 @@ msgstr "Permissions par défaut mises à jour avec succès"
 msgid "error occurred during update of permissions"
 msgstr "erreur pendant la mise à jour des permissions"
 
-#: rhodecode/controllers/admin/repos.py:126
+#: rhodecode/controllers/admin/repos.py:121
 msgid "--REMOVE FORK--"
 msgstr "[Pas un fork]"
 
-#: rhodecode/controllers/admin/repos.py:195
+#: rhodecode/controllers/admin/repos.py:190
 #, python-format
 msgid "created repository %s from %s"
 msgstr "Le dépôt %s a été créé depuis %s."
 
-#: rhodecode/controllers/admin/repos.py:199
+#: rhodecode/controllers/admin/repos.py:194
 #, python-format
 msgid "created repository %s"
 msgstr "Le dépôt %s a été créé."
 
-#: rhodecode/controllers/admin/repos.py:230
+#: rhodecode/controllers/admin/repos.py:225
 #, python-format
 msgid "error occurred during creation of repository %s"
 msgstr "Une erreur est survenue durant la création du dépôt %s."
 
-#: rhodecode/controllers/admin/repos.py:330
+#: rhodecode/controllers/admin/repos.py:320
 #, python-format
 msgid "Cannot delete %s it still contains attached forks"
 msgstr "Impossible de supprimer le dépôt %s : Des forks y sont attachés."
 
-#: rhodecode/controllers/admin/repos.py:359
+#: rhodecode/controllers/admin/repos.py:349
 msgid "An error occurred during deletion of repository user"
 msgstr "Une erreur est survenue durant la suppression de l’utilisateur du dépôt."
 
-#: rhodecode/controllers/admin/repos.py:378
+#: rhodecode/controllers/admin/repos.py:368
 msgid "An error occurred during deletion of repository users groups"
 msgstr ""
 "Une erreur est survenue durant la suppression du groupe d’utilisateurs de"
 " ce dépôt."
 
-#: rhodecode/controllers/admin/repos.py:396
+#: rhodecode/controllers/admin/repos.py:386
 msgid "An error occurred during deletion of repository stats"
 msgstr "Une erreur est survenue durant la suppression des statistiques du dépôt."
 
-#: rhodecode/controllers/admin/repos.py:413
+#: rhodecode/controllers/admin/repos.py:403
 msgid "An error occurred during cache invalidation"
 msgstr "Une erreur est survenue durant l’invalidation du cache."
 
-#: rhodecode/controllers/admin/repos.py:453
+#: rhodecode/controllers/admin/repos.py:443
 msgid "Updated repository visibility in public journal"
 msgstr "La visibilité du dépôt dans le journal public a été mise à jour."
 
-#: rhodecode/controllers/admin/repos.py:457
+#: rhodecode/controllers/admin/repos.py:447
 msgid "An error occurred during setting this repository in public journal"
 msgstr ""
 "Une erreur est survenue durant la configuration du journal public pour ce"
 " dépôt."
 
-#: rhodecode/controllers/admin/repos.py:462 rhodecode/model/validators.py:300
+#: rhodecode/controllers/admin/repos.py:452 rhodecode/model/validators.py:300
 msgid "Token mismatch"
 msgstr "Jeton d’authentification incorrect."
 
-#: rhodecode/controllers/admin/repos.py:475
+#: rhodecode/controllers/admin/repos.py:465
 msgid "Pulled from remote location"
 msgstr "Les changements distants ont été récupérés."
 
-#: rhodecode/controllers/admin/repos.py:477
+#: rhodecode/controllers/admin/repos.py:467
 msgid "An error occurred during pull from remote location"
 msgstr "Une erreur est survenue durant le pull depuis la source distante."
 
-#: rhodecode/controllers/admin/repos.py:493
+#: rhodecode/controllers/admin/repos.py:483
 msgid "Nothing"
 msgstr "[Aucun dépôt]"
 
-#: rhodecode/controllers/admin/repos.py:495
+#: rhodecode/controllers/admin/repos.py:485
 #, python-format
 msgid "Marked repo %s as fork of %s"
 msgstr "Le dépôt %s a été marké comme fork de %s"
 
-#: rhodecode/controllers/admin/repos.py:499
+#: rhodecode/controllers/admin/repos.py:489
 msgid "An error occurred during this operation"
 msgstr "Une erreur est survenue durant cette opération."
 
@@ -955,6 +920,17 @@ msgstr "et %s de plus"
 #: rhodecode/lib/helpers.py:887
 msgid "No Files"
 msgstr "Aucun fichier"
+
+#: rhodecode/lib/helpers.py:1163
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was created or renamed from "
+"the filesystem please run the application again in order to rescan "
+"repositories"
+msgstr ""
+"Le dépôt %s n’est pas représenté dans la base de données. Il a "
+"probablement été créé ou renommé manuellement. Veuillez relancer "
+"l’application pour rescanner les dépôts."
 
 #: rhodecode/lib/utils2.py:403
 #, python-format
@@ -4344,4 +4320,30 @@ msgstr "Tags de %s"
 #, fuzzy
 msgid "Compare tags"
 msgstr "Comparer"
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was created or renamed"
+#~ " from the file system please run "
+#~ "the application again in order to "
+#~ "rescan repositories"
+#~ msgstr ""
+#~ "Le dépôt %s n’est pas représenté "
+#~ "dans la base de données. Il a "
+#~ "probablement été créé ou renommé "
+#~ "manuellement. Veuillez relancer l’application "
+#~ "pour rescanner les dépôts."
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was moved or renamed  "
+#~ "from the filesystem please run the "
+#~ "application again in order to rescan "
+#~ "repositories"
+#~ msgstr ""
+#~ "Le dépôt %s n’est pas représenté "
+#~ "dans la base de données. Il a "
+#~ "probablement été déplacé ou renommé "
+#~ "manuellement. Veuillez relancer l’application "
+#~ "pour rescanner les dépôts."
 

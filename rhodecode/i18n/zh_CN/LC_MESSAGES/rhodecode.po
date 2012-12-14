@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.4.4\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-12-14 04:02+0100\n"
+"POT-Creation-Date: 2012-12-14 04:19+0100\n"
 "PO-Revision-Date: 2012-11-26 15:19+0800\n"
 "Last-Translator: xpol <xpolife@gmail.com>\n"
 "Language-Team: mikespook\n"
@@ -181,29 +181,12 @@ msgstr "分支"
 msgid "Tags"
 msgstr "标签"
 
-#: rhodecode/controllers/forks.py:74 rhodecode/controllers/settings.py:80
-#: rhodecode/controllers/admin/repos.py:92
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr "版本库%s没有映射到数据库，可能是从文件系统创建或者重命名，请重启RhodeCode以重新扫描版本库"
-
-#: rhodecode/controllers/forks.py:134
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the file system please run the application again in order to rescan "
-"repositories"
-msgstr " 版本库%s没有映射到数据库，可能是从文件系统创建或者重命名，请重启RhodeCode以重新扫描版本库"
-
-#: rhodecode/controllers/forks.py:168
+#: rhodecode/controllers/forks.py:158
 #, python-format
 msgid "forked %s repository as %s"
 msgstr "版本库%s被复刻到%s"
 
-#: rhodecode/controllers/forks.py:182
+#: rhodecode/controllers/forks.py:172
 #, python-format
 msgid "An error occurred during repository forking %s"
 msgstr "在复刻版本库%s的时候发生错误"
@@ -272,55 +255,46 @@ msgstr "没有索引用于搜索。请运行whoosh索引器"
 msgid "An error occurred during this search operation"
 msgstr "在搜索操作中发生异常"
 
-#: rhodecode/controllers/settings.py:124
-#: rhodecode/controllers/admin/repos.py:277
+#: rhodecode/controllers/settings.py:119
+#: rhodecode/controllers/admin/repos.py:272
 #, python-format
 msgid "Repository %s updated successfully"
 msgstr "版本库%s成功更新"
 
-#: rhodecode/controllers/settings.py:142
-#: rhodecode/controllers/admin/repos.py:295
+#: rhodecode/controllers/settings.py:137
+#: rhodecode/controllers/admin/repos.py:290
 #, python-format
 msgid "error occurred during update of repository %s"
 msgstr "在更新版本库%s的时候发生错误"
 
-#: rhodecode/controllers/settings.py:160
-#: rhodecode/controllers/admin/repos.py:313
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was moved or renamed  from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr "版本库%s没有映射到数据库，可能是从文件系统创建或者重命名，请重启RhodeCode以重新扫描版本库"
-
-#: rhodecode/controllers/settings.py:172
-#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/settings.py:162
+#: rhodecode/controllers/admin/repos.py:315
 #, python-format
 msgid "deleted repository %s"
 msgstr "已经删除版本库%s"
 
-#: rhodecode/controllers/settings.py:176
-#: rhodecode/controllers/admin/repos.py:335
-#: rhodecode/controllers/admin/repos.py:341
+#: rhodecode/controllers/settings.py:166
+#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/admin/repos.py:331
 #, python-format
 msgid "An error occurred during deletion of %s"
 msgstr "在删除%s的时候发生错误"
 
-#: rhodecode/controllers/settings.py:195
+#: rhodecode/controllers/settings.py:185
 msgid "unlocked"
 msgstr "未锁"
 
-#: rhodecode/controllers/settings.py:198
+#: rhodecode/controllers/settings.py:188
 msgid "locked"
 msgstr "已锁"
 
-#: rhodecode/controllers/settings.py:200
+#: rhodecode/controllers/settings.py:190
 #, python-format
 msgid "Repository has been %s"
 msgstr "版本库已被%s"
 
-#: rhodecode/controllers/settings.py:204
-#: rhodecode/controllers/admin/repos.py:433
+#: rhodecode/controllers/settings.py:194
+#: rhodecode/controllers/admin/repos.py:423
 msgid "An error occurred during unlocking"
 msgstr "解锁时发生错误"
 
@@ -471,76 +445,76 @@ msgstr "成功更新默认权限"
 msgid "error occurred during update of permissions"
 msgstr "更新权限时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:126
+#: rhodecode/controllers/admin/repos.py:121
 msgid "--REMOVE FORK--"
 msgstr "-- 移除复刻 --"
 
-#: rhodecode/controllers/admin/repos.py:195
+#: rhodecode/controllers/admin/repos.py:190
 #, python-format
 msgid "created repository %s from %s"
 msgstr "新版本库%s基于%s建立。"
 
-#: rhodecode/controllers/admin/repos.py:199
+#: rhodecode/controllers/admin/repos.py:194
 #, python-format
 msgid "created repository %s"
 msgstr "建立版本库%s"
 
-#: rhodecode/controllers/admin/repos.py:230
+#: rhodecode/controllers/admin/repos.py:225
 #, python-format
 msgid "error occurred during creation of repository %s"
 msgstr "创建版本库时发生错误%s"
 
-#: rhodecode/controllers/admin/repos.py:330
+#: rhodecode/controllers/admin/repos.py:320
 #, python-format
 msgid "Cannot delete %s it still contains attached forks"
 msgstr "无法删除%s因为它还有其他分复刻本库"
 
-#: rhodecode/controllers/admin/repos.py:359
+#: rhodecode/controllers/admin/repos.py:349
 msgid "An error occurred during deletion of repository user"
 msgstr "删除版本库用户时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:378
+#: rhodecode/controllers/admin/repos.py:368
 msgid "An error occurred during deletion of repository users groups"
 msgstr "删除版本库用户组时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:396
+#: rhodecode/controllers/admin/repos.py:386
 msgid "An error occurred during deletion of repository stats"
 msgstr "删除版本库统计时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:413
+#: rhodecode/controllers/admin/repos.py:403
 msgid "An error occurred during cache invalidation"
 msgstr "清除缓存时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:453
+#: rhodecode/controllers/admin/repos.py:443
 msgid "Updated repository visibility in public journal"
 msgstr "成功更新在公共日志中的可见性"
 
-#: rhodecode/controllers/admin/repos.py:457
+#: rhodecode/controllers/admin/repos.py:447
 msgid "An error occurred during setting this repository in public journal"
 msgstr "设置版本库到公共日志时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:462 rhodecode/model/validators.py:300
+#: rhodecode/controllers/admin/repos.py:452 rhodecode/model/validators.py:300
 msgid "Token mismatch"
 msgstr "令牌不匹配"
 
-#: rhodecode/controllers/admin/repos.py:475
+#: rhodecode/controllers/admin/repos.py:465
 msgid "Pulled from remote location"
 msgstr "成功拉取自远程路径"
 
-#: rhodecode/controllers/admin/repos.py:477
+#: rhodecode/controllers/admin/repos.py:467
 msgid "An error occurred during pull from remote location"
 msgstr "从远程路径拉取时发生错误"
 
-#: rhodecode/controllers/admin/repos.py:493
+#: rhodecode/controllers/admin/repos.py:483
 msgid "Nothing"
 msgstr "无"
 
-#: rhodecode/controllers/admin/repos.py:495
+#: rhodecode/controllers/admin/repos.py:485
 #, python-format
 msgid "Marked repo %s as fork of %s"
 msgstr "成功将版本库%s标记为复刻自%s"
 
-#: rhodecode/controllers/admin/repos.py:499
+#: rhodecode/controllers/admin/repos.py:489
 msgid "An error occurred during this operation"
 msgstr "在搜索操作中发生错误"
 
@@ -921,6 +895,14 @@ msgstr "还有%s个"
 #: rhodecode/lib/helpers.py:887
 msgid "No Files"
 msgstr "没有文件"
+
+#: rhodecode/lib/helpers.py:1163
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was created or renamed from "
+"the filesystem please run the application again in order to rescan "
+"repositories"
+msgstr "版本库%s没有映射到数据库，可能是从文件系统创建或者重命名，请重启RhodeCode以重新扫描版本库"
 
 #: rhodecode/lib/utils2.py:403
 #, python-format
@@ -4214,4 +4196,20 @@ msgstr "%s标签"
 #: rhodecode/templates/tags/tags.html:29
 msgid "Compare tags"
 msgstr "比较标签"
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was created or renamed"
+#~ " from the file system please run "
+#~ "the application again in order to "
+#~ "rescan repositories"
+#~ msgstr " 版本库%s没有映射到数据库，可能是从文件系统创建或者重命名，请重启RhodeCode以重新扫描版本库"
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was moved or renamed  "
+#~ "from the filesystem please run the "
+#~ "application again in order to rescan "
+#~ "repositories"
+#~ msgstr "版本库%s没有映射到数据库，可能是从文件系统创建或者重命名，请重启RhodeCode以重新扫描版本库"
 

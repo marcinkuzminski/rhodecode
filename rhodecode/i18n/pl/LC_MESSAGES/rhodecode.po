@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rhodecode 0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-12-14 04:02+0100\n"
+"POT-Creation-Date: 2012-12-14 04:19+0100\n"
 "PO-Revision-Date: 2012-11-25 03:42+0200\n"
 "Last-Translator: Nemo <areczek01@gmail.com>\n"
 "Language-Team: Test\n"
@@ -188,35 +188,12 @@ msgstr "Gałęzie"
 msgid "Tags"
 msgstr "Etykiety"
 
-#: rhodecode/controllers/forks.py:74 rhodecode/controllers/settings.py:80
-#: rhodecode/controllers/admin/repos.py:92
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"%s repozytorium nie jest mapowane do db może zostało utworzone lub "
-"zmienione z systemie plików proszę uruchomić aplikację ponownie, aby "
-"ponownie przeskanować repozytoria"
-
-#: rhodecode/controllers/forks.py:134
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the file system please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"%s repozytorium nie jest mapowane do db może zostało utworzone lub "
-"zmienione z systemu plików proszę uruchomić aplikację ponownie, aby "
-"ponownie przeskanować repozytoria"
-
-#: rhodecode/controllers/forks.py:168
+#: rhodecode/controllers/forks.py:158
 #, python-format
 msgid "forked %s repository as %s"
 msgstr "gałęzi %s w repozytorium %s"
 
-#: rhodecode/controllers/forks.py:182
+#: rhodecode/controllers/forks.py:172
 #, python-format
 msgid "An error occurred during repository forking %s"
 msgstr "Wystąpił błąd podczas rozgałęzienia %s repozytorium"
@@ -285,58 +262,46 @@ msgstr "Nie ma szukanego indeksu. Proszę uruchomić indeksowanie whoosh"
 msgid "An error occurred during this search operation"
 msgstr "Wystąpił błąd podczas wyszukiwania tej operacji"
 
-#: rhodecode/controllers/settings.py:124
-#: rhodecode/controllers/admin/repos.py:277
+#: rhodecode/controllers/settings.py:119
+#: rhodecode/controllers/admin/repos.py:272
 #, python-format
 msgid "Repository %s updated successfully"
 msgstr "Repozytorium %s zostało pomyślnie zaktualizowane"
 
-#: rhodecode/controllers/settings.py:142
-#: rhodecode/controllers/admin/repos.py:295
+#: rhodecode/controllers/settings.py:137
+#: rhodecode/controllers/admin/repos.py:290
 #, python-format
 msgid "error occurred during update of repository %s"
 msgstr "wystąpił błąd podczas aktualizacji repozytorium %s"
 
-#: rhodecode/controllers/settings.py:160
-#: rhodecode/controllers/admin/repos.py:313
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was moved or renamed  from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"%s repozytorium nie jest mapowane do db może zostało przeniesione lub "
-"zmienione w systemie plików proszę uruchomić aplikację ponownie, aby "
-"ponownie przeskanować repozytoria"
-
-#: rhodecode/controllers/settings.py:172
-#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/settings.py:162
+#: rhodecode/controllers/admin/repos.py:315
 #, python-format
 msgid "deleted repository %s"
 msgstr "usunięte repozytorium %s"
 
-#: rhodecode/controllers/settings.py:176
-#: rhodecode/controllers/admin/repos.py:335
-#: rhodecode/controllers/admin/repos.py:341
+#: rhodecode/controllers/settings.py:166
+#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/admin/repos.py:331
 #, python-format
 msgid "An error occurred during deletion of %s"
 msgstr "Wystąpił błąd podczas usuwania %s"
 
-#: rhodecode/controllers/settings.py:195
+#: rhodecode/controllers/settings.py:185
 msgid "unlocked"
 msgstr "Odblokowany"
 
-#: rhodecode/controllers/settings.py:198
+#: rhodecode/controllers/settings.py:188
 msgid "locked"
 msgstr "zablokowany"
 
-#: rhodecode/controllers/settings.py:200
+#: rhodecode/controllers/settings.py:190
 #, python-format
 msgid "Repository has been %s"
 msgstr "Repozytoriów jest %s"
 
-#: rhodecode/controllers/settings.py:204
-#: rhodecode/controllers/admin/repos.py:433
+#: rhodecode/controllers/settings.py:194
+#: rhodecode/controllers/admin/repos.py:423
 msgid "An error occurred during unlocking"
 msgstr "Wystąpił błąd podczas odblokowywania"
 
@@ -487,76 +452,76 @@ msgstr "Domyślne uprawnienia zaktualizowane pomyślnie"
 msgid "error occurred during update of permissions"
 msgstr "wystąpił błąd podczas aktualizacji uprawnień"
 
-#: rhodecode/controllers/admin/repos.py:126
+#: rhodecode/controllers/admin/repos.py:121
 msgid "--REMOVE FORK--"
 msgstr "--USUŃ ROZGAŁĘZIENIE--"
 
-#: rhodecode/controllers/admin/repos.py:195
+#: rhodecode/controllers/admin/repos.py:190
 #, python-format
 msgid "created repository %s from %s"
 msgstr "utworzone repozytorium %s z %s"
 
-#: rhodecode/controllers/admin/repos.py:199
+#: rhodecode/controllers/admin/repos.py:194
 #, python-format
 msgid "created repository %s"
 msgstr "utworzone repozytorium %s"
 
-#: rhodecode/controllers/admin/repos.py:230
+#: rhodecode/controllers/admin/repos.py:225
 #, python-format
 msgid "error occurred during creation of repository %s"
 msgstr "wystąpił błąd podczas tworzenia repozytorium %s"
 
-#: rhodecode/controllers/admin/repos.py:330
+#: rhodecode/controllers/admin/repos.py:320
 #, python-format
 msgid "Cannot delete %s it still contains attached forks"
 msgstr "Nie można usunąć %s nadal zawiera załączniki rozgałęzienia"
 
-#: rhodecode/controllers/admin/repos.py:359
+#: rhodecode/controllers/admin/repos.py:349
 msgid "An error occurred during deletion of repository user"
 msgstr "Wystąpił błąd podczas usunięcia użytkownika z repozytorium"
 
-#: rhodecode/controllers/admin/repos.py:378
+#: rhodecode/controllers/admin/repos.py:368
 msgid "An error occurred during deletion of repository users groups"
 msgstr "Wystąpił błąd podczas usunięcia grupy użytkowników z repozytorium"
 
-#: rhodecode/controllers/admin/repos.py:396
+#: rhodecode/controllers/admin/repos.py:386
 msgid "An error occurred during deletion of repository stats"
 msgstr "Wystąpił błąd podczas usuwania z repozytorium statystyk"
 
-#: rhodecode/controllers/admin/repos.py:413
+#: rhodecode/controllers/admin/repos.py:403
 msgid "An error occurred during cache invalidation"
 msgstr "Wystąpił błąd podczas unieważniania cache"
 
-#: rhodecode/controllers/admin/repos.py:453
+#: rhodecode/controllers/admin/repos.py:443
 msgid "Updated repository visibility in public journal"
 msgstr "Zaktualizowano widoczność stron w publicznym dzienniku"
 
-#: rhodecode/controllers/admin/repos.py:457
+#: rhodecode/controllers/admin/repos.py:447
 msgid "An error occurred during setting this repository in public journal"
 msgstr "Wystąpił błąd podczas ustawiania tego repozytorium w dzienniku publicznym"
 
-#: rhodecode/controllers/admin/repos.py:462 rhodecode/model/validators.py:300
+#: rhodecode/controllers/admin/repos.py:452 rhodecode/model/validators.py:300
 msgid "Token mismatch"
 msgstr "Niezgodność tokenu"
 
-#: rhodecode/controllers/admin/repos.py:475
+#: rhodecode/controllers/admin/repos.py:465
 msgid "Pulled from remote location"
 msgstr "Pobieranie z lokalizacji zdalnej"
 
-#: rhodecode/controllers/admin/repos.py:477
+#: rhodecode/controllers/admin/repos.py:467
 msgid "An error occurred during pull from remote location"
 msgstr "Wystąpił błąd podczas pobierania z lokalizacji zdalnej"
 
-#: rhodecode/controllers/admin/repos.py:493
+#: rhodecode/controllers/admin/repos.py:483
 msgid "Nothing"
 msgstr "Brak"
 
-#: rhodecode/controllers/admin/repos.py:495
+#: rhodecode/controllers/admin/repos.py:485
 #, python-format
 msgid "Marked repo %s as fork of %s"
 msgstr "Oznaczono %s repo jako rozwidlenie %s"
 
-#: rhodecode/controllers/admin/repos.py:499
+#: rhodecode/controllers/admin/repos.py:489
 msgid "An error occurred during this operation"
 msgstr "Wystąpił błąd podczas tej operacji"
 
@@ -943,6 +908,17 @@ msgstr "i %s więcej"
 #: rhodecode/lib/helpers.py:887
 msgid "No Files"
 msgstr "Brak Plików"
+
+#: rhodecode/lib/helpers.py:1163
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was created or renamed from "
+"the filesystem please run the application again in order to rescan "
+"repositories"
+msgstr ""
+"%s repozytorium nie jest mapowane do db może zostało utworzone lub "
+"zmienione z systemie plików proszę uruchomić aplikację ponownie, aby "
+"ponownie przeskanować repozytoria"
 
 #: rhodecode/lib/utils2.py:403
 #, python-format
@@ -4323,4 +4299,30 @@ msgstr "Etykiety pliku %s"
 #, fuzzy
 msgid "Compare tags"
 msgstr "porównanie"
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was created or renamed"
+#~ " from the file system please run "
+#~ "the application again in order to "
+#~ "rescan repositories"
+#~ msgstr ""
+#~ "%s repozytorium nie jest mapowane do "
+#~ "db może zostało utworzone lub zmienione"
+#~ " z systemu plików proszę uruchomić "
+#~ "aplikację ponownie, aby ponownie przeskanować"
+#~ " repozytoria"
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was moved or renamed  "
+#~ "from the filesystem please run the "
+#~ "application again in order to rescan "
+#~ "repositories"
+#~ msgstr ""
+#~ "%s repozytorium nie jest mapowane do "
+#~ "db może zostało przeniesione lub "
+#~ "zmienione w systemie plików proszę "
+#~ "uruchomić aplikację ponownie, aby ponownie "
+#~ "przeskanować repozytoria"
 

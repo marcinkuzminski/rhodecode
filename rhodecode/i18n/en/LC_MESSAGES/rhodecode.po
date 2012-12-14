@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rhodecode 0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2012-12-14 04:02+0100\n"
+"POT-Creation-Date: 2012-12-14 04:19+0100\n"
 "PO-Revision-Date: 2011-02-25 19:13+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
@@ -180,29 +180,12 @@ msgstr ""
 msgid "Tags"
 msgstr ""
 
-#: rhodecode/controllers/forks.py:74 rhodecode/controllers/settings.py:80
-#: rhodecode/controllers/admin/repos.py:92
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-
-#: rhodecode/controllers/forks.py:134
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the file system please run the application again in order to rescan "
-"repositories"
-msgstr ""
-
-#: rhodecode/controllers/forks.py:168
+#: rhodecode/controllers/forks.py:158
 #, python-format
 msgid "forked %s repository as %s"
 msgstr ""
 
-#: rhodecode/controllers/forks.py:182
+#: rhodecode/controllers/forks.py:172
 #, python-format
 msgid "An error occurred during repository forking %s"
 msgstr ""
@@ -271,55 +254,46 @@ msgstr ""
 msgid "An error occurred during this search operation"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:124
-#: rhodecode/controllers/admin/repos.py:277
+#: rhodecode/controllers/settings.py:119
+#: rhodecode/controllers/admin/repos.py:272
 #, python-format
 msgid "Repository %s updated successfully"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:142
-#: rhodecode/controllers/admin/repos.py:295
+#: rhodecode/controllers/settings.py:137
+#: rhodecode/controllers/admin/repos.py:290
 #, python-format
 msgid "error occurred during update of repository %s"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:160
-#: rhodecode/controllers/admin/repos.py:313
-#, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was moved or renamed  from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-
-#: rhodecode/controllers/settings.py:172
-#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/settings.py:162
+#: rhodecode/controllers/admin/repos.py:315
 #, python-format
 msgid "deleted repository %s"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:176
-#: rhodecode/controllers/admin/repos.py:335
-#: rhodecode/controllers/admin/repos.py:341
+#: rhodecode/controllers/settings.py:166
+#: rhodecode/controllers/admin/repos.py:325
+#: rhodecode/controllers/admin/repos.py:331
 #, python-format
 msgid "An error occurred during deletion of %s"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:195
+#: rhodecode/controllers/settings.py:185
 msgid "unlocked"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:198
+#: rhodecode/controllers/settings.py:188
 msgid "locked"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:200
+#: rhodecode/controllers/settings.py:190
 #, python-format
 msgid "Repository has been %s"
 msgstr ""
 
-#: rhodecode/controllers/settings.py:204
-#: rhodecode/controllers/admin/repos.py:433
+#: rhodecode/controllers/settings.py:194
+#: rhodecode/controllers/admin/repos.py:423
 msgid "An error occurred during unlocking"
 msgstr ""
 
@@ -468,76 +442,76 @@ msgstr ""
 msgid "error occurred during update of permissions"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:126
+#: rhodecode/controllers/admin/repos.py:121
 msgid "--REMOVE FORK--"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:195
+#: rhodecode/controllers/admin/repos.py:190
 #, python-format
 msgid "created repository %s from %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:199
+#: rhodecode/controllers/admin/repos.py:194
 #, python-format
 msgid "created repository %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:230
+#: rhodecode/controllers/admin/repos.py:225
 #, python-format
 msgid "error occurred during creation of repository %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:330
+#: rhodecode/controllers/admin/repos.py:320
 #, python-format
 msgid "Cannot delete %s it still contains attached forks"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:359
+#: rhodecode/controllers/admin/repos.py:349
 msgid "An error occurred during deletion of repository user"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:378
+#: rhodecode/controllers/admin/repos.py:368
 msgid "An error occurred during deletion of repository users groups"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:396
+#: rhodecode/controllers/admin/repos.py:386
 msgid "An error occurred during deletion of repository stats"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:413
+#: rhodecode/controllers/admin/repos.py:403
 msgid "An error occurred during cache invalidation"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:453
+#: rhodecode/controllers/admin/repos.py:443
 msgid "Updated repository visibility in public journal"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:457
+#: rhodecode/controllers/admin/repos.py:447
 msgid "An error occurred during setting this repository in public journal"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:462 rhodecode/model/validators.py:300
+#: rhodecode/controllers/admin/repos.py:452 rhodecode/model/validators.py:300
 msgid "Token mismatch"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:475
+#: rhodecode/controllers/admin/repos.py:465
 msgid "Pulled from remote location"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:477
+#: rhodecode/controllers/admin/repos.py:467
 msgid "An error occurred during pull from remote location"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:493
+#: rhodecode/controllers/admin/repos.py:483
 msgid "Nothing"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:495
+#: rhodecode/controllers/admin/repos.py:485
 #, python-format
 msgid "Marked repo %s as fork of %s"
 msgstr ""
 
-#: rhodecode/controllers/admin/repos.py:499
+#: rhodecode/controllers/admin/repos.py:489
 msgid "An error occurred during this operation"
 msgstr ""
 
@@ -917,6 +891,14 @@ msgstr ""
 
 #: rhodecode/lib/helpers.py:887
 msgid "No Files"
+msgstr ""
+
+#: rhodecode/lib/helpers.py:1163
+#, python-format
+msgid ""
+"%s repository is not mapped to db perhaps it was created or renamed from "
+"the filesystem please run the application again in order to rescan "
+"repositories"
 msgstr ""
 
 #: rhodecode/lib/utils2.py:403
@@ -4211,4 +4193,20 @@ msgstr ""
 #: rhodecode/templates/tags/tags.html:29
 msgid "Compare tags"
 msgstr ""
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was created or renamed"
+#~ " from the file system please run "
+#~ "the application again in order to "
+#~ "rescan repositories"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "%s repository is not mapped to db"
+#~ " perhaps it was moved or renamed  "
+#~ "from the filesystem please run the "
+#~ "application again in order to rescan "
+#~ "repositories"
+#~ msgstr ""
 
