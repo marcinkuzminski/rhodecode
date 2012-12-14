@@ -96,6 +96,12 @@ class PullrequestsController(BaseRepoController):
             #if repo doesn't have default branch return first found
             return repo.branches.keys()[0]
 
+    def _get_is_allowed_change_status(self, pull_request):
+        owner = self.rhodecode_user.user_id == pull_request.user_id 
+        reviewer = self.rhodecode_user.user_id in [x.user_id for x in
+                                                   pull_request.reviewers]
+        return (self.rhodecode_user.admin or owner or reviewer)
+
     def show_all(self, repo_name):
         c.pull_requests = PullRequestModel().get_all(repo_name)
         c.repo_name = repo_name
@@ -334,7 +340,7 @@ class PullrequestsController(BaseRepoController):
         c.users_groups_array = repo_model.get_users_groups_js()
         c.pull_request = PullRequest.get_or_404(pull_request_id)
         c.target_repo = c.pull_request.org_repo.repo_name
-
+        c.allowed_to_change_status = self._get_is_allowed_change_status(c.pull_request)
         cc_model = ChangesetCommentsModel()
         cs_model = ChangesetStatusModel()
         _cs_statuses = cs_model.get_statuses(c.pull_request.org_repo,
@@ -405,7 +411,9 @@ class PullrequestsController(BaseRepoController):
         status = request.POST.get('changeset_status')
         change_status = request.POST.get('change_changeset_status')
         text = request.POST.get('text')
-        if status and change_status:
+
+        allowed_to_change_status = self._get_is_allowed_change_status(pull_request)
+        if status and change_status and allowed_to_change_status:
             text = text or (_('Status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
         comm = ChangesetCommentsModel().create(
@@ -416,27 +424,34 @@ class PullrequestsController(BaseRepoController):
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
             status_change=(ChangesetStatus.get_status_lbl(status)
-                           if status and change_status else None)
+            if status and change_status and allowed_to_change_status else None)
         )
 
-        # get status if set !
-        if status and change_status:
-            ChangesetStatusModel().set_status(
-                c.rhodecode_db_repo.repo_id,
-                status,
-                c.rhodecode_user.user_id,
-                comm,
-                pull_request=pull_request_id
-            )
         action_logger(self.rhodecode_user,
                       'user_commented_pull_request:%s' % pull_request_id,
                       c.rhodecode_db_repo, self.ip_addr, self.sa)
 
-        if request.POST.get('save_close'):
-            PullRequestModel().close_pull_request(pull_request_id)
-            action_logger(self.rhodecode_user,
-                      'user_closed_pull_request:%s' % pull_request_id,
-                      c.rhodecode_db_repo, self.ip_addr, self.sa)
+        if allowed_to_change_status:
+            # get status if set !
+            if status and change_status:
+                ChangesetStatusModel().set_status(
+                    c.rhodecode_db_repo.repo_id,
+                    status,
+                    c.rhodecode_user.user_id,
+                    comm,
+                    pull_request=pull_request_id
+                )
+
+            if request.POST.get('save_close'):
+                if status in ['rejected', 'approved']:
+                    PullRequestModel().close_pull_request(pull_request_id)
+                    action_logger(self.rhodecode_user,
+                              'user_closed_pull_request:%s' % pull_request_id,
+                              c.rhodecode_db_repo, self.ip_addr, self.sa)
+                else:
+                    h.flash(_('Closing pull request on other statuses than '
+                              'rejected or approved forbidden'),
+                            category='warning')
 
         Session().commit()
 

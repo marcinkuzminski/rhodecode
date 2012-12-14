@@ -276,6 +276,16 @@ class DbManage(object):
                 self.klass.create_default_options(skip_existing=True)
                 Session().commit()
 
+            def step_9(self):
+                perm_fixes = self.klass.reset_permissions(User.DEFAULT_USER)
+                Session().commit()
+                if perm_fixes:
+                    notify('There was an inconsistent state of permissions '
+                           'detected for default user. Permissions are now '
+                           'reset to the default value for default user. '
+                           'Please validate and check default permissions '
+                           'in admin panel')
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE

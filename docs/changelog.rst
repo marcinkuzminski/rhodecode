@@ -5,6 +5,24 @@ Changelog
 =========
 
 
+1.5.1 (**2012-12-13**)
+----------------------
+
+news
+++++
+
+- implements #677: Don't allow to close pull requests when they are 
+  under-review status
+- implemented #670 Implementation of Roles in Pull Request
+
+fixes
++++++
+
+- default permissions can get duplicated after migration
+- fixed changeset status labels, they now select radio buttons
+- #682 translation difficult for multi-line text
+- #683 fixed difference between messages about not mapped repositories
+
 1.5.0 (**2012-12-12**)
 ----------------------
 

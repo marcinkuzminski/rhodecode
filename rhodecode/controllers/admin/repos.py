@@ -89,12 +89,7 @@ class ReposController(BaseController):
         repo = db_repo.scm_instance
 
         if c.repo_info is None:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was created or renamed from the filesystem'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
+            h.not_mapped_error(repo_name)
             return redirect(url('repos'))
 
         ##override defaults for exact repo info here git/hg etc
@@ -310,12 +305,7 @@ class ReposController(BaseController):
         repo_model = RepoModel()
         repo = repo_model.get_by_repo_name(repo_name)
         if not repo:
-            h.flash(_('%s repository is not mapped to db perhaps'
-                      ' it was moved or renamed  from the filesystem'
-                      ' please run the application again'
-                      ' in order to rescan repositories') % repo_name,
-                      category='error')
-
+            h.not_mapped_error(repo_name)
             return redirect(url('repos'))
         try:
             action_logger(self.rhodecode_user, 'admin_deleted_repo',

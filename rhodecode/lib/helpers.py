@@ -1157,3 +1157,10 @@ def journal_filter_help():
             "repository:vcs OR repository:test"
             "username:test AND repository:test*"
     '''))
+
+
+def not_mapped_error(repo_name):
+    flash(_('%s repository is not mapped to db perhaps'
+            ' it was created or renamed from the filesystem'
+            ' please run the application again'
+            ' in order to rescan repositories') % repo_name, category='error')
