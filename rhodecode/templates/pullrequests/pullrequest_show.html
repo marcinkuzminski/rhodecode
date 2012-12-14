@@ -166,7 +166,7 @@
       ${comment.comments(h.url('pullrequest_comment', repo_name=c.repo_name,
                                 pull_request_id=c.pull_request.pull_request_id),
                                 c.current_changeset_status,
-                                close_btn=True)}
+                                close_btn=True, change_status=c.allowed_to_change_status)}
     %endif
 
     <script type="text/javascript">

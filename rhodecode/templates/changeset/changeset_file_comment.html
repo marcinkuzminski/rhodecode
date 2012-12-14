@@ -109,7 +109,7 @@
 </%def>
 
 ## MAIN COMMENT FORM
-<%def name="comments(post_url, cur_status, close_btn=False)">
+<%def name="comments(post_url, cur_status, close_btn=False, change_status=True)">
 
 <div class="comments">
     %if c.rhodecode_user.username != 'default':
@@ -121,9 +121,12 @@
                 ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
           		'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
           		_('Use @username inside this text to send notification to this RhodeCode user')))|n}
+              %if change_status:
                 | <label for="show_changeset_status_box" class="tooltip" title="${_('Check this to change current status of code-review for this changeset')}"> ${_('change status')}</label>
                   <input style="vertical-align: bottom;margin-bottom:-2px" id="show_changeset_status_box" type="checkbox" name="change_changeset_status" />
+              %endif
             </div>
+            %if change_status:
             <div id="status_block_container" class="status-block" style="display:none">
                 %for status,lbl in c.changeset_statuses:
                     <div class="">
@@ -132,13 +135,14 @@
                     </div>
                 %endfor
             </div>
+            %endif
             <div class="mentions-container" id="mentions_container"></div>
              ${h.textarea('text')}
         </div>
         <div class="comment-button">
         ${h.submit('save', _('Comment'), class_="ui-btn large")}
-        %if close_btn:
-           ${h.submit('save_close', _('Comment and close'), class_='ui-btn blue large %s' % 'hidden' if cur_status in ['not_reviewd','under_review'] else '')}
+        %if close_btn and change_status:
+           ${h.submit('save_close', _('Comment and close'), class_='ui-btn blue large %s' % ('hidden' if cur_status in ['not_reviewed','under_review'] else ''))}
         %endif
         </div>
         ${h.end_form()}
