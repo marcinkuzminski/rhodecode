@@ -555,16 +555,19 @@ OUTPUT::
     id : <id_given_in_input>
     result: None if repository does not exist or
             {
-                "repo_id" :     "<repo_id>",
-                "repo_name" :   "<reponame>"
-                "repo_type" :   "<repo_type>",
-                "clone_uri" :   "<clone_uri>",
-                "private": :    "<bool>",
-                "created_on" :  "<datetimecreated>",                
-                "description" : "<description>",
-                "landing_rev":  "<landing_rev>",
-                "owner":        "<repo_owner>",
-                "fork_of":  "<name_of_fork_parent>",
+                "repo_id" :          "<repo_id>",
+                "repo_name" :        "<reponame>"
+                "repo_type" :        "<repo_type>",
+                "clone_uri" :        "<clone_uri>",
+                "enable_downloads":  "<bool>",
+                "enable_locking":    "<bool>",
+                "enable_statistics": "<bool>",                
+                "private":           "<bool>",
+                "created_on" :       "<datetimecreated>",                
+                "description" :      "<description>",
+                "landing_rev":       "<landing_rev>",
+                "owner":             "<repo_owner>",
+                "fork_of":           "<name_of_fork_parent>",
                 "members" :     [
                                   { 
                                     "type": "user",
@@ -613,16 +616,19 @@ OUTPUT::
     id : <id_given_in_input>
     result: [
               {
-                "repo_id" :     "<repo_id>",
-                "repo_name" :   "<reponame>"
-                "repo_type" :   "<repo_type>",
-                "clone_uri" :   "<clone_uri>",
-                "private": :    "<bool>",
-                "created_on" :  "<datetimecreated>",                
-                "description" : "<description>",
-                "landing_rev":  "<landing_rev>",
-                "owner":        "<repo_owner>",
-                "fork_of":  "<name_of_fork_parent>",
+                "repo_id" :          "<repo_id>",
+                "repo_name" :        "<reponame>"
+                "repo_type" :        "<repo_type>",
+                "clone_uri" :        "<clone_uri>",
+                "private": :         "<bool>",
+                "created_on" :       "<datetimecreated>",                
+                "description" :      "<description>",
+                "landing_rev":       "<landing_rev>",
+                "owner":             "<repo_owner>",
+                "fork_of":           "<name_of_fork_parent>",
+                "enable_downloads":  "<bool>",
+                "enable_locking":    "<bool>",
+                "enable_statistics": "<bool>",                   
               },
               …
             ]
@@ -679,13 +685,16 @@ INPUT::
     api_key : "<api_key>"
     method :  "create_repo"
     args:     {
-                "repo_name" :   "<reponame>",
-                "owner" :       "<onwer_name_or_id>",
-                "repo_type" :   "<repo_type>",
-                "description" : "<description> = Optional('')",
-                "private" :     "<bool> = Optional(False)",
-                "clone_uri" :   "<clone_uri> = Optional(None)",
-                "landing_rev" : "<landing_rev> = Optional('tip')",
+                "repo_name" :        "<reponame>",
+                "owner" :            "<onwer_name_or_id>",
+                "repo_type" :        "<repo_type> = Optional('hg')",
+                "description" :      "<description> = Optional('')",
+                "private" :          "<bool> = Optional(False)",
+                "clone_uri" :        "<clone_uri> = Optional(None)",
+                "landing_rev" :      "<landing_rev> = Optional('tip')",
+                "enable_downloads":  "<bool> = Optional(False)",
+                "enable_locking":    "<bool> = Optional(False)",
+                "enable_statistics": "<bool> = Optional(False)",
               }
 
 OUTPUT::
@@ -694,16 +703,19 @@ OUTPUT::
     result: {
               "msg": "Created new repository `<reponame>`",
               "repo": {
-                "repo_id" :     "<repo_id>",
-                "repo_name" :   "<reponame>"
-                "repo_type" :   "<repo_type>",
-                "clone_uri" :   "<clone_uri>",
-                "private": :    "<bool>",
-                "created_on" :  "<datetimecreated>",                
-                "description" : "<description>",
-                "landing_rev":  "<landing_rev>",
-                "owner":        "<repo_owner>",
-                "fork_of":  "<name_of_fork_parent>",
+                "repo_id" :          "<repo_id>",
+                "repo_name" :        "<reponame>"
+                "repo_type" :        "<repo_type>",
+                "clone_uri" :        "<clone_uri>",
+                "private": :         "<bool>",
+                "created_on" :       "<datetimecreated>",                
+                "description" :      "<description>",
+                "landing_rev":       "<landing_rev>",
+                "owner":             "<repo_owner>",
+                "fork_of":           "<name_of_fork_parent>",
+                "enable_downloads":  "<bool>",
+                "enable_locking":    "<bool>",
+                "enable_statistics": "<bool>",                     
               },
             }
     error:  null

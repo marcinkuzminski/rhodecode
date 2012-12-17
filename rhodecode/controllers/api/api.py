@@ -38,7 +38,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.db import Repository
+from rhodecode.model.db import Repository, RhodeCodeSetting
 
 log = logging.getLogger(__name__)
 
@@ -556,9 +556,12 @@ class ApiController(JSONRPCController):
             )
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
-    def create_repo(self, apiuser, repo_name, owner, repo_type,
+    def create_repo(self, apiuser, repo_name, owner, repo_type=Optional('hg'),
                     description=Optional(''), private=Optional(False),
-                    clone_uri=Optional(None), landing_rev=Optional('tip')):
+                    clone_uri=Optional(None), landing_rev=Optional('tip'),
+                    enable_statistics=Optional(False),
+                    enable_locking=Optional(False),
+                    enable_downloads=Optional(False)):
         """
         Create repository, if clone_url is given it makes a remote clone
         if repo_name is withina  group name the groups will be created
@@ -578,7 +581,18 @@ class ApiController(JSONRPCController):
         if RepoModel().get_by_repo_name(repo_name):
             raise JSONRPCError("repo `%s` already exist" % repo_name)
 
-        private = Optional.extract(private)
+        defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        if isinstance(private, Optional):
+            private = defs.get('repo_private') or Optional.extract(private)
+        if isinstance(repo_type, Optional):
+            repo_type = defs.get('repo_type')
+        if isinstance(enable_statistics, Optional):
+            enable_statistics = defs.get('repo_enable_statistics')
+        if isinstance(enable_locking, Optional):
+            enable_locking = defs.get('repo_enable_locking')
+        if isinstance(enable_downloads, Optional):
+            enable_downloads = defs.get('repo_enable_downloads')
+
         clone_uri = Optional.extract(clone_uri)
         description = Optional.extract(description)
         landing_rev = Optional.extract(landing_rev)
@@ -596,6 +610,9 @@ class ApiController(JSONRPCController):
                 clone_uri=clone_uri,
                 repos_group=group,
                 landing_rev=landing_rev,
+                enable_statistics=enable_statistics,
+                enable_downloads=enable_downloads,
+                enable_locking=enable_locking
             )
 
             Session().commit()

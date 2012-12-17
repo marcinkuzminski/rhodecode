@@ -339,9 +339,9 @@ class RepoModel(BaseModel):
         copy_fork_permissions = form_data.get('copy_permissions')
         fork_of = form_data.get('fork_parent_id')
 
-        ##defaults
+        ## repo creation defaults, private and repo_type are filled in form
         defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
-        enable_statistics = defs.get('repo_enable_statistic')
+        enable_statistics = defs.get('repo_enable_statistics')
         enable_locking = defs.get('repo_enable_locking')
         enable_downloads = defs.get('repo_enable_downloads')
 

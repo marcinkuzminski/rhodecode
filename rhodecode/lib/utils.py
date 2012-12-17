@@ -423,6 +423,13 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
 #    CacheInvalidation.clear_cache()
 #    sa.commit()
 
+    ##creation defaults
+    defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+    enable_statistics = defs.get('repo_enable_statistics')
+    enable_locking = defs.get('repo_enable_locking')
+    enable_downloads = defs.get('repo_enable_downloads')
+    private = defs.get('repo_private')
+
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
         db_repo = rm.get_by_repo_name(name)
@@ -433,13 +440,18 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
             desc = (repo.description
                     if repo.description != 'unknown'
                     else '%s repository' % name)
+
             new_repo = rm.create_repo(
                 repo_name=name,
                 repo_type=repo.alias,
                 description=desc,
                 repos_group=getattr(group, 'group_id', None),
                 owner=user,
-                just_db=True
+                just_db=True,
+                enable_locking=enable_locking,
+                enable_downloads=enable_downloads,
+                enable_statistics=enable_statistics,
+                private=private
             )
             # we added that repo just now, and make sure it has githook
             # installed
