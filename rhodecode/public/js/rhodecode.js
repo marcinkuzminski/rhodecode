@@ -416,7 +416,6 @@ YAHOO.yuitip.main = {
 	},
 
 	init: function(){
-		yt._tooltip = '';
 		yt.tipBox = yt.$('tip-box');
 		if(!yt.tipBox){
 			yt.tipBox = document.createElement('div');
@@ -457,7 +456,7 @@ YAHOO.yuitip.main = {
 
 		if(yt.tipText !== ''){
 			// save org title
-			yt._tooltip = yt.tipText;
+			YUD.setAttribute(el, 'tt_title', yt.tipText);
 			// reset title to not show org tooltips
 			YUD.setAttribute(el, 'title', '');
 
@@ -495,7 +494,7 @@ YAHOO.yuitip.main = {
 		} else {
 			YUD.setStyle(yt.tipBox, 'display', 'none');
 		}
-		YUD.setAttribute(el,'title', yt._tooltip);
+		YUD.setAttribute(el,'title', YUD.getAttribute(el, 'tt_title'));
 	}
 }
 
