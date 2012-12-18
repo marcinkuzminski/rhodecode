@@ -171,7 +171,10 @@ var url = location.href.split('#');
 if (url[1]) {
     //We have a hash
     var tabHash = url[1];
-    tabs[tabHash]();
+    var func = tabs[tabHash]
+    if (func){
+        func();
+    }
 }
 
 // main table sorting
