@@ -73,7 +73,8 @@ class UpdateCommand(BasePasterCommand):
         else:
             repo_list = Repository.getAll()
         for repo in repo_list:
-            last_change = repo.scm_instance.last_change
+            last_change = (repo.scm_instance.last_change if repo.scm_instance
+                           else datetime.datetime.utcfromtimestamp(0))
             repo.update_last_change(last_change)
 
     def update_parser(self):
