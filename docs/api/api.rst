@@ -711,12 +711,47 @@ OUTPUT::
                 "created_on" :       "<datetimecreated>",                
                 "description" :      "<description>",
                 "landing_rev":       "<landing_rev>",
-                "owner":             "<repo_owner>",
+                "owner":             "<username or user_id>",
                 "fork_of":           "<name_of_fork_parent>",
                 "enable_downloads":  "<bool>",
                 "enable_locking":    "<bool>",
                 "enable_statistics": "<bool>",                     
               },
+            }
+    error:  null
+
+
+fork_repo
+---------
+
+Creates a fork of given repo. This command can be executed only using api_key
+belonging to user with admin rights. In case of using celery this will
+immidiatelly return success message, while fork is going to be created
+asynchronous
+
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "fork_repo"
+    args:     {
+                "repoid" :          "<reponame or repo_id>",
+                "fork_name":        "<forkname>",
+                "owner":            "<username or user_id>",
+                "description":      "<description>",
+                "copy_permissions": "<bool>",
+                "private":          "<bool>",
+                "landing_rev":      "<landing_rev>"
+                                
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result: {
+              "msg": "Created fork of `<reponame>` as `<forkname>`",
+              "success": true
             }
     error:  null
 
