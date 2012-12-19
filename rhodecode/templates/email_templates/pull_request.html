@@ -1,9 +1,10 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="main.html"/>
 
-${_('User %s opened pull request for repository %s and wants you to review changes.') % ('<b>%s</b>' % pr_user_created,pr_repo_url)}
+${_('User %s opened pull request for repository %s and wants you to review changes.') % (('<b>%s</b>' % pr_user_created),pr_repo_url) |n}
 <div>${_('title')}: ${pr_title}</div>
 <div>${_('description')}:</div>
+<div>${_('View this pull request here')}: ${pr_url}</div>
 <p>
 ${body}
 </p>
@@ -15,4 +16,4 @@ ${body}
 %endfor
 </ul>
 
-${_('View this pull request here')}: ${pr_url}
+
