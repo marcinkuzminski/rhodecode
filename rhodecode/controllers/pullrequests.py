@@ -299,7 +299,7 @@ class PullrequestsController(BaseRepoController):
                                   else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
-        c.target_repo = c.repo_name
+        c.target_repo = other_repo.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
 
@@ -339,7 +339,6 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
         c.pull_request = PullRequest.get_or_404(pull_request_id)
-        c.target_repo = c.pull_request.org_repo.repo_name
         c.allowed_to_change_status = self._get_is_allowed_change_status(c.pull_request)
         cc_model = ChangesetCommentsModel()
         cs_model = ChangesetStatusModel()
