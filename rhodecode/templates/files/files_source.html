@@ -86,15 +86,6 @@ YUE.onDOMReady(function(){
       }
     highlight_lines(h_lines);
 
-    //remember original location
-    var old_hash  = location.href.substring(location.href.indexOf('#'));
-
-    // this makes a jump to anchor moved by 3 posstions for padding
-    window.location.hash = '#L'+Math.max(parseInt(h_lines[0])-3,1);
-
-    //sets old anchor
-    window.location.hash = old_hash;
-
     }
 
     // select code link event
