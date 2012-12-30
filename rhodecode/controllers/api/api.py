@@ -140,6 +140,9 @@ class ApiController(JSONRPCController):
     errors that happens
 
     """
+    def _get_ip_addr(self, environ):
+        from rhodecode.lib.base import _get_ip_addr
+        return _get_ip_addr(environ)
 
     @HasPermissionAllDecorator('hg.admin')
     def pull(self, apiuser, repoid):

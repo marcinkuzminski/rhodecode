@@ -11,7 +11,7 @@ from webhelpers.pylonslib.secure_form import authentication_token
 
 from formencode.validators import (
     UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set,
-    NotEmpty
+    NotEmpty, IPAddress, CIDR
 )
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib.utils import repo_name_slug
@@ -23,7 +23,7 @@ from rhodecode.lib.auth import HasReposGroupPermissionAny
 
 # silence warnings and pylint
 UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set, \
-    NotEmpty
+    NotEmpty, IPAddress, CIDR
 
 log = logging.getLogger(__name__)
 
@@ -705,4 +705,41 @@ def NotReviewedRevisions(repo_id):
                     error_dict=dict(revisions=revs)
                 )
 
+    return _validator
+
+
+def ValidIp():
+    class _validator(CIDR):
+        messages = dict(
+            badFormat=_('Please enter a valid IP address (a.b.c.d)'),
+            illegalOctets=_('The octets must be within the range of 0-255'
+                ' (not %(octet)r)'),
+            illegalBits=_('The network size (bits) must be within the range'
+                ' of 0-32 (not %(bits)r)'))
+
+        def validate_python(self, value, state):
+            try:
+                # Split into octets and bits
+                if '/' in value:  # a.b.c.d/e
+                    addr, bits = value.split('/')
+                else:  # a.b.c.d
+                    addr, bits = value, 32
+                # Use IPAddress validator to validate the IP part
+                IPAddress.validate_python(self, addr, state)
+                # Bits (netmask) correct?
+                if not 0 <= int(bits) <= 32:
+                    raise formencode.Invalid(
+                        self.message('illegalBits', state, bits=bits),
+                        value, state)
+            # Splitting faild: wrong syntax
+            except ValueError:
+                raise formencode.Invalid(self.message('badFormat', state),
+                                         value, state)
+
+        def to_python(self, value, state):
+            v = super(_validator, self).to_python(value, state)
+            #if IP doesn't end with a mask, add /32
+            if '/' not in value:
+                v += '/32'
+            return v
     return _validator

@@ -4040,6 +4040,22 @@ div#legend_container table td,div#legend_choices table td {
 	float: left
 }
 
+.ips_wrap{
+    padding: 0px 20px;
+}
+
+.ips_wrap .ip_entry{
+    height: 30px;
+    padding:0px 0px 0px 10px;
+}
+.ips_wrap .ip_entry .ip{
+    float: left
+}
+.ips_wrap .ip_entry .ip_action{
+    float: left
+}
+
+
 /*README STYLE*/
 
 div.readme {

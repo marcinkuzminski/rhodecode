@@ -518,6 +518,33 @@ class UserEmailMap(Base, BaseModel):
         self._email = val.lower() if val else None
 
 
+class UserIpMap(Base, BaseModel):
+    __tablename__ = 'user_ip_map'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'ip_addr'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    __mapper_args__ = {}
+
+    ip_id = Column("ip_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    ip_addr = Column("ip_addr", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    user = relationship('User', lazy='joined')
+
+    @classmethod
+    def _get_ip_range(cls, ip_addr):
+        from rhodecode.lib import ipaddr
+        net = ipaddr.IPv4Network(ip_addr)
+        return [str(net.network), str(net.broadcast)]
+
+    def __json__(self):
+        return dict(
+          ip_addr=self.ip_addr,
+          ip_range=self._get_ip_range(self.ip_addr)
+        )
+
+
 class UserLog(Base, BaseModel):
     __tablename__ = 'user_logs'
     __table_args__ = (
@@ -637,6 +664,7 @@ class Repository(Base, BaseModel):
     landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
     _locked = Column("locked", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    #changeset_cache = Column("changeset_cache", LargeBinary(), nullable=False) #JSON data
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)

@@ -43,7 +43,7 @@ from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
 HTTPBadRequest, HTTPError
 
 from rhodecode.model.db import User
-from rhodecode.lib.auth import AuthUser
+from rhodecode.lib.auth import AuthUser, check_ip_access
 from rhodecode.lib.base import _get_ip_addr, _get_access_path
 from rhodecode.lib.utils2 import safe_unicode
 
@@ -99,6 +99,7 @@ class JSONRPCController(WSGIController):
         controller and if it exists, dispatch to it.
         """
         start = time.time()
+        ip_addr = self._get_ip_addr(environ)
         self._req_id = None
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")
@@ -144,7 +145,17 @@ class JSONRPCController(WSGIController):
             if u is None:
                 return jsonrpc_error(retid=self._req_id,
                                      message='Invalid API KEY')
-            auth_u = AuthUser(u.user_id, self._req_api_key)
+            #check if we are allowed to use this IP
+            allowed_ips = AuthUser.get_allowed_ips(u.user_id)
+            if check_ip_access(source_ip=ip_addr, allowed_ips=allowed_ips) is False:
+                log.info('Access for IP:%s forbidden, '
+                         'not in %s' % (ip_addr, allowed_ips))
+                return jsonrpc_error(retid=self._req_id,
+                        message='request from IP:%s not allowed' % (ip_addr))
+            else:
+                log.info('Access for IP:%s allowed' % (ip_addr))
+
+            auth_u = AuthUser(u.user_id, self._req_api_key, ip_addr=ip_addr)
         except Exception, e:
             return jsonrpc_error(retid=self._req_id,
                                  message='Invalid API KEY')

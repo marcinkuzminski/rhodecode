@@ -45,7 +45,7 @@ from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission, RhodeCodeSetting, User
+from rhodecode.model.db import Permission, RhodeCodeSetting, User, UserIpMap
 
 log = logging.getLogger(__name__)
 
@@ -313,11 +313,12 @@ class  AuthUser(object):
     in
     """
 
-    def __init__(self, user_id=None, api_key=None, username=None):
+    def __init__(self, user_id=None, api_key=None, username=None, ip_addr=None):
 
         self.user_id = user_id
         self.api_key = None
         self.username = username
+        self.ip_addr = ip_addr
 
         self.name = ''
         self.lastname = ''
@@ -326,6 +327,7 @@ class  AuthUser(object):
         self.admin = False
         self.inherit_default_permissions = False
         self.permissions = {}
+        self.allowed_ips = set()
         self._api_key = api_key
         self.propagate_data()
         self._instance = None
@@ -375,6 +377,8 @@ class  AuthUser(object):
 
         log.debug('Auth User is now %s' % self)
         user_model.fill_perms(self)
+        log.debug('Filling Allowed IPs')
+        self.allowed_ips = AuthUser.get_allowed_ips(self.user_id)
 
     @property
     def is_admin(self):
@@ -405,6 +409,14 @@ class  AuthUser(object):
         username = cookie_store.get('username')
         api_key = cookie_store.get('api_key')
         return AuthUser(user_id, api_key, username)
+
+    @classmethod
+    def get_allowed_ips(cls, user_id):
+        _set = set()
+        user_ips = UserIpMap.query().filter(UserIpMap.user_id == user_id).all()
+        for ip in user_ips:
+            _set.add(ip.ip_addr)
+        return _set or set(['0.0.0.0/0'])
 
 
 def set_available_permissions(config):
@@ -821,3 +833,19 @@ class HasPermissionAnyMiddleware(object):
                  )
         )
         return False
+
+
+def check_ip_access(source_ip, allowed_ips=None):
+    """
+    Checks if source_ip is a subnet of any of allowed_ips.
+
+    :param source_ip:
+    :param allowed_ips: list of allowed ips together with mask
+    """
+    from rhodecode.lib import ipaddr
+    log.debug('checking if ip:%s is subnet of %s' % (source_ip, allowed_ips))
+    if isinstance(allowed_ips, (tuple, list, set)):
+        for ip in allowed_ips:
+            if ipaddr.IPAddress(source_ip) in ipaddr.IPNetwork(ip):
+                return True
+    return False

@@ -40,7 +40,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
     Notification, RepoGroup, UserRepoGroupToPerm, UsersGroupRepoGroupToPerm, \
-    UserEmailMap
+    UserEmailMap, UserIpMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
@@ -703,5 +703,35 @@ class UserModel(BaseModel):
         """
         user = self._get_user(user)
         obj = UserEmailMap.query().get(email_id)
+        if obj:
+            self.sa.delete(obj)
+
+    def add_extra_ip(self, user, ip):
+        """
+        Adds ip address to UserIpMap
+
+        :param user:
+        :param ip:
+        """
+        from rhodecode.model import forms
+        form = forms.UserExtraIpForm()()
+        data = form.to_python(dict(ip=ip))
+        user = self._get_user(user)
+
+        obj = UserIpMap()
+        obj.user = user
+        obj.ip_addr = data['ip']
+        self.sa.add(obj)
+        return obj
+
+    def delete_extra_ip(self, user, ip_id):
+        """
+        Removes ip address from UserIpMap
+
+        :param user:
+        :param ip_id:
+        """
+        user = self._get_user(user)
+        obj = UserIpMap.query().get(ip_id)
         if obj:
             self.sa.delete(obj)

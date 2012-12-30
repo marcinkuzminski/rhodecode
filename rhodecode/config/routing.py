@@ -222,6 +222,10 @@ def make_map(config):
                   action="add_email", conditions=dict(method=["PUT"]))
         m.connect("user_emails_delete", "/users_emails/{id}",
                   action="delete_email", conditions=dict(method=["DELETE"]))
+        m.connect("user_ips", "/users_ips/{id}",
+                  action="add_ip", conditions=dict(method=["PUT"]))
+        m.connect("user_ips_delete", "/users_ips/{id}",
+                  action="delete_ip", conditions=dict(method=["DELETE"]))
 
     #ADMIN USERS GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,

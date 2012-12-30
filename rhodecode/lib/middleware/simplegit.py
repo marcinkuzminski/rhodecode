@@ -109,7 +109,7 @@ class SimpleGit(BaseVCSController):
         if not self._check_ssl(environ, start_response):
             return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
 
-        ipaddr = self._get_ip_addr(environ)
+        ip_addr = self._get_ip_addr(environ)
         username = None
         self._git_first_op = False
         # skip passing error to error controller
@@ -140,7 +140,7 @@ class SimpleGit(BaseVCSController):
             anonymous_user = self.__get_user('default')
             username = anonymous_user.username
             anonymous_perm = self._check_permission(action, anonymous_user,
-                                                    repo_name)
+                                                    repo_name, ip_addr)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
@@ -182,7 +182,7 @@ class SimpleGit(BaseVCSController):
                     return HTTPInternalServerError()(environ, start_response)
 
                 #check permissions for this repository
-                perm = self._check_permission(action, user, repo_name)
+                perm = self._check_permission(action, user, repo_name, ip_addr)
                 if perm is not True:
                     return HTTPForbidden()(environ, start_response)
 
@@ -191,7 +191,7 @@ class SimpleGit(BaseVCSController):
         from rhodecode import CONFIG
         server_url = get_server_url(environ)
         extras = {
-            'ip': ipaddr,
+            'ip': ip_addr,
             'username': username,
             'action': action,
             'repository': repo_name,
