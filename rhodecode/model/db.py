@@ -370,6 +370,11 @@ class User(Base, BaseModel):
         return [self.email] + [x.email for x in other]
 
     @property
+    def ip_addresses(self):
+        ret = UserIpMap.query().filter(UserIpMap.user == self).all()
+        return [x.ip_addr for x in ret]
+
+    @property
     def username_and_name(self):
         return '%s (%s %s)' % (self.username, self.firstname, self.lastname)
 
@@ -472,6 +477,7 @@ class User(Base, BaseModel):
             admin=user.admin,
             ldap_dn=user.ldap_dn,
             last_login=user.last_login,
+            ip_addresses=user.ip_addresses
         )
         return data
 
