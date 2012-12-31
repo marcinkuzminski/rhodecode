@@ -38,7 +38,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UsersGroupModel
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.db import Repository, RhodeCodeSetting
+from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap
 
 log = logging.getLogger(__name__)
 
@@ -140,9 +140,6 @@ class ApiController(JSONRPCController):
     errors that happens
 
     """
-    def _get_ip_addr(self, environ):
-        from rhodecode.lib.base import _get_ip_addr
-        return _get_ip_addr(environ)
 
     @HasPermissionAllDecorator('hg.admin')
     def pull(self, apiuser, repoid):
@@ -213,6 +210,22 @@ class ApiController(JSONRPCController):
             raise JSONRPCError(
                 'Error occurred locking repository `%s`' % repo.repo_name
             )
+
+    @HasPermissionAllDecorator('hg.admin')
+    def show_ip(self, apiuser, userid):
+        """
+        Shows IP address as seen from RhodeCode server, together with all
+        defined IP addresses for given user
+
+        :param apiuser:
+        :param userid:
+        """
+        user = get_user_or_error(userid)
+        ips = UserIpMap.query().filter(UserIpMap.user == user).all()
+        return dict(
+            ip_addr_server=self.ip_addr,
+            user_ips=ips
+        )
 
     @HasPermissionAllDecorator('hg.admin')
     def get_user(self, apiuser, userid):

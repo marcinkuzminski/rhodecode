@@ -86,6 +86,9 @@ class JSONRPCController(WSGIController):
 
      """
 
+    def _get_ip_addr(self, environ):
+        return _get_ip_addr(environ)
+
     def _get_method_args(self):
         """
         Return `self._rpc_args` to dispatched controller method
@@ -99,7 +102,7 @@ class JSONRPCController(WSGIController):
         controller and if it exists, dispatch to it.
         """
         start = time.time()
-        ip_addr = self._get_ip_addr(environ)
+        ip_addr = self.ip_addr = self._get_ip_addr(environ)
         self._req_id = None
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")

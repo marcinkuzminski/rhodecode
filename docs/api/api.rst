@@ -168,13 +168,46 @@ INPUT::
                 "repoid" : "<reponame or repo_id>"
                 "userid" : "<user_id or username>",
                 "locked" : "<bool true|false>"
-                
               }
 
 OUTPUT::
 
     id : <id_given_in_input>
     result : "User `<username>` set lock state for repo `<reponame>` to `true|false`"
+    error :  null
+
+
+show_ip
+-------
+
+Shows IP address as seen from RhodeCode server, together with all
+defined IP addresses for given user.
+This command can be executed only using api_key belonging to user with admin 
+rights.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "show_ip"
+    args :    {
+                "userid" : "<user_id or username>",
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : {
+                 "ip_addr_server": <ip_from_clien>",
+                 "user_ips": [
+                                {
+                                   "ip_addr": "<ip_with_mask>",
+                                   "ip_range": ["<start_ip>", "<end_ip>"],
+                                },
+                                ...
+                             ]
+             }
+    
     error :  null
 
 
