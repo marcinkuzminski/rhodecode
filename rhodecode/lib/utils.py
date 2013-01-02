@@ -464,8 +464,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         # system, this will register all repos and multiple instances
         key, _prefix, _org_key = CacheInvalidation._get_key(name)
         CacheInvalidation.invalidate(name)
-        log.debug("Creating a cache key for %s instance_id=>`%s`"
-                  % (name, _prefix or '-'))
+        log.debug("Creating a cache key for %s, instance_id %s"
+                  % (name, _prefix or 'unknown'))
 
     sa.commit()
     removed = []
