@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Compare')} ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -> ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
+    ${c.repo_name} ${_('Compare')} ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -28,7 +28,7 @@
             <div class="code-header cv">
                 <h3 class="code-header-title">${_('Compare View')}</h3>
                 <div>
-                ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -> ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}  <a href="${c.swap_url}">[swap]</a>
+                ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}  <a href="${c.swap_url}">[swap]</a>
                 </div>
             </div>
         </div>
