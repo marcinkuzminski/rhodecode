@@ -309,7 +309,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
-                log.debug('settings ui from file[%s]%s:%s' % (section, k, v))
+                log.debug('settings ui from file: [%s] %s=%s' % (section, k, v))
                 baseui.setconfig(safe_str(section), safe_str(k), safe_str(v))
 
     elif read_from == 'db':
@@ -321,7 +321,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
         hg_ui = ret
         for ui_ in hg_ui:
             if ui_.ui_active:
-                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
+                log.debug('settings ui from db: [%s] %s=%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(safe_str(ui_.ui_section), safe_str(ui_.ui_key),
                                  safe_str(ui_.ui_value))
