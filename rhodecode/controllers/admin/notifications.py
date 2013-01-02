@@ -110,8 +110,8 @@ class NotificationsController(BaseController):
         # url('notification', notification_id=ID)
         try:
             no = Notification.get(notification_id)
-            owner = lambda: (no.notifications_to_users.user.user_id
-                             == c.rhodecode_user.user_id)
+            owner = all(un.user.user_id == c.rhodecode_user.user_id
+                        for un in no.notifications_to_users)
             if h.HasPermissionAny('hg.admin')() or owner:
                     NotificationModel().mark_read(c.rhodecode_user.user_id, no)
                     Session().commit()
@@ -132,8 +132,8 @@ class NotificationsController(BaseController):
 
         try:
             no = Notification.get(notification_id)
-            owner = lambda: (no.notifications_to_users.user.user_id
-                             == c.rhodecode_user.user_id)
+            owner = all(un.user.user_id == c.rhodecode_user.user_id
+                        for un in no.notifications_to_users)
             if h.HasPermissionAny('hg.admin')() or owner:
                     NotificationModel().delete(c.rhodecode_user.user_id, no)
                     Session().commit()
@@ -149,8 +149,8 @@ class NotificationsController(BaseController):
         c.user = self.rhodecode_user
         no = Notification.get(notification_id)
 
-        owner = lambda: (no.notifications_to_users.user.user_id
-                         == c.user.user_id)
+        owner = all(un.user.user_id == c.rhodecode_user.user_id
+                    for un in no.notifications_to_users)
         if no and (h.HasPermissionAny('hg.admin', 'repository.admin')() or owner):
             unotification = NotificationModel()\
                             .get_user_notification(c.user.user_id, no)

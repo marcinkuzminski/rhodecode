@@ -477,7 +477,7 @@ class PullrequestsController(BaseRepoController):
             #don't allow deleting comments on closed pull request
             raise HTTPForbidden()
 
-        owner = lambda: co.author.user_id == c.rhodecode_user.user_id
+        owner = co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
             Session().commit()
