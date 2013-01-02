@@ -39,6 +39,7 @@ from rhodecode.tests import *
 from rhodecode.model.db import User, Repository, UserLog
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.user import UserModel
 
 DEBUG = True
 HOST = '127.0.0.1:5000'  # test host
@@ -420,3 +421,41 @@ class TestVCSOperations(unittest.TestCase):
 #        Session.remove()
 #        r = Repository.get_by_repo_name(GIT_REPO)
 #        assert r.locked == [None, None]
+
+    def test_ip_restriction_hg(self):
+        user_model = UserModel()
+        new_ip = user_model.add_extra_ip(TEST_USER_ADMIN_LOGIN, '10.10.10.10/32')
+        Session().commit()
+        clone_url = _construct_url(HG_REPO)
+        stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
+        assert 'abort: HTTP Error 403: Forbidden' in stderr
+
+        #release IP restrictions
+        clone_url = _construct_url(HG_REPO)
+        user_model.delete_extra_ip(TEST_USER_ADMIN_LOGIN, new_ip.ip_id)
+        Session().commit()
+        stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
+
+        assert 'requesting all changes' in stdout
+        assert 'adding changesets' in stdout
+        assert 'adding manifests' in stdout
+        assert 'adding file changes' in stdout
+
+        assert stderr == ''
+
+    def test_ip_restriction_git(self):
+        user_model = UserModel()
+        new_ip = user_model.add_extra_ip(TEST_USER_ADMIN_LOGIN, '10.10.10.10/32')
+        Session().commit()
+        clone_url = _construct_url(GIT_REPO)
+        stdout, stderr = Command('/tmp').execute('git clone', clone_url)
+        assert 'error: The requested URL returned error: 403 Forbidden' in stderr
+
+        #release IP restrictions
+        clone_url = _construct_url(GIT_REPO)
+        user_model.delete_extra_ip(TEST_USER_ADMIN_LOGIN, new_ip.ip_id)
+        Session().commit()
+        stdout, stderr = Command('/tmp').execute('git clone', clone_url)
+
+        assert 'Cloning into' in stdout
+        assert stderr == ''
