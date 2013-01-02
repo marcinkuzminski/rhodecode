@@ -336,7 +336,7 @@ class SettingsController(BaseController):
                 .get_email_tmpl(EmailNotificationModel.TYPE_DEFAULT,
                                 body=test_email_body)
 
-            recipients = [test_email] if [test_email] else None
+            recipients = [test_email] if test_email else None
 
             run_task(tasks.send_email, recipients, test_email_subj,
                      test_email_body, test_email_html_body)
