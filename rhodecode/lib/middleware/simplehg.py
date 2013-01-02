@@ -194,14 +194,15 @@ class SimpleHg(BaseVCSController):
             # invalidate cache on push
             if action == 'push':
                 self._invalidate_cache(repo_name)
-            log.info('%s action on HG repo "%s"' % (action, repo_name))
+            log.info('%s action on HG repo "%s" by "%s" from %s' %
+                     (action, repo_name, username, ip_addr))
             app = self.__make_app(repo_path, baseui, extras)
             return app(environ, start_response)
         except RepoError, e:
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
         except HTTPLockedRC, e:
-            log.debug('Repositry LOCKED ret code 423!')
+            log.debug('Repository LOCKED ret code 423!')
             return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())

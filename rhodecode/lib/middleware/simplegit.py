@@ -233,11 +233,12 @@ class SimpleGit(BaseVCSController):
                 self._invalidate_cache(repo_name)
             self._handle_githooks(repo_name, action, baseui, environ)
 
-            log.info('%s action on GIT repo "%s"' % (action, repo_name))
+            log.info('%s action on GIT repo "%s" by "%s" from %s' %
+                     (action, repo_name, username, ip_addr))
             app = self.__make_app(repo_name, repo_path, extras)
             return app(environ, start_response)
         except HTTPLockedRC, e:
-            log.debug('Repositry LOCKED ret code 423!')
+            log.debug('Repository LOCKED ret code 423!')
             return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
