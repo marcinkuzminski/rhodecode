@@ -127,7 +127,7 @@ class CompareController(BaseRepoController):
             org_ref = ('rev', rev_start)
             other_ref = ('rev', rev_end)
 
-        c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
+        c.cs_ranges = PullRequestModel().get_compare_data(
                                     org_repo, org_ref, other_repo, other_ref,
                                     )
 
@@ -156,7 +156,6 @@ class CompareController(BaseRepoController):
         diff_limit = self.cut_off_limit if not fulldiff else None
 
         _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
-                             discovery_data,
                              remote_compare=incoming_changesets)
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',

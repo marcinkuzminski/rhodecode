@@ -155,8 +155,7 @@ class PullRequestModel(BaseModel):
         pull_request.updated_on = datetime.datetime.now()
         self.sa.add(pull_request)
 
-    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref,
-                        discovery_data):
+    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref):
         """
         Returns a list of changesets that are incoming from org_repo@org_ref
         to other_repo@other_ref
@@ -170,7 +169,6 @@ class PullRequestModel(BaseModel):
 
         changesets = []
         #case two independent repos
-        common, incoming, rheads = discovery_data
         if org_repo != other_repo:
             revs = [
                 org_repo._repo.lookup(org_ref[1]),
@@ -223,46 +221,9 @@ class PullRequestModel(BaseModel):
 
         return changesets
 
-    def _get_discovery(self, org_repo, org_ref, other_repo, other_ref):
-        """
-        Get's mercurial discovery data used to calculate difference between
-        repos and refs
-
-        :param org_repo:
-        :type org_repo:
-        :param org_ref:
-        :type org_ref:
-        :param other_repo:
-        :type other_repo:
-        :param other_ref:
-        :type other_ref:
-        """
-
-        _org_repo = org_repo._repo
-        org_rev_type, org_rev = org_ref
-
-        _other_repo = other_repo._repo
-        other_rev_type, other_rev = other_ref
-
-        log.debug('Doing discovery for %s@%s vs %s@%s' % (
-                        org_repo, org_ref, other_repo, other_ref)
-        )
-
-        #log.debug('Filter heads are %s[%s]' % ('', org_ref[1]))
-        org_peer = localrepo.locallegacypeer(_org_repo.local())
-        tmp = discovery.findcommonincoming(
-                  repo=_other_repo,  # other_repo we check for incoming
-                  remote=org_peer,  # org_repo source for incoming
-#                  heads=[_other_repo[other_rev].node(),
-#                         _org_repo[org_rev].node()],
-                  force=True
-        )
-        return tmp
-
     def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
         """
-        Returns a tuple of incomming changesets, and discoverydata cache for
-        mercurial repositories
+        Returns incomming changesets for mercurial repositories
 
         :param org_repo:
         :type org_repo:
@@ -284,12 +245,7 @@ class PullRequestModel(BaseModel):
         other_repo_scm = other_repo.scm_instance
 
         alias = org_repo.scm_instance.alias
-        discovery_data = [None, None, None]
-        if alias == 'hg':
-            discovery_data = self._get_discovery(org_repo_scm, org_ref,
-                                               other_repo_scm, other_ref)
         cs_ranges = self._get_changesets(alias,
                                          org_repo_scm, org_ref,
-                                         other_repo_scm, other_ref,
-                                         discovery_data)
-        return cs_ranges, discovery_data
+                                         other_repo_scm, other_ref)
+        return cs_ranges

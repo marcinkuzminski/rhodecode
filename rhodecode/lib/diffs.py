@@ -704,7 +704,7 @@ class InMemoryBundleRepo(bundlerepository):
         self.bundlefilespos = {}
 
 
-def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
+def differ(org_repo, org_ref, other_repo, other_ref,
            remote_compare=False, context=3, ignore_whitespace=False):
     """
     General differ between branches, bookmarks, revisions of two remote or
@@ -735,7 +735,6 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
 
     elif remote_compare:
         opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
-        common, incoming, rheads = discovery_data
         org_repo_peer = localrepo.locallegacypeer(org_repo.local())
         # create a bundle (uncompressed if other repo is not local)
         if org_repo_peer.capable('getbundle'):
