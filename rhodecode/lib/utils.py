@@ -162,10 +162,8 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         user_log.user_ip = ipaddr
         sa.add(user_log)
 
-        log.info(
-            'Adding user %s, action %s on %s' % (user_obj, action,
-                                                 safe_unicode(repo))
-        )
+        log.info('Logging action %s on %s by %s' %
+                 (action, safe_unicode(repo), user_obj))
         if commit:
             sa.commit()
     except:
