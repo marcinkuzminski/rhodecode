@@ -24,22 +24,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import binascii
 import datetime
 import re
 
 from pylons.i18n.translation import _
 
 from rhodecode.model.meta import Session
-from rhodecode.lib import helpers as h
+from rhodecode.lib import helpers as h, unionrepo
 from rhodecode.model import BaseModel
 from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification,\
     ChangesetStatus
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
-from rhodecode.lib.vcs.utils.hgcompat import discovery, localrepo, scmutil, \
-    findcommonoutgoing
+from rhodecode.lib.vcs.utils.hgcompat import scmutil
 from rhodecode.lib.vcs.utils import safe_str
 
 log = logging.getLogger(__name__)
@@ -192,35 +190,21 @@ class PullRequestModel(BaseModel):
 
             #case two independent repos
             if org_repo != other_repo:
-                revs = [
-                    org_repo._repo.lookup(org_ref[1]),
-                    org_repo._repo.lookup(other_ref[1]), # lookup up in the wrong repo!
-                ]
-    
-                obj = findcommonoutgoing(org_repo._repo,
-                            localrepo.locallegacypeer(other_repo._repo.local()),
-                            revs,
-                            force=True)
-                revs = obj.missing
-    
-                for cs in map(binascii.hexlify, revs):
-                    _cs = org_repo.get_changeset(cs)
-                    changesets.append(_cs)
-                # in case we have revisions filter out the ones not in given range
-                if org_ref[0] == 'rev' and other_ref[0] == 'rev':
-                    revs = [x.raw_id for x in changesets]
-                    start = org_ref[1]
-                    stop = other_ref[1]
-                    changesets = changesets[revs.index(start):revs.index(stop) + 1]
+                hgrepo = unionrepo.unionrepository(org_repo.baseui,
+                                                   org_repo.path,
+                                                   other_repo.path)
+                revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
+                        (org_rev, other_rev)]
 
             #no remote compare do it on the same repository
             else:
+                hgrepo = org_repo._repo
                 revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
                         (other_rev, org_rev)]
     
-                out = scmutil.revrange(org_repo._repo, revs)
-                for cs in (out):
-                    changesets.append(org_repo.get_changeset(cs))
+            out = scmutil.revrange(hgrepo, revs)
+            for cs in (out):
+                changesets.append(org_repo.get_changeset(cs))
 
         elif alias == 'git':
             assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
