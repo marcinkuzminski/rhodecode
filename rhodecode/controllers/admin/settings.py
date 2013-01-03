@@ -121,8 +121,9 @@ class SettingsController(BaseController):
             added, removed = repo2db_mapper(initial, rm_obsolete)
 
             h.flash(_('Repositories successfully'
-                      ' rescanned added: %s,removed: %s') % (added, removed),
-                      category='success')
+                      ' rescanned added: %s, removed: %s') %
+                    (len(added), len(removed)),
+                    category='success')
 
         if setting_id == 'whoosh':
             repo_location = self._get_hg_ui_settings()['paths_root_path']
