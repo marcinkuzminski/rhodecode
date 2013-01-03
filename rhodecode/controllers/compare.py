@@ -103,8 +103,11 @@ class CompareController(BaseRepoController):
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
 
-        if c.org_repo is None or c.other_repo is None:
-            log.error('Could not found repo %s or %s' % (org_repo, other_repo))
+        if c.org_repo is None:
+            log.error('Could not find org repo %s' % org_repo)
+            raise HTTPNotFound
+        if c.other_repo is None:
+            log.error('Could not find other repo %s' % other_repo)
             raise HTTPNotFound
 
         if c.org_repo != c.other_repo and h.is_git(c.rhodecode_repo):
