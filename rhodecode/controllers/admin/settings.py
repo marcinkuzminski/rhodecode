@@ -51,7 +51,7 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.db import User
 from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
-from rhodecode.lib.utils2 import str2bool
+from rhodecode.lib.utils2 import str2bool, safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -119,10 +119,10 @@ class SettingsController(BaseController):
                 invalidate_cache('get_repo_cached_%s' % repo_name)
 
             added, removed = repo2db_mapper(initial, rm_obsolete)
-
-            h.flash(_('Repositories successfully'
-                      ' rescanned added: %s, removed: %s') %
-                    (len(added), len(removed)),
+            _repr = lambda l: ', '.join(map(safe_unicode, l)) or '-'
+            h.flash(_('Repositories successfully '
+                      'rescanned added: %s ; removed: %s') %
+                    (_repr(added), _repr(removed)),
                     category='success')
 
         if setting_id == 'whoosh':
