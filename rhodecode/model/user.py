@@ -27,7 +27,6 @@ import logging
 import traceback
 import itertools
 import collections
-import functools
 from pylons import url
 from pylons.i18n.translation import _
 

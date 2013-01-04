@@ -2002,7 +2002,6 @@ a.metatag[tag="license"]:hover {
 }
 
 #login div.title {
-	width: 420px;
 	clear: both;
 	overflow: hidden;
 	position: relative;
@@ -2021,7 +2020,6 @@ a.metatag[tag="license"]:hover {
 }
 
 #login div.inner {
-	width: 380px;
 	background: #FFF url("../images/login.png") no-repeat top left;
 	border-top: none;
 	border-bottom: none;
@@ -2038,7 +2036,6 @@ a.metatag[tag="license"]:hover {
 }
 
 #login div.form div.fields div.field div.input input {
-	width: 176px;
 	background: #FFF;
 	border-top: 1px solid #b3b3b3;
 	border-left: 1px solid #b3b3b3;

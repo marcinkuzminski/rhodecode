@@ -54,10 +54,9 @@ class LoginController(BaseController):
     def index(self):
         # redirect if already logged in
         c.came_from = request.GET.get('came_from')
-
-        if self.rhodecode_user.is_authenticated \
-                            and self.rhodecode_user.username != 'default':
-
+        not_default = self.rhodecode_user.username != 'default'
+        ip_allowed = self.rhodecode_user.ip_allowed
+        if self.rhodecode_user.is_authenticated and not_default and ip_allowed:
             return redirect(url('home'))
 
         if request.POST:

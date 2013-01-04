@@ -20,7 +20,7 @@ from rhodecode import __version__, BACKENDS
 from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
     safe_str, safe_int
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
-    HasPermissionAnyMiddleware, CookieStoreWrapper, check_ip_access
+    HasPermissionAnyMiddleware, CookieStoreWrapper
 from rhodecode.lib.utils import get_repo_slug, invalidate_cache
 from rhodecode.model import meta
 
@@ -146,10 +146,8 @@ class BaseVCSController(object):
         :param repo_name: repository name
         """
         #check IP
-        allowed_ips = AuthUser.get_allowed_ips(user.user_id)
-        if check_ip_access(source_ip=ip_addr, allowed_ips=allowed_ips) is False:
-            log.info('Access for IP:%s forbidden, '
-                     'not in %s' % (ip_addr, allowed_ips))
+        authuser = AuthUser(user_id=user.user_id, ip_addr=ip_addr)
+        if not authuser.ip_allowed:
             return False
         else:
             log.info('Access for IP:%s allowed' % (ip_addr))

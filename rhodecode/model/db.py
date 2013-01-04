@@ -536,6 +536,7 @@ class UserIpMap(Base, BaseModel):
     ip_id = Column("ip_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
     ip_addr = Column("ip_addr", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    active = Column("active", Boolean(), nullable=True, unique=None, default=True)
     user = relationship('User', lazy='joined')
 
     @classmethod

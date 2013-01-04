@@ -46,6 +46,7 @@ from rhodecode.lib.auth_ldap import AuthLdap
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
 from rhodecode.model.db import Permission, RhodeCodeSetting, User, UserIpMap
+from rhodecode.lib.caching_query import FromCache
 
 log = logging.getLogger(__name__)
 
@@ -327,7 +328,6 @@ class  AuthUser(object):
         self.admin = False
         self.inherit_default_permissions = False
         self.permissions = {}
-        self.allowed_ips = set()
         self._api_key = api_key
         self.propagate_data()
         self._instance = None
@@ -377,12 +377,28 @@ class  AuthUser(object):
 
         log.debug('Auth User is now %s' % self)
         user_model.fill_perms(self)
-        log.debug('Filling Allowed IPs')
-        self.allowed_ips = AuthUser.get_allowed_ips(self.user_id)
 
     @property
     def is_admin(self):
         return self.admin
+
+    @property
+    def ip_allowed(self):
+        """
+        Checks if ip_addr used in constructor is allowed from defined list of
+        allowed ip_addresses for user
+
+        :returns: boolean, True if ip is in allowed ip range
+        """
+        #check IP
+        allowed_ips = AuthUser.get_allowed_ips(self.user_id, cache=True)
+        if check_ip_access(source_ip=self.ip_addr, allowed_ips=allowed_ips):
+            log.debug('IP:%s is in range of %s' % (self.ip_addr, allowed_ips))
+            return True
+        else:
+            log.info('Access for IP:%s forbidden, '
+                     'not in %s' % (self.ip_addr, allowed_ips))
+            return False
 
     def __repr__(self):
         return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
@@ -411,9 +427,12 @@ class  AuthUser(object):
         return AuthUser(user_id, api_key, username)
 
     @classmethod
-    def get_allowed_ips(cls, user_id):
+    def get_allowed_ips(cls, user_id, cache=False):
         _set = set()
-        user_ips = UserIpMap.query().filter(UserIpMap.user_id == user_id).all()
+        user_ips = UserIpMap.query().filter(UserIpMap.user_id == user_id)
+        if cache:
+            user_ips = user_ips.options(FromCache("sql_cache_short",
+                                                  "get_user_ips_%s" % user_id))
         for ip in user_ips:
             _set.add(ip.ip_addr)
         return _set or set(['0.0.0.0/0'])
@@ -462,6 +481,15 @@ class LoginRequired(object):
     def __wrapper(self, func, *fargs, **fkwargs):
         cls = fargs[0]
         user = cls.rhodecode_user
+        loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
+
+        #check IP
+        ip_access_ok = True
+        if not user.ip_allowed:
+            from rhodecode.lib import helpers as h
+            h.flash(h.literal(_('IP %s not allowed' % (user.ip_addr))),
+                    category='warning')
+            ip_access_ok = False
 
         api_access_ok = False
         if self.api_access:
@@ -470,9 +498,9 @@ class LoginRequired(object):
                 api_access_ok = True
             else:
                 log.debug("API KEY token not valid")
-        loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
+
         log.debug('Checking if %s is authenticated @ %s' % (user.username, loc))
-        if user.is_authenticated or api_access_ok:
+        if (user.is_authenticated or api_access_ok) and ip_access_ok:
             reason = 'RegularAuth' if user.is_authenticated else 'APIAuth'
             log.info('user %s is authenticated and granted access to %s '
                      'using %s' % (user.username, loc, reason)
