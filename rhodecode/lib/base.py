@@ -319,7 +319,7 @@ class BaseRepoController(BaseController):
             dbr = c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
             # update last change according to VCS data
-            dbr.update_last_change(c.rhodecode_repo.last_change)
+            dbr.update_changeset_cache(dbr.get_changeset())
             if c.rhodecode_repo is None:
                 log.error('%s this repository is present in database but it '
                           'cannot be created as an scm instance', c.repo_name)

@@ -34,6 +34,7 @@ from os.path import dirname as dn, join as jn
 from rhodecode.model import init_model
 from rhodecode.lib.utils2 import engine_from_config, safe_str
 from rhodecode.model.db import RhodeCodeUi, Repository
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 
 #to get the rhodecode import
@@ -73,9 +74,9 @@ class UpdateCommand(BasePasterCommand):
         else:
             repo_list = Repository.getAll()
         for repo in repo_list:
-            last_change = (repo.scm_instance.last_change if repo.scm_instance
-                           else datetime.datetime.utcfromtimestamp(0))
-            repo.update_last_change(last_change)
+            last_cs = (repo.scm_instance.get_changeset() if repo.scm_instance
+                           else EmptyChangeset())
+            repo.update_changeset_cache(last_cs)
 
     def update_parser(self):
         self.parser.add_option('--update-only',

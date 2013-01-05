@@ -455,6 +455,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
             # installed
             if new_repo.repo_type == 'git':
                 ScmModel().install_git_hook(new_repo.scm_instance)
+            new_repo.update_changeset_cache()
         elif install_git_hook:
             if db_repo.repo_type == 'git':
                 ScmModel().install_git_hook(db_repo.scm_instance)

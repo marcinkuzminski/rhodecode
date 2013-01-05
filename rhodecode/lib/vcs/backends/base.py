@@ -376,6 +376,7 @@ class BaseChangeset(object):
         return dict(
             short_id=self.short_id,
             raw_id=self.raw_id,
+            revision=self.revision,
             message=self.message,
             date=self.date,
             author=self.author,

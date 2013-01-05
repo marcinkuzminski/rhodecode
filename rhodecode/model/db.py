@@ -671,7 +671,7 @@ class Repository(Base, BaseModel):
     landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
     _locked = Column("locked", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
-    #changeset_cache = Column("changeset_cache", LargeBinary(), nullable=False) #JSON data
+    _changeset_cache = Column("changeset_cache", LargeBinary(), nullable=True) #JSON data
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
@@ -716,6 +716,24 @@ class Repository(Base, BaseModel):
             self._locked = ':'.join(map(str, val))
         else:
             self._locked = None
+
+    @hybrid_property
+    def changeset_cache(self):
+        from rhodecode.lib.vcs.backends.base import EmptyChangeset
+        dummy = EmptyChangeset().__json__()
+        if not self._changeset_cache:
+            return dummy
+        try:
+            return json.loads(self._changeset_cache)
+        except TypeError:
+            return dummy
+
+    @changeset_cache.setter
+    def changeset_cache(self, val):
+        try:
+            self._changeset_cache = json.dumps(val)
+        except:
+            log.error(traceback.format_exc())
 
     @classmethod
     def url_sep(cls):
@@ -914,12 +932,30 @@ class Repository(Base, BaseModel):
         cs = self.get_changeset(self.landing_rev) or self.get_changeset()
         return cs
 
-    def update_last_change(self, last_change=None):
-        if last_change is None:
-            last_change = datetime.datetime.now()
-        if self.updated_on is None or self.updated_on != last_change:
-            log.debug('updated repo %s with new date %s' % (self, last_change))
+    def update_changeset_cache(self, cs_cache=None):
+        """
+        Update cache of last changeset for repository, keys should be::
+
+            short_id
+            raw_id
+            revision
+            message
+            date
+            author
+
+        :param cs_cache:
+        """
+        from rhodecode.lib.vcs.backends.base import BaseChangeset
+        if cs_cache is None:
+            cs_cache = self.get_changeset()
+        if isinstance(cs_cache, BaseChangeset):
+            cs_cache = cs_cache.__json__()
+
+        if cs_cache != self.changeset_cache:
+            last_change = cs_cache.get('date') or self.last_change
+            log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
             self.updated_on = last_change
+            self.changeset_cache = cs_cache
             Session().add(self)
             Session().commit()
 

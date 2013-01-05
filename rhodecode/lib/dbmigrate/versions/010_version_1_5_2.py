@@ -28,6 +28,23 @@ def upgrade(migrate_engine):
     tbl = UserIpMap.__table__
     tbl.create()
 
+    #==========================================================================
+    # REPOSITORIES
+    #==========================================================================
+    from rhodecode.lib.dbmigrate.schema.db_1_5_0 import Repository
+    tbl = Repository.__table__
+    changeset_cache = Column("changeset_cache", LargeBinary(), nullable=True)
+    # create username column
+    changeset_cache.create(table=tbl)
+
+    #fix cache data
+    _Session = Session()
+    ## after adding that column fix all usernames
+    repositories = _Session.query(Repository).all()
+    for entry in repositories:
+        entry.update_changeset_cache()
+    _Session.commit()
+
 
 def downgrade(migrate_engine):
     meta = MetaData()

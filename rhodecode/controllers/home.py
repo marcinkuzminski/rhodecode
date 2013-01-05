@@ -76,6 +76,13 @@ class HomeController(BaseController):
                                            .render(repo_name, _=_, h=h, c=c))
             atom_lnk = lambda repo_name: (template.get_def("atom")
                                            .render(repo_name, _=_, h=h, c=c))
+            tip = lambda repo_name, cs_cache: (template.get_def("revision")
+                                    .render(repo_name,
+                                            cs_cache.get('revision'),
+                                            cs_cache.get('raw_id'),
+                                            cs_cache.get('author'),
+                                            cs_cache.get('message'), _=_, h=h,
+                                            c=c))
 
             def desc(desc):
                 if c.visual.stylify_metatags:
@@ -90,6 +97,7 @@ class HomeController(BaseController):
                     "name": repo_lnk(repo.repo_name, repo.repo_type,
                                      repo.private, repo.fork),
                     "last_change": last_change(repo.last_db_change),
+                    "tip": tip(repo.repo_name, repo.changeset_cache),
                     "desc": desc(repo.description),
                     "owner": h.person(repo.user.username),
                     "rss": rss_lnk(repo.repo_name),
