@@ -362,10 +362,11 @@ class FileNode(Node):
         Returns pygment's lexer class. Would try to guess lexer taking file's
         content, name and mimetype.
         """
+
         try:
-            lexer = lexers.guess_lexer_for_filename(self.name, self.content)
+            lexer = lexers.guess_lexer_for_filename(self.name, self.content, stripnl=False)
         except lexers.ClassNotFound:
-            lexer = lexers.TextLexer()
+            lexer = lexers.TextLexer(stripnl=False)
         # returns first alias
         return lexer
 
