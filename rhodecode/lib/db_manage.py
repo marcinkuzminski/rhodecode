@@ -164,8 +164,8 @@ class DbManage(object):
 
             def step_0(self):
                 # step 0 is the schema upgrade, and than follow proper upgrades
-                notify('attempting to do database upgrade to version %s' \
-                                % __dbversion__)
+                notify('attempting to do database upgrade from '
+                       'version %s to version %s' %(curr_version, __dbversion__))
                 api.upgrade(db_uri, repository_path, __dbversion__)
                 notify('Schema upgrade completed')
 

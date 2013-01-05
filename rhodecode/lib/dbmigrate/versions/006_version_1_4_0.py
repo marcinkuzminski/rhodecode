@@ -12,6 +12,7 @@ from rhodecode.lib.dbmigrate.migrate.changeset import *
 
 from rhodecode.model.meta import Base
 from rhodecode.model import meta
+from rhodecode.lib.dbmigrate.versions import _reset_base
 
 log = logging.getLogger(__name__)
 
@@ -49,12 +50,7 @@ def upgrade(migrate_engine):
     tbl = ChangesetStatus.__table__
     tbl.create()
 
-    ## RESET COMPLETLY THE metadata for sqlalchemy to use the 1_3_0 Base
-    Base = declarative_base()
-    Base.metadata.clear()
-    Base.metadata = MetaData()
-    Base.metadata.bind = migrate_engine
-    meta.Base = Base
+    _reset_base(migrate_engine)
 
     #==========================================================================
     # USERS TABLE
@@ -173,12 +169,7 @@ def upgrade(migrate_engine):
                              ForeignKey('pull_requests.pull_request_id'),
                              nullable=True)
     pull_request_id.create(table=tbl)
-    ## RESET COMPLETLY THE metadata for sqlalchemy back after using 1_3_0
-    Base = declarative_base()
-    Base.metadata.clear()
-    Base.metadata = MetaData()
-    Base.metadata.bind = migrate_engine
-    meta.Base = Base
+    _reset_base(migrate_engine)
 
 
 def downgrade(migrate_engine):
