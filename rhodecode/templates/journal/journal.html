@@ -114,7 +114,7 @@
     </div>
 
     <script type="text/javascript">
-    
+
     YUE.on('j_filter','click',function(){
         var jfilter = YUD.get('j_filter');
         if(YUD.hasClass(jfilter, 'initial')){
@@ -132,8 +132,8 @@
         var val = YUD.get('j_filter').value;
         window.location = "${url.current(filter='__FILTER__')}".replace('__FILTER__',val);
     });
-    fix_j_filter_width(YUD.get('j_filter').value.length);    
-    
+    fix_j_filter_width(YUD.get('j_filter').value.length);
+
     var show_my = function(e){
         YUD.setStyle('watched','display','none');
         YUD.setStyle('my','display','');

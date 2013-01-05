@@ -40,7 +40,7 @@
                  %endfor
                  %else:
                     <span>${_('No parents')}</span>
-                 %endif                
+                 %endif
             </div>
             <div class="children">
                 %if c.changeset.children:
@@ -50,10 +50,10 @@
                  %endfor
                  %else:
                     <span>${_('No children')}</span>
-                 %endif                
-            </div>              
+                 %endif
+            </div>
 			<div class="code-header banner">
-      
+
                 <div class="hash">
                  r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}
                 </div>
@@ -74,7 +74,7 @@
                   ${c.context_url(request.GET)}
                 </div>
                 <div class="comments-number" style="float:right;padding-right:5px">${ungettext("%d comment", "%d comments", len(c.comments)) % len(c.comments)} ${ungettext("(%d inline)", "(%d inline)", c.inline_cnt) % c.inline_cnt}</div>
-            </div>          
+            </div>
 		</div>
 	    <div id="changeset_content">
 			<div class="container">

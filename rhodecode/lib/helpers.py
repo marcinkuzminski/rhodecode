@@ -1170,4 +1170,3 @@ def ip_range(ip_addr):
     from rhodecode.model.db import UserIpMap
     s, e = UserIpMap._get_ip_range(ip_addr)
     return '%s - %s' % (s, e)
-

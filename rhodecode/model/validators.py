@@ -566,7 +566,7 @@ def ValidPerms(type_='repo'):
 def ValidSettings():
     class _validator(formencode.validators.FancyValidator):
         def _to_python(self, value, state):
-            # settings  form for users that are not admin 
+            # settings  form for users that are not admin
             # can't edit certain parameters, it's extra backup if they mangle
             # with forms
 

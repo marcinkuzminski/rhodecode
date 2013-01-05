@@ -97,7 +97,7 @@ class PullrequestsController(BaseRepoController):
             return repo.branches.keys()[0]
 
     def _get_is_allowed_change_status(self, pull_request):
-        owner = self.rhodecode_user.user_id == pull_request.user_id 
+        owner = self.rhodecode_user.user_id == pull_request.user_id
         reviewer = self.rhodecode_user.user_id in [x.user_id for x in
                                                    pull_request.reviewers]
         return (self.rhodecode_user.admin or owner or reviewer)

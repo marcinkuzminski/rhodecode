@@ -74,7 +74,7 @@
                     return false;
                 }
             })(window);
-            
+
             YUE.onDOMReady(function(){
               tooltip_activate();
               show_more_event();
@@ -83,7 +83,7 @@
               YUE.on('quick_login_link','click',function(e){
                  // make sure we don't redirect
                  YUE.preventDefault(e);
-              
+
                  if(YUD.hasClass('quick_login_link','enabled')){
                      YUD.setStyle('quick_login','display','none');
                      YUD.removeClass('quick_login_link','enabled');
