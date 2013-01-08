@@ -740,6 +740,17 @@ class Repository(Base, BaseModel):
         return URL_SEP
 
     @classmethod
+    def normalize_repo_name(cls, repo_name):
+        """
+        Normalizes os specific repo_name to the format internally stored inside
+        dabatabase using URL_SEP
+
+        :param cls:
+        :param repo_name:
+        """
+        return cls.url_sep().join(repo_name.split(os.sep))
+
+    @classmethod
     def get_by_repo_name(cls, repo_name):
         q = Session().query(cls).filter(cls.repo_name == repo_name)
         q = q.options(joinedload(Repository.fork))\
@@ -750,6 +761,7 @@ class Repository(Base, BaseModel):
     @classmethod
     def get_by_full_path(cls, repo_full_path):
         repo_name = repo_full_path.split(cls.base_path(), 1)[-1]
+        repo_name = cls.normalize_repo_name(repo_name)
         return cls.get_by_repo_name(repo_name.strip(URL_SEP))
 
     @classmethod

@@ -230,7 +230,7 @@ class ScmModel(BaseModel):
 
             # name need to be decomposed and put back together using the /
             # since this is internal storage separator for rhodecode
-            name = Repository.url_sep().join(name.split(os.sep))
+            name = Repository.normalize_repo_name(name)
 
             try:
                 if name in repos:
