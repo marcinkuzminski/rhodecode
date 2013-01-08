@@ -37,13 +37,18 @@ def _get_ip_addr(environ):
     proxy_key2 = 'HTTP_X_FORWARDED_FOR'
     def_key = 'REMOTE_ADDR'
 
-    ip = environ.get(proxy_key2)
+    ip = environ.get(proxy_key)
     if ip:
         return ip
 
-    ip = environ.get(proxy_key)
-
+    ip = environ.get(proxy_key2)
     if ip:
+        # HTTP_X_FORWARDED_FOR can have mutliple ips inside
+        # the left-most being the original client, and each successive proxy 
+        # that passed the request adding the IP address where it received the 
+        # request from.
+        if ',' in ip:
+            ip = ip.split(',')[0].strip()
         return ip
 
     ip = environ.get(def_key, '0.0.0.0')
