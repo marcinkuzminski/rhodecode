@@ -41,6 +41,7 @@ from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
     RhodeCodeSetting
 from rhodecode.lib import helpers as h
+from rhodecode.lib.auth import HasRepoPermissionAny
 
 
 log = logging.getLogger(__name__)
@@ -112,6 +113,95 @@ class RepoModel(BaseModel):
              'grmembers': len(gr.members),
             } for gr in users_groups]
         )
+
+    @classmethod
+    def _render_datatable(cls, tmpl, *args, **kwargs):
+        import rhodecode
+        from pylons import tmpl_context as c
+        from pylons.i18n.translation import _
+
+        _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
+        template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
+
+        tmpl = template.get_def(tmpl)
+        kwargs.update(dict(_=_, h=h, c=c))
+        return tmpl.render(*args, **kwargs)
+
+    def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True):
+        _render = self._render_datatable
+
+        def quick_menu(repo_name):
+            return _render('quick_menu', repo_name)
+
+        def repo_lnk(name, rtype, private, fork_of):
+            return _render('repo_name', name, rtype, private, fork_of,
+                           short_name=not admin, admin=False)
+
+        def last_change(last_change):
+            return _render("last_change", last_change)
+
+        def rss_lnk(repo_name):
+            return _render("rss", repo_name)
+
+        def atom_lnk(repo_name):
+            return _render("atom", repo_name)
+
+        def last_rev(repo_name, cs_cache):
+            return _render('revision', repo_name, cs_cache.get('revision'),
+                           cs_cache.get('raw_id'), cs_cache.get('author'),
+                           cs_cache.get('message'))
+
+        def desc(desc):
+            from pylons import tmpl_context as c
+            if c.visual.stylify_metatags:
+                return h.urlify_text(h.desc_stylize(h.truncate(desc, 60)))
+            else:
+                return h.urlify_text(h.truncate(desc, 60))
+
+        def repo_actions(repo_name):
+            return _render('repo_actions', repo_name)
+
+        def owner_actions(user_id, username):
+            return _render('user_name', user_id, username)
+
+        repos_data = []
+        for repo in repos_list:
+            if perm_check:
+                # check permission at this level
+                if not HasRepoPermissionAny(
+                    'repository.read', 'repository.write', 'repository.admin'
+                )(repo.repo_name, 'get_repos_as_dict check'):
+                    continue
+            cs_cache = repo.changeset_cache
+            row = {
+                "menu": quick_menu(repo.repo_name),
+                "raw_name": repo.repo_name.lower(),
+                "name": repo_lnk(repo.repo_name, repo.repo_type,
+                                 repo.private, repo.fork),
+                "last_change": last_change(repo.last_db_change),
+                "last_changeset": last_rev(repo.repo_name, cs_cache),
+                "raw_tip": cs_cache.get('revision'),
+                "desc": desc(repo.description),
+                "owner": h.person(repo.user.username),
+                "rss": rss_lnk(repo.repo_name),
+                "atom": atom_lnk(repo.repo_name),
+
+            }
+            if admin:
+                row.update({
+                    "action": repo_actions(repo.repo_name),
+                    "owner": owner_actions(repo.user.user_id,
+                                           h.person(repo.user.username))
+                })
+            repos_data.append(row)
+
+        return {
+            "totalRecords": len(repos_list),
+            "startIndex": 0,
+            "sort": "name",
+            "dir": "asc",
+            "records": repos_data
+        }
 
     def _get_defaults(self, repo_name):
         """

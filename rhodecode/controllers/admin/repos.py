@@ -135,40 +135,10 @@ class ReposController(BaseController):
                         .order_by(func.lower(Repository.repo_name))\
                         .all()
 
-        repos_data = []
-        total_records = len(c.repos_list)
-
-        _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
-        template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
-
-        quick_menu = lambda repo_name: (template.get_def("quick_menu")
-                                        .render(repo_name, _=_, h=h, c=c))
-        repo_lnk = lambda name, rtype, private, fork_of: (
-            template.get_def("repo_name")
-            .render(name, rtype, private, fork_of, short_name=False,
-                    admin=True, _=_, h=h, c=c))
-
-        repo_actions = lambda repo_name: (template.get_def("repo_actions")
-                                       .render(repo_name, _=_, h=h, c=c))
-
-        for repo in c.repos_list:
-            repos_data.append({
-                "menu": quick_menu(repo.repo_name),
-                "raw_name": repo.repo_name.lower(),
-                "name": repo_lnk(repo.repo_name, repo.repo_type,
-                                 repo.private, repo.fork),
-                "desc": repo.description,
-                "owner": repo.user.username,
-                "action": repo_actions(repo.repo_name),
-            })
-
-        c.data = json.dumps({
-            "totalRecords": total_records,
-            "startIndex": 0,
-            "sort": "name",
-            "dir": "asc",
-            "records": repos_data
-        })
+        repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
+                                                   admin=True)
+        #json used to render the grid
+        c.data = json.dumps(repos_data)
 
         return render('admin/repos/repos.html')
 

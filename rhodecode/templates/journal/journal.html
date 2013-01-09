@@ -43,73 +43,36 @@
     </div>
     <div class="box box-right">
         <!-- box / title -->
+    
         <div class="title">
             <h5>
-            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-            <a id="show_watched" class="link-white" href="#watched">${_('Watched')}</a> / <a id="show_my" class="link-white" href="#my">${_('My repos')}</a>
+            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
+            <input class="q_filter_box" id="q_filter_watched" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
             </h5>
-             %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-             <ul class="links">
+             <ul class="links" style="color:#DADADA">
                <li>
-                 <span>${h.link_to(_('ADD'),h.url('admin_settings_create_repository'))}</span>
+                 <span><a id="show_watched" class="link-white current" href="#watched">${_('Watched')}</a> </span>
                </li>
+               <li>
+                 <span><a id="show_my" class="link-white" href="#my">${_('My repos')}</a> </span>
+               </li>
+               %if h.HasPermissionAny('hg.admin','hg.create.repository')():
+                 <li>
+                   <span>${h.link_to(_('Add repo'),h.url('admin_settings_create_repository'))}</span>
+                 </li>
+               %endif
              </ul>
-             %endif
-        </div>
+        </div>        
+        
         <!-- end box / title -->
-        <div id="my" class="table" style="display:none">
-        ## loaded via AJAX
-        ${_('Loading...')}
+        <div id="my_container" style="display:none">
+            <div class="table yui-skin-sam" id="repos_list_wrap"></div>
+            <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
         </div>
-
-        <div id="watched" class="table">
-          %if c.following:
-            <table>
-            <thead>
-                <tr>
-                <th class="left">${_('Name')}</th>
-            </thead>
-             <tbody>
-                %for entry in c.following:
-                  <tr>
-                    <td>
-                      %if entry.follows_user_id:
-                        <img title="${_('following user')}" alt="${_('user')}" src="${h.url('/images/icons/user.png')}"/>
-                        ${entry.follows_user.full_contact}
-                      %endif
-
-                      %if entry.follows_repo_id:
-                        <div style="float:right;padding-right:5px">
-                        <span id="follow_toggle_${entry.follows_repository.repo_id}" class="following" title="${_('Stop following this repository')}"
-                              onclick="javascript:toggleFollowingRepo(this,${entry.follows_repository.repo_id},'${str(h.get_token())}')">
-                        </span>
-                        </div>
-
-                         %if h.is_hg(entry.follows_repository):
-                           <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
-                         %elif h.is_git(entry.follows_repository):
-                           <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
-                         %endif
-
-                        %if entry.follows_repository.private and c.visual.show_private_icon:
-                          <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
-                        %elif not entry.follows_repository.private and c.visual.show_public_icon:
-                          <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
-                        %endif
-                        <span class="watched_repo">
-                            ${h.link_to(entry.follows_repository.repo_name,h.url('summary_home',repo_name=entry.follows_repository.repo_name))}
-                        </span>
-                      %endif
-                    </td>
-                  </tr>
-                %endfor
-            </tbody>
-            </table>
-          %else:
-              <div style="padding:5px 0px 10px 0px;">
-              ${_('You are not following any users or repositories')}
-              </div>
-          %endif
+        
+        <div id="watched_container">
+            <div class="table yui-skin-sam" id="watched_repos_list_wrap"></div>
+            <div id="watched-user-paginator" style="padding: 0px 0px 0px 20px"></div>
         </div>
     </div>
 
@@ -134,29 +97,47 @@
     });
     fix_j_filter_width(YUD.get('j_filter').value.length);
 
-    var show_my = function(e){
-        YUD.setStyle('watched','display','none');
-        YUD.setStyle('my','display','');
-
-        var url = "${h.url('admin_settings_my_repos')}";
-        ypjax(url, 'my', function(){
+    YUE.on('refresh','click',function(e){
+        ypjax("${h.url.current(filter=c.search_term)}","journal",function(){
+            show_more_event();
             tooltip_activate();
-            quick_repo_menu();
-            var nodes = YUQ('#my tr td a.repo_name');
-            var func = function(node){
-                return node.parentNode.parentNode.parentNode;
-            }
-            q_filter('q_filter',nodes,func);
-        });
+            show_changeset_tooltip();
+            });
+        YUE.preventDefault(e);
+    });    
+    
+    var show_my = function(e){
+        YUD.setStyle('watched_container','display','none');
+        YUD.setStyle('my_container','display','');
+        YUD.setStyle('q_filter','display','');
+        YUD.setStyle('q_filter_watched','display','none');
 
+        YUD.addClass('show_my', 'current');
+        YUD.removeClass('show_watched','current');
+        
+        if(!YUD.hasClass('show_my', 'loaded')){
+            table_renderer(${c.data |n});
+            YUD.addClass('show_my', 'loaded');
+        }
     }
     YUE.on('show_my','click',function(e){
         show_my(e);
     })
     var show_watched = function(e){
-    	YUD.setStyle('my','display','none');
-        YUD.setStyle('watched','display','');
-        var nodes = YUQ('#watched .watched_repo a');
+    	YUD.setStyle('my_container','display','none');
+        YUD.setStyle('watched_container','display','');
+        YUD.setStyle('q_filter_watched','display','');
+        YUD.setStyle('q_filter','display','none');
+
+        YUD.addClass('show_watched', 'current');
+        YUD.removeClass('show_my','current');
+        if(!YUD.hasClass('show_watched', 'loaded')){
+        	watched_renderer(${c.watched_data |n});
+            YUD.addClass('show_watched', 'loaded');
+        }        
+        
+        return
+        var nodes = YUQ('#watched_container .watched_repo a');
         var target = 'q_filter';
         var func = function(node){
             return node.parentNode.parentNode;
@@ -182,60 +163,213 @@
         	func();
         }
     }
+    function watched_renderer(data){
+        var myDataSource = new YAHOO.util.DataSource(data);
+        myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
 
-    YUE.on('refresh','click',function(e){
-        ypjax("${h.url.current(filter=c.search_term)}","journal",function(){
-        	show_more_event();
-        	tooltip_activate();
-        	show_changeset_tooltip();
-        	});
-        YUE.preventDefault(e);
-    });
+        myDataSource.responseSchema = {
+            resultsList: "records",
+            fields: [
+               {key:"menu"},
+               {key:"raw_name"},
+               {key:"name"},
+               {key:"last_changeset"},
+               {key:"action"},
+            ]
+         };
+        myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
 
-
-    // main table sorting
-    var myColumnDefs = [
-        {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
-        {key:"name",label:"${_('Name')}",sortable:true,
-            sortOptions: { sortFunction: nameSort }},
-        {key:"tip",label:"${_('Tip')}",sortable:true,
-            sortOptions: { sortFunction: revisionSort }},
-        {key:"action1",label:"",sortable:false},
-        {key:"action2",label:"",sortable:false},
-    ];
-
-    var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
-
-    myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-
-    myDataSource.responseSchema = {
-        fields: [
-            {key:"menu"},
-            {key:"name"},
-            {key:"tip"},
-            {key:"action1"},
-            {key:"action2"}
-        ]
-    };
-
-    var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
-            {
-              sortedBy:{key:"name",dir:"asc"},
-              MSG_SORTASC:"${_('Click to sort ascending')}",
-              MSG_SORTDESC:"${_('Click to sort descending')}",
-              MSG_EMPTY:"${_('No records found.')}",
-              MSG_ERROR:"${_('Data error.')}",
-              MSG_LOADING:"${_('Loading...')}",
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0; i<data.length; i++) {
+                    var pos = data[i].raw_name.toLowerCase().indexOf(req)
+                    if (pos != -1) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
             }
-    );
-    myDataTable.subscribe('postRenderEvent',function(oArgs) {
-        tooltip_activate();
-        quick_repo_menu();
-        var func = function(node){
-            return node.parentNode.parentNode.parentNode.parentNode;
+            return res;
         }
-        q_filter('q_filter',YUQ('#my tr td a.repo_name'),func);
-    });
+        // main table sorting
+        var myColumnDefs = [
+            {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+            {key:"name",label:"${_('Name')}",sortable:true,
+                sortOptions: { sortFunction: nameSort }},
+            {key:"last_changeset",label:"${_('Tip')}",sortable:true,
+                sortOptions: { sortFunction: revisionSort }},      
+            {key:"action",label:"${_('Action')}",sortable:false},
+        ];
 
+        var myDataTable = new YAHOO.widget.DataTable("watched_repos_list_wrap", myColumnDefs, myDataSource,{
+          sortedBy:{key:"name",dir:"asc"},
+          paginator: new YAHOO.widget.Paginator({
+              rowsPerPage: 25,
+              alwaysVisible: false,
+              template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+              pageLinks: 5,
+              containerClass: 'pagination-wh',
+              currentPageClass: 'pager_curpage',
+              pageLinkClass: 'pager_link',
+              nextPageLinkLabel: '&gt;',
+              previousPageLinkLabel: '&lt;',
+              firstPageLinkLabel: '&lt;&lt;',
+              lastPageLinkLabel: '&gt;&gt;',
+              containers:['watched-user-paginator']
+          }),
+
+          MSG_SORTASC:"${_('Click to sort ascending')}",
+          MSG_SORTDESC:"${_('Click to sort descending')}",
+          MSG_EMPTY:"${_('No records found.')}",
+          MSG_ERROR:"${_('Data error.')}",
+          MSG_LOADING:"${_('Loading...')}",
+        }
+        );
+        myDataTable.subscribe('postRenderEvent',function(oArgs) {
+            tooltip_activate();
+            quick_repo_menu();
+        });
+
+        var filterTimeout = null;
+
+        updateFilter  = function () {
+            // Reset timeout
+            filterTimeout = null;
+
+            // Reset sort
+            var state = myDataTable.getState();
+            state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+            // Get filtered data
+            myDataSource.sendRequest(YUD.get('q_filter_watched').value,{
+                success : myDataTable.onDataReturnInitializeTable,
+                failure : myDataTable.onDataReturnInitializeTable,
+                scope   : myDataTable,
+                argument: state
+            });
+
+        };
+        YUE.on('q_filter_watched','click',function(){
+            if(!YUD.hasClass('q_filter_watched', 'loaded')){
+                YUD.get('q_filter_watched').value = '';
+                //TODO: load here full list later to do search within groups
+                YUD.addClass('q_filter_watched', 'loaded');
+            }
+         });
+
+        YUE.on('q_filter_watched','keyup',function (e) {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(updateFilter,600);
+        });
+      }
+    
+    function table_renderer(data){
+        var myDataSource = new YAHOO.util.DataSource(data);
+        myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+
+        myDataSource.responseSchema = {
+            resultsList: "records",
+            fields: [
+               {key:"menu"},
+               {key:"raw_name"},
+               {key:"name"},
+               {key:"last_changeset"},
+               {key:"action"},
+            ]
+         };
+        myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+            // This is the filter function
+            var data     = res.results || [],
+                filtered = [],
+                i,l;
+
+            if (req) {
+                req = req.toLowerCase();
+                for (i = 0; i<data.length; i++) {
+                    var pos = data[i].raw_name.toLowerCase().indexOf(req)
+                    if (pos != -1) {
+                        filtered.push(data[i]);
+                    }
+                }
+                res.results = filtered;
+            }
+            return res;
+        }
+        // main table sorting
+        var myColumnDefs = [
+            {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+            {key:"name",label:"${_('Name')}",sortable:true,
+                sortOptions: { sortFunction: nameSort }},
+            {key:"last_changeset",label:"${_('Tip')}",sortable:true,
+                sortOptions: { sortFunction: revisionSort }},      
+            {key:"action",label:"${_('Action')}",sortable:false},
+        ];
+
+        var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
+          sortedBy:{key:"name",dir:"asc"},
+          paginator: new YAHOO.widget.Paginator({
+              rowsPerPage: 25,
+              alwaysVisible: false,
+              template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+              pageLinks: 5,
+              containerClass: 'pagination-wh',
+              currentPageClass: 'pager_curpage',
+              pageLinkClass: 'pager_link',
+              nextPageLinkLabel: '&gt;',
+              previousPageLinkLabel: '&lt;',
+              firstPageLinkLabel: '&lt;&lt;',
+              lastPageLinkLabel: '&gt;&gt;',
+              containers:['user-paginator']
+          }),
+
+          MSG_SORTASC:"${_('Click to sort ascending')}",
+          MSG_SORTDESC:"${_('Click to sort descending')}",
+          MSG_EMPTY:"${_('No records found.')}",
+          MSG_ERROR:"${_('Data error.')}",
+          MSG_LOADING:"${_('Loading...')}",
+        }
+        );
+        myDataTable.subscribe('postRenderEvent',function(oArgs) {
+            tooltip_activate();
+            quick_repo_menu();
+        });
+
+        var filterTimeout = null;
+
+        updateFilter  = function () {
+            // Reset timeout
+            filterTimeout = null;
+
+            // Reset sort
+            var state = myDataTable.getState();
+            state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+            // Get filtered data
+            myDataSource.sendRequest(YUD.get('q_filter').value,{
+                success : myDataTable.onDataReturnInitializeTable,
+                failure : myDataTable.onDataReturnInitializeTable,
+                scope   : myDataTable,
+                argument: state
+            });
+
+        };
+        YUE.on('q_filter','click',function(){
+            if(!YUD.hasClass('q_filter', 'loaded')){
+                YUD.get('q_filter').value = '';
+                //TODO: load here full list later to do search within groups
+                YUD.addClass('q_filter', 'loaded');
+            }
+         });
+
+        YUE.on('q_filter','keyup',function (e) {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(updateFilter,600);
+        });
+      }    
+    
     </script>
 </%def>

@@ -48,7 +48,7 @@
          </ul>
     </div>
     <!-- end box / title -->
-    <div id="perms" class="table">
+    <div id="perms_container" class="table">
            %for section in sorted(c.rhodecode_user.permissions.keys()):
             <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
 
@@ -94,30 +94,26 @@
             </div>
            %endfor
     </div>
-    <div id="my" class="table" style="display:none">
+    <div id="my_container" style="display:none">
+        <div class="table yui-skin-sam" id="repos_list_wrap"></div>
+        <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
     </div>
-    <div id="pullrequests" class="table" style="display:none"></div>
+    <div id="pullrequests_container" class="table" style="display:none">
+        ## loaded via AJAX
+        ${_('Loading...')}    
+    </div>
 </div>
 
-
-
 <script type="text/javascript">
-var filter_activate = function(){
-    var nodes = YUQ('#my tr td a.repo_name');
-    var func = function(node){
-        return node.parentNode.parentNode.parentNode.parentNode;
-    }
-    q_filter('q_filter',YUQ('#my tr td a.repo_name'),func);
-}
 
 var show_perms = function(e){
     YUD.addClass('show_perms', 'current');
     YUD.removeClass('show_my','current');
     YUD.removeClass('show_pullrequests','current');
 
-    YUD.setStyle('my','display','none');
-    YUD.setStyle('pullrequests','display','none');
-    YUD.setStyle('perms','display','');
+    YUD.setStyle('my_container','display','none');
+    YUD.setStyle('pullrequests_container','display','none');
+    YUD.setStyle('perms_container','display','');
     YUD.setStyle('q_filter','display','none');
 }
 YUE.on('show_perms','click',function(e){
@@ -129,17 +125,14 @@ var show_my = function(e){
     YUD.removeClass('show_perms','current');
     YUD.removeClass('show_pullrequests','current');
 
-    YUD.setStyle('perms','display','none');
-    YUD.setStyle('pullrequests','display','none');
-    YUD.setStyle('my','display','');
+    YUD.setStyle('perms_container','display','none');
+    YUD.setStyle('pullrequests_container','display','none');
+    YUD.setStyle('my_container','display','');
     YUD.setStyle('q_filter','display','');
-
-
-    var url = "${h.url('journal_my_repos')}";
-    ypjax(url, 'my', function(){
-        table_sort();
-        filter_activate();
-    });
+    if(!YUD.hasClass('show_my', 'loaded')){
+    	table_renderer(${c.data |n});
+        YUD.addClass('show_my', 'loaded');
+    }
 }
 YUE.on('show_my','click',function(e){
 	show_my(e);
@@ -150,13 +143,13 @@ var show_pullrequests = function(e){
     YUD.removeClass('show_my','current');
     YUD.removeClass('show_perms','current');
 
-    YUD.setStyle('my','display','none');
-    YUD.setStyle('perms','display','none');
-    YUD.setStyle('pullrequests','display','');
+    YUD.setStyle('my_container','display','none');
+    YUD.setStyle('perms_container','display','none');
+    YUD.setStyle('pullrequests_container','display','');
     YUD.setStyle('q_filter','display','none');
 
     var url = "${h.url('admin_settings_my_pullrequests')}";
-    ypjax(url, 'pullrequests');
+    ypjax(url, 'pullrequests_container');
 }
 YUE.on('show_pullrequests','click',function(e){
 	show_pullrequests(e)
@@ -177,72 +170,109 @@ if (url[1]) {
     }
 }
 
-// main table sorting
-var myColumnDefs = [
-    {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
-    {key:"name",label:"${_('Name')}",sortable:true,
-        sortOptions: { sortFunction: nameSort }},
-    {key:"tip",label:"${_('Tip')}",sortable:true,
-        sortOptions: { sortFunction: revisionSort }},
-    {key:"action1",label:"",sortable:false},
-    {key:"action2",label:"",sortable:false},
-];
+function table_renderer(data){
+	  var myDataSource = new YAHOO.util.DataSource(data);
+	  myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
 
-function table_sort(){
-var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
-myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-myDataSource.responseSchema = {
-    fields: [
-        {key:"menu"},
-        {key:"name"},
-        {key:"tip"},
-        {key:"action1"},
-        {key:"action2"},
-    ]
-};
-var trans_defs =  {
-    sortedBy:{key:"name",dir:"asc"},
-    MSG_SORTASC:"${_('Click to sort ascending')}",
-    MSG_SORTDESC:"${_('Click to sort descending')}",
-    MSG_EMPTY:"${_('No records found.')}",
-    MSG_ERROR:"${_('Data error.')}",
-    MSG_LOADING:"${_('Loading...')}",
-}
-var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,trans_defs);
-myDataTable.subscribe('postRenderEvent',function(oArgs) {
-    tooltip_activate();
-    quick_repo_menu();
-    filter_activate();
-});
+	  myDataSource.responseSchema = {
+	      resultsList: "records",
+	      fields: [
+	         {key:"menu"},
+	         {key:"raw_name"},
+	         {key:"name"},
+	         {key:"last_changeset"},
+	         {key:"action"},
+	      ]
+	   };
+      myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+          // This is the filter function
+          var data     = res.results || [],
+              filtered = [],
+              i,l;
 
-var permsColumnDefs = [
-    {key:"name",label:"${_('Name')}",sortable:true, sortOptions: { sortFunction: permNameSort }},
-    {key:"perm",label:"${_('Permission')}",sortable:false,},
-];
+          if (req) {
+              req = req.toLowerCase();
+              for (i = 0; i<data.length; i++) {
+                  var pos = data[i].raw_name.toLowerCase().indexOf(req)
+                  if (pos != -1) {
+                      filtered.push(data[i]);
+                  }
+              }
+              res.results = filtered;
+          }
+          return res;
+      }
+      
+	  // main table sorting
+	  var myColumnDefs = [
+	      {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+	      {key:"name",label:"${_('Name')}",sortable:true,
+	          sortOptions: { sortFunction: nameSort }},
+	      {key:"last_changeset",label:"${_('Tip')}",sortable:true,
+	          sortOptions: { sortFunction: revisionSort }},      
+	      {key:"action",label:"${_('Action')}",sortable:false},
+	  ];
 
-// perms repos table
-var myDataSource2 = new YAHOO.util.DataSource(YUD.get("tbl_list_repositories"));
-myDataSource2.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-myDataSource2.responseSchema = {
-    fields: [
-        {key:"name"},
-        {key:"perm"},
-    ]
-};
+	  var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
+	    sortedBy:{key:"name",dir:"asc"},
+	    paginator: new YAHOO.widget.Paginator({
+	        rowsPerPage: 50,
+	        alwaysVisible: false,
+	        template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+	        pageLinks: 5,
+	        containerClass: 'pagination-wh',
+	        currentPageClass: 'pager_curpage',
+	        pageLinkClass: 'pager_link',
+	        nextPageLinkLabel: '&gt;',
+	        previousPageLinkLabel: '&lt;',
+	        firstPageLinkLabel: '&lt;&lt;',
+	        lastPageLinkLabel: '&gt;&gt;',
+	        containers:['user-paginator']
+	    }),
 
-new YAHOO.widget.DataTable("tbl_list_wrap_repositories", permsColumnDefs, myDataSource2, trans_defs);
+	    MSG_SORTASC:"${_('Click to sort ascending')}",
+	    MSG_SORTDESC:"${_('Click to sort descending')}",
+	    MSG_EMPTY:"${_('No records found.')}",
+	    MSG_ERROR:"${_('Data error.')}",
+	    MSG_LOADING:"${_('Loading...')}",
+	  }
+	  );
+	  myDataTable.subscribe('postRenderEvent',function(oArgs) {
+	      tooltip_activate();
+	      quick_repo_menu();
+	  });
 
-//perms groups table
-var myDataSource3 = new YAHOO.util.DataSource(YUD.get("tbl_list_repositories_groups"));
-myDataSource3.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-myDataSource3.responseSchema = {
-    fields: [
-        {key:"name"},
-        {key:"perm"},
-    ]
-};
+	  var filterTimeout = null;
 
-new YAHOO.widget.DataTable("tbl_list_wrap_repositories_groups", permsColumnDefs, myDataSource3, trans_defs);
-}
+	  updateFilter = function() {
+	      // Reset timeout
+	      filterTimeout = null;
+
+	      // Reset sort
+	      var state = myDataTable.getState();
+	      state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+
+	      // Get filtered data
+	      myDataSource.sendRequest(YUD.get('q_filter').value,{
+	          success : myDataTable.onDataReturnInitializeTable,
+	          failure : myDataTable.onDataReturnInitializeTable,
+	          scope   : myDataTable,
+	          argument: state
+	      });
+
+	  };
+	  YUE.on('q_filter','click',function(){
+	      if(!YUD.hasClass('q_filter', 'loaded')){
+	          YUD.get('q_filter').value = '';
+	          //TODO: load here full list later to do search within groups
+	          YUD.addClass('q_filter', 'loaded');
+	      }
+	   });
+
+	  YUE.on('q_filter','keyup',function (e) {
+	      clearTimeout(filterTimeout);
+	      filterTimeout = setTimeout(updateFilter,600);
+	  });
+	}
 </script>
 </%def>

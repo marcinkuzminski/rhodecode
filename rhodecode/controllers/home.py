@@ -28,6 +28,7 @@ import logging
 from pylons import tmpl_context as c, request
 from pylons.i18n.translation import _
 from webob.exc import HTTPBadRequest
+from sqlalchemy.sql.expression import func
 
 import rhodecode
 from rhodecode.lib import helpers as h
@@ -35,7 +36,8 @@ from rhodecode.lib.ext_json import json
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Repository
-from sqlalchemy.sql.expression import func
+from rhodecode.model.repo import RepoModel
+
 
 log = logging.getLogger(__name__)
 
@@ -58,59 +60,11 @@ class HomeController(BaseController):
                             .filter(Repository.group_id == None)\
                             .order_by(func.lower(Repository.repo_name))\
                             .all()
-            repos_data = []
-            total_records = len(c.repos_list)
 
-            _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
-            template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
-
-            quick_menu = lambda repo_name: (template.get_def("quick_menu")
-                                            .render(repo_name, _=_, h=h, c=c))
-            repo_lnk = lambda name, rtype, private, fork_of: (
-                template.get_def("repo_name")
-                .render(name, rtype, private, fork_of, short_name=False,
-                        admin=False, _=_, h=h, c=c))
-            last_change = lambda last_change:  (template.get_def("last_change")
-                                           .render(last_change, _=_, h=h, c=c))
-            rss_lnk = lambda repo_name: (template.get_def("rss")
-                                           .render(repo_name, _=_, h=h, c=c))
-            atom_lnk = lambda repo_name: (template.get_def("atom")
-                                           .render(repo_name, _=_, h=h, c=c))
-            tip = lambda repo_name, cs_cache: (template.get_def("revision")
-                                    .render(repo_name,
-                                            cs_cache.get('revision'),
-                                            cs_cache.get('raw_id'),
-                                            cs_cache.get('author'),
-                                            cs_cache.get('message'), _=_, h=h,
-                                            c=c))
-
-            def desc(desc):
-                if c.visual.stylify_metatags:
-                    return h.urlify_text(h.desc_stylize(h.truncate(desc, 60)))
-                else:
-                    return h.urlify_text(h.truncate(desc, 60))
-
-            for repo in c.repos_list:
-                repos_data.append({
-                    "menu": quick_menu(repo.repo_name),
-                    "raw_name": repo.repo_name.lower(),
-                    "name": repo_lnk(repo.repo_name, repo.repo_type,
-                                     repo.private, repo.fork),
-                    "last_change": last_change(repo.last_db_change),
-                    "tip": tip(repo.repo_name, repo.changeset_cache),
-                    "desc": desc(repo.description),
-                    "owner": h.person(repo.user.username),
-                    "rss": rss_lnk(repo.repo_name),
-                    "atom": atom_lnk(repo.repo_name),
-                })
-
-            c.data = json.dumps({
-                "totalRecords": total_records,
-                "startIndex": 0,
-                "sort": "name",
-                "dir": "asc",
-                "records": repos_data
-            })
+            repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
+                                                       admin=False)
+            #json used to render the grid
+            c.data = json.dumps(repos_data)
 
         return render('/index.html')
 

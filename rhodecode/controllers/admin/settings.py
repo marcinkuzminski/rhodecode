@@ -48,11 +48,12 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm, ApplicationVisualisationForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
+from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
 from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils2 import str2bool, safe_unicode
-
+from rhodecode.lib.compat import json
 log = logging.getLogger(__name__)
 
 
@@ -390,16 +391,21 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account')
 
         c.user = User.get(self.rhodecode_user.user_id)
-        all_repos = Session().query(Repository)\
-                     .filter(Repository.user_id == c.user.user_id)\
-                     .order_by(func.lower(Repository.repo_name)).all()
-
-        c.user_repos = ScmModel().get_repos(all_repos)
 
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's"
               " crucial for entire application"), category='warning')
             return redirect(url('users'))
+
+        repos_list = Session().query(Repository)\
+                     .filter(Repository.user_id ==
+                             self.rhodecode_user.user_id)\
+                     .order_by(func.lower(Repository.repo_name)).all()
+
+        repos_data = RepoModel().get_repos_as_dict(repos_list=repos_list,
+                                                   admin=True)
+        #json used to render the grid
+        c.data = json.dumps(repos_data)
 
         defaults = c.user.get_dict()
 
@@ -449,23 +455,14 @@ class SettingsController(BaseController):
         return redirect(url('my_account'))
 
     @NotAnonymous()
-    def my_account_my_repos(self):
-        all_repos = Session().query(Repository)\
-            .filter(Repository.user_id == self.rhodecode_user.user_id)\
-            .order_by(func.lower(Repository.repo_name))\
-            .all()
-        c.user_repos = ScmModel().get_repos(all_repos)
-        return render('admin/users/user_edit_my_account_repos.html')
-
-    @NotAnonymous()
     def my_account_my_pullrequests(self):
         c.my_pull_requests = PullRequest.query()\
-                                .filter(PullRequest.user_id==
+                                .filter(PullRequest.user_id ==
                                         self.rhodecode_user.user_id)\
                                 .all()
         c.participate_in_pull_requests = \
             [x.pull_request for x in PullRequestReviewers.query()\
-                                    .filter(PullRequestReviewers.user_id==
+                                    .filter(PullRequestReviewers.user_id ==
                                             self.rhodecode_user.user_id)\
                                     .all()]
         return render('admin/users/user_edit_my_account_pullrequests.html')
