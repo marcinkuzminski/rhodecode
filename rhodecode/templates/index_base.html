@@ -51,9 +51,9 @@
                         ##<td><b>${gr.repositories_recursive_count}</b></td>
                     </tr>
                   % endfor
-
               </table>
             </div>
+            <div id="group-user-paginator" style="padding: 0px 0px 0px 0px"></div>
             <div style="height: 20px"></div>
             % endif
             <div id="welcome" style="display:none;text-align:center">
@@ -148,7 +148,7 @@
       var myDataTable = new YAHOO.widget.DataTable("groups_list_wrap", myColumnDefs, myDataSource,{
           sortedBy:{key:"name",dir:"asc"},
           paginator: new YAHOO.widget.Paginator({
-              rowsPerPage: 5,
+              rowsPerPage: 50,
               alwaysVisible: false,
               template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
               pageLinks: 5,
@@ -159,7 +159,7 @@
               previousPageLinkLabel: '&lt;',
               firstPageLinkLabel: '&lt;&lt;',
               lastPageLinkLabel: '&gt;&gt;',
-              containers:['user-paginator']
+              containers:['group-user-paginator']
           }),
           MSG_SORTASC:"${_('Click to sort ascending')}",
           MSG_SORTDESC:"${_('Click to sort descending')}"
