@@ -293,30 +293,6 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def update_my_account(self, user_id, form_data):
-        from rhodecode.lib.auth import get_crypt_password
-        try:
-            user = self.get(user_id, cache=False)
-            if user.username == 'default':
-                raise DefaultUserException(
-                    _("You can't Edit this user since it's"
-                      " crucial for entire application")
-                )
-            for k, v in form_data.items():
-                if k == 'new_password' and v:
-                    user.password = get_crypt_password(v)
-                    user.api_key = generate_api_key(user.username)
-                else:
-                    if k == 'firstname':
-                        k = 'name'
-                    if k not in ['admin', 'active']:
-                        setattr(user, k, v)
-
-            self.sa.add(user)
-        except:
-            log.error(traceback.format_exc())
-            raise
-
     def delete(self, user):
         user = self._get_user(user)
 

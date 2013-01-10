@@ -26,7 +26,11 @@
                         <label for="username">${_('Username')}:</label>
                     </div>
                     <div class="input">
-                        ${h.text('username',class_="medium")}
+                      %if c.ldap_dn:
+                          ${h.text('username',class_='medium disabled', readonly="readonly")}
+                      %else:
+                          ${h.text('username',class_='medium')}
+                      %endif:
                     </div>
                  </div>
 

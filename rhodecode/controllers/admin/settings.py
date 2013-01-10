@@ -383,20 +383,7 @@ class SettingsController(BaseController):
             force_defaults=False
         )
 
-    @NotAnonymous()
-    def my_account(self):
-        """
-        GET /_admin/my_account Displays info about my account
-        """
-        # url('admin_settings_my_account')
-
-        c.user = User.get(self.rhodecode_user.user_id)
-
-        if c.user.username == 'default':
-            h.flash(_("You can't edit this user since it's"
-              " crucial for entire application"), category='warning')
-            return redirect(url('users'))
-
+    def _load_my_repos_data(self):
         repos_list = Session().query(Repository)\
                      .filter(Repository.user_id ==
                              self.rhodecode_user.user_id)\
@@ -405,7 +392,25 @@ class SettingsController(BaseController):
         repos_data = RepoModel().get_repos_as_dict(repos_list=repos_list,
                                                    admin=True)
         #json used to render the grid
-        c.data = json.dumps(repos_data)
+        return json.dumps(repos_data)
+
+    @NotAnonymous()
+    def my_account(self):
+        """
+        GET /_admin/my_account Displays info about my account
+        """
+        # url('admin_settings_my_account')
+
+        c.user = User.get(self.rhodecode_user.user_id)
+        c.ldap_dn = c.user.ldap_dn
+
+        if c.user.username == 'default':
+            h.flash(_("You can't edit this user since it's"
+              " crucial for entire application"), category='warning')
+            return redirect(url('users'))
+
+        #json used to render the grid
+        c.data = self._load_my_repos_data()
 
         defaults = c.user.get_dict()
 
@@ -427,19 +432,25 @@ class SettingsController(BaseController):
         #           method='put')
         # url('admin_settings_my_account_update', id=ID)
         uid = self.rhodecode_user.user_id
+        c.user = User.get(self.rhodecode_user.user_id)
+        c.ldap_dn = c.user.ldap_dn
         email = self.rhodecode_user.email
         _form = UserForm(edit=True,
                          old_data={'user_id': uid, 'email': email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            UserModel().update_my_account(uid, form_result)
+            skip_attrs = ['admin', 'active']  # skip attr for my account
+            if c.ldap_dn:
+                #forbid updating username for ldap accounts
+                skip_attrs.append('username')
+            UserModel().update(uid, form_result, skip_attrs=skip_attrs)
             h.flash(_('Your account was updated successfully'),
                     category='success')
             Session().commit()
         except formencode.Invalid, errors:
-            c.user = User.get(self.rhodecode_user.user_id)
-
+            #json used to render the grid
+            c.data = self._load_my_repos_data()
             c.form = htmlfill.render(
                 render('admin/users/user_edit_my_account_form.html'),
                 defaults=errors.value,
