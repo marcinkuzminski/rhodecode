@@ -222,7 +222,7 @@ class ApiController(JSONRPCController):
             #make sure normal user does not pass userid, he is not allowed to do that
             if not isinstance(userid, Optional):
                 raise JSONRPCError(
-                    'Only RhodeCode admin can specify `userid` params'
+                    'Only RhodeCode admin can specify `userid` param'
                 )
         else:
             return abort(403)
@@ -260,14 +260,21 @@ class ApiController(JSONRPCController):
             user_ips=ips
         )
 
-    @HasPermissionAllDecorator('hg.admin')
-    def get_user(self, apiuser, userid):
+    def get_user(self, apiuser, userid=Optional(OAttr('apiuser'))):
         """"
-        Get a user by username
+        Get a user by username, or userid, if userid is given
 
         :param apiuser:
         :param userid:
         """
+        if HasPermissionAnyApi('hg.admin')(user=apiuser):
+            pass
+        else:
+            if not isinstance(userid, Optional):
+                raise JSONRPCError(
+                    'Only RhodeCode admin can specify `userid` params'
+                )
+            userid = apiuser.user_id
 
         user = get_user_or_error(userid)
         data = user.get_api_data()

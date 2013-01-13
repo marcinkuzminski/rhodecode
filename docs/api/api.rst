@@ -216,8 +216,9 @@ get_user
 --------
 
 Get's an user by username or user_id, Returns empty result if user is not found.
+If userid param is skipped it is set to id of user who is calling this method.
 This command can be executed only using api_key belonging to user with admin 
-rights.
+rights, or regular users which cannot specify userid parameter.
 
 
 INPUT::
@@ -226,7 +227,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_user"
     args :    { 
-                "userid" : "<username or user_id>"
+                "userid" : "<username or user_id Optional(=apiuser)>"
               }
 
 OUTPUT::
@@ -351,14 +352,14 @@ INPUT::
     method :  "update_user"
     args :    {
                 "userid" : "<user_id or username>",
-                "username" :  "<username> = Optional",
-                "email" :     "<useremail> = Optional",
-                "password" :  "<password> = Optional",
-                "firstname" : "<firstname> = Optional",
-                "lastname" :  "<lastname> = Optional",
-                "active" :    "<bool> = Optional",
-                "admin" :     "<bool> = Optional",
-                "ldap_dn" :   "<ldap_dn> = Optional"
+                "username" :  "<username> = Optional(None)",
+                "email" :     "<useremail> = Optional(None)",
+                "password" :  "<password> = Optional(None)",
+                "firstname" : "<firstname> = Optional(None)",
+                "lastname" :  "<lastname> = Optional(None)",
+                "active" :    "<bool> = Optional(None)",
+                "admin" :     "<bool> = Optional(None)",
+                "ldap_dn" :   "<ldap_dn> = Optional(None)"
               }
 
 OUTPUT::
