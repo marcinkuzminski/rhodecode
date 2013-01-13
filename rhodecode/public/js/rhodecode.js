@@ -334,7 +334,7 @@ var show_changeset_tooltip = function(){
 			YUD.setAttribute(target, 'title',_TM['loading...']);
 			YAHOO.yuitip.main.set_listeners(target);
 			YAHOO.yuitip.main.show_yuitip(e, target);			
-			ajaxGET('/changeset_info/{0}/{1}'.format(repo_name,rid), success)
+			ajaxGET(LAZY_CS_URL.replace('__NAME__',repo_name).replace('__REV__', rid), success)
 		}
 	});
 };
