@@ -27,10 +27,12 @@
 
 import traceback
 import logging
+from pylons.controllers.util import abort
 
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
-from rhodecode.lib.auth import HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator, PasswordGenerator, AuthUser
+from rhodecode.lib.auth import PasswordGenerator, AuthUser, \
+    HasPermissionAllDecorator, HasPermissionAnyDecorator, \
+    HasPermissionAnyApi, HasRepoPermissionAnyApi
 from rhodecode.lib.utils import map_groups, repo2db_mapper
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
@@ -41,6 +43,22 @@ from rhodecode.model.permission import PermissionModel
 from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap
 
 log = logging.getLogger(__name__)
+
+
+class OptionalAttr(object):
+    """
+    Special Optional Option that defines other attribute
+    """
+    def __init__(self, attr_name):
+        self.attr_name = attr_name
+
+    def __repr__(self):
+        return '<OptionalAttr:%s>' % self.attr_name
+
+    def __call__(self):
+        return self
+#alias
+OAttr = OptionalAttr
 
 
 class Optional(object):
@@ -184,10 +202,11 @@ class ApiController(JSONRPCController):
                 'Error occurred during rescan repositories action'
             )
 
-    @HasPermissionAllDecorator('hg.admin')
-    def lock(self, apiuser, repoid, userid, locked):
+    def lock(self, apiuser, repoid, locked, userid=Optional(OAttr('apiuser'))):
         """
-        Set locking state on particular repository by given user
+        Set locking state on particular repository by given user, if
+        this command is runned by non-admin account userid is set to user
+        who is calling this method
 
         :param apiuser:
         :param repoid:
@@ -195,6 +214,20 @@ class ApiController(JSONRPCController):
         :param locked:
         """
         repo = get_repo_or_error(repoid)
+        if HasPermissionAnyApi('hg.admin')(user=apiuser):
+            pass
+        elif HasRepoPermissionAnyApi('repository.admin',
+                                     'repository.write')(user=apiuser,
+                                                         repo_name=repo.repo_name):
+            #make sure normal user does not pass userid, he is not allowed to do that
+            if not isinstance(userid, Optional):
+                raise JSONRPCError(
+                    'Only RhodeCode admin can specify `userid` params'
+                )
+        else:
+            return abort(403)
+        if isinstance(userid, Optional):
+            userid = apiuser.user_id
         user = get_user_or_error(userid)
         locked = bool(locked)
         try:
@@ -495,7 +528,7 @@ class ApiController(JSONRPCController):
                     )
             )
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def get_repo(self, apiuser, repoid):
         """"
         Get repository by name
@@ -526,7 +559,7 @@ class ApiController(JSONRPCController):
         data['members'] = members
         return data
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def get_repos(self, apiuser):
         """"
         Get all repositories
@@ -539,7 +572,7 @@ class ApiController(JSONRPCController):
             result.append(repo.get_api_data())
         return result
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def get_repo_nodes(self, apiuser, repoid, revision, root_path,
                        ret_type='all'):
         """
@@ -642,7 +675,7 @@ class ApiController(JSONRPCController):
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository `%s`' % repo_name)
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def fork_repo(self, apiuser, repoid, fork_name, owner,
                   description=Optional(''), copy_permissions=Optional(False),
                   private=Optional(False), landing_rev=Optional('tip')):
@@ -685,7 +718,7 @@ class ApiController(JSONRPCController):
                                                             fork_name)
             )
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def delete_repo(self, apiuser, repoid):
         """
         Deletes a given repository
@@ -708,7 +741,7 @@ class ApiController(JSONRPCController):
                 'failed to delete repository `%s`' % repo.repo_name
             )
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def grant_user_permission(self, apiuser, repoid, userid, perm):
         """
         Grant permission for user on given repository, or update existing one
@@ -741,7 +774,7 @@ class ApiController(JSONRPCController):
                 )
             )
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def revoke_user_permission(self, apiuser, repoid, userid):
         """
         Revoke permission for user on given repository
@@ -772,7 +805,7 @@ class ApiController(JSONRPCController):
                 )
             )
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def grant_users_group_permission(self, apiuser, repoid, usersgroupid,
                                      perm):
         """
@@ -811,7 +844,7 @@ class ApiController(JSONRPCController):
                 )
             )
 
-    @HasPermissionAnyDecorator('hg.admin')
+    @HasPermissionAllDecorator('hg.admin')
     def revoke_users_group_permission(self, apiuser, repoid, usersgroupid):
         """
         Revoke permission for users group on given repository

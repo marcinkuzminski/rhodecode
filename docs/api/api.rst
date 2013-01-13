@@ -155,9 +155,10 @@ OUTPUT::
 lock
 ----
 
-Set locking state on given repository by given user.
+Set locking state on given repository by given user. If userid param is skipped
+, then it is set to id of user whos calling this method.
 This command can be executed only using api_key belonging to user with admin 
-rights.
+rights or regular user that have admin or write access to repository.
 
 INPUT::
 
@@ -166,7 +167,7 @@ INPUT::
     method :  "lock"
     args :    {
                 "repoid" : "<reponame or repo_id>"
-                "userid" : "<user_id or username>",
+                "userid" : "<user_id or username = Optional(=apiuser)>",
                 "locked" : "<bool true|false>"
               }
 

@@ -247,6 +247,15 @@ class BaseTestApi(object):
                    % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
         self._compare_ok(id_, expected, given=response.body)
 
+    def test_api_lock_repo_lock_aquire_optional_userid(self):
+        id_, params = _build_data(self.apikey, 'lock',
+                                  repoid=self.REPO,
+                                  locked=True)
+        response = api_call(self, params)
+        expected = ('User `%s` set lock state for repo `%s` to `%s`'
+                   % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        self._compare_ok(id_, expected, given=response.body)
+
     @mock.patch.object(Repository, 'lock', crash)
     def test_api_lock_error(self):
         id_, params = _build_data(self.apikey, 'lock',
