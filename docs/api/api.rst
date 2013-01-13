@@ -218,7 +218,7 @@ get_user
 Get's an user by username or user_id, Returns empty result if user is not found.
 If userid param is skipped it is set to id of user who is calling this method.
 This command can be executed only using api_key belonging to user with admin 
-rights, or regular users which cannot specify userid parameter.
+rights, or regular users that cannot specify different userid than theirs
 
 
 INPUT::
@@ -574,8 +574,9 @@ get_repo
 --------
 
 Gets an existing repository by it's name or repository_id. Members will return
-either users_group or user associated to that repository. This command can 
-be executed only using api_key belonging to user with admin rights.
+either users_group or user associated to that repository. This command can be 
+executed only using api_key belonging to user with admin 
+rights or regular user that have at least read access to repository.
 
 
 INPUT::
@@ -637,8 +638,9 @@ OUTPUT::
 get_repos
 ---------
 
-Lists all existing repositories. This command can be executed only using api_key
-belonging to user with admin rights
+Lists all existing repositories. This command can be executed only using 
+api_key belonging to user with admin rights or regular user that have 
+admin, write or read access to repository.
 
 
 INPUT::
@@ -709,11 +711,12 @@ OUTPUT::
 create_repo
 -----------
 
-Creates a repository. This command can be executed only using api_key
-belonging to user with admin rights.
-If repository name contains "/", all needed repository groups will be created.
-For example "foo/bar/baz" will create groups "foo", "bar" (with "foo" as parent),
-and create "baz" repository with "bar" as group.
+Creates a repository. If repository name contains "/", all needed repository
+groups will be created. For example "foo/bar/baz" will create groups 
+"foo", "bar" (with "foo" as parent), and create "baz" repository with 
+"bar" as group. This command can be executed only using api_key belonging to user with admin 
+rights or regular user that have create repository permission. Regular users
+cannot specify owner parameter
 
 
 INPUT::
@@ -723,7 +726,7 @@ INPUT::
     method :  "create_repo"
     args:     {
                 "repo_name" :        "<reponame>",
-                "owner" :            "<onwer_name_or_id>",
+                "owner" :            "<onwer_name_or_id = Optional(=apiuser)>",
                 "repo_type" :        "<repo_type> = Optional('hg')",
                 "description" :      "<description> = Optional('')",
                 "private" :          "<bool> = Optional(False)",
@@ -761,10 +764,11 @@ OUTPUT::
 fork_repo
 ---------
 
-Creates a fork of given repo. This command can be executed only using api_key
-belonging to user with admin rights. In case of using celery this will
+Creates a fork of given repo. In case of using celery this will
 immidiatelly return success message, while fork is going to be created
-asynchronous
+asynchronous. This command can be executed only using api_key belonging to
+user with admin rights or regular user that have fork permission, and at least
+read access to forking repository. Regular users cannot specify owner parameter.
 
 
 INPUT::
@@ -775,7 +779,7 @@ INPUT::
     args:     {
                 "repoid" :          "<reponame or repo_id>",
                 "fork_name":        "<forkname>",
-                "owner":            "<username or user_id>",
+                "owner":            "<username or user_id = Optional(=apiuser)>",
                 "description":      "<description>",
                 "copy_permissions": "<bool>",
                 "private":          "<bool>",
@@ -796,8 +800,8 @@ OUTPUT::
 delete_repo
 -----------
 
-Deletes a repository. This command can be executed only using api_key
-belonging to user with admin rights.
+Deletes a repository. This command can be executed only using api_key belonging to user with admin 
+rights or regular user that have admin access to repository.
 
 
 INPUT::

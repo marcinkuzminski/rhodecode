@@ -90,6 +90,22 @@ class RepoModel(BaseModel):
                                           "get_repo_%s" % repo_name))
         return repo.scalar()
 
+    def get_all_user_repos(self, user):
+        """
+        Get's all repositories that user have at least read access
+
+        :param user:
+        :type user:
+        """
+        from rhodecode.lib.auth import AuthUser
+        user = self._get_user(user)
+        repos = AuthUser(user_id=user.user_id).permissions['repositories']
+        access_check = lambda r: r[1] in ['repository.read',
+                                          'repository.write',
+                                          'repository.admin']
+        repos = [x[0] for x in filter(access_check, repos.items())]
+        return Repository.query().filter(Repository.repo_name.in_(repos))
+
     def get_users_js(self):
         users = self.sa.query(User).filter(User.active == True).all()
         return json.dumps([

@@ -32,17 +32,15 @@ import urllib
 import traceback
 import time
 
-from rhodecode.lib.compat import izip_longest, json
-
 from paste.response import replace_header
-
 from pylons.controllers import WSGIController
-
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
 HTTPBadRequest, HTTPError
 
 from rhodecode.model.db import User
+from rhodecode.model import meta
+from rhodecode.lib.compat import izip_longest, json
 from rhodecode.lib.auth import AuthUser
 from rhodecode.lib.base import _get_ip_addr, _get_access_path
 from rhodecode.lib.utils2 import safe_unicode

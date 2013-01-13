@@ -59,13 +59,13 @@ def destroy_users_group(name=TEST_USERS_GROUP):
     Session().commit()
 
 
-def create_repo(repo_name, repo_type):
+def create_repo(repo_name, repo_type, owner=None):
     # create new repo
     form_data = _get_repo_create_params(
                     repo_name_full=repo_name,
                     repo_description='description %s' % repo_name,
                 )
-    cur_user = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
+    cur_user = UserModel().get_by_username(owner or TEST_USER_ADMIN_LOGIN)
     r = RepoModel().create(form_data, cur_user)
     Session().commit()
     return r
@@ -93,7 +93,7 @@ class BaseTestApi(object):
     def setUpClass(self):
         self.usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
         self.apikey = self.usr.api_key
-        self.TEST_USER = UserModel().create_or_update(
+        self.test_user = UserModel().create_or_update(
             username='test-api',
             password='test',
             email='test@api.rhodecode.org',
@@ -101,7 +101,8 @@ class BaseTestApi(object):
             lastname='last'
         )
         Session().commit()
-        self.TEST_USER_LOGIN = self.TEST_USER.username
+        self.TEST_USER_LOGIN = self.test_user.username
+        self.apikey_regular = self.test_user.api_key
 
     @classmethod
     def teardownClass(self):
@@ -148,10 +149,10 @@ class BaseTestApi(object):
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_missing_non_optional_param(self):
-        id_, params = _build_data(self.apikey, 'get_user')
+        id_, params = _build_data(self.apikey, 'get_repo')
         response = api_call(self, params)
 
-        expected = 'Missing non optional `userid` arg in JSON DATA'
+        expected = 'Missing non optional `repoid` arg in JSON DATA'
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_get_users(self):
@@ -182,6 +183,36 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = "user `%s` does not exist" % 'trololo'
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_get_user_without_giving_userid(self):
+        id_, params = _build_data(self.apikey, 'get_user')
+        response = api_call(self, params)
+
+        usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
+        ret = usr.get_api_data()
+        ret['permissions'] = AuthUser(usr.user_id).permissions
+
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_user_without_giving_userid_non_admin(self):
+        id_, params = _build_data(self.apikey_regular, 'get_user')
+        response = api_call(self, params)
+
+        usr = UserModel().get_by_username(self.TEST_USER_LOGIN)
+        ret = usr.get_api_data()
+        ret['permissions'] = AuthUser(usr.user_id).permissions
+
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_user_with_giving_userid_non_admin(self):
+        id_, params = _build_data(self.apikey_regular, 'get_user',
+                                  userid=self.TEST_USER_LOGIN)
+        response = api_call(self, params)
+
+        expected = 'userid is not the same as your user'
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_pull(self):
@@ -236,6 +267,42 @@ class BaseTestApi(object):
         expected = ('User `%s` set lock state for repo `%s` to `%s`'
                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
         self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_lock_repo_lock_aquire_by_non_admin(self):
+        repo_name = 'api_delete_me'
+        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        try:
+            id_, params = _build_data(self.apikey_regular, 'lock',
+                                      repoid=repo_name,
+                                      locked=True)
+            response = api_call(self, params)
+            expected = ('User `%s` set lock state for repo `%s` to `%s`'
+                       % (self.TEST_USER_LOGIN, repo_name, True))
+            self._compare_ok(id_, expected, given=response.body)
+        finally:
+            destroy_repo(repo_name)
+
+    def test_api_lock_repo_lock_aquire_non_admin_with_userid(self):
+        repo_name = 'api_delete_me'
+        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        try:
+            id_, params = _build_data(self.apikey_regular, 'lock',
+                                      userid=TEST_USER_ADMIN_LOGIN,
+                                      repoid=repo_name,
+                                      locked=True)
+            response = api_call(self, params)
+            expected = 'userid is not the same as your user'
+            self._compare_error(id_, expected, given=response.body)
+        finally:
+            destroy_repo(repo_name)
+
+    def test_api_lock_repo_lock_aquire_non_admin_not_his_repo(self):
+        id_, params = _build_data(self.apikey_regular, 'lock',
+                                  repoid=self.REPO,
+                                  locked=True)
+        response = api_call(self, params)
+        expected = 'repository `%s` does not exist' % (self.REPO)
+        self._compare_error(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_release(self):
         id_, params = _build_data(self.apikey, 'lock',
@@ -466,6 +533,48 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
         destroy_users_group(new_group)
 
+    def test_api_get_repo_by_non_admin(self):
+        id_, params = _build_data(self.apikey, 'get_repo',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+
+        repo = RepoModel().get_by_repo_name(self.REPO)
+        ret = repo.get_api_data()
+
+        members = []
+        for user in repo.repo_to_perm:
+            perm = user.permission.permission_name
+            user = user.user
+            user_data = user.get_api_data()
+            user_data['type'] = "user"
+            user_data['permission'] = perm
+            members.append(user_data)
+
+        for users_group in repo.users_group_to_perm:
+            perm = users_group.permission.permission_name
+            users_group = users_group.users_group
+            users_group_data = users_group.get_api_data()
+            users_group_data['type'] = "users_group"
+            users_group_data['permission'] = perm
+            members.append(users_group_data)
+
+        ret['members'] = members
+
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_repo_by_non_admin_no_permission_to_repo(self):
+        RepoModel().grant_user_permission(repo=self.REPO,
+                                          user=self.TEST_USER_LOGIN,
+                                          perm='repository.none')
+
+        id_, params = _build_data(self.apikey_regular, 'get_repo',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+
+        expected = 'repository `%s` does not exist' % (self.REPO)
+        self._compare_error(id_, expected, given=response.body)
+
     def test_api_get_repo_that_doesn_not_exist(self):
         id_, params = _build_data(self.apikey, 'get_repo',
                                   repoid='no-such-repo')
@@ -481,6 +590,18 @@ class BaseTestApi(object):
 
         result = []
         for repo in RepoModel().get_all():
+            result.append(repo.get_api_data())
+        ret = jsonify(result)
+
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_repos_non_admin(self):
+        id_, params = _build_data(self.apikey_regular, 'get_repos')
+        response = api_call(self, params)
+
+        result = []
+        for repo in RepoModel().get_all_user_repos(self.TEST_USER_LOGIN):
             result.append(repo.get_api_data())
         ret = jsonify(result)
 
@@ -569,6 +690,56 @@ class BaseTestApi(object):
         expected = 'user `%s` does not exist' % owner
         self._compare_error(id_, expected, given=response.body)
 
+    def test_api_create_repo_dont_specify_owner(self):
+        repo_name = 'api-repo'
+        owner = 'i-dont-exist'
+        id_, params = _build_data(self.apikey, 'create_repo',
+                                    repo_name=repo_name,
+                                    repo_type='hg',
+                                  )
+        response = api_call(self, params)
+
+        repo = RepoModel().get_by_repo_name(repo_name)
+        ret = {
+            'msg': 'Created new repository `%s`' % repo_name,
+            'repo': jsonify(repo.get_api_data())
+        }
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+        destroy_repo(repo_name)
+
+    def test_api_create_repo_by_non_admin(self):
+        repo_name = 'api-repo'
+        owner = 'i-dont-exist'
+        id_, params = _build_data(self.apikey_regular, 'create_repo',
+                                    repo_name=repo_name,
+                                    repo_type='hg',
+                                  )
+        response = api_call(self, params)
+
+        repo = RepoModel().get_by_repo_name(repo_name)
+        ret = {
+            'msg': 'Created new repository `%s`' % repo_name,
+            'repo': jsonify(repo.get_api_data())
+        }
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+        destroy_repo(repo_name)
+
+    def test_api_create_repo_by_non_admin_specify_owner(self):
+        repo_name = 'api-repo'
+        owner = 'i-dont-exist'
+        id_, params = _build_data(self.apikey_regular, 'create_repo',
+                                    repo_name=repo_name,
+                                    repo_type='hg',
+                                    owner=owner
+                                  )
+        response = api_call(self, params)
+
+        expected = 'Only RhodeCode admin can specify `owner` param'
+        self._compare_error(id_, expected, given=response.body)
+        destroy_repo(repo_name)
+
     def test_api_create_repo_exists(self):
         repo_name = self.REPO
         id_, params = _build_data(self.apikey, 'create_repo',
@@ -607,6 +778,35 @@ class BaseTestApi(object):
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
 
+    def test_api_delete_repo_by_non_admin(self):
+        repo_name = 'api_delete_me'
+        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        try:
+            id_, params = _build_data(self.apikey_regular, 'delete_repo',
+                                      repoid=repo_name,)
+            response = api_call(self, params)
+
+            ret = {
+                'msg': 'Deleted repository `%s`' % repo_name,
+                'success': True
+            }
+            expected = ret
+            self._compare_ok(id_, expected, given=response.body)
+        finally:
+            destroy_repo(repo_name)
+
+    def test_api_delete_repo_by_non_admin_no_permission(self):
+        repo_name = 'api_delete_me'
+        create_repo(repo_name, self.REPO_TYPE)
+        try:
+            id_, params = _build_data(self.apikey_regular, 'delete_repo',
+                                      repoid=repo_name,)
+            response = api_call(self, params)
+            expected = 'repository `%s` does not exist' % (repo_name)
+            self._compare_error(id_, expected, given=response.body)
+        finally:
+            destroy_repo(repo_name)
+
     def test_api_delete_repo_exception_occurred(self):
         repo_name = 'api_delete_me'
         create_repo(repo_name, self.REPO_TYPE)
@@ -637,6 +837,49 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
+        destroy_repo(fork_name)
+
+    def test_api_fork_repo_non_admin(self):
+        fork_name = 'api-repo-fork'
+        id_, params = _build_data(self.apikey_regular, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                  )
+        response = api_call(self, params)
+
+        ret = {
+            'msg': 'Created fork of `%s` as `%s`' % (self.REPO,
+                                                     fork_name),
+            'success': True
+        }
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+        destroy_repo(fork_name)
+
+    def test_api_fork_repo_non_admin_specify_owner(self):
+        fork_name = 'api-repo-fork'
+        id_, params = _build_data(self.apikey_regular, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                    owner=TEST_USER_ADMIN_LOGIN,
+                                  )
+        response = api_call(self, params)
+        expected = 'Only RhodeCode admin can specify `owner` param'
+        self._compare_error(id_, expected, given=response.body)
+        destroy_repo(fork_name)
+
+    def test_api_fork_repo_non_admin_no_permission_to_fork(self):
+        RepoModel().grant_user_permission(repo=self.REPO,
+                                          user=self.TEST_USER_LOGIN,
+                                          perm='repository.none')
+        fork_name = 'api-repo-fork'
+        id_, params = _build_data(self.apikey_regular, 'fork_repo',
+                                    repoid=self.REPO,
+                                    fork_name=fork_name,
+                                  )
+        response = api_call(self, params)
+        expected = 'repository `%s` does not exist' % (self.REPO)
+        self._compare_error(id_, expected, given=response.body)
         destroy_repo(fork_name)
 
     def test_api_fork_repo_unknown_owner(self):
