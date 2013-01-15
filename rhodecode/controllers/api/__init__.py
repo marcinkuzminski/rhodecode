@@ -132,6 +132,9 @@ class JSONRPCController(WSGIController):
             self._req_id = json_body['id']
             self._req_method = json_body['method']
             self._request_params = json_body['args']
+            if not isinstance(self._request_params, dict):
+                self._request_params = {}
+
             log.debug(
                 'method: %s, params: %s' % (self._req_method,
                                             self._request_params)
@@ -212,6 +215,7 @@ class JSONRPCController(WSGIController):
                 )
 
         self._rpc_args = {USER_SESSION_ATTR: u}
+
         self._rpc_args.update(self._request_params)
 
         self._rpc_args['action'] = self._req_method

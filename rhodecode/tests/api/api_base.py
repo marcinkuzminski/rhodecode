@@ -155,6 +155,34 @@ class BaseTestApi(object):
         expected = 'Missing non optional `repoid` arg in JSON DATA'
         self._compare_error(id_, expected, given=response.body)
 
+    def test_api_missing_non_optional_param_args_null(self):
+        id_, params = _build_data(self.apikey, 'get_repo')
+        params = params.replace('"args": {}', '"args": null')
+        response = api_call(self, params)
+
+        expected = 'Missing non optional `repoid` arg in JSON DATA'
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_missing_non_optional_param_args_bad(self):
+        id_, params = _build_data(self.apikey, 'get_repo')
+        params = params.replace('"args": {}', '"args": 1')
+        response = api_call(self, params)
+
+        expected = 'Missing non optional `repoid` arg in JSON DATA'
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_args_is_null(self):
+        id_, params = _build_data(self.apikey, 'get_users',)
+        params = params.replace('"args": {}', '"args": null')
+        response = api_call(self, params)
+        self.assertEqual(response.status, '200 OK')
+
+    def test_api_args_is_bad(self):
+        id_, params = _build_data(self.apikey, 'get_users',)
+        params = params.replace('"args": {}', '"args": 1')
+        response = api_call(self, params)
+        self.assertEqual(response.status, '200 OK')
+
     def test_api_get_users(self):
         id_, params = _build_data(self.apikey, 'get_users',)
         response = api_call(self, params)
