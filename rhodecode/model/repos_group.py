@@ -273,7 +273,7 @@ class ReposGroupModel(BaseModel):
             self.sa.delete(repos_group)
             self.__delete_group(repos_group, force_delete)
         except:
-            log.exception('Error removing repos_group %s' % repos_group)
+            log.error('Error removing repos_group %s' % repos_group)
             raise
 
     def delete_permission(self, repos_group, obj, obj_type, recursive):
