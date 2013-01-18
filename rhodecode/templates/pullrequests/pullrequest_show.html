@@ -51,6 +51,24 @@
             %endif
           </div>
          </div>
+         <div class="field">
+          <div class="label-summary">
+              <label>${_('Origin repository')}:</label>
+          </div>
+          <div class="input">
+              <div>
+             ##%if h.is_hg(c.pull_request.org_repo):
+             ##  <img class="icon" title="${_('Mercurial repository')}" alt="${_('Mercurial repository')}" src="${h.url('/images/icons/hgicon.png')}"/>
+             ##%elif h.is_git(c.pull_request.org_repo):
+             ##  <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
+             ##%endif
+              <span class="spantag">${c.pull_request.org_ref_parts[0]}</span>
+              :
+              <span class="spantag">${c.pull_request.org_ref_parts[1]}</span>             
+              <span>${c.pull_request.org_repo.clone_url()}</span> 
+              </div>
+          </div>
+         </div>         
       </div>
     </div>
     <div style="white-space:pre-wrap;padding:3px 3px 5px 20px">${h.literal(c.pull_request.description)}</div>

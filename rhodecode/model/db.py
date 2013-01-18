@@ -930,6 +930,25 @@ class Repository(Base, BaseModel):
     def last_db_change(self):
         return self.updated_on
 
+    def clone_url(self, **override):
+        from pylons import url
+        from urlparse import urlparse
+        import urllib
+        parsed_url = urlparse(url('home', qualified=True))
+        default_clone_uri = '%(scheme)s://%(user)s%(pass)s%(netloc)s%(prefix)s%(path)s'
+        decoded_path = safe_unicode(urllib.unquote(parsed_url.path))
+        args = {
+           'user': '',
+           'pass': '',
+           'scheme': parsed_url.scheme,
+           'netloc': parsed_url.netloc,
+           'prefix': decoded_path,
+           'path': self.repo_name
+        }
+
+        args.update(override)
+        return default_clone_uri % args
+
     #==========================================================================
     # SCM PROPERTIES
     #==========================================================================
@@ -1793,6 +1812,14 @@ class PullRequest(Base, BaseModel):
     @revisions.setter
     def revisions(self, val):
         self._revisions = ':'.join(val)
+
+    @property
+    def org_ref_parts(self):
+        return self.org_ref.split(':')
+
+    @property
+    def other_ref_parts(self):
+        return self.other_ref.split(':')
 
     author = relationship('User', lazy='joined')
     reviewers = relationship('PullRequestReviewers',
