@@ -219,7 +219,7 @@ class ApiController(JSONRPCController):
         elif HasRepoPermissionAnyApi('repository.admin',
                                      'repository.write')(user=apiuser,
                                                          repo_name=repo.repo_name):
-            #make sure normal user does not pass someone else userid, 
+            #make sure normal user does not pass someone else userid,
             #he is not allowed to do that
             if not isinstance(userid, Optional) and userid != apiuser.user_id:
                 raise JSONRPCError(
@@ -270,7 +270,7 @@ class ApiController(JSONRPCController):
         :param userid:
         """
         if HasPermissionAnyApi('hg.admin')(user=apiuser) is False:
-            #make sure normal user does not pass someone else userid, 
+            #make sure normal user does not pass someone else userid,
             #he is not allowed to do that
             if not isinstance(userid, Optional) and userid != apiuser.user_id:
                 raise JSONRPCError(

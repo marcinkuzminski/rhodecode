@@ -100,7 +100,7 @@
     </div>
     <div id="pullrequests_container" class="table" style="display:none">
         ## loaded via AJAX
-        ${_('Loading...')}    
+        ${_('Loading...')}
     </div>
 </div>
 
@@ -202,14 +202,14 @@ function table_renderer(data){
           }
           return res;
       }
-      
+
 	  // main table sorting
 	  var myColumnDefs = [
 	      {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
 	      {key:"name",label:"${_('Name')}",sortable:true,
 	          sortOptions: { sortFunction: nameSort }},
 	      {key:"last_changeset",label:"${_('Tip')}",sortable:true,
-	          sortOptions: { sortFunction: revisionSort }},      
+	          sortOptions: { sortFunction: revisionSort }},
 	      {key:"action",label:"${_('Action')}",sortable:false},
 	  ];
 

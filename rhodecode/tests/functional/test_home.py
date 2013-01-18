@@ -106,4 +106,3 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
             RepoModel().delete('gr1/repo_in_group')
             ReposGroupModel().delete(repos_group='gr1', force_delete=True)
             Session().commit()
-            

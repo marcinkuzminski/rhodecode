@@ -122,7 +122,7 @@
       ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
     ${h.end_form()}
     </div>
-  </div>  
+  </div>
 </%def>
 
 <%def name="user_actions(user_id, username)">
@@ -141,4 +141,3 @@
         onclick="javascript:toggleFollowingRepo(this, ${repo_id},'${str(h.get_token())}')">
   </span>
 </%def>
-

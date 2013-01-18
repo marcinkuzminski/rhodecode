@@ -43,7 +43,7 @@
     </div>
     <div class="box box-right">
         <!-- box / title -->
-    
+
         <div class="title">
             <h5>
             <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
@@ -62,14 +62,14 @@
                  </li>
                %endif
              </ul>
-        </div>        
-        
+        </div>
+
         <!-- end box / title -->
         <div id="my_container" style="display:none">
             <div class="table yui-skin-sam" id="repos_list_wrap"></div>
             <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
         </div>
-        
+
         <div id="watched_container">
             <div class="table yui-skin-sam" id="watched_repos_list_wrap"></div>
             <div id="watched-user-paginator" style="padding: 0px 0px 0px 20px"></div>
@@ -104,8 +104,8 @@
             show_changeset_tooltip();
             });
         YUE.preventDefault(e);
-    });    
-    
+    });
+
     var show_my = function(e){
         YUD.setStyle('watched_container','display','none');
         YUD.setStyle('my_container','display','');
@@ -114,7 +114,7 @@
 
         YUD.addClass('show_my', 'current');
         YUD.removeClass('show_watched','current');
-        
+
         if(!YUD.hasClass('show_my', 'loaded')){
             table_renderer(${c.data |n});
             YUD.addClass('show_my', 'loaded');
@@ -134,8 +134,8 @@
         if(!YUD.hasClass('show_watched', 'loaded')){
         	watched_renderer(${c.watched_data |n});
             YUD.addClass('show_watched', 'loaded');
-        }        
-        
+        }
+
         return
         var nodes = YUQ('#watched_container .watched_repo a');
         var target = 'q_filter';
@@ -201,7 +201,7 @@
             {key:"name",label:"${_('Name')}",sortable:true,
                 sortOptions: { sortFunction: nameSort }},
             {key:"last_changeset",label:"${_('Tip')}",sortable:true,
-                sortOptions: { sortFunction: revisionSort }},      
+                sortOptions: { sortFunction: revisionSort }},
             {key:"action",label:"${_('Action')}",sortable:false},
         ];
 
@@ -266,7 +266,7 @@
             filterTimeout = setTimeout(updateFilter,600);
         });
       }
-    
+
     function table_renderer(data){
         var myDataSource = new YAHOO.util.DataSource(data);
         myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
@@ -305,7 +305,7 @@
             {key:"name",label:"${_('Name')}",sortable:true,
                 sortOptions: { sortFunction: nameSort }},
             {key:"last_changeset",label:"${_('Tip')}",sortable:true,
-                sortOptions: { sortFunction: revisionSort }},      
+                sortOptions: { sortFunction: revisionSort }},
             {key:"action",label:"${_('Action')}",sortable:false},
         ];
 
@@ -369,7 +369,7 @@
             clearTimeout(filterTimeout);
             filterTimeout = setTimeout(updateFilter,600);
         });
-      }    
-    
+      }
+
     </script>
 </%def>
