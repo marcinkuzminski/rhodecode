@@ -276,15 +276,17 @@ def get_container_username(environ, config):
     if str2bool(config.get('container_auth_enabled', False)):
         from paste.httpheaders import REMOTE_USER
         username = REMOTE_USER(environ)
+        log.debug('extracted REMOTE_USER:%s' % (username))
 
     if not username and str2bool(config.get('proxypass_auth_enabled', False)):
         username = environ.get('HTTP_X_FORWARDED_USER')
+        log.debug('extracted HTTP_X_FORWARDED_USER:%s' % (username))
 
     if username:
         # Removing realm and domain from username
         username = username.partition('@')[0]
         username = username.rpartition('\\')[2]
-        log.debug('Received username %s from container' % username)
+    log.debug('Received username %s from container' % username)
 
     return username
 
