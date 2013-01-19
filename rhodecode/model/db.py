@@ -909,7 +909,8 @@ class Repository(Base, BaseModel):
             fork_of=repo.fork.repo_name if repo.fork else None,
             enable_statistics=repo.enable_statistics,
             enable_locking=repo.enable_locking,
-            enable_downloads=repo.enable_downloads
+            enable_downloads=repo.enable_downloads,
+            last_changeset=repo.changeset_cache
         )
 
         return data

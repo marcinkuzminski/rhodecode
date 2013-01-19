@@ -601,24 +601,32 @@ OUTPUT::
                 "enable_locking":    "<bool>",
                 "enable_statistics": "<bool>",                
                 "private":           "<bool>",
-                "created_on" :       "<datetimecreated>",                
+                "created_on" :       "<date_time_created>",                
                 "description" :      "<description>",
                 "landing_rev":       "<landing_rev>",
+                "last_changeset":    {
+                                       "author":   "<full_author>",
+                                       "date":     "<date_time_of_commit>",
+                                       "message":  "<commit_message>",
+                                       "raw_id":   "<raw_id>",
+                                       "revision": "<numeric_revision>",
+                                       "short_id": "<short_id>"
+                                     }
                 "owner":             "<repo_owner>",
                 "fork_of":           "<name_of_fork_parent>",
                 "members" :     [
                                   { 
                                     "type": "user",
-                                    "user_id" :  "<user_id>",
-                                    "username" : "<username>",
-                                    "firstname": "<firstname>",
-                                    "lastname" : "<lastname>",
-                                    "email" :    "<email>",
-                                    "emails":    "<list_of_all_additional_emails>",
-                                    "active" :   "<bool>",
-                                    "admin" :    "<bool>",
-                                    "ldap_dn" :  "<ldap_dn>",
-                                    "last_login": "<last_login>",
+                                    "user_id" :    "<user_id>",
+                                    "username" :   "<username>",
+                                    "firstname":   "<firstname>",
+                                    "lastname" :   "<lastname>",
+                                    "email" :      "<email>",
+                                    "emails":      "<list_of_all_additional_emails>",
+                                    "active" :     "<bool>",
+                                    "admin" :      "<bool>",
+                                    "ldap_dn" :    "<ldap_dn>",
+                                    "last_login":  "<last_login>",
                                     "permission" : "repository.(read|write|admin)"
                                   },
                                   …
