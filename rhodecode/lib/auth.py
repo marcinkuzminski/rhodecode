@@ -270,7 +270,18 @@ def login_container_auth(username):
     return user
 
 
-def get_container_username(environ, config):
+def get_container_username(environ, config, clean_username=False):
+    """
+    Get's the container_auth username (or email). It tries to get username
+    from REMOTE_USER if container_auth_enabled is enabled, if that fails
+    it tries to get username from HTTP_X_FORWARDED_USER if proxypass_auth_enabled
+    is enabled. clean_username extracts the username from this data if it's
+    having @ in it.
+
+    :param environ:
+    :param config:
+    :param clean_username:
+    """
     username = None
 
     if str2bool(config.get('container_auth_enabled', False)):
@@ -282,7 +293,7 @@ def get_container_username(environ, config):
         username = environ.get('HTTP_X_FORWARDED_USER')
         log.debug('extracted HTTP_X_FORWARDED_USER:%s' % (username))
 
-    if username:
+    if username and clean_username:
         # Removing realm and domain from username
         username = username.partition('@')[0]
         username = username.rpartition('\\')[2]
