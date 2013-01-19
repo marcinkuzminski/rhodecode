@@ -111,22 +111,17 @@ class ChangesetStatusModel(BaseModel):
         st = status or ChangesetStatus.DEFAULT
         return str(st)
 
-    def set_status(self, repo, status, user, comment, revision=None,
+    def set_status(self, repo, status, user, comment=None, revision=None,
                    pull_request=None, dont_allow_on_closed_pull_request=False):
         """
         Creates new status for changeset or updates the old ones bumping their
         version, leaving the current status at
 
         :param repo:
-        :type repo:
         :param revision:
-        :type revision:
         :param status:
-        :type status:
         :param user:
-        :type user:
         :param comment:
-        :type comment:
         :param dont_allow_on_closed_pull_request: don't allow a status change
             if last status was for pull request and it's closed. We shouldn't
             mess around this manually
@@ -134,14 +129,21 @@ class ChangesetStatusModel(BaseModel):
         repo = self._get_repo(repo)
 
         q = ChangesetStatus.query()
-
+        if not comment:
+            from rhodecode.model.comment import ChangesetCommentsModel
+            comment = ChangesetCommentsModel().create(
+                text='Auto status change',
+                repo=repo,
+                user=user,
+                pull_request=pull_request,
+            )
         if revision:
             q = q.filter(ChangesetStatus.repo == repo)
             q = q.filter(ChangesetStatus.revision == revision)
         elif pull_request:
             pull_request = self.__get_pull_request(pull_request)
             q = q.filter(ChangesetStatus.repo == pull_request.org_repo)
-            q = q.filter(ChangesetStatus.pull_request == pull_request)
+            q = q.filter(ChangesetStatus.revision.in_(pull_request.revisions))
         cur_statuses = q.all()
 
         #if statuses exists and last is associated with a closed pull request
@@ -153,6 +155,7 @@ class ChangesetStatusModel(BaseModel):
                 'Changing status on closed pull request is not allowed'
             )
 
+        #update all current statuses with older version
         if cur_statuses:
             for st in cur_statuses:
                 st.version += 1

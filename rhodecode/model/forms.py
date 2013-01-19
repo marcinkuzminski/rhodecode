@@ -365,7 +365,8 @@ def PullRequestForm(repo_id):
         org_ref = v.UnicodeString(strip=True, required=True)
         other_repo = v.UnicodeString(strip=True, required=True)
         other_ref = v.UnicodeString(strip=True, required=True)
-        revisions = All(v.NotReviewedRevisions(repo_id)(), v.UniqueList(not_empty=True))
+        revisions = All(#v.NotReviewedRevisions(repo_id)(),
+                        v.UniqueList(not_empty=True))
         review_members = v.UniqueList(not_empty=True)
 
         pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)

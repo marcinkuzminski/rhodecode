@@ -33,7 +33,8 @@ from pylons.i18n.translation import _
 from rhodecode.model.meta import Session
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
-from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification
+from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification,\
+    ChangesetStatus
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
@@ -54,8 +55,9 @@ class PullRequestModel(BaseModel):
         repo = self._get_repo(repo)
         return PullRequest.query().filter(PullRequest.other_repo == repo).all()
 
-    def create(self, created_by, org_repo, org_ref, other_repo,
-               other_ref, revisions, reviewers, title, description=None):
+    def create(self, created_by, org_repo, org_ref, other_repo, other_ref,
+               revisions, reviewers, title, description=None):
+        from rhodecode.model.changeset_status import ChangesetStatusModel
 
         created_by_user = self._get_user(created_by)
         org_repo = self._get_repo(org_repo)
@@ -77,6 +79,14 @@ class PullRequestModel(BaseModel):
             _usr = self._get_user(member)
             reviewer = PullRequestReviewers(_usr, new)
             self.sa.add(reviewer)
+
+        #reset state to under-review
+        ChangesetStatusModel().set_status(
+            repo=org_repo,
+            status=ChangesetStatus.STATUS_UNDER_REVIEW,
+            user=created_by_user,
+            pull_request=new
+        )
 
         #notification to reviewers
         notif = NotificationModel()

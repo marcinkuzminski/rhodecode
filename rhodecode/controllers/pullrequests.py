@@ -224,6 +224,7 @@ class PullrequestsController(BaseRepoController):
             h.flash(_('Successfully opened new pull request'),
                     category='success')
         except Exception:
+            raise
             h.flash(_('Error occurred during sending pull request'),
                     category='error')
             log.error(traceback.format_exc())
