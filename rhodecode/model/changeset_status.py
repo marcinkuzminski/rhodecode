@@ -89,27 +89,27 @@ class ChangesetStatusModel(BaseModel):
                                    with_revisions)
         return q.all()
 
-    def get_status(self, repo, revision=None, pull_request=None):
+    def get_status(self, repo, revision=None, pull_request=None, as_str=True):
         """
         Returns latest status of changeset for given revision or for given
         pull request. Statuses are versioned inside a table itself and
         version == 0 is always the current one
 
         :param repo:
-        :type repo:
         :param revision: 40char hash or None
-        :type revision: str
         :param pull_request: pull_request reference
-        :type:
+        :param as_str: return status as string not object
         """
         q = self._get_status_query(repo, revision, pull_request)
 
         # need to use first here since there can be multiple statuses
         # returned from pull_request
         status = q.first()
-        status = status.status if status else status
-        st = status or ChangesetStatus.DEFAULT
-        return str(st)
+        if as_str:
+            status = status.status if status else status
+            st = status or ChangesetStatus.DEFAULT
+            return str(st)
+        return status
 
     def set_status(self, repo, status, user, comment=None, revision=None,
                    pull_request=None, dont_allow_on_closed_pull_request=False):
