@@ -54,6 +54,7 @@
             };
             var _TM = TRANSLATION_MAP;
             var TOGGLE_FOLLOW_URL  = "${h.url('toggle_following')}";
+            var LAZY_CS_URL = "${h.url('changeset_info', repo_name='__NAME__', revision='__REV__')}"
             </script>
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js', ver=c.rhodecode_version)}"></script>
             <!--[if lt IE 9]>
@@ -74,7 +75,7 @@
                     return false;
                 }
             })(window);
-            
+
             YUE.onDOMReady(function(){
               tooltip_activate();
               show_more_event();
@@ -83,7 +84,7 @@
               YUE.on('quick_login_link','click',function(e){
                  // make sure we don't redirect
                  YUE.preventDefault(e);
-              
+
                  if(YUD.hasClass('quick_login_link','enabled')){
                      YUD.setStyle('quick_login','display','none');
                      YUD.removeClass('quick_login_link','enabled');

@@ -347,6 +347,10 @@ def send_email(recipients, subject, body, html_body=''):
     debug = str2bool(config.get('debug'))
     smtp_auth = email_config.get('smtp_auth')
 
+    if not mail_server:
+        log.error("SMTP mail server not configured - cannot send mail")
+        return False
+
     try:
         m = SmtpMailer(mail_from, user, passwd, mail_server, smtp_auth,
                        mail_port, ssl, tls, debug=debug)

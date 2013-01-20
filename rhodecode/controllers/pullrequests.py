@@ -97,7 +97,7 @@ class PullrequestsController(BaseRepoController):
             return repo.branches.keys()[0]
 
     def _get_is_allowed_change_status(self, pull_request):
-        owner = self.rhodecode_user.user_id == pull_request.user_id 
+        owner = self.rhodecode_user.user_id == pull_request.user_id
         reviewer = self.rhodecode_user.user_id in [x.user_id for x in
                                                    pull_request.reviewers]
         return (self.rhodecode_user.admin or owner or reviewer)
@@ -299,7 +299,7 @@ class PullrequestsController(BaseRepoController):
                                   else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
-        c.target_repo = c.repo_name
+        c.target_repo = other_repo.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
 
@@ -339,7 +339,6 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
         c.pull_request = PullRequest.get_or_404(pull_request_id)
-        c.target_repo = c.pull_request.org_repo.repo_name
         c.allowed_to_change_status = self._get_is_allowed_change_status(c.pull_request)
         cc_model = ChangesetCommentsModel()
         cs_model = ChangesetStatusModel()
@@ -478,7 +477,7 @@ class PullrequestsController(BaseRepoController):
             #don't allow deleting comments on closed pull request
             raise HTTPForbidden()
 
-        owner = lambda: co.author.user_id == c.rhodecode_user.user_id
+        owner = co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
             Session().commit()

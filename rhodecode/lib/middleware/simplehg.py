@@ -73,7 +73,7 @@ class SimpleHg(BaseVCSController):
         if not self._check_ssl(environ, start_response):
             return HTTPNotAcceptable('SSL REQUIRED !')(environ, start_response)
 
-        ipaddr = self._get_ip_addr(environ)
+        ip_addr = self._get_ip_addr(environ)
         username = None
         # skip passing error to error controller
         environ['pylons.status_code_redirect'] = True
@@ -103,7 +103,7 @@ class SimpleHg(BaseVCSController):
             anonymous_user = self.__get_user('default')
             username = anonymous_user.username
             anonymous_perm = self._check_permission(action, anonymous_user,
-                                                    repo_name)
+                                                    repo_name, ip_addr)
 
             if anonymous_perm is not True or anonymous_user.active is False:
                 if anonymous_perm is not True:
@@ -145,7 +145,7 @@ class SimpleHg(BaseVCSController):
                     return HTTPInternalServerError()(environ, start_response)
 
                 #check permissions for this repository
-                perm = self._check_permission(action, user, repo_name)
+                perm = self._check_permission(action, user, repo_name, ip_addr)
                 if perm is not True:
                     return HTTPForbidden()(environ, start_response)
 
@@ -154,7 +154,7 @@ class SimpleHg(BaseVCSController):
         from rhodecode import CONFIG
         server_url = get_server_url(environ)
         extras = {
-            'ip': ipaddr,
+            'ip': ip_addr,
             'username': username,
             'action': action,
             'repository': repo_name,
@@ -194,14 +194,15 @@ class SimpleHg(BaseVCSController):
             # invalidate cache on push
             if action == 'push':
                 self._invalidate_cache(repo_name)
-            log.info('%s action on HG repo "%s"' % (action, repo_name))
+            log.info('%s action on HG repo "%s" by "%s" from %s' %
+                     (action, repo_name, username, ip_addr))
             app = self.__make_app(repo_path, baseui, extras)
             return app(environ, start_response)
         except RepoError, e:
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
         except HTTPLockedRC, e:
-            log.debug('Repositry LOCKED ret code 423!')
+            log.debug('Repository LOCKED ret code 423!')
             return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())

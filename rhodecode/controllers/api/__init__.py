@@ -32,17 +32,15 @@ import urllib
 import traceback
 import time
 
-from rhodecode.lib.compat import izip_longest, json
-
 from paste.response import replace_header
-
 from pylons.controllers import WSGIController
-
 
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
 HTTPBadRequest, HTTPError
 
 from rhodecode.model.db import User
+from rhodecode.model import meta
+from rhodecode.lib.compat import izip_longest, json
 from rhodecode.lib.auth import AuthUser
 from rhodecode.lib.base import _get_ip_addr, _get_access_path
 from rhodecode.lib.utils2 import safe_unicode
@@ -86,6 +84,9 @@ class JSONRPCController(WSGIController):
 
      """
 
+    def _get_ip_addr(self, environ):
+        return _get_ip_addr(environ)
+
     def _get_method_args(self):
         """
         Return `self._rpc_args` to dispatched controller method
@@ -99,6 +100,7 @@ class JSONRPCController(WSGIController):
         controller and if it exists, dispatch to it.
         """
         start = time.time()
+        ip_addr = self.ip_addr = self._get_ip_addr(environ)
         self._req_id = None
         if 'CONTENT_LENGTH' not in environ:
             log.debug("No Content-Length")
@@ -130,6 +132,9 @@ class JSONRPCController(WSGIController):
             self._req_id = json_body['id']
             self._req_method = json_body['method']
             self._request_params = json_body['args']
+            if not isinstance(self._request_params, dict):
+                self._request_params = {}
+
             log.debug(
                 'method: %s, params: %s' % (self._req_method,
                                             self._request_params)
@@ -144,7 +149,15 @@ class JSONRPCController(WSGIController):
             if u is None:
                 return jsonrpc_error(retid=self._req_id,
                                      message='Invalid API KEY')
-            auth_u = AuthUser(u.user_id, self._req_api_key)
+
+            #check if we are allowed to use this IP
+            auth_u = AuthUser(u.user_id, self._req_api_key, ip_addr=ip_addr)
+            if not auth_u.ip_allowed:
+                return jsonrpc_error(retid=self._req_id,
+                        message='request from IP:%s not allowed' % (ip_addr))
+            else:
+                log.info('Access for IP:%s allowed' % (ip_addr))
+
         except Exception, e:
             return jsonrpc_error(retid=self._req_id,
                                  message='Invalid API KEY')
@@ -202,6 +215,7 @@ class JSONRPCController(WSGIController):
                 )
 
         self._rpc_args = {USER_SESSION_ATTR: u}
+
         self._rpc_args.update(self._request_params)
 
         self._rpc_args['action'] = self._req_method

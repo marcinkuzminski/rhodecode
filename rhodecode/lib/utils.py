@@ -162,10 +162,8 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         user_log.user_ip = ipaddr
         sa.add(user_log)
 
-        log.info(
-            'Adding user %s, action %s on %s' % (user_obj, action,
-                                                 safe_unicode(repo))
-        )
+        log.info('Logging action %s on %s by %s' %
+                 (action, safe_unicode(repo), user_obj))
         if commit:
             sa.commit()
     except:
@@ -309,7 +307,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
         cfg.read(path)
         for section in ui_sections:
             for k, v in cfg.items(section):
-                log.debug('settings ui from file[%s]%s:%s' % (section, k, v))
+                log.debug('settings ui from file: [%s] %s=%s' % (section, k, v))
                 baseui.setconfig(safe_str(section), safe_str(k), safe_str(v))
 
     elif read_from == 'db':
@@ -321,7 +319,7 @@ def make_ui(read_from='file', path=None, checkpaths=True, clear_session=True):
         hg_ui = ret
         for ui_ in hg_ui:
             if ui_.ui_active:
-                log.debug('settings ui from db[%s]%s:%s', ui_.ui_section,
+                log.debug('settings ui from db: [%s] %s=%s', ui_.ui_section,
                           ui_.ui_key, ui_.ui_value)
                 baseui.setconfig(safe_str(ui_.ui_section), safe_str(ui_.ui_key),
                                  safe_str(ui_.ui_value))
@@ -423,6 +421,13 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
 #    CacheInvalidation.clear_cache()
 #    sa.commit()
 
+    ##creation defaults
+    defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+    enable_statistics = defs.get('repo_enable_statistics')
+    enable_locking = defs.get('repo_enable_locking')
+    enable_downloads = defs.get('repo_enable_downloads')
+    private = defs.get('repo_private')
+
     for name, repo in initial_repo_list.items():
         group = map_groups(name)
         db_repo = rm.get_by_repo_name(name)
@@ -433,18 +438,24 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
             desc = (repo.description
                     if repo.description != 'unknown'
                     else '%s repository' % name)
+
             new_repo = rm.create_repo(
                 repo_name=name,
                 repo_type=repo.alias,
                 description=desc,
                 repos_group=getattr(group, 'group_id', None),
                 owner=user,
-                just_db=True
+                just_db=True,
+                enable_locking=enable_locking,
+                enable_downloads=enable_downloads,
+                enable_statistics=enable_statistics,
+                private=private
             )
             # we added that repo just now, and make sure it has githook
             # installed
             if new_repo.repo_type == 'git':
                 ScmModel().install_git_hook(new_repo.scm_instance)
+            new_repo.update_changeset_cache()
         elif install_git_hook:
             if db_repo.repo_type == 'git':
                 ScmModel().install_git_hook(db_repo.scm_instance)
@@ -452,8 +463,8 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         # system, this will register all repos and multiple instances
         key, _prefix, _org_key = CacheInvalidation._get_key(name)
         CacheInvalidation.invalidate(name)
-        log.debug("Creating a cache key for %s instance_id=>`%s`"
-                  % (name, _prefix or '-'))
+        log.debug("Creating a cache key for %s, instance_id %s"
+                  % (name, _prefix or 'unknown'))
 
     sa.commit()
     removed = []

@@ -4,6 +4,38 @@
 Changelog
 =========
 
+1.5.2 (**2013-01-14**)
+----------------------
+
+news
+++++
+
+- IP restrictions for users. Each user can get a set of whitelist IP+mask for
+  extra protection. Useful for buildbots etc.
+- added full last changeset info to lightweight dashboard. lightweight dashboard
+  is now fully functional replacement of original dashboard.
+- implemented certain API calls for non-admin users.
+- enabled all Markdown Extra plugins
+- implemented #725 Pull Request View - Show origin repo URL
+- show comments from pull requests into associated changesets
+
+fixes
++++++
+
+- update repoinfo script is more failsafe
+- fixed #687  Lazy loaded tooltip bug with simultaneous ajax requests
+- fixed #691: Notifications for pull requests: move link to top for better
+  readability
+- fixed #699: fix missing fork docs for API
+- fixed #693 Opening changeset from pull request fails
+- fixed #710 File view stripping empty lines from beginning and end of file
+- fixed issues with getting repos by path on windows, caused GIT hooks to fail
+- fixed issues with groups paginator on main dashboard
+- improved fetch/pull command for git repos, now pulling all refs
+- fixed issue #719 Journal revision ID tooltip AJAX query path is incorrect
+  when running in a subdir
+- fixed issue #702 API methods without arguments fail when "args":null
+- set the status of changesets initially on pull request. Fixes issues #690 and #587
 
 1.5.1 (**2012-12-13**)
 ----------------------

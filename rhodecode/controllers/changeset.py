@@ -221,13 +221,25 @@ class ChangesetController(BaseRepoController):
         for changeset in c.cs_ranges:
             inlines = []
             if method == 'show':
-                c.statuses.extend([ChangesetStatusModel()\
-                                  .get_status(c.rhodecode_db_repo.repo_id,
-                                              changeset.raw_id)])
+                c.statuses.extend([ChangesetStatusModel().get_status(
+                            c.rhodecode_db_repo.repo_id, changeset.raw_id)])
 
                 c.comments.extend(ChangesetCommentsModel()\
                                   .get_comments(c.rhodecode_db_repo.repo_id,
                                                 revision=changeset.raw_id))
+
+                #comments from PR
+                st = ChangesetStatusModel().get_statuses(
+                            c.rhodecode_db_repo.repo_id, changeset.raw_id,
+                            with_revisions=True)
+                # from associated statuses, check the pull requests, and
+                # show comments from them
+
+                prs = set([x.pull_request for x in
+                           filter(lambda x: x.pull_request != None, st)])
+
+                for pr in prs:
+                    c.comments.extend(pr.comments)
                 inlines = ChangesetCommentsModel()\
                             .get_inline_comments(c.rhodecode_db_repo.repo_id,
                                                  revision=changeset.raw_id)
@@ -268,6 +280,9 @@ class ChangesetController(BaseRepoController):
                 diff = diff_processor.as_raw()
                 cs_changes[''] = [None, None, None, None, diff, None]
             c.changes[changeset.raw_id] = cs_changes
+
+        #sort comments by how they were generated
+        c.comments = sorted(c.comments, key=lambda x: x.comment_id)
 
         # count inline comments
         for __, lines in c.inline_comments:
@@ -342,7 +357,7 @@ class ChangesetController(BaseRepoController):
                 )
             except StatusChangeOnClosedPullRequestError:
                 log.error(traceback.format_exc())
-                msg = _('Changing status on a changeset associated with'
+                msg = _('Changing status on a changeset associated with '
                         'a closed pull request is not allowed')
                 h.flash(msg, category='warning')
                 return redirect(h.url('changeset_home', repo_name=repo_name,
@@ -371,7 +386,7 @@ class ChangesetController(BaseRepoController):
     @jsonify
     def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)
-        owner = lambda: co.author.user_id == c.rhodecode_user.user_id
+        owner = co.author.user_id == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
             ChangesetCommentsModel().delete(comment=co)
             Session().commit()

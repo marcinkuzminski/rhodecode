@@ -40,6 +40,7 @@
          {key:"raw_name"},
          {key:"name"},
          {key:"desc"},
+         {key:"last_changeset"},
          {key:"owner"},
          {key:"action"},
       ]
@@ -70,6 +71,8 @@
       {key:"name",label:"${_('Name')}",sortable:true,
     	  sortOptions: { sortFunction: nameSort }},
       {key:"desc",label:"${_('Description')}",sortable:true},
+      {key:"last_changeset",label:"${_('Tip')}",sortable:true,
+          sortOptions: { sortFunction: revisionSort }},
       {key:"owner",label:"${_('Owner')}",sortable:true},
       {key:"action",label:"${_('Action')}",sortable:false},
   ];
@@ -77,7 +80,7 @@
   var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
     sortedBy:{key:"name",dir:"asc"},
     paginator: new YAHOO.widget.Paginator({
-        rowsPerPage: 15,
+        rowsPerPage: 25,
         alwaysVisible: false,
         template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
         pageLinks: 5,
@@ -111,7 +114,7 @@
 
       // Reset sort
       var state = myDataTable.getState();
-          state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+      state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
       // Get filtered data
       myDataSource.sendRequest(YUD.get('q_filter').value,{
@@ -123,7 +126,11 @@
 
   };
   YUE.on('q_filter','click',function(){
-      YUD.get('q_filter').value = '';
+	  if(!YUD.hasClass('q_filter', 'loaded')){
+		  YUD.get('q_filter').value = '';
+		  //TODO: load here full list later to do search within groups
+		  YUD.addClass('q_filter', 'loaded');
+	  }
    });
 
   YUE.on('q_filter','keyup',function (e) {

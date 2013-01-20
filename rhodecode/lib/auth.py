@@ -45,7 +45,8 @@ from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
 from rhodecode.model.user import UserModel
-from rhodecode.model.db import Permission, RhodeCodeSetting, User
+from rhodecode.model.db import Permission, RhodeCodeSetting, User, UserIpMap
+from rhodecode.lib.caching_query import FromCache
 
 log = logging.getLogger(__name__)
 
@@ -269,21 +270,34 @@ def login_container_auth(username):
     return user
 
 
-def get_container_username(environ, config):
+def get_container_username(environ, config, clean_username=False):
+    """
+    Get's the container_auth username (or email). It tries to get username
+    from REMOTE_USER if container_auth_enabled is enabled, if that fails
+    it tries to get username from HTTP_X_FORWARDED_USER if proxypass_auth_enabled
+    is enabled. clean_username extracts the username from this data if it's
+    having @ in it.
+
+    :param environ:
+    :param config:
+    :param clean_username:
+    """
     username = None
 
     if str2bool(config.get('container_auth_enabled', False)):
         from paste.httpheaders import REMOTE_USER
         username = REMOTE_USER(environ)
+        log.debug('extracted REMOTE_USER:%s' % (username))
 
     if not username and str2bool(config.get('proxypass_auth_enabled', False)):
         username = environ.get('HTTP_X_FORWARDED_USER')
+        log.debug('extracted HTTP_X_FORWARDED_USER:%s' % (username))
 
-    if username:
+    if username and clean_username:
         # Removing realm and domain from username
         username = username.partition('@')[0]
         username = username.rpartition('\\')[2]
-        log.debug('Received username %s from container' % username)
+    log.debug('Received username %s from container' % username)
 
     return username
 
@@ -313,11 +327,12 @@ class  AuthUser(object):
     in
     """
 
-    def __init__(self, user_id=None, api_key=None, username=None):
+    def __init__(self, user_id=None, api_key=None, username=None, ip_addr=None):
 
         self.user_id = user_id
         self.api_key = None
         self.username = username
+        self.ip_addr = ip_addr
 
         self.name = ''
         self.lastname = ''
@@ -380,6 +395,24 @@ class  AuthUser(object):
     def is_admin(self):
         return self.admin
 
+    @property
+    def ip_allowed(self):
+        """
+        Checks if ip_addr used in constructor is allowed from defined list of
+        allowed ip_addresses for user
+
+        :returns: boolean, True if ip is in allowed ip range
+        """
+        #check IP
+        allowed_ips = AuthUser.get_allowed_ips(self.user_id, cache=True)
+        if check_ip_access(source_ip=self.ip_addr, allowed_ips=allowed_ips):
+            log.debug('IP:%s is in range of %s' % (self.ip_addr, allowed_ips))
+            return True
+        else:
+            log.info('Access for IP:%s forbidden, '
+                     'not in %s' % (self.ip_addr, allowed_ips))
+            return False
+
     def __repr__(self):
         return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
                                               self.is_authenticated)
@@ -405,6 +438,17 @@ class  AuthUser(object):
         username = cookie_store.get('username')
         api_key = cookie_store.get('api_key')
         return AuthUser(user_id, api_key, username)
+
+    @classmethod
+    def get_allowed_ips(cls, user_id, cache=False):
+        _set = set()
+        user_ips = UserIpMap.query().filter(UserIpMap.user_id == user_id)
+        if cache:
+            user_ips = user_ips.options(FromCache("sql_cache_short",
+                                                  "get_user_ips_%s" % user_id))
+        for ip in user_ips:
+            _set.add(ip.ip_addr)
+        return _set or set(['0.0.0.0/0'])
 
 
 def set_available_permissions(config):
@@ -450,6 +494,15 @@ class LoginRequired(object):
     def __wrapper(self, func, *fargs, **fkwargs):
         cls = fargs[0]
         user = cls.rhodecode_user
+        loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
+
+        #check IP
+        ip_access_ok = True
+        if not user.ip_allowed:
+            from rhodecode.lib import helpers as h
+            h.flash(h.literal(_('IP %s not allowed' % (user.ip_addr))),
+                    category='warning')
+            ip_access_ok = False
 
         api_access_ok = False
         if self.api_access:
@@ -458,9 +511,9 @@ class LoginRequired(object):
                 api_access_ok = True
             else:
                 log.debug("API KEY token not valid")
-        loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
+
         log.debug('Checking if %s is authenticated @ %s' % (user.username, loc))
-        if user.is_authenticated or api_access_ok:
+        if (user.is_authenticated or api_access_ok) and ip_access_ok:
             reason = 'RegularAuth' if user.is_authenticated else 'APIAuth'
             log.info('user %s is authenticated and granted access to %s '
                      'using %s' % (user.username, loc, reason)
@@ -682,12 +735,12 @@ class PermsFunction(object):
             return False
         self.user_perms = user.permissions
         if self.check_permissions():
-            log.debug('Permission granted for user: %s @ %s', user,
+            log.debug('Permission to %s granted for user: %s @ %s', self.repo_name, user,
                       check_Location or 'unspecified location')
             return True
 
         else:
-            log.debug('Permission denied for user: %s @ %s', user,
+            log.debug('Permission to %s denied for user: %s @ %s', self.repo_name, user,
                         check_Location or 'unspecified location')
             return False
 
@@ -821,3 +874,122 @@ class HasPermissionAnyMiddleware(object):
                  )
         )
         return False
+
+
+#==============================================================================
+# SPECIAL VERSION TO HANDLE API AUTH
+#==============================================================================
+class _BaseApiPerm(object):
+    def __init__(self, *perms):
+        self.required_perms = set(perms)
+
+    def __call__(self, check_location='unspecified', user=None, repo_name=None):
+        cls_name = self.__class__.__name__
+        check_scope = 'user:%s, repo:%s' % (user, repo_name)
+        log.debug('checking cls:%s %s %s @ %s', cls_name,
+                  self.required_perms, check_scope, check_location)
+        if not user:
+            log.debug('Empty User passed into arguments')
+            return False
+
+        ## process user
+        if not isinstance(user, AuthUser):
+            user = AuthUser(user.user_id)
+
+        if self.check_permissions(user.permissions, repo_name):
+            log.debug('Permission to %s granted for user: %s @ %s', repo_name,
+                      user, check_location)
+            return True
+
+        else:
+            log.debug('Permission to %s denied for user: %s @ %s', repo_name,
+                      user, check_location)
+            return False
+
+    def check_permissions(self, perm_defs, repo_name):
+        """
+        implement in child class should return True if permissions are ok,
+        False otherwise
+
+        :param perm_defs: dict with permission definitions
+        :param repo_name: repo name
+        """
+        raise NotImplementedError()
+
+
+class HasPermissionAllApi(_BaseApiPerm):
+    def __call__(self, user, check_location=''):
+        return super(HasPermissionAllApi, self)\
+            .__call__(check_location=check_location, user=user)
+
+    def check_permissions(self, perm_defs, repo):
+        if self.required_perms.issubset(perm_defs.get('global')):
+            return True
+        return False
+
+
+class HasPermissionAnyApi(_BaseApiPerm):
+    def __call__(self, user, check_location=''):
+        return super(HasPermissionAnyApi, self)\
+            .__call__(check_location=check_location, user=user)
+
+    def check_permissions(self, perm_defs, repo):
+        if self.required_perms.intersection(perm_defs.get('global')):
+            return True
+        return False
+
+
+class HasRepoPermissionAllApi(_BaseApiPerm):
+    def __call__(self, user, repo_name, check_location=''):
+        return super(HasRepoPermissionAllApi, self)\
+            .__call__(check_location=check_location, user=user,
+                      repo_name=repo_name)
+
+    def check_permissions(self, perm_defs, repo_name):
+
+        try:
+            self._user_perms = set(
+                [perm_defs['repositories'][repo_name]]
+            )
+        except KeyError:
+            log.warning(traceback.format_exc())
+            return False
+        if self.required_perms.issubset(self._user_perms):
+            return True
+        return False
+
+
+class HasRepoPermissionAnyApi(_BaseApiPerm):
+    def __call__(self, user, repo_name, check_location=''):
+        return super(HasRepoPermissionAnyApi, self)\
+            .__call__(check_location=check_location, user=user,
+                      repo_name=repo_name)
+
+    def check_permissions(self, perm_defs, repo_name):
+
+        try:
+            _user_perms = set(
+                [perm_defs['repositories'][repo_name]]
+            )
+        except KeyError:
+            log.warning(traceback.format_exc())
+            return False
+        if self.required_perms.intersection(_user_perms):
+            return True
+        return False
+
+
+def check_ip_access(source_ip, allowed_ips=None):
+    """
+    Checks if source_ip is a subnet of any of allowed_ips.
+
+    :param source_ip:
+    :param allowed_ips: list of allowed ips together with mask
+    """
+    from rhodecode.lib import ipaddr
+    log.debug('checking if ip:%s is subnet of %s' % (source_ip, allowed_ips))
+    if isinstance(allowed_ips, (tuple, list, set)):
+        for ip in allowed_ips:
+            if ipaddr.IPAddress(source_ip) in ipaddr.IPNetwork(ip):
+                return True
+    return False

@@ -583,7 +583,7 @@ class DiffProcessor(object):
         #return u''.join(imap(self._line_counter, self._diff.splitlines(1)))
 
     def as_html(self, table_class='code-difftable', line_class='line',
-                new_lineno_class='lineno old', old_lineno_class='lineno new',
+                old_lineno_class='lineno old', new_lineno_class='lineno new',
                 code_class='code', enable_comments=False, parsed_lines=None):
         """
         Return given diff as html table with customized css classes

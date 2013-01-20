@@ -464,7 +464,7 @@ def desc_stylize(value):
                    '<div class="metatag" tag="see">see =&gt; \\1 </div>', value)
     value = re.sub(r'\[license\ \=\>\ *([a-zA-Z0-9\/\=\?\&\ \:\/\.\-]*)\]',
                    '<div class="metatag" tag="license"><a href="http:\/\/www.opensource.org/licenses/\\1">\\1</a></div>', value)
-    value = re.sub(r'\[(requires|recommends|conflicts|base)\ \=\>\ *([a-zA-Z\-\/]*)\]',
+    value = re.sub(r'\[(requires|recommends|conflicts|base)\ \=\>\ *([a-zA-Z0-9\-\/]*)\]',
                    '<div class="metatag" tag="\\1">\\1 =&gt; <a href="/\\2">\\2</a></div>', value)
     value = re.sub(r'\[(lang|language)\ \=\>\ *([a-zA-Z\-\/\#\+]*)\]',
                    '<div class="metatag" tag="lang">\\2</div>', value)
@@ -1164,3 +1164,9 @@ def not_mapped_error(repo_name):
             ' it was created or renamed from the filesystem'
             ' please run the application again'
             ' in order to rescan repositories') % repo_name, category='error')
+
+
+def ip_range(ip_addr):
+    from rhodecode.model.db import UserIpMap
+    s, e = UserIpMap._get_ip_range(ip_addr)
+    return '%s - %s' % (s, e)

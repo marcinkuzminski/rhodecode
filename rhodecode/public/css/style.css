@@ -2002,7 +2002,6 @@ a.metatag[tag="license"]:hover {
 }
 
 #login div.title {
-	width: 420px;
 	clear: both;
 	overflow: hidden;
 	position: relative;
@@ -2021,7 +2020,6 @@ a.metatag[tag="license"]:hover {
 }
 
 #login div.inner {
-	width: 380px;
 	background: #FFF url("../images/login.png") no-repeat top left;
 	border-top: none;
 	border-bottom: none;
@@ -2038,7 +2036,6 @@ a.metatag[tag="license"]:hover {
 }
 
 #login div.form div.fields div.field div.input input {
-	width: 176px;
 	background: #FFF;
 	border-top: 1px solid #b3b3b3;
 	border-left: 1px solid #b3b3b3;
@@ -2781,7 +2778,9 @@ h3.files_location {
     margin: 0px 2px;
 }
 
-.right .logtags .branchtag,.logtags .branchtag {
+.right .logtags .branchtag,
+.logtags .branchtag,
+.spantag {
   padding: 1px 3px 1px 3px;
   background-color: #bfbfbf;
   font-size: 10px;
@@ -3238,7 +3237,7 @@ table.code-browser .submodule-dir {
 }
 
 .edit_icon {
-	background: url("../images/icons/folder_edit.png") no-repeat scroll 3px;
+	background: url("../images/icons/application_form_edit.png") no-repeat scroll 3px;
 	padding-left: 20px;
 	padding-top: 0px;
 	text-align: left;
@@ -4039,6 +4038,22 @@ div#legend_container table td,div#legend_choices table td {
 .emails_wrap .email_entry .email_action{
 	float: left
 }
+
+.ips_wrap{
+    padding: 0px 20px;
+}
+
+.ips_wrap .ip_entry{
+    height: 30px;
+    padding:0px 0px 0px 10px;
+}
+.ips_wrap .ip_entry .ip{
+    float: left
+}
+.ips_wrap .ip_entry .ip_action{
+    float: left
+}
+
 
 /*README STYLE*/
 

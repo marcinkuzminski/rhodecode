@@ -37,13 +37,18 @@ def _get_ip_addr(environ):
     proxy_key2 = 'HTTP_X_FORWARDED_FOR'
     def_key = 'REMOTE_ADDR'
 
-    ip = environ.get(proxy_key2)
+    ip = environ.get(proxy_key)
     if ip:
         return ip
 
-    ip = environ.get(proxy_key)
-
+    ip = environ.get(proxy_key2)
     if ip:
+        # HTTP_X_FORWARDED_FOR can have mutliple ips inside
+        # the left-most being the original client, and each successive proxy
+        # that passed the request adding the IP address where it received the
+        # request from.
+        if ',' in ip:
+            ip = ip.split(',')[0].strip()
         return ip
 
     ip = environ.get(def_key, '0.0.0.0')
@@ -101,7 +106,7 @@ class BaseVCSController(object):
         #authenticate this mercurial request using authfunc
         self.authenticate = BasicAuth('', authfunc,
                                       config.get('auth_ret_code'))
-        self.ipaddr = '0.0.0.0'
+        self.ip_addr = '0.0.0.0'
 
     def _handle_request(self, environ, start_response):
         raise NotImplementedError()
@@ -136,7 +141,7 @@ class BaseVCSController(object):
         """
         invalidate_cache('get_repo_cached_%s' % repo_name)
 
-    def _check_permission(self, action, user, repo_name):
+    def _check_permission(self, action, user, repo_name, ip_addr=None):
         """
         Checks permissions using action (push/pull) user and repository
         name
@@ -145,6 +150,12 @@ class BaseVCSController(object):
         :param user: user instance
         :param repo_name: repository name
         """
+        #check IP
+        authuser = AuthUser(user_id=user.user_id, ip_addr=ip_addr)
+        if not authuser.ip_allowed:
+            return False
+        else:
+            log.info('Access for IP:%s allowed' % (ip_addr))
         if action == 'push':
             if not HasPermissionAnyMiddleware('repository.write',
                                               'repository.admin')(user,
@@ -235,6 +246,9 @@ class BaseVCSController(object):
 class BaseController(WSGIController):
 
     def __before__(self):
+        """
+        __before__ is called before controller methods and after __call__
+        """
         c.rhodecode_version = __version__
         c.rhodecode_instanceid = config.get('instance_id')
         c.rhodecode_name = config.get('rhodecode_title')
@@ -258,7 +272,6 @@ class BaseController(WSGIController):
 
         self.sa = meta.Session
         self.scm_model = ScmModel(self.sa)
-        self.ip_addr = ''
 
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
@@ -273,7 +286,7 @@ class BaseController(WSGIController):
             cookie_store = CookieStoreWrapper(session.get('rhodecode_user'))
             user_id = cookie_store.get('user_id', None)
             username = get_container_username(environ, config)
-            auth_user = AuthUser(user_id, api_key, username)
+            auth_user = AuthUser(user_id, api_key, username, self.ip_addr)
             request.user = auth_user
             self.rhodecode_user = c.rhodecode_user = auth_user
             if not self.rhodecode_user.is_authenticated and \
@@ -311,7 +324,7 @@ class BaseRepoController(BaseController):
             dbr = c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
             c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
             # update last change according to VCS data
-            dbr.update_last_change(c.rhodecode_repo.last_change)
+            dbr.update_changeset_cache(dbr.get_changeset())
             if c.rhodecode_repo is None:
                 log.error('%s this repository is present in database but it '
                           'cannot be created as an scm instance', c.repo_name)

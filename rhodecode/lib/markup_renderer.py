@@ -98,7 +98,7 @@ class MarkupRenderer(object):
         source = safe_unicode(source)
         try:
             import markdown as __markdown
-            return __markdown.markdown(source, ['codehilite', 'tables'])
+            return __markdown.markdown(source, ['codehilite', 'extra'])
         except ImportError:
             log.warning('Install markdown to use this function')
             return cls.plain(source)

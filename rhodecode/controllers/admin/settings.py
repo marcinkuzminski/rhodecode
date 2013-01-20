@@ -48,11 +48,12 @@ from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm, ApplicationVisualisationForm
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.user import UserModel
+from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
 from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
-from rhodecode.lib.utils2 import str2bool
-
+from rhodecode.lib.utils2 import str2bool, safe_unicode
+from rhodecode.lib.compat import json
 log = logging.getLogger(__name__)
 
 
@@ -119,10 +120,11 @@ class SettingsController(BaseController):
                 invalidate_cache('get_repo_cached_%s' % repo_name)
 
             added, removed = repo2db_mapper(initial, rm_obsolete)
-
-            h.flash(_('Repositories successfully'
-                      ' rescanned added: %s,removed: %s') % (added, removed),
-                      category='success')
+            _repr = lambda l: ', '.join(map(safe_unicode, l)) or '-'
+            h.flash(_('Repositories successfully '
+                      'rescanned added: %s ; removed: %s') %
+                    (_repr(added), _repr(removed)),
+                    category='success')
 
         if setting_id == 'whoosh':
             repo_location = self._get_hg_ui_settings()['paths_root_path']
@@ -336,7 +338,7 @@ class SettingsController(BaseController):
                 .get_email_tmpl(EmailNotificationModel.TYPE_DEFAULT,
                                 body=test_email_body)
 
-            recipients = [test_email] if [test_email] else None
+            recipients = [test_email] if test_email else None
 
             run_task(tasks.send_email, recipients, test_email_subj,
                      test_email_body, test_email_html_body)
@@ -381,6 +383,17 @@ class SettingsController(BaseController):
             force_defaults=False
         )
 
+    def _load_my_repos_data(self):
+        repos_list = Session().query(Repository)\
+                     .filter(Repository.user_id ==
+                             self.rhodecode_user.user_id)\
+                     .order_by(func.lower(Repository.repo_name)).all()
+
+        repos_data = RepoModel().get_repos_as_dict(repos_list=repos_list,
+                                                   admin=True)
+        #json used to render the grid
+        return json.dumps(repos_data)
+
     @NotAnonymous()
     def my_account(self):
         """
@@ -389,16 +402,15 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account')
 
         c.user = User.get(self.rhodecode_user.user_id)
-        all_repos = Session().query(Repository)\
-                     .filter(Repository.user_id == c.user.user_id)\
-                     .order_by(func.lower(Repository.repo_name)).all()
-
-        c.user_repos = ScmModel().get_repos(all_repos)
+        c.ldap_dn = c.user.ldap_dn
 
         if c.user.username == 'default':
             h.flash(_("You can't edit this user since it's"
               " crucial for entire application"), category='warning')
             return redirect(url('users'))
+
+        #json used to render the grid
+        c.data = self._load_my_repos_data()
 
         defaults = c.user.get_dict()
 
@@ -420,19 +432,25 @@ class SettingsController(BaseController):
         #           method='put')
         # url('admin_settings_my_account_update', id=ID)
         uid = self.rhodecode_user.user_id
+        c.user = User.get(self.rhodecode_user.user_id)
+        c.ldap_dn = c.user.ldap_dn
         email = self.rhodecode_user.email
         _form = UserForm(edit=True,
                          old_data={'user_id': uid, 'email': email})()
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
-            UserModel().update_my_account(uid, form_result)
+            skip_attrs = ['admin', 'active']  # skip attr for my account
+            if c.ldap_dn:
+                #forbid updating username for ldap accounts
+                skip_attrs.append('username')
+            UserModel().update(uid, form_result, skip_attrs=skip_attrs)
             h.flash(_('Your account was updated successfully'),
                     category='success')
             Session().commit()
         except formencode.Invalid, errors:
-            c.user = User.get(self.rhodecode_user.user_id)
-
+            #json used to render the grid
+            c.data = self._load_my_repos_data()
             c.form = htmlfill.render(
                 render('admin/users/user_edit_my_account_form.html'),
                 defaults=errors.value,
@@ -448,23 +466,14 @@ class SettingsController(BaseController):
         return redirect(url('my_account'))
 
     @NotAnonymous()
-    def my_account_my_repos(self):
-        all_repos = Session().query(Repository)\
-            .filter(Repository.user_id == self.rhodecode_user.user_id)\
-            .order_by(func.lower(Repository.repo_name))\
-            .all()
-        c.user_repos = ScmModel().get_repos(all_repos)
-        return render('admin/users/user_edit_my_account_repos.html')
-
-    @NotAnonymous()
     def my_account_my_pullrequests(self):
         c.my_pull_requests = PullRequest.query()\
-                                .filter(PullRequest.user_id==
+                                .filter(PullRequest.user_id ==
                                         self.rhodecode_user.user_id)\
                                 .all()
         c.participate_in_pull_requests = \
             [x.pull_request for x in PullRequestReviewers.query()\
-                                    .filter(PullRequestReviewers.user_id==
+                                    .filter(PullRequestReviewers.user_id ==
                                             self.rhodecode_user.user_id)\
                                     .all()]
         return render('admin/users/user_edit_my_account_pullrequests.html')

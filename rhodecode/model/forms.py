@@ -345,9 +345,14 @@ def LdapSettingsForm(tls_reqcert_choices, search_scope_choices,
 
 def UserExtraEmailForm():
     class _UserExtraEmailForm(formencode.Schema):
-        email = All(v.UniqSystemEmail(), v.Email)
-
+        email = All(v.UniqSystemEmail(), v.Email(not_empty=True))
     return _UserExtraEmailForm
+
+
+def UserExtraIpForm():
+    class _UserExtraIpForm(formencode.Schema):
+        ip = v.ValidIp()(not_empty=True)
+    return _UserExtraIpForm
 
 
 def PullRequestForm(repo_id):
@@ -360,7 +365,8 @@ def PullRequestForm(repo_id):
         org_ref = v.UnicodeString(strip=True, required=True)
         other_repo = v.UnicodeString(strip=True, required=True)
         other_ref = v.UnicodeString(strip=True, required=True)
-        revisions = All(v.NotReviewedRevisions(repo_id)(), v.UniqueList(not_empty=True))
+        revisions = All(#v.NotReviewedRevisions(repo_id)(),
+                        v.UniqueList(not_empty=True))
         review_members = v.UniqueList(not_empty=True)
 
         pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)

@@ -123,15 +123,16 @@ class TestLibs(unittest.TestCase):
         from rhodecode.lib.utils2 import age
         n = datetime.datetime.now()
         delt = lambda *args, **kwargs: datetime.timedelta(*args, **kwargs)
+        prev_month = n.month - 1 if n.month != 1 else n.month - 2
         self.assertEqual(age(n), u'just now')
         self.assertEqual(age(n - delt(seconds=1)), u'1 second ago')
         self.assertEqual(age(n - delt(seconds=60 * 2)), u'2 minutes ago')
         self.assertEqual(age(n - delt(hours=1)), u'1 hour ago')
         self.assertEqual(age(n - delt(hours=24)), u'1 day ago')
         self.assertEqual(age(n - delt(hours=24 * 5)), u'5 days ago')
-        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[n.month - 1]))),
+        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[prev_month]))),
                          u'1 month ago')
-        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[n.month - 1] + 2))),
+        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[prev_month] + 2))),
                          u'1 month and 2 days ago')
         self.assertEqual(age(n - delt(hours=24 * 400)), u'1 year and 1 month ago')
 

@@ -149,6 +149,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     //ranges
                     var checkboxes = YUD.getElementsByClassName('changeset_range');
                     var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
+                    var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
                     YUE.on(checkboxes,'click',function(e){
                     	var clicked_cb = e.currentTarget;
                         var checked_checkboxes = [];
@@ -203,7 +204,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             YUD.setStyle('rev_range_container','display','');
                             YUD.setStyle('rev_range_clear','display','');
 
-                            YUD.get('open_new_pr').href += '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
+                            YUD.get('open_new_pr').href = pr_tmpl + '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
 
                         }
                         else{

@@ -43,6 +43,10 @@ For installing RhodeCode i highly recommend using separate virtualenv_. This
 way many required by RhodeCode libraries will remain sandboxed from your main
 python and making things less problematic when doing system python updates. 
 
+Alternative very detailed installation instructions for Ubuntu Server with
+celery, indexer and daemon scripts: https://gist.github.com/4546398
+
+
 - Assuming you have installed virtualenv_ create a new virtual environment 
   using virtualenv command:: 
 

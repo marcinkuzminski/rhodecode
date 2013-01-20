@@ -98,7 +98,7 @@ class TestCompareController(TestController):
                                     ))
 
         try:
-            response.mustcontain('%s@%s -> %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
+            response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
             response.mustcontain("""Showing 2 commits""")
             response.mustcontain("""1 file changed with 2 insertions and 0 deletions""")
 
@@ -156,7 +156,7 @@ class TestCompareController(TestController):
                                     ))
 
         try:
-            response.mustcontain('%s@%s -> %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
+            response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
             response.mustcontain("""Showing 2 commits""")
             response.mustcontain("""1 file changed with 2 insertions and 0 deletions""")
 
@@ -191,7 +191,7 @@ class TestCompareController(TestController):
 #                                    ))
 #
 #        try:
-#            response.mustcontain('%s@%s -> %s@%s' % (HG_REPO, rev1, HG_FORK, rev2))
+#            response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, rev1, HG_FORK, rev2))
 #            ## outgoing changesets between those revisions
 #
 #            response.mustcontain("""<a href="/%s/changeset/2dda4e345facb0ccff1a191052dd1606dba6781d">r4:2dda4e345fac</a>""" % (HG_REPO))
@@ -226,7 +226,7 @@ class TestCompareController(TestController):
 #                                    ))
 #
 #        try:
-#            response.mustcontain('%s@%s -> %s@%s' % (HG_REPO, rev1, HG_FORK, rev2))
+#            response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, rev1, HG_FORK, rev2))
 #            ## outgoing changesets between those revisions
 #
 #            response.mustcontain("""<a href="/%s/changeset/2dda4e345facb0ccff1a191052dd1606dba6781d">r4:2dda4e345fac</a>""" % (HG_REPO))
@@ -312,7 +312,7 @@ class TestCompareController(TestController):
 #                                    ))
 #
 #        try:
-#            #response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
+#            #response.mustcontain('%s@%s -&gt; %s@%s' % (r2_name, rev1, r1_name, rev2))
 #
 #            #add new commit into parent !
 #            cs0 = ScmModel().create_node(
@@ -336,7 +336,7 @@ class TestCompareController(TestController):
 #                                        bundle=False
 #                                        ))
 #
-#            response.mustcontain('%s@%s -> %s@%s' % (r2_name, rev1, r1_name, rev2))
+#            response.mustcontain('%s@%s -&gt; %s@%s' % (r2_name, rev1, r1_name, rev2))
 #            response.mustcontain("""file1-line1-from-fork""")
 #            response.mustcontain("""file2-line1-from-fork""")
 #            response.mustcontain("""file3-line1-from-fork""")

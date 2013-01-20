@@ -12,6 +12,7 @@ from rhodecode.lib.dbmigrate.migrate.changeset import *
 
 from rhodecode.model.meta import Base
 from rhodecode.model import meta
+from rhodecode.lib.dbmigrate.versions import _reset_base
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ def upgrade(migrate_engine):
     #==========================================================================
     # USER LOGS
     #==========================================================================
+    _reset_base(migrate_engine)
     from rhodecode.lib.dbmigrate.schema.db_1_5_0 import UserLog
     tbl = UserLog.__table__
     username = Column("username", String(255, convert_unicode=False,

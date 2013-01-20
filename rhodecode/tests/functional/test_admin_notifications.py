@@ -82,6 +82,7 @@ class TestNotificationsController(TestController):
         response = self.app.delete(url('notification',
                                        notification_id=
                                        notification.notification_id))
+        self.assertEqual(response.body, 'ok')
 
         cur_user = User.get(cur_usr_id)
         self.assertEqual(cur_user.notifications, [])

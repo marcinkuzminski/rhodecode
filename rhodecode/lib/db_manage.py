@@ -164,8 +164,8 @@ class DbManage(object):
 
             def step_0(self):
                 # step 0 is the schema upgrade, and than follow proper upgrades
-                notify('attempting to do database upgrade to version %s' \
-                                % __dbversion__)
+                notify('attempting to do database upgrade from '
+                       'version %s to version %s' %(curr_version, __dbversion__))
                 api.upgrade(db_uri, repository_path, __dbversion__)
                 notify('Schema upgrade completed')
 
@@ -285,6 +285,9 @@ class DbManage(object):
                            'reset to the default value for default user. '
                            'Please validate and check default permissions '
                            'in admin panel')
+
+            def step_10(self):
+                pass
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 

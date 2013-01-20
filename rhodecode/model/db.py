@@ -370,6 +370,11 @@ class User(Base, BaseModel):
         return [self.email] + [x.email for x in other]
 
     @property
+    def ip_addresses(self):
+        ret = UserIpMap.query().filter(UserIpMap.user == self).all()
+        return [x.ip_addr for x in ret]
+
+    @property
     def username_and_name(self):
         return '%s (%s %s)' % (self.username, self.firstname, self.lastname)
 
@@ -472,6 +477,7 @@ class User(Base, BaseModel):
             admin=user.admin,
             ldap_dn=user.ldap_dn,
             last_login=user.last_login,
+            ip_addresses=user.ip_addresses
         )
         return data
 
@@ -516,6 +522,34 @@ class UserEmailMap(Base, BaseModel):
     @email.setter
     def email(self, val):
         self._email = val.lower() if val else None
+
+
+class UserIpMap(Base, BaseModel):
+    __tablename__ = 'user_ip_map'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'ip_addr'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    __mapper_args__ = {}
+
+    ip_id = Column("ip_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=None, default=None)
+    ip_addr = Column("ip_addr", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    active = Column("active", Boolean(), nullable=True, unique=None, default=True)
+    user = relationship('User', lazy='joined')
+
+    @classmethod
+    def _get_ip_range(cls, ip_addr):
+        from rhodecode.lib import ipaddr
+        net = ipaddr.IPv4Network(ip_addr)
+        return [str(net.network), str(net.broadcast)]
+
+    def __json__(self):
+        return dict(
+          ip_addr=self.ip_addr,
+          ip_range=self._get_ip_range(self.ip_addr)
+        )
 
 
 class UserLog(Base, BaseModel):
@@ -637,6 +671,7 @@ class Repository(Base, BaseModel):
     landing_rev = Column("landing_revision", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=False, default=None)
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
     _locked = Column("locked", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=False, default=None)
+    _changeset_cache = Column("changeset_cache", LargeBinary(), nullable=True) #JSON data
 
     fork_id = Column("fork_id", Integer(), ForeignKey('repositories.repo_id'), nullable=True, unique=False, default=None)
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=False, default=None)
@@ -682,9 +717,38 @@ class Repository(Base, BaseModel):
         else:
             self._locked = None
 
+    @hybrid_property
+    def changeset_cache(self):
+        from rhodecode.lib.vcs.backends.base import EmptyChangeset
+        dummy = EmptyChangeset().__json__()
+        if not self._changeset_cache:
+            return dummy
+        try:
+            return json.loads(self._changeset_cache)
+        except TypeError:
+            return dummy
+
+    @changeset_cache.setter
+    def changeset_cache(self, val):
+        try:
+            self._changeset_cache = json.dumps(val)
+        except:
+            log.error(traceback.format_exc())
+
     @classmethod
     def url_sep(cls):
         return URL_SEP
+
+    @classmethod
+    def normalize_repo_name(cls, repo_name):
+        """
+        Normalizes os specific repo_name to the format internally stored inside
+        dabatabase using URL_SEP
+
+        :param cls:
+        :param repo_name:
+        """
+        return cls.url_sep().join(repo_name.split(os.sep))
 
     @classmethod
     def get_by_repo_name(cls, repo_name):
@@ -697,6 +761,7 @@ class Repository(Base, BaseModel):
     @classmethod
     def get_by_full_path(cls, repo_full_path):
         repo_name = repo_full_path.split(cls.base_path(), 1)[-1]
+        repo_name = cls.normalize_repo_name(repo_name)
         return cls.get_by_repo_name(repo_name.strip(URL_SEP))
 
     @classmethod
@@ -841,7 +906,11 @@ class Repository(Base, BaseModel):
             description=repo.description,
             landing_rev=repo.landing_rev,
             owner=repo.user.username,
-            fork_of=repo.fork.repo_name if repo.fork else None
+            fork_of=repo.fork.repo_name if repo.fork else None,
+            enable_statistics=repo.enable_statistics,
+            enable_locking=repo.enable_locking,
+            enable_downloads=repo.enable_downloads,
+            last_changeset=repo.changeset_cache
         )
 
         return data
@@ -862,6 +931,25 @@ class Repository(Base, BaseModel):
     def last_db_change(self):
         return self.updated_on
 
+    def clone_url(self, **override):
+        from pylons import url
+        from urlparse import urlparse
+        import urllib
+        parsed_url = urlparse(url('home', qualified=True))
+        default_clone_uri = '%(scheme)s://%(user)s%(pass)s%(netloc)s%(prefix)s%(path)s'
+        decoded_path = safe_unicode(urllib.unquote(parsed_url.path))
+        args = {
+           'user': '',
+           'pass': '',
+           'scheme': parsed_url.scheme,
+           'netloc': parsed_url.netloc,
+           'prefix': decoded_path,
+           'path': self.repo_name
+        }
+
+        args.update(override)
+        return default_clone_uri % args
+
     #==========================================================================
     # SCM PROPERTIES
     #==========================================================================
@@ -876,12 +964,30 @@ class Repository(Base, BaseModel):
         cs = self.get_changeset(self.landing_rev) or self.get_changeset()
         return cs
 
-    def update_last_change(self, last_change=None):
-        if last_change is None:
-            last_change = datetime.datetime.now()
-        if self.updated_on is None or self.updated_on != last_change:
-            log.debug('updated repo %s with new date %s' % (self, last_change))
+    def update_changeset_cache(self, cs_cache=None):
+        """
+        Update cache of last changeset for repository, keys should be::
+
+            short_id
+            raw_id
+            revision
+            message
+            date
+            author
+
+        :param cs_cache:
+        """
+        from rhodecode.lib.vcs.backends.base import BaseChangeset
+        if cs_cache is None:
+            cs_cache = self.get_changeset()
+        if isinstance(cs_cache, BaseChangeset):
+            cs_cache = cs_cache.__json__()
+
+        if cs_cache != self.changeset_cache:
+            last_change = cs_cache.get('date') or self.last_change
+            log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
             self.updated_on = last_change
+            self.changeset_cache = cs_cache
             Session().add(self)
             Session().commit()
 
@@ -1707,6 +1813,14 @@ class PullRequest(Base, BaseModel):
     @revisions.setter
     def revisions(self, val):
         self._revisions = ':'.join(val)
+
+    @property
+    def org_ref_parts(self):
+        return self.org_ref.split(':')
+
+    @property
+    def other_ref_parts(self):
+        return self.other_ref.split(':')
 
     author = relationship('User', lazy='joined')
     reviewers = relationship('PullRequestReviewers',

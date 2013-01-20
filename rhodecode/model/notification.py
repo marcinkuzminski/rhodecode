@@ -270,8 +270,9 @@ class EmailNotificationModel(BaseModel):
 
         base = self.email_types.get(type_, self.email_types[self.TYPE_DEFAULT])
         email_template = self._tmpl_lookup.get_template(base)
-        # translator inject
-        _kwargs = {'_': _}
+        # translator and helpers inject
+        _kwargs = {'_': _,
+                   'h': h}
         _kwargs.update(kwargs)
         log.debug('rendering tmpl %s with kwargs %s' % (base, _kwargs))
         return email_template.render(**_kwargs)

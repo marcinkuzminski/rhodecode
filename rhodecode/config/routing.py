@@ -222,6 +222,10 @@ def make_map(config):
                   action="add_email", conditions=dict(method=["PUT"]))
         m.connect("user_emails_delete", "/users_emails/{id}",
                   action="delete_email", conditions=dict(method=["DELETE"]))
+        m.connect("user_ips", "/users_ips/{id}",
+                  action="add_ip", conditions=dict(method=["PUT"]))
+        m.connect("user_ips_delete", "/users_ips/{id}",
+                  action="delete_ip", conditions=dict(method=["DELETE"]))
 
     #ADMIN USERS GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
@@ -355,8 +359,6 @@ def make_map(config):
         m.connect('api', '/api')
 
     #USER JOURNAL
-    rmap.connect('journal_my_repos', '%s/journal_my_repos' % ADMIN_PREFIX,
-                 controller='journal', action='index_my_repos')
     rmap.connect('journal', '%s/journal' % ADMIN_PREFIX,
                  controller='journal', action='index')
     rmap.connect('journal_rss', '%s/journal/rss' % ADMIN_PREFIX,

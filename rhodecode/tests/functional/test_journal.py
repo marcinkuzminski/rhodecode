@@ -10,10 +10,7 @@ class TestJournalController(TestController):
         self.log_user()
         response = self.app.get(url(controller='journal', action='index'))
 
-        # Test response...
-        assert """ <span id="follow_toggle_1" class="following" title="Stop following this repository""" in response.body, 'no info about stop follwoing repo id 1'
-
-        assert """<div class="journal_day">%s</div>""" % datetime.date.today() in response.body, 'no info about action journal day'
+        response.mustcontain("""<div class="journal_day">%s</div>""" % datetime.date.today())
 
     def test_stop_following_repository(self):
         session = self.log_user()

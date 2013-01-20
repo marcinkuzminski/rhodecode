@@ -295,54 +295,18 @@ class ReposGroupsController(BaseController):
         c.groups = self.scm_model.get_repos_groups(groups)
 
         if c.visual.lightweight_dashboard is False:
-            c.cached_repo_list = self.scm_model.get_repos(all_repos=gr_filter)
-
-            c.repos_list = c.cached_repo_list
+            c.repos_list = self.scm_model.get_repos(all_repos=gr_filter)
         ## lightweight version of dashboard
         else:
             c.repos_list = Repository.query()\
                             .filter(Repository.group_id == id)\
                             .order_by(func.lower(Repository.repo_name))\
                             .all()
-            repos_data = []
-            total_records = len(c.repos_list)
 
-            _tmpl_lookup = rhodecode.CONFIG['pylons.app_globals'].mako_lookup
-            template = _tmpl_lookup.get_template('data_table/_dt_elements.html')
-
-            quick_menu = lambda repo_name: (template.get_def("quick_menu")
-                                            .render(repo_name, _=_, h=h, c=c))
-            repo_lnk = lambda name, rtype, private, fork_of: (
-                template.get_def("repo_name")
-                .render(name, rtype, private, fork_of, short_name=False,
-                        admin=False, _=_, h=h, c=c))
-            last_change = lambda last_change:  (template.get_def("last_change")
-                                           .render(last_change, _=_, h=h, c=c))
-            rss_lnk = lambda repo_name: (template.get_def("rss")
-                                           .render(repo_name, _=_, h=h, c=c))
-            atom_lnk = lambda repo_name: (template.get_def("atom")
-                                           .render(repo_name, _=_, h=h, c=c))
-
-            for repo in c.repos_list:
-                repos_data.append({
-                    "menu": quick_menu(repo.repo_name),
-                    "raw_name": repo.repo_name.lower(),
-                    "name": repo_lnk(repo.repo_name, repo.repo_type,
-                                     repo.private, repo.fork),
-                    "last_change": last_change(repo.last_db_change),
-                    "desc": repo.description,
-                    "owner": h.person(repo.user.username),
-                    "rss": rss_lnk(repo.repo_name),
-                    "atom": atom_lnk(repo.repo_name),
-                })
-
-            c.data = json.dumps({
-                "totalRecords": total_records,
-                "startIndex": 0,
-                "sort": "name",
-                "dir": "asc",
-                "records": repos_data
-            })
+            repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
+                                                       admin=False)
+            #json used to render the grid
+            c.data = json.dumps(repos_data)
 
         return render('admin/repos_groups/repos_groups.html')
 

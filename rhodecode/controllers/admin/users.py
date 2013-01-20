@@ -41,7 +41,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     AuthUser
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, UserEmailMap
+from rhodecode.model.db import User, UserEmailMap, UserIpMap
 from rhodecode.model.forms import UserForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
@@ -159,7 +159,7 @@ class UsersController(BaseController):
         user_model = UserModel()
         c.user = user_model.get(id)
         c.ldap_dn = c.user.ldap_dn
-        c.perm_user = AuthUser(user_id=id)
+        c.perm_user = AuthUser(user_id=id, ip_addr=self.ip_addr)
         _form = UserForm(edit=True, old_data={'user_id': id,
                                               'email': c.user.email})()
         form_result = {}
@@ -178,6 +178,8 @@ class UsersController(BaseController):
         except formencode.Invalid, errors:
             c.user_email_map = UserEmailMap.query()\
                             .filter(UserEmailMap.user == c.user).all()
+            c.user_ip_map = UserIpMap.query()\
+                            .filter(UserIpMap.user == c.user).all()
             defaults = errors.value
             e = errors.error_dict or {}
             defaults.update({
@@ -231,12 +233,14 @@ class UsersController(BaseController):
             h.flash(_("You can't edit this user"), category='warning')
             return redirect(url('users'))
 
-        c.perm_user = AuthUser(user_id=id)
+        c.perm_user = AuthUser(user_id=id, ip_addr=self.ip_addr)
         c.user.permissions = {}
         c.granted_permissions = UserModel().fill_perms(c.user)\
             .permissions['global']
         c.user_email_map = UserEmailMap.query()\
                         .filter(UserEmailMap.user == c.user).all()
+        c.user_ip_map = UserIpMap.query()\
+                        .filter(UserIpMap.user == c.user).all()
         user_model = UserModel()
         c.ldap_dn = c.user.ldap_dn
         defaults = c.user.get_dict()
@@ -299,7 +303,6 @@ class UsersController(BaseController):
         """POST /user_emails:Add an existing item"""
         # url('user_emails', id=ID, method='put')
 
-        #TODO: validation and form !!!
         email = request.POST.get('new_email')
         user_model = UserModel()
 
@@ -323,4 +326,37 @@ class UsersController(BaseController):
         user_model.delete_extra_email(id, request.POST.get('del_email'))
         Session().commit()
         h.flash(_("Removed email from user"), category='success')
+        return redirect(url('edit_user', id=id))
+
+    def add_ip(self, id):
+        """POST /user_ips:Add an existing item"""
+        # url('user_ips', id=ID, method='put')
+
+        ip = request.POST.get('new_ip')
+        user_model = UserModel()
+
+        try:
+            user_model.add_extra_ip(id, ip)
+            Session().commit()
+            h.flash(_("Added ip %s to user") % ip, category='success')
+        except formencode.Invalid, error:
+            msg = error.error_dict['ip']
+            h.flash(msg, category='error')
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during ip saving'),
+                    category='error')
+        if 'default_user' in request.POST:
+            return redirect(url('edit_permission', id='default'))
+        return redirect(url('edit_user', id=id))
+
+    def delete_ip(self, id):
+        """DELETE /user_ips_delete/id: Delete an existing item"""
+        # url('user_ips_delete', id=ID, method='delete')
+        user_model = UserModel()
+        user_model.delete_extra_ip(id, request.POST.get('del_ip'))
+        Session().commit()
+        h.flash(_("Removed ip from user"), category='success')
+        if 'default_user' in request.POST:
+            return redirect(url('edit_permission', id='default'))
         return redirect(url('edit_user', id=id))

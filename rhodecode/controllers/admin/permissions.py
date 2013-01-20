@@ -33,11 +33,12 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
+    AuthUser
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.db import User
+from rhodecode.model.db import User, UserIpMap
 from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
@@ -105,36 +106,41 @@ class PermissionsController(BaseController):
         #    h.form(url('permission', id=ID),
         #           method='put')
         # url('permission', id=ID)
+        if id == 'default':
+            c.user = default_user = User.get_by_username('default')
+            c.perm_user = AuthUser(user_id=default_user.user_id)
+            c.user_ip_map = UserIpMap.query()\
+                            .filter(UserIpMap.user == default_user).all()
+            permission_model = PermissionModel()
 
-        permission_model = PermissionModel()
+            _form = DefaultPermissionsForm(
+                    [x[0] for x in self.repo_perms_choices],
+                    [x[0] for x in self.group_perms_choices],
+                    [x[0] for x in self.register_choices],
+                    [x[0] for x in self.create_choices],
+                    [x[0] for x in self.fork_choices])()
 
-        _form = DefaultPermissionsForm([x[0] for x in self.repo_perms_choices],
-                                       [x[0] for x in self.group_perms_choices],
-                                       [x[0] for x in self.register_choices],
-                                       [x[0] for x in self.create_choices],
-                                       [x[0] for x in self.fork_choices])()
+            try:
+                form_result = _form.to_python(dict(request.POST))
+                form_result.update({'perm_user_name': id})
+                permission_model.update(form_result)
+                Session().commit()
+                h.flash(_('Default permissions updated successfully'),
+                        category='success')
 
-        try:
-            form_result = _form.to_python(dict(request.POST))
-            form_result.update({'perm_user_name': id})
-            permission_model.update(form_result)
-            Session().commit()
-            h.flash(_('Default permissions updated successfully'),
-                    category='success')
+            except formencode.Invalid, errors:
+                defaults = errors.value
 
-        except formencode.Invalid, errors:
-            defaults = errors.value
-
-            return htmlfill.render(
-                render('admin/permissions/permissions.html'),
-                defaults=defaults,
-                errors=errors.error_dict or {},
-                prefix_error=False,
-                encoding="UTF-8")
-        except Exception:
-            log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of permissions'),
-                    category='error')
+                return htmlfill.render(
+                    render('admin/permissions/permissions.html'),
+                    defaults=defaults,
+                    errors=errors.error_dict or {},
+                    prefix_error=False,
+                    encoding="UTF-8")
+            except Exception:
+                log.error(traceback.format_exc())
+                h.flash(_('error occurred during update of permissions'),
+                        category='error')
 
         return redirect(url('edit_permission', id=id))
 
@@ -157,10 +163,11 @@ class PermissionsController(BaseController):
 
         #this form can only edit default user permissions
         if id == 'default':
-            default_user = User.get_by_username('default')
-            defaults = {'_method': 'put',
-                        'anonymous': default_user.active}
-
+            c.user = default_user = User.get_by_username('default')
+            defaults = {'anonymous': default_user.active}
+            c.perm_user = AuthUser(user_id=default_user.user_id)
+            c.user_ip_map = UserIpMap.query()\
+                            .filter(UserIpMap.user == default_user).all()
             for p in default_user.user_perms:
                 if p.permission.permission_name.startswith('repository.'):
                     defaults['default_repo_perm'] = p.permission.permission_name
@@ -181,7 +188,7 @@ class PermissionsController(BaseController):
                 render('admin/permissions/permissions.html'),
                 defaults=defaults,
                 encoding="UTF-8",
-                force_defaults=True,
+                force_defaults=False
             )
         else:
             return redirect(url('admin_home'))

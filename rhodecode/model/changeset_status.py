@@ -89,44 +89,39 @@ class ChangesetStatusModel(BaseModel):
                                    with_revisions)
         return q.all()
 
-    def get_status(self, repo, revision=None, pull_request=None):
+    def get_status(self, repo, revision=None, pull_request=None, as_str=True):
         """
         Returns latest status of changeset for given revision or for given
         pull request. Statuses are versioned inside a table itself and
         version == 0 is always the current one
 
         :param repo:
-        :type repo:
         :param revision: 40char hash or None
-        :type revision: str
         :param pull_request: pull_request reference
-        :type:
+        :param as_str: return status as string not object
         """
         q = self._get_status_query(repo, revision, pull_request)
 
         # need to use first here since there can be multiple statuses
         # returned from pull_request
         status = q.first()
-        status = status.status if status else status
-        st = status or ChangesetStatus.DEFAULT
-        return str(st)
+        if as_str:
+            status = status.status if status else status
+            st = status or ChangesetStatus.DEFAULT
+            return str(st)
+        return status
 
-    def set_status(self, repo, status, user, comment, revision=None,
+    def set_status(self, repo, status, user, comment=None, revision=None,
                    pull_request=None, dont_allow_on_closed_pull_request=False):
         """
         Creates new status for changeset or updates the old ones bumping their
         version, leaving the current status at
 
         :param repo:
-        :type repo:
         :param revision:
-        :type revision:
         :param status:
-        :type status:
         :param user:
-        :type user:
         :param comment:
-        :type comment:
         :param dont_allow_on_closed_pull_request: don't allow a status change
             if last status was for pull request and it's closed. We shouldn't
             mess around this manually
@@ -134,14 +129,21 @@ class ChangesetStatusModel(BaseModel):
         repo = self._get_repo(repo)
 
         q = ChangesetStatus.query()
-
+        if not comment:
+            from rhodecode.model.comment import ChangesetCommentsModel
+            comment = ChangesetCommentsModel().create(
+                text='Auto status change',
+                repo=repo,
+                user=user,
+                pull_request=pull_request,
+            )
         if revision:
             q = q.filter(ChangesetStatus.repo == repo)
             q = q.filter(ChangesetStatus.revision == revision)
         elif pull_request:
             pull_request = self.__get_pull_request(pull_request)
             q = q.filter(ChangesetStatus.repo == pull_request.org_repo)
-            q = q.filter(ChangesetStatus.pull_request == pull_request)
+            q = q.filter(ChangesetStatus.revision.in_(pull_request.revisions))
         cur_statuses = q.all()
 
         #if statuses exists and last is associated with a closed pull request
@@ -153,6 +155,7 @@ class ChangesetStatusModel(BaseModel):
                 'Changing status on closed pull request is not allowed'
             )
 
+        #update all current statuses with older version
         if cur_statuses:
             for st in cur_statuses:
                 st.version += 1

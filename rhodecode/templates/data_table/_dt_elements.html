@@ -2,12 +2,6 @@
 ## usage:
 ## <%namespace name="dt" file="/data_table/_dt_elements.html"/>
 
-<%def name="repo_actions(repo_name)">
-  ${h.form(h.url('repo', repo_name=repo_name),method='delete')}
-    ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
-  ${h.end_form()}
-</%def>
-
 <%def name="quick_menu(repo_name)">
   <ul class="menu_items hidden">
     <li style="border-top:1px solid #003367;margin-left:18px;padding-left:-99px"></li>
@@ -46,7 +40,7 @@
   </ul>
 </%def>
 
-<%def name="repo_name(name,rtype,private,fork_of,short_name=False, admin=False)">
+<%def name="repo_name(name,rtype,private,fork_of,short_name=False,admin=False)">
     <%
     def get_name(name,short_name=short_name):
       if short_name:
@@ -116,6 +110,21 @@
     <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(email, size)}"/> </div>
 </%def>
 
+<%def name="repo_actions(repo_name)">
+  <div>
+    <div style="float:left">
+    <a href="${h.url('repo_settings_home',repo_name=repo_name)}" title="${_('edit')}">
+      ${h.submit('edit_%s' % repo_name,_('edit'),class_="edit_icon action_button")}
+    </a>
+    </div>
+    <div style="float:left">
+    ${h.form(h.url('repo', repo_name=repo_name),method='delete')}
+      ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
+    ${h.end_form()}
+    </div>
+  </div>
+</%def>
+
 <%def name="user_actions(user_id, username)">
   ${h.form(h.url('delete_user', id=user_id),method='delete')}
       ${h.submit('remove_',_('delete'),id="remove_user_%s" % user_id,
@@ -125,4 +134,10 @@
 
 <%def name="user_name(user_id, username)">
     ${h.link_to(username,h.url('edit_user', id=user_id))}
+</%def>
+
+<%def name="toggle_follow(repo_id)">
+  <span id="follow_toggle_${repo_id}" class="following" title="${_('Stop following this repository')}"
+        onclick="javascript:toggleFollowingRepo(this, ${repo_id},'${str(h.get_token())}')">
+  </span>
 </%def>

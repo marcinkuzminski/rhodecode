@@ -19,7 +19,7 @@ class TestCompareController(TestController):
                                     other_ref_type="tag",
                                     other_ref=tag2,
                                     ))
-        response.mustcontain('%s@%s -> %s@%s' % (HG_REPO, tag1, HG_REPO, tag2))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, tag1, HG_REPO, tag2))
         ## outgoing changesets between tags
         response.mustcontain('''<a href="/%s/changeset/c5ddebc06eaaba3010c2d66ea6ec9d074eb0f678">r112:c5ddebc06eaa</a>''' % HG_REPO)
         response.mustcontain('''<a href="/%s/changeset/70d4cef8a37657ee4cf5aabb3bd9f68879769816">r115:70d4cef8a376</a>''' % HG_REPO)
@@ -56,7 +56,7 @@ class TestCompareController(TestController):
                                     other_ref=tag2,
                                     bundle=False
                                     ))
-        response.mustcontain('%s@%s -> %s@%s' % (GIT_REPO, tag1, GIT_REPO, tag2))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (GIT_REPO, tag1, GIT_REPO, tag2))
 
         ## outgoing changesets between tags
         response.mustcontain('''<a href="/%s/changeset/794bbdd31545c199f74912709ea350dedcd189a2">r113:794bbdd31545</a>''' % GIT_REPO)
@@ -92,7 +92,7 @@ class TestCompareController(TestController):
                                     other_ref='default',
                                     ))
 
-        response.mustcontain('%s@default -> %s@default' % (HG_REPO, HG_REPO))
+        response.mustcontain('%s@default -&gt; %s@default' % (HG_REPO, HG_REPO))
         # branch are equal
         response.mustcontain('<span class="empty_data">No files</span>')
         response.mustcontain('<span class="empty_data">No changesets</span>')
@@ -107,7 +107,7 @@ class TestCompareController(TestController):
                                     other_ref='master',
                                     ))
 
-        response.mustcontain('%s@master -> %s@master' % (GIT_REPO, GIT_REPO))
+        response.mustcontain('%s@master -&gt; %s@master' % (GIT_REPO, GIT_REPO))
         # branch are equal
         response.mustcontain('<span class="empty_data">No files</span>')
         response.mustcontain('<span class="empty_data">No changesets</span>')
@@ -124,7 +124,7 @@ class TestCompareController(TestController):
                                     other_ref_type="rev",
                                     other_ref=rev2,
                                     ))
-        response.mustcontain('%s@%s -> %s@%s' % (HG_REPO, rev1, HG_REPO, rev2))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, rev1, HG_REPO, rev2))
         ## outgoing changesets between those revisions
         response.mustcontain("""<a href="/%s/changeset/3d8f361e72ab303da48d799ff1ac40d5ac37c67e">r1:%s</a>""" % (HG_REPO, rev2))
 
@@ -144,7 +144,7 @@ class TestCompareController(TestController):
                                     other_ref_type="rev",
                                     other_ref=rev2,
                                     ))
-        response.mustcontain('%s@%s -> %s@%s' % (GIT_REPO, rev1, GIT_REPO, rev2))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (GIT_REPO, rev1, GIT_REPO, rev2))
         ## outgoing changesets between those revisions
         response.mustcontain("""<a href="/%s/changeset/38b5fe81f109cb111f549bfe9bb6b267e10bc557">r1:%s</a>""" % (GIT_REPO, rev2[:12]))
         response.mustcontain('1 file changed with 7 insertions and 0 deletions')

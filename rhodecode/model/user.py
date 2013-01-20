@@ -27,7 +27,6 @@ import logging
 import traceback
 import itertools
 import collections
-import functools
 from pylons import url
 from pylons.i18n.translation import _
 
@@ -40,7 +39,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
     Notification, RepoGroup, UserRepoGroupToPerm, UsersGroupRepoGroupToPerm, \
-    UserEmailMap
+    UserEmailMap, UserIpMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 
@@ -290,30 +289,6 @@ class UserModel(BaseModel):
                 setattr(user, k, v)
             self.sa.add(user)
             return user
-        except:
-            log.error(traceback.format_exc())
-            raise
-
-    def update_my_account(self, user_id, form_data):
-        from rhodecode.lib.auth import get_crypt_password
-        try:
-            user = self.get(user_id, cache=False)
-            if user.username == 'default':
-                raise DefaultUserException(
-                    _("You can't Edit this user since it's"
-                      " crucial for entire application")
-                )
-            for k, v in form_data.items():
-                if k == 'new_password' and v:
-                    user.password = get_crypt_password(v)
-                    user.api_key = generate_api_key(user.username)
-                else:
-                    if k == 'firstname':
-                        k = 'name'
-                    if k not in ['admin', 'active']:
-                        setattr(user, k, v)
-
-            self.sa.add(user)
         except:
             log.error(traceback.format_exc())
             raise
@@ -703,5 +678,35 @@ class UserModel(BaseModel):
         """
         user = self._get_user(user)
         obj = UserEmailMap.query().get(email_id)
+        if obj:
+            self.sa.delete(obj)
+
+    def add_extra_ip(self, user, ip):
+        """
+        Adds ip address to UserIpMap
+
+        :param user:
+        :param ip:
+        """
+        from rhodecode.model import forms
+        form = forms.UserExtraIpForm()()
+        data = form.to_python(dict(ip=ip))
+        user = self._get_user(user)
+
+        obj = UserIpMap()
+        obj.user = user
+        obj.ip_addr = data['ip']
+        self.sa.add(obj)
+        return obj
+
+    def delete_extra_ip(self, user, ip_id):
+        """
+        Removes ip address from UserIpMap
+
+        :param user:
+        :param ip_id:
+        """
+        user = self._get_user(user)
+        obj = UserIpMap.query().get(ip_id)
         if obj:
             self.sa.delete(obj)

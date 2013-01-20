@@ -27,6 +27,8 @@ from itertools import groupby
 
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.expression import func
+
 from webhelpers.paginate import Page
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
@@ -39,10 +41,10 @@ from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import UserLog, UserFollowing, Repository, User
 from rhodecode.model.meta import Session
-from sqlalchemy.sql.expression import func
-from rhodecode.model.scm import ScmModel
 from rhodecode.lib.utils2 import safe_int, AttributeDict
 from rhodecode.controllers.admin.admin import _journal_filter
+from rhodecode.model.repo import RepoModel
+from rhodecode.lib.compat import json
 
 log = logging.getLogger(__name__)
 
@@ -78,18 +80,73 @@ class JournalController(BaseController):
         c.journal_data = render('journal/journal_data.html')
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.journal_data
-        return render('journal/journal.html')
 
-    @LoginRequired()
-    @NotAnonymous()
-    def index_my_repos(self):
-        c.user = User.get(self.rhodecode_user.user_id)
-        if request.environ.get('HTTP_X_PARTIAL_XHR'):
-            all_repos = self.sa.query(Repository)\
-                     .filter(Repository.user_id == c.user.user_id)\
+        repos_list = Session().query(Repository)\
+                     .filter(Repository.user_id ==
+                             self.rhodecode_user.user_id)\
                      .order_by(func.lower(Repository.repo_name)).all()
-            c.user_repos = ScmModel().get_repos(all_repos)
-            return render('journal/journal_page_repos.html')
+
+        repos_data = RepoModel().get_repos_as_dict(repos_list=repos_list,
+                                                   admin=True)
+        #json used to render the grid
+        c.data = json.dumps(repos_data)
+
+        watched_repos_data = []
+
+        ## watched repos
+        _render = RepoModel._render_datatable
+
+        def quick_menu(repo_name):
+            return _render('quick_menu', repo_name)
+
+        def repo_lnk(name, rtype, private, fork_of):
+            return _render('repo_name', name, rtype, private, fork_of,
+                           short_name=False, admin=False)
+
+        def last_rev(repo_name, cs_cache):
+            return _render('revision', repo_name, cs_cache.get('revision'),
+                           cs_cache.get('raw_id'), cs_cache.get('author'),
+                           cs_cache.get('message'))
+
+        def desc(desc):
+            from pylons import tmpl_context as c
+            if c.visual.stylify_metatags:
+                return h.urlify_text(h.desc_stylize(h.truncate(desc, 60)))
+            else:
+                return h.urlify_text(h.truncate(desc, 60))
+
+        def repo_actions(repo_name):
+            return _render('repo_actions', repo_name)
+
+        def owner_actions(user_id, username):
+            return _render('user_name', user_id, username)
+
+        def toogle_follow(repo_id):
+            return  _render('toggle_follow', repo_id)
+
+        for entry in c.following:
+            repo = entry.follows_repository
+            cs_cache = repo.changeset_cache
+            row = {
+                "menu": quick_menu(repo.repo_name),
+                "raw_name": repo.repo_name.lower(),
+                "name": repo_lnk(repo.repo_name, repo.repo_type,
+                                 repo.private, repo.fork),
+                "last_changeset": last_rev(repo.repo_name, cs_cache),
+                "raw_tip": cs_cache.get('revision'),
+                "action": toogle_follow(repo.repo_id)
+            }
+
+            watched_repos_data.append(row)
+
+        c.watched_data = json.dumps({
+            "totalRecords": len(c.following),
+            "startIndex": 0,
+            "sort": "name",
+            "dir": "asc",
+            "records": watched_repos_data
+        })
+        return render('journal/journal.html')
 
     @LoginRequired(api_access=True)
     @NotAnonymous()

@@ -606,10 +606,13 @@ class GitRepository(BaseRepository):
         Tries to pull changes from external location.
         """
         url = self._get_url(url)
-        cmd = ['fetch']
-        cmd.append(url)
-        cmd = ' '.join(cmd)
-        # If error occurs run_git_command raises RepositoryError already
+        so, se = self.run_git_command('ls-remote -h %s' % url)
+        refs = []
+        for line in (x for x in so.splitlines()):
+            sha, ref = line.split('\t')
+            refs.append(ref)
+        refs = ' '.join(('+%s:%s' % (r, r) for r in refs))
+        cmd = '''fetch %s -- %s''' % (url, refs)
         self.run_git_command(cmd)
 
     @LazyProperty

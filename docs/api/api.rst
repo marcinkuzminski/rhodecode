@@ -155,9 +155,10 @@ OUTPUT::
 lock
 ----
 
-Set locking state on given repository by given user.
+Set locking state on given repository by given user. If userid param is skipped
+, then it is set to id of user whos calling this method.
 This command can be executed only using api_key belonging to user with admin 
-rights.
+rights or regular user that have admin or write access to repository.
 
 INPUT::
 
@@ -166,9 +167,8 @@ INPUT::
     method :  "lock"
     args :    {
                 "repoid" : "<reponame or repo_id>"
-                "userid" : "<user_id or username>",
+                "userid" : "<user_id or username = Optional(=apiuser)>",
                 "locked" : "<bool true|false>"
-                
               }
 
 OUTPUT::
@@ -178,12 +178,47 @@ OUTPUT::
     error :  null
 
 
+show_ip
+-------
+
+Shows IP address as seen from RhodeCode server, together with all
+defined IP addresses for given user.
+This command can be executed only using api_key belonging to user with admin 
+rights.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "show_ip"
+    args :    {
+                "userid" : "<user_id or username>",
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : {
+                 "ip_addr_server": <ip_from_clien>",
+                 "user_ips": [
+                                {
+                                   "ip_addr": "<ip_with_mask>",
+                                   "ip_range": ["<start_ip>", "<end_ip>"],
+                                },
+                                ...
+                             ]
+             }
+    
+    error :  null
+
+
 get_user
 --------
 
 Get's an user by username or user_id, Returns empty result if user is not found.
+If userid param is skipped it is set to id of user who is calling this method.
 This command can be executed only using api_key belonging to user with admin 
-rights.
+rights, or regular users that cannot specify different userid than theirs
 
 
 INPUT::
@@ -192,7 +227,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_user"
     args :    { 
-                "userid" : "<username or user_id>"
+                "userid" : "<username or user_id Optional(=apiuser)>"
               }
 
 OUTPUT::
@@ -200,16 +235,17 @@ OUTPUT::
     id : <id_given_in_input>
     result: None if user does not exist or 
             {
-                "user_id" :  "<user_id>",
-                "username" : "<username>",
-                "firstname": "<firstname>",
-                "lastname" : "<lastname>",
-                "email" :    "<email>",
-                "emails":    "<list_of_all_additional_emails>",
-                "active" :   "<bool>",
-                "admin" :    "<bool>",
-                "ldap_dn" :  "<ldap_dn>",
-                "last_login": "<last_login>",
+                "user_id" :     "<user_id>",
+                "username" :    "<username>",
+                "firstname":    "<firstname>",
+                "lastname" :    "<lastname>",
+                "email" :       "<email>",
+                "emails":       "<list_of_all_additional_emails>",
+                "ip_addresses": "<list_of_ip_addresses_for_user>",
+                "active" :      "<bool>",
+                "admin" :       "<bool>",
+                "ldap_dn" :     "<ldap_dn>",
+                "last_login":   "<last_login>",
                 "permissions": {
                     "global": ["hg.create.repository",
                                "repository.read",
@@ -241,16 +277,17 @@ OUTPUT::
     id : <id_given_in_input>
     result: [
               {
-                "user_id" :  "<user_id>",
-                "username" : "<username>",
-                "firstname": "<firstname>",
-                "lastname" : "<lastname>",
-                "email" :    "<email>",
-                "emails":    "<list_of_all_additional_emails>",
-                "active" :   "<bool>",
-                "admin" :    "<bool>",
-                "ldap_dn" :  "<ldap_dn>",
-                "last_login": "<last_login>",
+                "user_id" :     "<user_id>",
+                "username" :    "<username>",
+                "firstname":    "<firstname>",
+                "lastname" :    "<lastname>",
+                "email" :       "<email>",
+                "emails":       "<list_of_all_additional_emails>",
+                "ip_addresses": "<list_of_ip_addresses_for_user>",
+                "active" :      "<bool>",
+                "admin" :       "<bool>",
+                "ldap_dn" :     "<ldap_dn>",
+                "last_login":   "<last_login>",
               },
     	      …
             ]
@@ -315,14 +352,14 @@ INPUT::
     method :  "update_user"
     args :    {
                 "userid" : "<user_id or username>",
-                "username" :  "<username> = Optional",
-                "email" :     "<useremail> = Optional",
-                "password" :  "<password> = Optional",
-                "firstname" : "<firstname> = Optional",
-                "lastname" :  "<lastname> = Optional",
-                "active" :    "<bool> = Optional",
-                "admin" :     "<bool> = Optional",
-                "ldap_dn" :   "<ldap_dn> = Optional"
+                "username" :  "<username> = Optional(None)",
+                "email" :     "<useremail> = Optional(None)",
+                "password" :  "<password> = Optional(None)",
+                "firstname" : "<firstname> = Optional(None)",
+                "lastname" :  "<lastname> = Optional(None)",
+                "active" :    "<bool> = Optional(None)",
+                "admin" :     "<bool> = Optional(None)",
+                "ldap_dn" :   "<ldap_dn> = Optional(None)"
               }
 
 OUTPUT::
@@ -537,8 +574,9 @@ get_repo
 --------
 
 Gets an existing repository by it's name or repository_id. Members will return
-either users_group or user associated to that repository. This command can 
-be executed only using api_key belonging to user with admin rights.
+either users_group or user associated to that repository. This command can be 
+executed only using api_key belonging to user with admin 
+rights or regular user that have at least read access to repository.
 
 
 INPUT::
@@ -555,29 +593,40 @@ OUTPUT::
     id : <id_given_in_input>
     result: None if repository does not exist or
             {
-                "repo_id" :     "<repo_id>",
-                "repo_name" :   "<reponame>"
-                "repo_type" :   "<repo_type>",
-                "clone_uri" :   "<clone_uri>",
-                "private": :    "<bool>",
-                "created_on" :  "<datetimecreated>",                
-                "description" : "<description>",
-                "landing_rev":  "<landing_rev>",
-                "owner":        "<repo_owner>",
-                "fork_of":  "<name_of_fork_parent>",
+                "repo_id" :          "<repo_id>",
+                "repo_name" :        "<reponame>"
+                "repo_type" :        "<repo_type>",
+                "clone_uri" :        "<clone_uri>",
+                "enable_downloads":  "<bool>",
+                "enable_locking":    "<bool>",
+                "enable_statistics": "<bool>",                
+                "private":           "<bool>",
+                "created_on" :       "<date_time_created>",                
+                "description" :      "<description>",
+                "landing_rev":       "<landing_rev>",
+                "last_changeset":    {
+                                       "author":   "<full_author>",
+                                       "date":     "<date_time_of_commit>",
+                                       "message":  "<commit_message>",
+                                       "raw_id":   "<raw_id>",
+                                       "revision": "<numeric_revision>",
+                                       "short_id": "<short_id>"
+                                     }
+                "owner":             "<repo_owner>",
+                "fork_of":           "<name_of_fork_parent>",
                 "members" :     [
                                   { 
                                     "type": "user",
-                                    "user_id" :  "<user_id>",
-                                    "username" : "<username>",
-                                    "firstname": "<firstname>",
-                                    "lastname" : "<lastname>",
-                                    "email" :    "<email>",
-                                    "emails":    "<list_of_all_additional_emails>",
-                                    "active" :   "<bool>",
-                                    "admin" :    "<bool>",
-                                    "ldap_dn" :  "<ldap_dn>",
-                                    "last_login": "<last_login>",
+                                    "user_id" :    "<user_id>",
+                                    "username" :   "<username>",
+                                    "firstname":   "<firstname>",
+                                    "lastname" :   "<lastname>",
+                                    "email" :      "<email>",
+                                    "emails":      "<list_of_all_additional_emails>",
+                                    "active" :     "<bool>",
+                                    "admin" :      "<bool>",
+                                    "ldap_dn" :    "<ldap_dn>",
+                                    "last_login":  "<last_login>",
                                     "permission" : "repository.(read|write|admin)"
                                   },
                                   …
@@ -597,8 +646,9 @@ OUTPUT::
 get_repos
 ---------
 
-Lists all existing repositories. This command can be executed only using api_key
-belonging to user with admin rights
+Lists all existing repositories. This command can be executed only using 
+api_key belonging to user with admin rights or regular user that have 
+admin, write or read access to repository.
 
 
 INPUT::
@@ -613,16 +663,19 @@ OUTPUT::
     id : <id_given_in_input>
     result: [
               {
-                "repo_id" :     "<repo_id>",
-                "repo_name" :   "<reponame>"
-                "repo_type" :   "<repo_type>",
-                "clone_uri" :   "<clone_uri>",
-                "private": :    "<bool>",
-                "created_on" :  "<datetimecreated>",                
-                "description" : "<description>",
-                "landing_rev":  "<landing_rev>",
-                "owner":        "<repo_owner>",
-                "fork_of":  "<name_of_fork_parent>",
+                "repo_id" :          "<repo_id>",
+                "repo_name" :        "<reponame>"
+                "repo_type" :        "<repo_type>",
+                "clone_uri" :        "<clone_uri>",
+                "private": :         "<bool>",
+                "created_on" :       "<datetimecreated>",                
+                "description" :      "<description>",
+                "landing_rev":       "<landing_rev>",
+                "owner":             "<repo_owner>",
+                "fork_of":           "<name_of_fork_parent>",
+                "enable_downloads":  "<bool>",
+                "enable_locking":    "<bool>",
+                "enable_statistics": "<bool>",                   
               },
               …
             ]
@@ -666,11 +719,12 @@ OUTPUT::
 create_repo
 -----------
 
-Creates a repository. This command can be executed only using api_key
-belonging to user with admin rights.
-If repository name contains "/", all needed repository groups will be created.
-For example "foo/bar/baz" will create groups "foo", "bar" (with "foo" as parent),
-and create "baz" repository with "bar" as group.
+Creates a repository. If repository name contains "/", all needed repository
+groups will be created. For example "foo/bar/baz" will create groups 
+"foo", "bar" (with "foo" as parent), and create "baz" repository with 
+"bar" as group. This command can be executed only using api_key belonging to user with admin 
+rights or regular user that have create repository permission. Regular users
+cannot specify owner parameter
 
 
 INPUT::
@@ -679,13 +733,16 @@ INPUT::
     api_key : "<api_key>"
     method :  "create_repo"
     args:     {
-                "repo_name" :   "<reponame>",
-                "owner" :       "<onwer_name_or_id>",
-                "repo_type" :   "<repo_type>",
-                "description" : "<description> = Optional('')",
-                "private" :     "<bool> = Optional(False)",
-                "clone_uri" :   "<clone_uri> = Optional(None)",
-                "landing_rev" : "<landing_rev> = Optional('tip')",
+                "repo_name" :        "<reponame>",
+                "owner" :            "<onwer_name_or_id = Optional(=apiuser)>",
+                "repo_type" :        "<repo_type> = Optional('hg')",
+                "description" :      "<description> = Optional('')",
+                "private" :          "<bool> = Optional(False)",
+                "clone_uri" :        "<clone_uri> = Optional(None)",
+                "landing_rev" :      "<landing_rev> = Optional('tip')",
+                "enable_downloads":  "<bool> = Optional(False)",
+                "enable_locking":    "<bool> = Optional(False)",
+                "enable_statistics": "<bool> = Optional(False)",
               }
 
 OUTPUT::
@@ -694,17 +751,56 @@ OUTPUT::
     result: {
               "msg": "Created new repository `<reponame>`",
               "repo": {
-                "repo_id" :     "<repo_id>",
-                "repo_name" :   "<reponame>"
-                "repo_type" :   "<repo_type>",
-                "clone_uri" :   "<clone_uri>",
-                "private": :    "<bool>",
-                "created_on" :  "<datetimecreated>",                
-                "description" : "<description>",
-                "landing_rev":  "<landing_rev>",
-                "owner":        "<repo_owner>",
-                "fork_of":  "<name_of_fork_parent>",
+                "repo_id" :          "<repo_id>",
+                "repo_name" :        "<reponame>"
+                "repo_type" :        "<repo_type>",
+                "clone_uri" :        "<clone_uri>",
+                "private": :         "<bool>",
+                "created_on" :       "<datetimecreated>",                
+                "description" :      "<description>",
+                "landing_rev":       "<landing_rev>",
+                "owner":             "<username or user_id>",
+                "fork_of":           "<name_of_fork_parent>",
+                "enable_downloads":  "<bool>",
+                "enable_locking":    "<bool>",
+                "enable_statistics": "<bool>",                     
               },
+            }
+    error:  null
+
+
+fork_repo
+---------
+
+Creates a fork of given repo. In case of using celery this will
+immidiatelly return success message, while fork is going to be created
+asynchronous. This command can be executed only using api_key belonging to
+user with admin rights or regular user that have fork permission, and at least
+read access to forking repository. Regular users cannot specify owner parameter.
+
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "fork_repo"
+    args:     {
+                "repoid" :          "<reponame or repo_id>",
+                "fork_name":        "<forkname>",
+                "owner":            "<username or user_id = Optional(=apiuser)>",
+                "description":      "<description>",
+                "copy_permissions": "<bool>",
+                "private":          "<bool>",
+                "landing_rev":      "<landing_rev>"
+                                
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result: {
+              "msg": "Created fork of `<reponame>` as `<forkname>`",
+              "success": true
             }
     error:  null
 
@@ -712,8 +808,8 @@ OUTPUT::
 delete_repo
 -----------
 
-Deletes a repository. This command can be executed only using api_key
-belonging to user with admin rights.
+Deletes a repository. This command can be executed only using api_key belonging to user with admin 
+rights or regular user that have admin access to repository.
 
 
 INPUT::
