@@ -29,6 +29,7 @@
 import os
 import tempfile
 import unittest
+import time
 from os.path import join as jn
 from os.path import dirname as dn
 
@@ -36,7 +37,7 @@ from tempfile import _RandomNameSequence
 from subprocess import Popen, PIPE
 
 from rhodecode.tests import *
-from rhodecode.model.db import User, Repository, UserLog
+from rhodecode.model.db import User, Repository, UserLog, UserIpMap
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
@@ -424,16 +425,20 @@ class TestVCSOperations(unittest.TestCase):
 
     def test_ip_restriction_hg(self):
         user_model = UserModel()
-        new_ip = user_model.add_extra_ip(TEST_USER_ADMIN_LOGIN, '10.10.10.10/32')
-        Session().commit()
-        clone_url = _construct_url(HG_REPO)
-        stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
-        assert 'abort: HTTP Error 403: Forbidden' in stderr
+        try:
+            user_model.add_extra_ip(TEST_USER_ADMIN_LOGIN, '10.10.10.10/32')
+            Session().commit()
+            clone_url = _construct_url(HG_REPO)
+            stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
+            assert 'abort: HTTP Error 403: Forbidden' in stderr
+        finally:
+            #release IP restrictions
+            for ip in UserIpMap.getAll():
+                UserIpMap.delete(ip.ip_id)
+            Session().commit()
 
-        #release IP restrictions
+        time.sleep(2)
         clone_url = _construct_url(HG_REPO)
-        user_model.delete_extra_ip(TEST_USER_ADMIN_LOGIN, new_ip.ip_id)
-        Session().commit()
         stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
 
         assert 'requesting all changes' in stdout
@@ -445,16 +450,20 @@ class TestVCSOperations(unittest.TestCase):
 
     def test_ip_restriction_git(self):
         user_model = UserModel()
-        new_ip = user_model.add_extra_ip(TEST_USER_ADMIN_LOGIN, '10.10.10.10/32')
-        Session().commit()
-        clone_url = _construct_url(GIT_REPO)
-        stdout, stderr = Command('/tmp').execute('git clone', clone_url)
-        assert 'error: The requested URL returned error: 403 Forbidden' in stderr
+        try:
+            user_model.add_extra_ip(TEST_USER_ADMIN_LOGIN, '10.10.10.10/32')
+            Session().commit()
+            clone_url = _construct_url(GIT_REPO)
+            stdout, stderr = Command('/tmp').execute('git clone', clone_url)
+            assert 'error: The requested URL returned error: 403 Forbidden' in stderr
+        finally:
+            #release IP restrictions
+            for ip in UserIpMap.getAll():
+                UserIpMap.delete(ip.ip_id)
+            Session().commit()
 
-        #release IP restrictions
+        time.sleep(2)
         clone_url = _construct_url(GIT_REPO)
-        user_model.delete_extra_ip(TEST_USER_ADMIN_LOGIN, new_ip.ip_id)
-        Session().commit()
         stdout, stderr = Command('/tmp').execute('git clone', clone_url)
 
         assert 'Cloning into' in stdout
