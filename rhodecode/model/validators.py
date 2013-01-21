@@ -103,7 +103,7 @@ def ValidUsername(edit=False, old_data={}):
                     msg = M(self, 'username_exists', state, username=value)
                     raise formencode.Invalid(msg, value, state)
 
-            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
+            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]*$', value) is None:
                 msg = M(self, 'invalid_username', state)
                 raise formencode.Invalid(msg, value, state)
     return _validator
