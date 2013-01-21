@@ -68,39 +68,41 @@ https://github.com/marcinkuzminski/rhodecode
 RhodeCode Features
 ------------------
 
-- Has its own middleware to handle mercurial_ protocol requests. 
-  Each request can be logged and authenticated.
-- Runs on threads unlike hgweb. You can make multiple pulls/pushes simultaneous.
-  Supports http/https and LDAP
-- Full permissions (private/read/write/admin) for each repository, additional
-  explicit forking and repository permissions.
-- Have built in users groups for easier permission management
+- Has its own middleware to handle mercurial_ and git_ protocol requests. 
+  Each request is authenticated and logged together with IP address.
+- Build for speed and performance. You can make multiple pulls/pushes simultaneous.
+  Proven to work with 1000s of repositories and users
+- Supports http/https, LDAP, AD, proxy-pass authentication.
+- Full permissions (private/read/write/admin) together with IP restrictions for each repository,
+  additional explicit forking and repository creation permissions.
+- Users groups for easier permission management
 - Repository groups let you group repos and manage them easier.
-- Users can fork other users repo. RhodeCode have also compare view to see
-  combined changeset for all changeset made within single push.
+- Users can fork other users repos, and compare them at any time.
+- Integrates easily with other systems, with custom created mappers you can connect it to almost
+  any issue tracker, and with an JSON-RPC API you can make much more
 - Build in commit-api let's you add, edit and commit files right from RhodeCode
-  interface using simple editor or upload form for binaries.
-- Powerfull pull-request driven review system with inline commenting, and
-  changeset statuses, notification system.
-- Importing SVN repositories from remote locations into RhodeCode.
+  web interface using simple editor or upload binary files using simple form.
+- Powerfull pull-request driven review system with inline commenting,
+  changeset statuses, and notification system.
+- Importing and syncing repositories from remote locations for GIT_, Mercurial_ and  SVN.
 - Mako templates let's you customize the look and feel of the application.
 - Beautiful diffs, annotations and source code browsing all colored by pygments. 
-  Raw diffs are made in git-diff format, including GIT_ binary-patches
-- Mercurial_ branch graph and yui-flot powered graphs with zooming and statistics
+  Raw diffs are made in git-diff format for both VCS systems, including GIT_ binary-patches
+- Mercurial_ and Git_ DAG graphs and yui-flot powered graphs with zooming and statistics
+  to track activity for repositories
 - Admin interface with user/permission management. Admin activity journal, logs
   pulls, pushes, forks, registrations and other actions made by all users.
 - Server side forks. It is possible to fork a project and modify it freely 
-  without breaking the main repository. You can even write Your own hooks 
-  and install them
-- rst and markdown README support for repositories  
-- Full text search powered by Whoosh on the source files, and file names.
+  without breaking the main repository.
+- rst and markdown README support for repositories. 
+- Full text search powered by Whoosh on the source files, commit messages, and file names.
   Build in indexing daemons, with optional incremental index build
   (no external search servers required all in one application)
-- Setup project descriptions and info inside built in db for easy, non 
-  file-system operations
+- Setup project descriptions/tags and info inside built in db for easy, non 
+  file-system operations.
 - Intelligent cache with invalidation after push or project change, provides 
   high performance and always up to date data.
-- Rss / atom feeds, gravatar support, download sources as zip/tar/gz
+- RSS / Atom feeds, gravatar support, downloadable sources as zip/tar/gz
 - Optional async tasks for speed and performance using celery_  
 - Backup scripts can do backup of whole app and send it over scp to desired 
   location 
@@ -110,12 +112,13 @@ RhodeCode Features
 Incoming / Plans
 ----------------
 
-- Finer granular permissions per branch, repo group or subrepo
-- Pull requests with web based merges
-- Per line file history
+- Finer granular permissions per branch, or subrepo
+- Web based merges for pull requests
+- Tracking history for each lines in files
 - Simple issue tracker 
 - SSH based authentication with server side key management
 - Commit based built in wiki system
+- Gist server
 - More statistics and graph (global annotation + some more statistics)
 - Other advancements as development continues (or you can of course make 
   additions and or requests)
@@ -140,7 +143,6 @@ Listed bellow are various support resources that should help.
   any questions.
 
 - Open an issue at `issue tracker <http://bitbucket.org/marcinkuzminski/rhodecode/issues>`_
-
 
 - Join #rhodecode on FreeNode (irc.freenode.net)
   or use http://webchat.freenode.net/?channels=rhodecode for web access to irc.
