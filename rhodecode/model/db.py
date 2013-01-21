@@ -454,6 +454,26 @@ class User(Base, BaseModel):
 
         return ret
 
+    @classmethod
+    def get_from_cs_author(cls, author):
+        """
+        Tries to get User objects out of commit author string
+
+        :param author:
+        """
+        from rhodecode.lib.helpers import email, author_name
+        # Valid email in the attribute passed, see if they're in the system
+        _email = email(author)
+        if _email:
+            user = cls.get_by_email(_email, case_insensitive=True)
+            if user:
+                return user
+        # Maybe we can match by username?
+        _author = author_name(author)
+        user = cls.get_by_username(_author, case_insensitive=True)
+        if user:
+            return user
+
     def update_lastlogin(self):
         """Update user lastlogin"""
         self.last_login = datetime.datetime.now()
