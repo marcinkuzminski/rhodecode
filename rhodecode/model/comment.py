@@ -88,7 +88,6 @@ class ChangesetCommentsModel(BaseModel):
         if revision:
             cs = repo.scm_instance.get_changeset(revision)
             desc = "%s - %s" % (cs.short_id, h.shorter(cs.message, 256))
-            author_email = cs.author_email
             comment.revision = revision
         elif pull_request:
             pull_request = self.__get_pull_request(pull_request)
@@ -122,7 +121,11 @@ class ChangesetCommentsModel(BaseModel):
             # get the current participants of this changeset
             recipients = ChangesetComment.get_users(revision=revision)
             # add changeset author if it's in rhodecode system
-            recipients += [User.get_by_email(author_email)]
+            cs_author = User.get_from_cs_author(cs.author)
+            if not cs_author:
+                #use repo owner if we cannot extract the author correctly
+                cs_author = repo.user
+            recipients += [cs_author]
             email_kwargs = {
                 'status_change': status_change,
             }
