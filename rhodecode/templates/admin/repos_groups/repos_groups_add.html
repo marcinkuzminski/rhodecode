@@ -50,7 +50,7 @@
                      <label for="group_parent_id">${_('Group parent')}:</label>
                  </div>
                  <div class="input">
-                     ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
+                     ${h.select('group_parent_id',request.GET.get('parent_group'),c.repo_groups,class_="medium")}
                  </div>
              </div>
 
