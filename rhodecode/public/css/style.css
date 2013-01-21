@@ -2786,7 +2786,6 @@ h3.files_location {
   font-size: 10px;
   font-weight: bold;
   color: #ffffff;
-  text-transform: uppercase;
   white-space: nowrap;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -2805,7 +2804,6 @@ h3.files_location {
   font-size: 10px;
   font-weight: bold;
   color: #ffffff;
-  text-transform: uppercase;
   white-space: nowrap;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -3329,7 +3327,6 @@ table.code-browser .submodule-dir {
 	border: medium none;
 	color: #FFF;
 	float: left;
-	text-transform: uppercase;
 	font-weight: 700;
 	font-size: 14px;
 	margin: 0;
