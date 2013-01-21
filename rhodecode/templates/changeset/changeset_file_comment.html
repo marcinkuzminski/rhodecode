@@ -19,13 +19,23 @@
              <div style="float:left;padding:0px 2px 0px 2px"><span style="font-size: 18px;">&rsaquo;</span></div>
              <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change[0].status_lbl}</div>
              <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change[0].status))}" /></div>
-             <div style="float:left;padding:3px 0px 0px 5px"> <span class="">
-             %if co.pull_request:
-                <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">${_('Status from pull request %s') % co.pull_request.pull_request_id}</a>   
-             %endif
-             </span> </div>
            </div>
         %endif
+
+       <div style="float:left;padding:3px 0px 0px 5px">
+        <span class="">
+         %if co.pull_request:
+            <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">
+            %if co.status_change:
+              ${_('Status from pull request %s') % co.pull_request.pull_request_id}
+            %else:
+              ${_('Comment from pull request %s') % co.pull_request.pull_request_id}
+            %endif
+            </a>   
+         %endif
+        </span>
+       </div>
+        
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
         <div class="buttons">
           <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
