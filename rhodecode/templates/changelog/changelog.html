@@ -40,7 +40,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                         <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref=request.GET.get('branch') or 'default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name)}" class="ui-btn small">${_('Compare fork with parent')}</a>
                     %endif
                     %if h.is_hg(c.rhodecode_repo):
-                    <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
+                    <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('open new pull request')}</a>
                     %endif
                     </div>
 					<div class="container_header">
