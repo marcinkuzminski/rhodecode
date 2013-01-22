@@ -555,6 +555,7 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('repository `%s` does not exist' % (repoid))
 
         members = []
+        followers = []
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
@@ -571,8 +572,12 @@ class ApiController(JSONRPCController):
             users_group_data['permission'] = perm
             members.append(users_group_data)
 
+        for user in repo.followers:
+            followers.append(user.user.get_api_data())
+
         data = repo.get_api_data()
         data['members'] = members
+        data['followers'] = followers
         return data
 
     def get_repos(self, apiuser):
