@@ -1,27 +1,27 @@
 <%def name="file_class(node)">
-	%if node.is_file():
-		<%return "browser-file" %>
-	%else:
-		<%return "browser-dir"%>
-	%endif
+    %if node.is_file():
+        <%return "browser-file" %>
+    %else:
+        <%return "browser-dir"%>
+    %endif
 </%def>
 <div id="body" class="browserblock">
     <div class="browser-header">
-		<div class="browser-nav">
-			${h.form(h.url.current())}
-			<div class="info_box">
-	          <span class="rev">${_('view')}@rev</span>
-	          <a class="ui-btn ypjax-link" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
-	          ${h.text('at_rev',value=c.changeset.revision,size=5)}
-	          <a class="ui-btn ypjax-link" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
-	          ## ${h.submit('view',_('view'),class_="ui-btn")}
-		    </div>
-			${h.end_form()}
-		</div>
-	    <div class="browser-branch">
-	       ${h.checkbox('stay_at_branch',c.changeset.branch,c.changeset.branch==c.branch)}
-	       <label>${_('follow current branch')}</label>
-	    </div>
+        <div class="browser-nav">
+            ${h.form(h.url.current())}
+            <div class="info_box">
+              <span class="rev">${_('view')}@rev</span>
+              <a class="ui-btn ypjax-link" href="${c.url_prev}" title="${_('previous revision')}">&laquo;</a>
+              ${h.text('at_rev',value=c.changeset.revision,size=5)}
+              <a class="ui-btn ypjax-link" href="${c.url_next}" title="${_('next revision')}">&raquo;</a>
+              ## ${h.submit('view',_('view'),class_="ui-btn")}
+            </div>
+            ${h.end_form()}
+        </div>
+        <div class="browser-branch">
+           ${h.checkbox('stay_at_branch',c.changeset.branch,c.changeset.branch==c.branch)}
+           <label>${_('follow current branch')}</label>
+        </div>
         <div class="browser-search">
               <div id="search_activate_id" class="search_activate">
                   <a class="ui-btn" id="filter_activate" href="#">${_('search file list')}</a>
@@ -40,77 +40,77 @@
         </div>
     </div>
 
-	<div class="browser-body">
-		<table class="code-browser">
-		         <thead>
-		             <tr>
-		                 <th>${_('Name')}</th>
-		                 <th>${_('Size')}</th>
-		                 <th>${_('Mimetype')}</th>
-		                 <th>${_('Last Revision')}</th>
-		                 <th>${_('Last modified')}</th>
-		                 <th>${_('Last commiter')}</th>
-		             </tr>
-		         </thead>
+    <div class="browser-body">
+        <table class="code-browser">
+                 <thead>
+                     <tr>
+                         <th>${_('Name')}</th>
+                         <th>${_('Size')}</th>
+                         <th>${_('Mimetype')}</th>
+                         <th>${_('Last Revision')}</th>
+                         <th>${_('Last modified')}</th>
+                         <th>${_('Last commiter')}</th>
+                     </tr>
+                 </thead>
 
                 <tbody id="tbody">
-          		%if c.file.parent:
-         		<tr class="parity0">
-	          		<td>
-	          			${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.file.parent.path),class_="browser-dir ypjax-link")}
-	          		</td>
-	          		<td></td>
-	          		<td></td>
-	          		<td></td>
-	          		<td></td>
-	          		<td></td>
-				</tr>
-          		%endif
+                  %if c.file.parent:
+                 <tr class="parity0">
+                      <td>
+                          ${h.link_to('..',h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=c.file.parent.path),class_="browser-dir ypjax-link")}
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                </tr>
+                  %endif
 
-		    %for cnt,node in enumerate(c.file):
-				<tr class="parity${cnt%2}">
-		             <td>
+            %for cnt,node in enumerate(c.file):
+                <tr class="parity${cnt%2}">
+                     <td>
                         %if node.is_submodule():
                            ${h.link_to(node.name,node.url or '#',class_="submodule-dir ypjax-link")}
                         %else:
                           ${h.link_to(node.name, h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id,f_path=h.safe_unicode(node.path)),class_=file_class(node)+" ypjax-link")}
                         %endif:
-		             </td>
-		             <td>
-		             %if node.is_file():
-		             	${h.format_byte_size(node.size,binary=True)}
-		             %endif
-		             </td>
-		             <td>
-		              %if node.is_file():
-		                  ${node.mimetype}
-		              %endif
-		             </td>
-		             <td>
-		             	%if node.is_file():
-		             		<div class="tooltip" title="${h.tooltip(node.last_changeset.message)}">
-		             		<pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
+                     </td>
+                     <td>
+                     %if node.is_file():
+                         ${h.format_byte_size(node.size,binary=True)}
+                     %endif
+                     </td>
+                     <td>
+                      %if node.is_file():
+                          ${node.mimetype}
+                      %endif
+                     </td>
+                     <td>
+                         %if node.is_file():
+                             <div class="tooltip" title="${h.tooltip(node.last_changeset.message)}">
+                             <pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
                             </div>
-		             	%endif
-		             </td>
-		             <td>
-		             	%if node.is_file():
-		             		<span class="tooltip" title="${h.tooltip(h.fmt_date(node.last_changeset.date))}">
+                         %endif
+                     </td>
+                     <td>
+                         %if node.is_file():
+                             <span class="tooltip" title="${h.tooltip(h.fmt_date(node.last_changeset.date))}">
                             ${h.age(node.last_changeset.date)}</span>
-		             	%endif
-		             </td>
-		             <td>
-		             	%if node.is_file():
-		             		<span title="${node.last_changeset.author}">
+                         %endif
+                     </td>
+                     <td>
+                         %if node.is_file():
+                             <span title="${node.last_changeset.author}">
                             ${h.person(node.last_changeset.author)}
                             </span>
-		             	%endif
-		             </td>
-				</tr>
-			%endfor
+                         %endif
+                     </td>
+                </tr>
+            %endfor
                 </tbody>
                 <tbody id="tbody_filtered" style="display:none">
                 </tbody>
-		</table>
-	</div>
+        </table>
+    </div>
 </div>

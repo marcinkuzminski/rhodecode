@@ -1,40 +1,40 @@
 ## -*- coding: utf-8 -*-
 %if c.users_log:
 <table>
-	<tr>
-		<th class="left">${_('Username')}</th>
-		<th class="left">${_('Action')}</th>
-		<th class="left">${_('Repository')}</th>
-		<th class="left">${_('Date')}</th>
-		<th class="left">${_('From IP')}</th>
-	</tr>
+    <tr>
+        <th class="left">${_('Username')}</th>
+        <th class="left">${_('Action')}</th>
+        <th class="left">${_('Repository')}</th>
+        <th class="left">${_('Date')}</th>
+        <th class="left">${_('From IP')}</th>
+    </tr>
 
-	%for cnt,l in enumerate(c.users_log):
-	<tr class="parity${cnt%2}">
-		<td>
+    %for cnt,l in enumerate(c.users_log):
+    <tr class="parity${cnt%2}">
+        <td>
         %if l.user is not None:
           ${h.link_to(l.user.username,h.url('edit_user', id=l.user.user_id))}
         %else:
           ${l.username}
         %endif
         </td>
-		<td>${h.action_parser(l)[0]()}
-		  <div class="journal_action_params">
+        <td>${h.action_parser(l)[0]()}
+          <div class="journal_action_params">
             ${h.literal(h.action_parser(l)[1]())}
           </div>
-		</td>
-		<td>
-		%if l.repository is not None:
-		  ${h.link_to(l.repository.repo_name,h.url('summary_home',repo_name=l.repository.repo_name))}
-		%else:
-		  ${l.repository_name}
-		%endif
-		</td>
+        </td>
+        <td>
+        %if l.repository is not None:
+          ${h.link_to(l.repository.repo_name,h.url('summary_home',repo_name=l.repository.repo_name))}
+        %else:
+          ${l.repository_name}
+        %endif
+        </td>
 
-		<td>${h.fmt_date(l.action_date)}</td>
-		<td>${l.user_ip}</td>
-	</tr>
-	%endfor
+        <td>${h.fmt_date(l.action_date)}</td>
+        <td>${l.user_ip}</td>
+    </tr>
+    %endfor
 </table>
 
 <script type="text/javascript">
@@ -60,5 +60,5 @@
 ${c.users_log.pager('$link_previous ~2~ $link_next')}
 </div>
 %else:
-	${_('No actions yet')}
+    ${_('No actions yet')}
 %endif

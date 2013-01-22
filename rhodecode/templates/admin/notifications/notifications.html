@@ -10,7 +10,7 @@
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
@@ -59,7 +59,7 @@ YUE.on('mark_all_read','click',function(e){
 
 var current_filter = "${c.current_filter}";
 if (YUD.get(current_filter)){
-	YUD.addClass(current_filter, 'active');
+    YUD.addClass(current_filter, 'active');
 }
 </script>
 </%def>

@@ -10,8 +10,8 @@
             <th class="left">${_('Compare')}</th>
         </tr>
       </thead>
-		%for cnt,branch in enumerate(c.repo_branches.items()):
-		<tr class="parity${cnt%2}">
+        %for cnt,branch in enumerate(c.repo_branches.items()):
+        <tr class="parity${cnt%2}">
             <td>
                 <span class="logtags">
                     <span class="branchtag">${h.link_to(branch[0],
@@ -29,8 +29,8 @@
                 <input class="branch-compare" type="radio" name="compare_org" value="${branch[0]}"/>
                 <input class="branch-compare" type="radio" name="compare_other" value="${branch[0]}"/>
             </td>
-		</tr>
-		%endfor
+        </tr>
+        %endfor
         % if hasattr(c,'repo_closed_branches') and c.repo_closed_branches:
           %for cnt,branch in enumerate(c.repo_closed_branches.items()):
           <tr class="parity${cnt%2}">

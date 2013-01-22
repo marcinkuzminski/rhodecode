@@ -1,16 +1,16 @@
 ## -*- coding: utf-8 -*-
 %if c.repo_changesets:
 <table class="table_disp">
-	<tr>
-	    <th class="left">${_('revision')}</th>
+    <tr>
+        <th class="left">${_('revision')}</th>
         <th class="left">${_('commit message')}</th>
-		<th class="left">${_('age')}</th>
-		<th class="left">${_('author')}</th>
-		<th class="left">${_('branch')}</th>
-		<th class="left">${_('tags')}</th>
-	</tr>
+        <th class="left">${_('age')}</th>
+        <th class="left">${_('author')}</th>
+        <th class="left">${_('branch')}</th>
+        <th class="left">${_('tags')}</th>
+    </tr>
 %for cnt,cs in enumerate(c.repo_changesets):
-	<tr class="parity${cnt%2}">
+    <tr class="parity${cnt%2}">
         <td>
           <div>
             <div class="changeset-status-container">
@@ -35,24 +35,24 @@
         <td><span class="tooltip" title="${h.tooltip(h.fmt_date(cs.date))}">
                       ${h.age(cs.date)}</span>
         </td>
-		<td title="${cs.author}">${h.person(cs.author)}</td>
-		<td>
-			<span class="logtags">
+        <td title="${cs.author}">${h.person(cs.author)}</td>
+        <td>
+            <span class="logtags">
                 %if cs.branch:
-				<span class="branchtag">
+                <span class="branchtag">
                     ${cs.branch}
                 </span>
                 %endif
-			</span>
-		</td>
-		<td>
-			<span class="logtags">
-				%for tag in cs.tags:
-					<span class="tagtag">${tag}</span>
-				%endfor
-			</span>
-		</td>
-	</tr>
+            </span>
+        </td>
+        <td>
+            <span class="logtags">
+                %for tag in cs.tags:
+                    <span class="tagtag">${tag}</span>
+                %endfor
+            </span>
+        </td>
+    </tr>
 %endfor
 
 </table>

@@ -137,10 +137,10 @@
   var other_repos_info = ${c.other_repos_info|n};
 
   var loadPreview = function(){
-	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
+      YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
       var url = "${h.url('compare_url',
-    	                 repo_name='org_repo',
-    	                 org_ref_type='org_ref_type', org_ref='org_ref',
+                         repo_name='org_repo',
+                         org_ref_type='org_ref_type', org_ref='org_ref',
                          other_ref_type='other_ref_type', other_ref='other_ref',
                          repo='other_repo',
                          as_form=True, bundle=False,
@@ -175,21 +175,21 @@
       }
 
       YUE.on('other_repo', 'change', function(e){
-    	  var repo_name = e.currentTarget.value;
-    	  // replace the <select> of changed repo
-    	  YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
+          var repo_name = e.currentTarget.value;
+          // replace the <select> of changed repo
+          YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
       });
 
       ypjax(url,'pull_request_overview', function(data){
-    	  var sel_box = YUQ('#pull_request_form #other_repo')[0];
-    	  var repo_name = sel_box.options[sel_box.selectedIndex].value;
-    	  YUD.get('pull_request_overview_url').href = url;
-    	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
-    	  YUD.get('other_repo_gravatar').src = other_repos_info[repo_name]['gravatar'];
-    	  YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
-    	  YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
-    	  // select back the revision that was just compared
-    	  setSelectValue(YUD.get('other_ref'), rev_data['other_ref']);
+          var sel_box = YUQ('#pull_request_form #other_repo')[0];
+          var repo_name = sel_box.options[sel_box.selectedIndex].value;
+          YUD.get('pull_request_overview_url').href = url;
+          YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
+          YUD.get('other_repo_gravatar').src = other_repos_info[repo_name]['gravatar'];
+          YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
+          YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
+          // select back the revision that was just compared
+          setSelectValue(YUD.get('other_ref'), rev_data['other_ref']);
       })
   }
   YUE.on('refresh','click',function(e){

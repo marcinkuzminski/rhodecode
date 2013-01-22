@@ -10,7 +10,7 @@
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
@@ -36,7 +36,7 @@
   myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
 
   myDataSource.responseSchema = {
-	  resultsList: "records",
+      resultsList: "records",
       fields: [
           {key: "gravatar"},
           {key: "raw_username"},
@@ -60,7 +60,7 @@
       if (req) {
           req = req.toLowerCase();
           for (i = 0; i<data.length; i++) {
-        	  var pos = data[i].raw_username.toLowerCase().indexOf(req)
+              var pos = data[i].raw_username.toLowerCase().indexOf(req)
               if (pos != -1) {
                   filtered.push(data[i]);
               }
@@ -75,12 +75,12 @@
   var myColumnDefs = [
       {key:"gravatar",label:"",sortable:false,},
       {key:"username",label:"${_('username')}",sortable:true,
-    	  sortOptions: { sortFunction: linkSort }
+          sortOptions: { sortFunction: linkSort }
       },
       {key:"firstname",label:"${_('firstname')}",sortable:true,},
       {key:"lastname",label:"${_('lastname')}",sortable:true,},
       {key:"last_login",label:"${_('last login')}",sortable:true,
-    	  sortOptions: { sortFunction: lastLoginSort }},
+          sortOptions: { sortFunction: lastLoginSort }},
       {key:"active",label:"${_('active')}",sortable:true,},
       {key:"admin",label:"${_('admin')}",sortable:true,},
       {key:"ldap",label:"${_('ldap')}",sortable:true,},

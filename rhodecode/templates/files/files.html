@@ -24,16 +24,16 @@
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
-	    <ul class="links">
-		    <li>
-		      <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.changeset.branch}</a></span>
-	        </li>
-	    </ul>
+        <ul class="links">
+            <li>
+              <span style="text-transform: uppercase;"><a href="#">${_('branch')}: ${c.changeset.branch}</a></span>
+            </li>
+        </ul>
     </div>
     <div class="table">
-		<div id="files_data">
-			<%include file='files_ypjax.html'/>
-		</div>
+        <div id="files_data">
+            <%include file='files_ypjax.html'/>
+        </div>
     </div>
 </div>
 
@@ -50,10 +50,10 @@ var node_history_url = '${h.url("files_history_home",repo_name=c.repo_name,revis
 var ypjax_links = function(){
     YUE.on(YUQ('.ypjax-link'), 'click',function(e){
 
-    	//don't do ypjax on middle click
-    	if(e.which == 2 || !History.enabled){
-    		return true;
-    	}
+        //don't do ypjax on middle click
+        if(e.which == 2 || !History.enabled){
+            return true;
+        }
 
         var el = e.currentTarget;
         var url = el.href;
@@ -64,12 +64,12 @@ var ypjax_links = function(){
         //extract rev and the f_path from url.
         parts = url.split(_base_url)
         if(parts.length != 2){
-        	return false;
+            return false;
         }
 
         var parts2 = parts[1].split('/');
-      	var rev = parts2.shift(); // pop the first element which is the revision
-      	var f_path = parts2.join('/');
+          var rev = parts2.shift(); // pop the first element which is the revision
+          var f_path = parts2.join('/');
 
         var title = "${_('%s files') % c.repo_name}" + " - " + f_path;
 
@@ -93,7 +93,7 @@ var callbacks = function(State){
     fileBrowserListeners(State.url, State.data.node_list_url, State.data.url_base);
 
     if(YUD.get('hlcode')){
-    	YUE.on('hlcode', 'mouseup', getSelectionLink);
+        YUE.on('hlcode', 'mouseup', getSelectionLink);
     }
     //console.log(State);
     if(YUD.get('load_node_history')){
@@ -102,7 +102,7 @@ var callbacks = function(State){
       YUE.on('load_node_history', 'click', function(e){
           var _url = node_history_url.replace('__REV__',State.data.rev).replace('__FPATH__', State.data.f_path);
           ypjax(_url, 'node_history', function(o){
-        	  tooltip_activate();
+              tooltip_activate();
           })
       });
     }
@@ -132,11 +132,11 @@ YUE.onDOMReady(function(){
         }
         else{
           ypjax(State.url,container,function(o){
-          	//callbacks after ypjax call
-          	callbacks(State);
-          	if (o !== undefined){
-          	  //store our request in cache
-          	  var _expire_on = new Date().getTime()+CACHE_EXPIRE;
+              //callbacks after ypjax call
+              callbacks(State);
+              if (o !== undefined){
+                //store our request in cache
+                var _expire_on = new Date().getTime()+CACHE_EXPIRE;
               CACHE[cache_key] = [_expire_on, o.responseText];
             }
           });

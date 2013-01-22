@@ -40,10 +40,10 @@
            <p class="footer-link">
                 <a href="${h.url('bugtracker')}">${_('Submit a bug')}</a>
            </p>
-	       <p class="footer-link-right">
-	           <a href="${h.url('rhodecode_official')}">RhodeCode${'-%s' % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}</a>
-	           ${c.rhodecode_version} &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski
-	       </p>
+           <p class="footer-link-right">
+               <a href="${h.url('rhodecode_official')}">RhodeCode${'-%s' % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}</a>
+               ${c.rhodecode_version} &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski
+           </p>
        </div>
    </div>
 </div>
@@ -131,37 +131,37 @@
 </%def>
 
 <%def name="menu(current=None)">
-		<%
-		def is_current(selected):
-			if selected == current:
-				return h.literal('class="current"')
-		%>
-		%if current not in ['home','admin']:
-		   ##REGULAR MENU
-	        <ul id="quick">
-				<!-- repo switcher -->
-				<li>
-					<a class="menu_link" id="repo_switcher" title="${_('Switch repository')}" href="#">
+        <%
+        def is_current(selected):
+            if selected == current:
+                return h.literal('class="current"')
+        %>
+        %if current not in ['home','admin']:
+           ##REGULAR MENU
+            <ul id="quick">
+                <!-- repo switcher -->
+                <li>
+                    <a class="menu_link" id="repo_switcher" title="${_('Switch repository')}" href="#">
                     <span class="icon">
                         <img src="${h.url('/images/icons/database.png')}" alt="${_('Products')}" />
                     </span>
                     <span>&darr;</span>
-					</a>
-					<ul id="repo_switcher_list" class="repo_switcher">
+                    </a>
+                    <ul id="repo_switcher_list" class="repo_switcher">
                         <li>
                             <a href="#">${_('loading...')}</a>
                         </li>
-					</ul>
-				</li>
+                    </ul>
+                </li>
 
-	            <li ${is_current('summary')}>
-	               <a class="menu_link" title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
-	               <span class="icon">
-	                   <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
-	               </span>
-	               <span>${_('Summary')}</span>
-	               </a>
-	            </li>
+                <li ${is_current('summary')}>
+                   <a class="menu_link" title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
+                   <span class="icon">
+                       <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
+                   </span>
+                   <span>${_('Summary')}</span>
+                   </a>
+                </li>
                 <li ${is_current('changelog')}>
                    <a class="menu_link" title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
                    <span class="icon">
@@ -207,14 +207,14 @@
                      %endif
                    %endif
 
-                   	<li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
+                       <li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
                     %if h.is_hg(c.rhodecode_repo):
                      <li>${h.link_to(_('open new pull request'),h.url('pullrequest_home',repo_name=c.repo_name),class_='pull_request')}</li>
                     %endif
                     %if c.rhodecode_db_repo.fork:
                      <li>${h.link_to(_('compare fork'),h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref=request.GET.get('branch') or 'default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name),class_='compare_request')}</li>
                     %endif
-                   	<li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
+                       <li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
 
                     %if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name) and c.rhodecode_db_repo.enable_locking:
                       %if c.rhodecode_db_repo.locked[0]:
@@ -272,7 +272,7 @@
                     </a>
                 </li>
                 ${usermenu()}
-	        </ul>
+            </ul>
             <script type="text/javascript">
                YUE.on('repo_switcher','mouseover',function(){
                       function qfilter(){
@@ -306,8 +306,8 @@
                  return false;
               });
             </script>
-		%else:
-		    ##ROOT MENU
+        %else:
+            ##ROOT MENU
             <ul id="quick">
                 <li>
                     <a class="menu_link" title="${_('Home')}"  href="${h.url('home')}">
@@ -345,7 +345,7 @@
                     </a>
                 </li>
 
-				%if h.HasPermissionAll('hg.admin')('access admin main page'):
+                %if h.HasPermissionAll('hg.admin')('access admin main page'):
                 <li ${is_current('admin')}>
                    <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
                    <span class="icon">
@@ -355,8 +355,8 @@
                    </a>
                     ${admin_menu()}
                 </li>
-				%endif
+                %endif
                 ${usermenu()}
-			</ul>
-		%endif
+            </ul>
+        %endif
 </%def>

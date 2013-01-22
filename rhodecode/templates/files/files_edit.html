@@ -20,7 +20,7 @@
 </%def>
 
 <%def name="page_nav()">
-		${self.menu('files')}
+        ${self.menu('files')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -35,10 +35,10 @@
         </ul>
     </div>
     <div class="table">
-		<div id="files_data">
-			<h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cs.revision,c.file.path)}</h3>
-			${h.form(h.url.current(),method='post',id='eform')}
-			<div id="body" class="codeblock">
+        <div id="files_data">
+            <h3 class="files_location">${_('Location')}: ${h.files_breadcrumbs(c.repo_name,c.cs.revision,c.file.path)}</h3>
+            ${h.form(h.url.current(),method='post',id='eform')}
+            <div id="body" class="codeblock">
             <div class="code-header">
                 <div class="stats">
                     <div class="left"><img src="${h.url('/images/icons/file.png')}"/></div>
@@ -58,21 +58,21 @@
                 </div>
                 <div class="commit">${_('Editing file')}: ${c.file.unicode_path}</div>
             </div>
-			    <pre id="editor_pre"></pre>
-				<textarea id="editor" name="content" style="display:none">${h.escape(c.file.content)|n}</textarea>
-				<div style="padding: 10px;color:#666666">${_('commit message')}</div>
-				<textarea id="commit" name="message" style="height: 60px;width: 99%;margin-left:4px"></textarea>
-			</div>
-			<div style="text-align: left;padding-top: 5px">
+                <pre id="editor_pre"></pre>
+                <textarea id="editor" name="content" style="display:none">${h.escape(c.file.content)|n}</textarea>
+                <div style="padding: 10px;color:#666666">${_('commit message')}</div>
+                <textarea id="commit" name="message" style="height: 60px;width: 99%;margin-left:4px"></textarea>
+            </div>
+            <div style="text-align: left;padding-top: 5px">
             ${h.submit('commit',_('Commit changes'),class_="ui-btn")}
             ${h.reset('reset',_('Reset'),class_="ui-btn")}
-			</div>
-			${h.end_form()}
-			<script type="text/javascript">
-			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.file.path)}";
-			initCodeMirror('editor',reset_url);
-			</script>
-		</div>
+            </div>
+            ${h.end_form()}
+            <script type="text/javascript">
+            var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.file.path)}";
+            initCodeMirror('editor',reset_url);
+            </script>
+        </div>
     </div>
 </div>
 </%def>

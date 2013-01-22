@@ -10,7 +10,7 @@
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
@@ -132,12 +132,12 @@ var show_my = function(e){
     YUD.setStyle('my_container','display','');
     YUD.setStyle('q_filter','display','');
     if(!YUD.hasClass('show_my', 'loaded')){
-    	table_renderer(${c.data |n});
+        table_renderer(${c.data |n});
         YUD.addClass('show_my', 'loaded');
     }
 }
 YUE.on('show_my','click',function(e){
-	show_my(e);
+    show_my(e);
 })
 
 var show_pullrequests = function(e){
@@ -154,7 +154,7 @@ var show_pullrequests = function(e){
     ypjax(url, 'pullrequests_container');
 }
 YUE.on('show_pullrequests','click',function(e){
-	show_pullrequests(e)
+    show_pullrequests(e)
 })
 
 var tabs = {
@@ -173,19 +173,19 @@ if (url[1]) {
 }
 
 function table_renderer(data){
-	  var myDataSource = new YAHOO.util.DataSource(data);
-	  myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+      var myDataSource = new YAHOO.util.DataSource(data);
+      myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
 
-	  myDataSource.responseSchema = {
-	      resultsList: "records",
-	      fields: [
-	         {key:"menu"},
-	         {key:"raw_name"},
-	         {key:"name"},
-	         {key:"last_changeset"},
-	         {key:"action"},
-	      ]
-	   };
+      myDataSource.responseSchema = {
+          resultsList: "records",
+          fields: [
+             {key:"menu"},
+             {key:"raw_name"},
+             {key:"name"},
+             {key:"last_changeset"},
+             {key:"action"},
+          ]
+       };
       myDataSource.doBeforeCallback = function(req,raw,res,cb) {
           // This is the filter function
           var data     = res.results || [],
@@ -205,76 +205,76 @@ function table_renderer(data){
           return res;
       }
 
-	  // main table sorting
-	  var myColumnDefs = [
-	      {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
-	      {key:"name",label:"${_('Name')}",sortable:true,
-	          sortOptions: { sortFunction: nameSort }},
-	      {key:"last_changeset",label:"${_('Tip')}",sortable:true,
-	          sortOptions: { sortFunction: revisionSort }},
-	      {key:"action",label:"${_('Action')}",sortable:false},
-	  ];
+      // main table sorting
+      var myColumnDefs = [
+          {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+          {key:"name",label:"${_('Name')}",sortable:true,
+              sortOptions: { sortFunction: nameSort }},
+          {key:"last_changeset",label:"${_('Tip')}",sortable:true,
+              sortOptions: { sortFunction: revisionSort }},
+          {key:"action",label:"${_('Action')}",sortable:false},
+      ];
 
-	  var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
-	    sortedBy:{key:"name",dir:"asc"},
-	    paginator: new YAHOO.widget.Paginator({
-	        rowsPerPage: 50,
-	        alwaysVisible: false,
-	        template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
-	        pageLinks: 5,
-	        containerClass: 'pagination-wh',
-	        currentPageClass: 'pager_curpage',
-	        pageLinkClass: 'pager_link',
-	        nextPageLinkLabel: '&gt;',
-	        previousPageLinkLabel: '&lt;',
-	        firstPageLinkLabel: '&lt;&lt;',
-	        lastPageLinkLabel: '&gt;&gt;',
-	        containers:['user-paginator']
-	    }),
+      var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
+        sortedBy:{key:"name",dir:"asc"},
+        paginator: new YAHOO.widget.Paginator({
+            rowsPerPage: 50,
+            alwaysVisible: false,
+            template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+            pageLinks: 5,
+            containerClass: 'pagination-wh',
+            currentPageClass: 'pager_curpage',
+            pageLinkClass: 'pager_link',
+            nextPageLinkLabel: '&gt;',
+            previousPageLinkLabel: '&lt;',
+            firstPageLinkLabel: '&lt;&lt;',
+            lastPageLinkLabel: '&gt;&gt;',
+            containers:['user-paginator']
+        }),
 
-	    MSG_SORTASC:"${_('Click to sort ascending')}",
-	    MSG_SORTDESC:"${_('Click to sort descending')}",
-	    MSG_EMPTY:"${_('No records found.')}",
-	    MSG_ERROR:"${_('Data error.')}",
-	    MSG_LOADING:"${_('Loading...')}",
-	  }
-	  );
-	  myDataTable.subscribe('postRenderEvent',function(oArgs) {
-	      tooltip_activate();
-	      quick_repo_menu();
-	  });
+        MSG_SORTASC:"${_('Click to sort ascending')}",
+        MSG_SORTDESC:"${_('Click to sort descending')}",
+        MSG_EMPTY:"${_('No records found.')}",
+        MSG_ERROR:"${_('Data error.')}",
+        MSG_LOADING:"${_('Loading...')}",
+      }
+      );
+      myDataTable.subscribe('postRenderEvent',function(oArgs) {
+          tooltip_activate();
+          quick_repo_menu();
+      });
 
-	  var filterTimeout = null;
+      var filterTimeout = null;
 
-	  updateFilter = function() {
-	      // Reset timeout
-	      filterTimeout = null;
+      updateFilter = function() {
+          // Reset timeout
+          filterTimeout = null;
 
-	      // Reset sort
-	      var state = myDataTable.getState();
-	      state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+          // Reset sort
+          var state = myDataTable.getState();
+          state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
-	      // Get filtered data
-	      myDataSource.sendRequest(YUD.get('q_filter').value,{
-	          success : myDataTable.onDataReturnInitializeTable,
-	          failure : myDataTable.onDataReturnInitializeTable,
-	          scope   : myDataTable,
-	          argument: state
-	      });
+          // Get filtered data
+          myDataSource.sendRequest(YUD.get('q_filter').value,{
+              success : myDataTable.onDataReturnInitializeTable,
+              failure : myDataTable.onDataReturnInitializeTable,
+              scope   : myDataTable,
+              argument: state
+          });
 
-	  };
-	  YUE.on('q_filter','click',function(){
-	      if(!YUD.hasClass('q_filter', 'loaded')){
-	          YUD.get('q_filter').value = '';
-	          //TODO: load here full list later to do search within groups
-	          YUD.addClass('q_filter', 'loaded');
-	      }
-	   });
+      };
+      YUE.on('q_filter','click',function(){
+          if(!YUD.hasClass('q_filter', 'loaded')){
+              YUD.get('q_filter').value = '';
+              //TODO: load here full list later to do search within groups
+              YUD.addClass('q_filter', 'loaded');
+          }
+       });
 
-	  YUE.on('q_filter','keyup',function (e) {
-	      clearTimeout(filterTimeout);
-	      filterTimeout = setTimeout(updateFilter,600);
-	  });
-	}
+      YUE.on('q_filter','keyup',function (e) {
+          clearTimeout(filterTimeout);
+          filterTimeout = setTimeout(updateFilter,600);
+      });
+    }
 </script>
 </%def>

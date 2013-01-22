@@ -34,16 +34,16 @@
 </div>
 <script type="text/javascript">
 YUE.on('compare_branches','click',function(e){
-	YUE.preventDefault(e);
-	var org = YUQ('input[name=compare_org]:checked')[0];
-	var other = YUQ('input[name=compare_other]:checked')[0];
+    YUE.preventDefault(e);
+    var org = YUQ('input[name=compare_org]:checked')[0];
+    var other = YUQ('input[name=compare_other]:checked')[0];
 
-	if(org && other){
-	    var compare_url = "${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='__ORG__',other_ref_type='branch',other_ref='__OTHER__')}";
-		var u = compare_url.replace('__ORG__',org.value)
-		                   .replace('__OTHER__',other.value);
-		window.location=u;
-	}
+    if(org && other){
+        var compare_url = "${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='__ORG__',other_ref_type='branch',other_ref='__OTHER__')}";
+        var u = compare_url.replace('__ORG__',org.value)
+                           .replace('__OTHER__',other.value);
+        window.location=u;
+    }
 });
 // main table sorting
 var myColumnDefs = [

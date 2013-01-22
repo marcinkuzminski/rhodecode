@@ -189,7 +189,7 @@
 
     <script type="text/javascript">
       YUE.onDOMReady(function(){
-    	  PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
+          PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
@@ -218,7 +218,7 @@
           renderInlineComments(file_comments);
 
           YUE.on(YUD.get('update_pull_request'),'click',function(e){
-        	  updateReviewers();
+              updateReviewers();
           })
       })
     </script>

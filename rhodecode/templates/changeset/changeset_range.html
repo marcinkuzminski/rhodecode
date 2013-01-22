@@ -24,17 +24,17 @@
         ${self.breadcrumbs()}
     </div>
     <div class="table">
-		<div id="body" class="diffblock">
-			<div class="code-header cv">
-		        <h3 class="code-header-title">${_('Compare View')} / ${h.link_to(_('Show combined compare'),h.url('compare_url',repo_name=c.repo_name,org_ref_type='rev',org_ref=getattr(c.cs_ranges[0].parents[0] if c.cs_ranges[0].parents else h.EmptyChangeset(),'raw_id'),other_ref_type='rev',other_ref=c.cs_ranges[-1].raw_id))}</h3>
+        <div id="body" class="diffblock">
+            <div class="code-header cv">
+                <h3 class="code-header-title">${_('Compare View')} / ${h.link_to(_('Show combined compare'),h.url('compare_url',repo_name=c.repo_name,org_ref_type='rev',org_ref=getattr(c.cs_ranges[0].parents[0] if c.cs_ranges[0].parents else h.EmptyChangeset(),'raw_id'),other_ref_type='rev',other_ref=c.cs_ranges[-1].raw_id))}</h3>
                 <div>
-				${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)}
-				</div>
-			</div>
-		</div>
-	    <div id="changeset_compare_view_content">
-			<div class="container">
-			<table class="compare_view_commits noborder">
+                ${_('Changesets')} - r${c.cs_ranges[0].revision}:${h.short_id(c.cs_ranges[0].raw_id)} -> r${c.cs_ranges[-1].revision}:${h.short_id(c.cs_ranges[-1].raw_id)}
+                </div>
+            </div>
+        </div>
+        <div id="changeset_compare_view_content">
+            <div class="container">
+            <table class="compare_view_commits noborder">
             %for cnt,cs in enumerate(c.cs_ranges):
                 <tr>
                 <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),14)}"/></div></td>
@@ -50,17 +50,17 @@
                 </tr>
             %endfor
             </table>
-	        </div>
-	        <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
-	        <div class="cs_files">
-	               %for cs in c.cs_ranges:
-	                   <div class="cur_cs">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
-	                  %for FID, (cs1, cs2, change, path, diff, stats) in c.changes[cs.raw_id].iteritems():
-	                    <div class="cs_${change}">${h.link_to(h.safe_unicode(path),h.url.current(anchor=FID))}</div>
-	                  %endfor
-	               %endfor
-	        </div>
-	    </div>
+            </div>
+            <div style="font-size:1.1em;font-weight: bold;clear:both;padding-top:10px">${_('Files affected')}</div>
+            <div class="cs_files">
+                   %for cs in c.cs_ranges:
+                       <div class="cur_cs">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
+                      %for FID, (cs1, cs2, change, path, diff, stats) in c.changes[cs.raw_id].iteritems():
+                        <div class="cs_${change}">${h.link_to(h.safe_unicode(path),h.url.current(anchor=FID))}</div>
+                      %endfor
+                   %endfor
+            </div>
+        </div>
 
     </div>
     <%namespace name="comment" file="/changeset/changeset_file_comment.html"/>

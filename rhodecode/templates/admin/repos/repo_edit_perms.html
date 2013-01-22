@@ -104,10 +104,10 @@ function ajaxActionUser(user_id, field_id) {
 function ajaxActionUsersGroup(users_group_id,field_id){
     var sUrl = "${h.url('delete_repo_users_group',repo_name=c.repo_name)}";
     var callback = {
-    	success:function(o){
-    	    var tr = YUD.get(String(field_id));
-    		tr.parentNode.removeChild(tr);
-    	},
+        success:function(o){
+            var tr = YUD.get(String(field_id));
+            tr.parentNode.removeChild(tr);
+        },
         failure:function(o){
             alert("${_('Failed to remove users group')}");
         },
