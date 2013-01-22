@@ -48,7 +48,8 @@
          </ul>
     </div>
     <!-- end box / title -->
-    <div id="perms_container" class="table">
+    <div id="perms_container">
+        <div id="perms" class="table">
            %for section in sorted(c.rhodecode_user.permissions.keys()):
             <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
 
@@ -93,6 +94,7 @@
             </table>
             </div>
            %endfor
+        </div>
     </div>
     <div id="my_container" style="display:none">
         <div class="table yui-skin-sam" id="repos_list_wrap"></div>
