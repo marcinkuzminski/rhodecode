@@ -137,7 +137,7 @@
                 return h.literal('class="current"')
         %>
         %if current not in ['home','admin']:
-           ##REGULAR MENU
+            ##REGULAR MENU
             <ul id="quick">
                 <!-- repo switcher -->
                 <li>
@@ -207,14 +207,14 @@
                      %endif
                    %endif
 
-                       <li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
+                    <li>${h.link_to(_('fork'),h.url('repo_fork_home',repo_name=c.repo_name),class_='fork')}</li>
                     %if h.is_hg(c.rhodecode_repo):
                      <li>${h.link_to(_('open new pull request'),h.url('pullrequest_home',repo_name=c.repo_name),class_='pull_request')}</li>
                     %endif
                     %if c.rhodecode_db_repo.fork:
                      <li>${h.link_to(_('compare fork'),h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref=request.GET.get('branch') or 'default',other_ref_type='branch',other_ref='default',repo=c.rhodecode_db_repo.fork.repo_name),class_='compare_request')}</li>
                     %endif
-                       <li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
+                    <li>${h.link_to(_('search'),h.url('search_repo',search_repo=c.repo_name),class_='search')}</li>
 
                     %if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name) and c.rhodecode_db_repo.enable_locking:
                       %if c.rhodecode_db_repo.locked[0]:

@@ -25,14 +25,14 @@
     <div class="form">
         <div class="fields">
           % for hook in c.hooks:
-          <div class="field">
-            <div class="label label">
-                <label for="${hook.ui_key}">${hook.ui_key}</label>
-            </div>
-            <div class="input" style="margin-left:280px">
+            <div class="field">
+                <div class="label label">
+                    <label for="${hook.ui_key}">${hook.ui_key}</label>
+                </div>
+                <div class="input" style="margin-left:280px">
                   ${h.text(hook.ui_key,hook.ui_value,size=60,readonly="readonly")}
+                </div>
             </div>
-          </div>
           % endfor
         </div>
     </div>

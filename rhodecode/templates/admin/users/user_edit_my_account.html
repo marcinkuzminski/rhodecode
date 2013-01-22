@@ -173,37 +173,37 @@ if (url[1]) {
 }
 
 function table_renderer(data){
-      var myDataSource = new YAHOO.util.DataSource(data);
-      myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+    var myDataSource = new YAHOO.util.DataSource(data);
+    myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
 
-      myDataSource.responseSchema = {
-          resultsList: "records",
-          fields: [
-             {key:"menu"},
-             {key:"raw_name"},
-             {key:"name"},
-             {key:"last_changeset"},
-             {key:"action"},
-          ]
-       };
-      myDataSource.doBeforeCallback = function(req,raw,res,cb) {
-          // This is the filter function
-          var data     = res.results || [],
-              filtered = [],
-              i,l;
+    myDataSource.responseSchema = {
+        resultsList: "records",
+        fields: [
+            {key:"menu"},
+            {key:"raw_name"},
+            {key:"name"},
+            {key:"last_changeset"},
+            {key:"action"},
+            ]
+        };
+    myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+        // This is the filter function
+        var data     = res.results || [],
+            filtered = [],
+            i,l;
 
-          if (req) {
-              req = req.toLowerCase();
-              for (i = 0; i<data.length; i++) {
-                  var pos = data[i].raw_name.toLowerCase().indexOf(req)
-                  if (pos != -1) {
-                      filtered.push(data[i]);
-                  }
-              }
-              res.results = filtered;
-          }
-          return res;
-      }
+        if (req) {
+            req = req.toLowerCase();
+            for (i = 0; i<data.length; i++) {
+                var pos = data[i].raw_name.toLowerCase().indexOf(req)
+                if (pos != -1) {
+                    filtered.push(data[i]);
+                }
+            }
+            res.results = filtered;
+        }
+        return res;
+    }
 
       // main table sorting
       var myColumnDefs = [

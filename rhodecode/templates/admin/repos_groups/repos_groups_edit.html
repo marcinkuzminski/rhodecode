@@ -32,14 +32,14 @@
     <div class="form">
         <!-- fields -->
         <div class="fields">
-             <div class="field">
+            <div class="field">
                 <div class="label">
                     <label for="group_name">${_('Group name')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('group_name',class_='medium')}
                 </div>
-             </div>
+            </div>
 
             <div class="field">
                 <div class="label label-textarea">
@@ -48,16 +48,16 @@
                 <div class="textarea text-area editor">
                     ${h.textarea('group_description',cols=23,rows=5,class_="medium")}
                 </div>
-             </div>
+            </div>
 
-             <div class="field">
-                 <div class="label">
-                     <label for="group_parent_id">${_('Group parent')}:</label>
-                 </div>
-                 <div class="input">
-                     ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
-                 </div>
-             </div>
+            <div class="field">
+                <div class="label">
+                    <label for="group_parent_id">${_('Group parent')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
+                </div>
+            </div>
             <div class="field">
                 <div class="label">
                     <label for="input">${_('Permissions')}:</label>
