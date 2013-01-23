@@ -309,7 +309,7 @@
         %else:
             ##ROOT MENU
             <ul id="quick">
-                <li>
+                <li ${is_current('home')}>
                     <a class="menu_link" title="${_('Home')}"  href="${h.url('home')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/home_16.png')}" alt="${_('Home')}" />
