@@ -539,6 +539,7 @@ class BaseTestApi(object):
         ret = repo.get_api_data()
 
         members = []
+        followers = []
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
@@ -555,7 +556,11 @@ class BaseTestApi(object):
             users_group_data['permission'] = perm
             members.append(users_group_data)
 
+        for user in repo.followers:
+            followers.append(user.user.get_api_data())
+
         ret['members'] = members
+        ret['followers'] = followers
 
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
@@ -570,6 +575,7 @@ class BaseTestApi(object):
         ret = repo.get_api_data()
 
         members = []
+        followers = []
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
@@ -585,8 +591,12 @@ class BaseTestApi(object):
             users_group_data['type'] = "users_group"
             users_group_data['permission'] = perm
             members.append(users_group_data)
-
+        
+        for user in repo.followers:
+            followers.append(user.user.get_api_data())
+            
         ret['members'] = members
+        ret['followers'] = followers
 
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
