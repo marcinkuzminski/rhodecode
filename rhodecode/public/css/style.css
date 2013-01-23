@@ -468,15 +468,20 @@ div:hover > a.permalink {
 	margin: 0px -2px 0px 0px;
 }
 
+#header #header-inner #quick li.current a,
 #header #header-inner #quick li a:hover {
 	background: #4e4e4e no-repeat top left;
 }
 
+#header #header-inner #quick li.current a span,
 #header #header-inner #quick li a:hover span {
 	border-left: 1px solid #545454;
 }
 
-#header #header-inner #quick li a:hover span.icon,#header #header-inner #quick li a:hover span.icon_short
+#header #header-inner #quick li.current a span.icon,
+#header #header-inner #quick li.current a span.icon_short,
+#header #header-inner #quick li a:hover span.icon,
+#header #header-inner #quick li a:hover span.icon_short
 	{
 	border-left: none;
 	border-right: 1px solid #464646;
