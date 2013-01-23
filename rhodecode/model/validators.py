@@ -14,6 +14,7 @@ from formencode.validators import (
     NotEmpty, IPAddress, CIDR
 )
 from rhodecode.lib.compat import OrderedSet
+from rhodecode.lib import ipaddr
 from rhodecode.lib.utils import repo_name_slug
 from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
     ChangesetStatus
@@ -711,35 +712,31 @@ def NotReviewedRevisions(repo_id):
 def ValidIp():
     class _validator(CIDR):
         messages = dict(
-            badFormat=_('Please enter a valid IP address (a.b.c.d)'),
-            illegalOctets=_('The octets must be within the range of 0-255'
-                ' (not %(octet)r)'),
+            badFormat=_('Please enter a valid IPv4 or IpV6 address'),
             illegalBits=_('The network size (bits) must be within the range'
                 ' of 0-32 (not %(bits)r)'))
 
+        def to_python(self, value, state):
+            v = super(_validator, self).to_python(value, state)
+            v = v.strip()
+            net = ipaddr.IPNetwork(address=v)
+            if isinstance(net, ipaddr.IPv4Network):
+                #if IPv4 doesn't end with a mask, add /32
+                if '/' not in value:
+                    v += '/32'
+            if isinstance(net, ipaddr.IPv6Network):
+                #if IPv6 doesn't end with a mask, add /128
+                if '/' not in value:
+                    v += '/128'
+            return v
+
         def validate_python(self, value, state):
             try:
-                # Split into octets and bits
-                if '/' in value:  # a.b.c.d/e
-                    addr, bits = value.split('/')
-                else:  # a.b.c.d
-                    addr, bits = value, 32
-                # Use IPAddress validator to validate the IP part
-                IPAddress.validate_python(self, addr, state)
-                # Bits (netmask) correct?
-                if not 0 <= int(bits) <= 32:
-                    raise formencode.Invalid(
-                        self.message('illegalBits', state, bits=bits),
-                        value, state)
-            # Splitting faild: wrong syntax
+                addr = value.strip()
+                #this raises an ValueError if address is not IpV4 or IpV6
+                ipaddr.IPNetwork(address=addr)
             except ValueError:
                 raise formencode.Invalid(self.message('badFormat', state),
                                          value, state)
 
-        def to_python(self, value, state):
-            v = super(_validator, self).to_python(value, state)
-            #if IP doesn't end with a mask, add /32
-            if '/' not in value:
-                v += '/32'
-            return v
     return _validator

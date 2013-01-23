@@ -34,6 +34,7 @@ from decorator import decorator
 from pylons import config, url, request
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
+from sqlalchemy.orm.exc import ObjectDeletedError
 
 from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
@@ -447,8 +448,13 @@ class  AuthUser(object):
             user_ips = user_ips.options(FromCache("sql_cache_short",
                                                   "get_user_ips_%s" % user_id))
         for ip in user_ips:
-            _set.add(ip.ip_addr)
-        return _set or set(['0.0.0.0/0'])
+            try:
+                _set.add(ip.ip_addr)
+            except ObjectDeletedError:
+                # since we use heavy caching sometimes it happens that we get
+                # deleted objects here, we just skip them
+                pass
+        return _set or set(['0.0.0.0/0', '::/0'])
 
 
 def set_available_permissions(config):
@@ -990,6 +996,13 @@ def check_ip_access(source_ip, allowed_ips=None):
     log.debug('checking if ip:%s is subnet of %s' % (source_ip, allowed_ips))
     if isinstance(allowed_ips, (tuple, list, set)):
         for ip in allowed_ips:
-            if ipaddr.IPAddress(source_ip) in ipaddr.IPNetwork(ip):
-                return True
+            try:
+                if ipaddr.IPAddress(source_ip) in ipaddr.IPNetwork(ip):
+                    return True
+                # for any case we cannot determine the IP, don't crash just
+                # skip it and log as error, we want to say forbidden still when
+                # sending bad IP
+            except Exception:
+                log.error(traceback.format_exc())
+                continue
     return False
