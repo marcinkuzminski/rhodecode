@@ -15,7 +15,7 @@
     </h5>
 </%def>
 <%def name="page_nav()">
-    ${self.menu('home')}
+    ${self.menu('journal')}
 </%def>
 <%def name="head_extra()">
 <link href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('ATOM journal feed')}" type="application/atom+xml" />

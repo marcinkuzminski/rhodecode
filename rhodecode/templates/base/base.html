@@ -144,7 +144,8 @@
             if selected == current:
                 return h.literal('class="current"')
         %>
-        %if current not in ['home','admin']:
+        ## we render this menu only not for those pages 
+        %if current not in ['home','admin', 'search', 'journal']:
             ##REGULAR MENU
             <ul id="quick">
                 <!-- repo switcher -->
@@ -326,7 +327,7 @@
                     </a>
                 </li>
                 %if c.rhodecode_user.username != 'default':
-                 <li>
+                 <li ${is_current('journal')}>
                     <a class="menu_link" title="${_('Journal')}"  href="${h.url('journal')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
@@ -335,7 +336,7 @@
                     </a>
                  </li>
                 %else:
-                 <li>
+                 <li ${is_current('journal')}>
                     <a class="menu_link" title="${_('Public journal')}"  href="${h.url('public_journal')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/book.png')}" alt="${_('Public journal')}" />
@@ -344,7 +345,7 @@
                     </a>
                  </li>
                 %endif
-                <li>
+                <li ${is_current('search')}>
                     <a class="menu_link" title="${_('Search')}"  href="${h.url('search')}">
                     <span class="icon">
                         <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
