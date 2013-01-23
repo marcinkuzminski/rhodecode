@@ -4532,9 +4532,13 @@ form.comment-inline-form {
     float: left;    	
 }
 
-.notifications {
-	padding: 2px 7px !important;
-	margin: 7px -4px -7px 4px !important;
+.menu_link_user{
+    padding: 10px 8px 8px 8px !important;
+}
+
+.menu_link_notifications {
+	padding: 4px 4px !important;
+	margin: 7px 4px 0px 0px !important;
 	text-align: center;
 	color:#888 !important;
 	font-size: 10px;

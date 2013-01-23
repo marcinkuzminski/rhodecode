@@ -63,20 +63,19 @@
 <%def name="usermenu()">
     ## USER MENU
     <li>
-        <a class="menu_link" id="quick_login_link">
-            <span class="icon" style="background-image:url(${h.gravatar_url(c.rhodecode_user.email,16)}); background-repeat:no-repeat; background-position:center; ">
-                %if c.rhodecode_user.username != 'default' and c.unread_notifications != -1:
-                <span class="notifications" href="${h.url('notifications')}">${c.unread_notifications}</span>
-                %endif
-            </span>
-            <span>
-                %if c.rhodecode_user.username != 'default':
-                ${c.rhodecode_user.username}
-                %else:
-                ${_('Not logged in')}
-                %endif
-            </span>
-        </a>
+      <a class="menu_link" id="quick_login_link">
+          <span class="icon" style="padding:5px 5px 0px 5px">
+             <img src="${h.gravatar_url(c.rhodecode_user.email,20)}" alt="avatar">
+          </span>
+          %if c.rhodecode_user.username != 'default':
+            <span class="menu_link_user">${c.rhodecode_user.username}</span>
+            %if c.unread_notifications != 0:
+              <span class="menu_link_notifications">${c.unread_notifications}</span>
+            %endif
+          %else:
+              <span>${_('Not logged in')}</span>
+          %endif
+      </a>
 
   <div class="user-menu">
       <div id="quick_login">
