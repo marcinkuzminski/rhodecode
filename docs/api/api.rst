@@ -236,6 +236,7 @@ OUTPUT::
     result: None if user does not exist or 
             {
                 "user_id" :     "<user_id>",
+                "api_key" :     "<api_key>",
                 "username" :    "<username>",
                 "firstname":    "<firstname>",
                 "lastname" :    "<lastname>",
@@ -616,7 +617,7 @@ OUTPUT::
                 "fork_of":           "<name_of_fork_parent>",
                 "members" :     [
                                   { 
-                                    "type": "user",
+                                    "type":        "user",
                                     "user_id" :    "<user_id>",
                                     "username" :   "<username>",
                                     "firstname":   "<firstname>",
@@ -631,7 +632,7 @@ OUTPUT::
                                   },
                                   …
                                   { 
-                                    "type": "users_group",
+                                    "type":      "users_group",
                                     "id" :       "<usersgroupid>",
                                     "name" :     "<usersgroupname>",
                                     "active":    "<bool>",
@@ -639,6 +640,22 @@ OUTPUT::
                                   },
                                   …
                                 ]
+                 "followers":   [
+                                  {
+                                    "user_id" :     "<user_id>",
+                                    "username" :    "<username>",
+                                    "firstname":    "<firstname>",
+                                    "lastname" :    "<lastname>",
+                                    "email" :       "<email>",
+                                    "emails":       "<list_of_all_additional_emails>",
+                                    "ip_addresses": "<list_of_ip_addresses_for_user>",
+                                    "active" :      "<bool>",
+                                    "admin" :       "<bool>",
+                                    "ldap_dn" :     "<ldap_dn>",
+                                    "last_login":   "<last_login>",                                    
+                                  },
+                                  …           
+                 ]
             }
     error:  null
 
