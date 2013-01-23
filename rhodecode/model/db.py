@@ -562,7 +562,7 @@ class UserIpMap(Base, BaseModel):
     @classmethod
     def _get_ip_range(cls, ip_addr):
         from rhodecode.lib import ipaddr
-        net = ipaddr.IPv4Network(ip_addr)
+        net = ipaddr.IPNetwork(address=ip_addr)
         return [str(net.network), str(net.broadcast)]
 
     def __json__(self):
