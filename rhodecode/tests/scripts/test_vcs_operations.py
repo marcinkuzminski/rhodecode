@@ -112,7 +112,7 @@ def _add_files_and_push(vcs, DEST, **kwargs):
                 i, 'Marcin Kuźminski <marcin@python-blog.com>', added_file
             )
         elif vcs == 'git':
-            cmd = """git ci -m 'commited new %s' --author '%s' %s """ % (
+            cmd = """git commit -m 'commited new %s' --author '%s' %s """ % (
                 i, 'Marcin Kuźminski <marcin@python-blog.com>', added_file
             )
         Command(cwd).execute(cmd)
