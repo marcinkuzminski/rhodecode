@@ -2092,9 +2092,9 @@ a.metatag[tag="license"]:hover {
 }
 #quick_login{
     min-height: 80px;
-    margin: 37px 0 0 -280px;
     padding: 4px;
     position: absolute;
+    right: 0;
     width: 278px;
     background-color: #003B76;
     background-repeat: repeat-x;
@@ -3665,6 +3665,7 @@ div#legend_data,div#legend_container,div#legend_choices
 	float: left;
 }
 
+#header #header-inner #quick li #quick_login,
 #header #header-inner #quick li:hover ul ul,
 #header #header-inner #quick li:hover ul ul ul,
 #header #header-inner #quick li:hover ul ul ul ul,
@@ -3673,6 +3674,7 @@ div#legend_data,div#legend_container,div#legend_choices
 	display: none;
 }
 
+#header #header-inner #quick li:hover #quick_login,
 #header #header-inner #quick li:hover ul,#header #header-inner #quick li li:hover ul,#header #header-inner #quick li li li:hover ul,#header #header-inner #quick li li li li:hover ul,#content #left #menu ul.opened,#content #left #menu li ul.expanded
 	{
 	display: block;

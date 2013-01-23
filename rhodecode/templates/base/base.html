@@ -61,6 +61,7 @@
 </%def>
 
 <%def name="usermenu()">
+    ## USER MENU
     <li>
         <a class="menu_link" id="quick_login_link">
             <span class="icon" style="background-image:url(${h.gravatar_url(c.rhodecode_user.email,16)}); background-repeat:no-repeat; background-position:center; ">
@@ -76,10 +77,9 @@
                 %endif
             </span>
         </a>
-    </li>
 
   <div class="user-menu">
-      <div id="quick_login" style="display:none">
+      <div id="quick_login">
         %if c.rhodecode_user.username == 'default':
             <h4>${_('Login to your account')}</h4>
             ${h.form(h.url('login_home',came_from=h.url.current()))}
@@ -134,7 +134,9 @@
             </div>
         %endif
       </div>
- </div>
+  </div>
+
+    </li>
 </%def>
 
 <%def name="menu(current=None)">

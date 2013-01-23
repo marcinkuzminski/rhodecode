@@ -80,24 +80,6 @@
               tooltip_activate();
               show_more_event();
               show_changeset_tooltip();
-
-              YUE.on('quick_login_link','click',function(e){
-                 // make sure we don't redirect
-                 YUE.preventDefault(e);
-
-                 if(YUD.hasClass('quick_login_link','enabled')){
-                     YUD.setStyle('quick_login','display','none');
-                     YUD.removeClass('quick_login_link','enabled');
-                 }
-                 else{
-                     YUD.setStyle('quick_login','display','');
-                     YUD.addClass('quick_login_link','enabled');
-                     var usr = YUD.get('username');
-                     if(usr){
-                         usr.focus();
-                     }
-                 }
-              });
            })
             </script>
         </%def>
