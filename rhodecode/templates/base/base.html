@@ -292,14 +292,6 @@
             </script>
         %else:
             ##ROOT MENU
-            <li ${is_current('home')}>
-                <a class="menu_link" title="${_('Home')}"  href="${h.url('home')}">
-                <span class="icon">
-                    <img src="${h.url('/images/icons/home_16.png')}" alt="${_('Home')}" />
-                </span>
-                <span>${_('Home')}</span>
-                </a>
-            </li>
             %if c.rhodecode_user.username != 'default':
              <li ${is_current('journal')}>
                 <a class="menu_link" title="${_('Journal')}"  href="${h.url('journal')}">
