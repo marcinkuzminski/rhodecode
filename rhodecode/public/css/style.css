@@ -453,6 +453,8 @@ div:hover > a.permalink {
 	border-left: none;
 	border-right: 1px solid #2e5c89;
 	padding: 8px 6px 4px;
+	min-width: 16px;
+	min-height: 16px;
 }
 
 #header #header-inner #quick li span.icon_short {
@@ -2090,7 +2092,7 @@ a.metatag[tag="license"]:hover {
 }
 #quick_login{
     min-height: 80px;
-    margin: 37px 0 0 -251px;
+    margin: 37px 0 0 -280px;
     padding: 4px;
     position: absolute;
     width: 278px;
@@ -4528,30 +4530,18 @@ form.comment-inline-form {
     float: left;    	
 }
 
-.notifications{
-    border-radius: 4px 4px 4px 4px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;    
-    float: right;
-    margin: 20px 0px 0px 0px;
-    position: absolute;
-    text-align: center;
-    width: 26px;
-    z-index: 1000;
-}
-.notifications a{
+.notifications {
+	padding: 2px 7px !important;
+	margin: 7px -4px -7px 4px !important;
+	text-align: center;
 	color:#888 !important;
-	display: block;
 	font-size: 10px;
 	background-color: #DEDEDE !important;
-    border-radius: 2px !important;
-    -webkit-border-radius: 2px !important;
-    -moz-border-radius: 2px !important;  	
+	border-radius: 4px !important;
+	-webkit-border-radius: 4px !important;
+	-moz-border-radius: 4px !important;  	
 }
-.notifications a:hover{
-	text-decoration: none !important;
-	background-color: #EEEFFF !important;
-}
+
 .notification-header{
 	padding-top:6px;
 }
