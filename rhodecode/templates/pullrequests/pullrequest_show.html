@@ -64,11 +64,11 @@
              ##%endif
               <span class="spantag">${c.pull_request.org_ref_parts[0]}</span>
               :
-              <span class="spantag">${c.pull_request.org_ref_parts[1]}</span>             
-              <span><a href="${h.url('summary_home', repo_name=c.pull_request.org_repo.repo_name)}">${c.pull_request.org_repo.clone_url()}</a></span> 
+              <span class="spantag">${c.pull_request.org_ref_parts[1]}</span>
+              <span><a href="${h.url('summary_home', repo_name=c.pull_request.org_repo.repo_name)}">${c.pull_request.org_repo.clone_url()}</a></span>
               </div>
           </div>
-         </div>         
+         </div>
       </div>
     </div>
     <div style="white-space:pre-wrap;padding:3px 3px 5px 20px">${h.literal(c.pull_request.description)}</div>

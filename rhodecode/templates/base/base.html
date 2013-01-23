@@ -159,7 +159,7 @@
                   </li>
               </ul>
           </li>
-        ## we render this menu only not for those pages 
+        ## we render this menu only not for those pages
         %if current not in ['home','admin', 'search', 'journal']:
             ##REGULAR MENU
             <li ${is_current('summary')}>
@@ -342,7 +342,7 @@
           }
           q_filter(target,nodes,func);
       }
-      
+
       var loaded = YUD.hasClass('repo_switcher','loaded');
       if(!loaded){
          YUD.addClass('repo_switcher','loaded');

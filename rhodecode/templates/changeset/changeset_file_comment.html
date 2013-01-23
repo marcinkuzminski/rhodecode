@@ -31,11 +31,11 @@
             %else:
               ${_('Comment from pull request %s') % co.pull_request.pull_request_id}
             %endif
-            </a>   
+            </a>
          %endif
         </span>
        </div>
-        
+
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
         <div class="buttons">
           <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>

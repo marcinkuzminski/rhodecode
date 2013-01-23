@@ -591,10 +591,10 @@ class BaseTestApi(object):
             users_group_data['type'] = "users_group"
             users_group_data['permission'] = perm
             members.append(users_group_data)
-        
+
         for user in repo.followers:
             followers.append(user.user.get_api_data())
-            
+
         ret['members'] = members
         ret['followers'] = followers
 
