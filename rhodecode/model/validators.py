@@ -533,7 +533,7 @@ def ValidPerms(type_='repo'):
                          'g': 'users_group'
                     }[k[0]]
                     if member == 'default':
-                        if value.get('private'):
+                        if value.get('repo_private'):
                             # set none for default when updating to
                             # private repo
                             v = EMPTY_PERM
