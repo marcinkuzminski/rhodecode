@@ -182,7 +182,7 @@ def safe_int(val, default=None):
 
     try:
         val = int(val)
-    except ValueError:
+    except (ValueError, TypeError):
         val = default
 
     return val
