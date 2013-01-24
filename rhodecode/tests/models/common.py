@@ -25,10 +25,11 @@ def _make_group(path, desc='desc', parent_id=None,
     return gr
 
 
-def _make_repo(name, repos_group=None, repo_type='hg'):
+def _make_repo(name, repos_group=None, repo_type='hg', private=False):
     return RepoModel().create_repo(name, repo_type, 'desc',
                                    TEST_USER_ADMIN_LOGIN,
-                                   repos_group=repos_group)
+                                   repos_group=repos_group,
+                                   private=private)
 
 
 def _destroy_project_tree(test_u1_id):
@@ -67,6 +68,7 @@ def _create_project_tree():
      |__[g0_3] 1 repo
         |
         |_<g0/g0_3/g0_3_r1>
+        |_<g0/g0_3/g0_3_r2_private>
 
     """
     test_u1 = UserModel().create_or_update(
@@ -84,6 +86,8 @@ def _create_project_tree():
     g0_2_r2 = _make_repo('g0/g0_2/g0_2_r2', repos_group=g0_2)
     g0_3 = _make_group('g0_3', parent_id=g0)
     g0_3_r1 = _make_repo('g0/g0_3/g0_3_r1', repos_group=g0_3)
+    g0_3_r2_private = _make_repo('g0/g0_3/g0_3_r1_private', repos_group=g0_3,
+                                 private=True)
     return test_u1
 
 
