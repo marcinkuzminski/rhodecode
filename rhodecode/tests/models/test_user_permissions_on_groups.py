@@ -101,7 +101,10 @@ def test_user_permissions_on_group_with_recursive_mode():
     _check_expected_count(items, repo_items, expected_count(group, True))
 
     for name, perm in repo_items:
-        yield check_tree_perms, name, perm, group, 'repository.write'
+        if name == 'g0/g0_3/g0_3_r1_private':
+            yield check_tree_perms, name, perm, group, 'repository.none'
+        else:
+            yield check_tree_perms, name, perm, group, 'repository.write'
 
     for name, perm in items:
         yield check_tree_perms, name, perm, group, 'group.write'

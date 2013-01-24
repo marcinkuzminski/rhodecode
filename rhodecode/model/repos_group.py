@@ -175,6 +175,10 @@ class ReposGroupModel(BaseModel):
                     repos_group=obj, user=user, perm=perm
                 )
             elif isinstance(obj, Repository):
+                #we do this ONLY IF repository is non-private
+                if obj.private:
+                    return
+
                 # we set group permission but we have to switch to repo
                 # permission
                 perm = perm.replace('group.', 'repository.')
@@ -199,6 +203,7 @@ class ReposGroupModel(BaseModel):
                   % (repos_group, recursive))
 
         for obj in repos_group.recursive_groups_and_repos():
+            #obj is an instance of a group or repositories in that group
             if not recursive:
                 obj = repos_group
 
