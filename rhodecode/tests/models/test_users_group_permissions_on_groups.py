@@ -117,6 +117,11 @@ def test_user_permissions_on_group_with_recursive_mode():
 
 
 @with_setup(permissions_setup_func)
+def test_user_permissions_on_group_with_recursive_mode_and_private_repos():
+    assert 0
+
+
+@with_setup(permissions_setup_func)
 def test_user_permissions_on_group_with_recursive_mode_inner_group():
     ## set permission to g0_3 group to none
     recursive = True

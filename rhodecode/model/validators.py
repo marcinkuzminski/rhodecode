@@ -538,6 +538,9 @@ def ValidPerms(type_='repo'):
                             # private repo
                             v = EMPTY_PERM
                     perms_update.add((member, v, t))
+            #always set NONE when private flag is set
+            if value.get('repo_private'):
+                perms_update.add(('default', EMPTY_PERM, 'user'))
 
             value['perms_updates'] = list(perms_update)
             value['perms_new'] = list(perms_new)

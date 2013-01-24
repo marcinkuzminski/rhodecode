@@ -213,7 +213,6 @@ class TestAdminReposController(TestController):
         self.log_user()
         repo_name = 'vcs_test_new_to_delete'
         description = 'description for newly created repo'
-        private = False
         response = self.app.post(url('repos'),
                         _get_repo_create_params(repo_private=False,
                                                 repo_type='hg',

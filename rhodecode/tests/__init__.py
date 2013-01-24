@@ -157,7 +157,8 @@ class TestController(TestCase):
         return User.get_by_username(self._logged_username)
 
     def checkSessionFlash(self, response, msg):
-        self.assertTrue('flash' in response.session)
+        self.assertTrue('flash' in response.session,
+                        msg='Response session:%r have no flash' % response.session)
         if not msg in response.session['flash'][0][1]:
             self.fail(
                 'msg `%s` not found in session flash: got `%s` instead' % (
