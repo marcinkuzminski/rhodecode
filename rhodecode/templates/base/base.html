@@ -147,8 +147,8 @@
         %>
         <ul id="quick">
           <!-- repo switcher -->
-          <li>
-              <a class="menu_link" id="repo_switcher" title="${_('Switch repository')}" href="#">
+          <li ${is_current('home')}>
+              <a class="menu_link" id="repo_switcher" title="${_('Switch repository')}" href="${h.url('home')}">
               <span class="icon">
                   <img src="${h.url('/images/icons/database.png')}" alt="${_('Products')}" />
               </span>
