@@ -509,13 +509,6 @@ def CanCreateGroup(can_create_in_root=False):
             return value
 
         def validate_python(self, value, state):
-            #TODO: REMOVE THIS !!
-            ################################
-            import ipdb;ipdb.set_trace()
-            print 'setting ipdb debuggin for rhodecode.model.validators._validator.validate_python'
-            ################################
-            
-
             gr = RepoGroup.get(value)
             gr_name = gr.group_name if gr else None  # None means ROOT location
 
