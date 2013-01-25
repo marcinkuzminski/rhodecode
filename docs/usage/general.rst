@@ -11,7 +11,7 @@ Repository deleting
 Currently when admin/owner deletes a repository, RhodeCode does not physically
 delete a repository from filesystem, it renames it in a special way so it's
 not possible to push,clone or access repository. It's worth a notice that,
-even if someone will be given administrative access to RhodeCode and will 
+even if someone will be given administrative access to RhodeCode and will
 delete a repository You can easy restore such action by restoring `rm__<date>`
 from the repository name, and internal repository storage (.hg/.git)
 
@@ -44,21 +44,21 @@ Due to complicated nature of repository grouping, often urls of repositories
 can change.
 
 example::
-  
+
   #before
   http://server.com/repo_name
   # after insertion to test_group group the url will be
   http://server.com/test_group/repo_name
-  
+
 This can be an issue for build systems and any other hardcoded scripts, moving
-repository to a group leads to a need for changing external systems. To 
-overcome this RhodeCode introduces a non changable replacement url. It's 
+repository to a group leads to a need for changing external systems. To
+overcome this RhodeCode introduces a non changable replacement url. It's
 simply an repository ID prefixed with `_` above urls are also accessible as::
 
   http://server.com/_<ID>
-  
+
 Since ID are always the same moving the repository will not affect such url.
-the _<ID> syntax can be used anywhere in the system so urls with repo_name 
+the _<ID> syntax can be used anywhere in the system so urls with repo_name
 for changelogs, files and other can be exchanged with _<ID> syntax.
 
 
@@ -71,7 +71,7 @@ on errors the mails will have a detailed traceback of error.
 
 
 Mails are also sent for code comments. If someone comments on a changeset
-mail is sent to all participants, the person who commited the changeset 
+mail is sent to all participants, the person who commited the changeset
 (if present in RhodeCode), and to all people mentioned with @mention system.
 
 
@@ -96,12 +96,12 @@ Currently it support following options:
 
 
 .. note::
-    
+
     - *`svn -> hg` cloning requires `hgsubversion` library to be installed.*
 
 If you need to clone repositories that are protected via basic auth, you
-might pass the url with stored credentials inside eg. 
+might pass the url with stored credentials inside eg.
 `http://user:passw@remote.server/repo, RhodeCode will try to login and clone
 using given credentials. Please take a note that they will be stored as
-plaintext inside the database. RhodeCode will remove auth info when showing the 
+plaintext inside the database. RhodeCode will remove auth info when showing the
 clone url in summary page.

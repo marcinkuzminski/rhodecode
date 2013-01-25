@@ -58,4 +58,3 @@ class TestSettingsController(TestController):
         perm[0].permission = Permission.get_by_key('repository.read')
         Session().add(perm[0])
         Session().commit()
-        
