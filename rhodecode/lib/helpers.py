@@ -741,7 +741,8 @@ def action_parser(user_log, feed=False, parse_cs=False):
 # PERMS
 #==============================================================================
 from rhodecode.lib.auth import HasPermissionAny, HasPermissionAll, \
-HasRepoPermissionAny, HasRepoPermissionAll
+HasRepoPermissionAny, HasRepoPermissionAll, HasReposGroupPermissionAll, \
+HasReposGroupPermissionAny
 
 
 #==============================================================================

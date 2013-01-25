@@ -115,7 +115,8 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
     return _UsersGroupForm
 
 
-def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
+def ReposGroupForm(edit=False, old_data={}, available_groups=[],
+                   can_create_in_root=False):
     class _ReposGroupForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -123,10 +124,15 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
         group_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                                v.SlugifyName())
         group_description = v.UnicodeString(strip=True, min=1,
-                                                not_empty=True)
-        group_parent_id = v.OneOf(available_groups, hideList=False,
-                                        testValueList=True,
-                                        if_missing=None, not_empty=False)
+                                                not_empty=False)
+        if edit:
+            #FIXME: do a special check that we cannot move a group to one of
+            #it's children
+            pass
+        group_parent_id = All(v.CanCreateGroup(can_create_in_root),
+                              v.OneOf(available_groups, hideList=False,
+                                      testValueList=True,
+                                      if_missing=None, not_empty=True))
         enable_locking = v.StringBoolean(if_missing=False)
         recursive = v.StringBoolean(if_missing=False)
         chained_validators = [v.ValidReposGroup(edit, old_data),

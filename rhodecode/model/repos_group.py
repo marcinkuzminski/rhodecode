@@ -140,15 +140,20 @@ class ReposGroupModel(BaseModel):
                                           group.name)
                 shutil.move(rm_path, os.path.join(self.repos_path, _d))
 
-    def create(self, group_name, group_description, parent=None, just_db=False):
+    def create(self, group_name, group_description, owner, parent=None, just_db=False):
         try:
             new_repos_group = RepoGroup()
-            new_repos_group.group_description = group_description
+            new_repos_group.group_description = group_description or group_name
             new_repos_group.parent_group = self._get_repos_group(parent)
             new_repos_group.group_name = new_repos_group.get_new_name(group_name)
 
             self.sa.add(new_repos_group)
             self._create_default_perms(new_repos_group)
+
+            #create an ADMIN permission for owner, later owner should go into
+            #the owner field of groups
+            self.grant_user_permission(repos_group=new_repos_group,
+                                       user=owner, perm='group.admin')
 
             if not just_db:
                 # we need to flush here, in order to check if database won't
@@ -229,10 +234,10 @@ class ReposGroupModel(BaseModel):
                 break
         return updates
 
-    def update(self, repos_group_id, form_data):
+    def update(self, repos_group, form_data):
 
         try:
-            repos_group = RepoGroup.get(repos_group_id)
+            repos_group = self._get_repos_group(repos_group)
             recursive = form_data['recursive']
             # iterate over all members(if in recursive mode) of this groups and
             # set the permissions !

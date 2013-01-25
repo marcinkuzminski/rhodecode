@@ -475,15 +475,63 @@ def CanWriteGroup():
                                    "to create repository in this group")
         }
 
+        def to_python(self, value, state):
+            #root location
+            if value in [-1, "-1"]:
+                return None
+            return value
+
         def validate_python(self, value, state):
             gr = RepoGroup.get(value)
-            if not HasReposGroupPermissionAny(
-                'group.write', 'group.admin'
-            )(gr.group_name, 'get group of repo form'):
+            gr_name = gr.group_name if gr else None  # None means ROOT location
+            val = HasReposGroupPermissionAny('group.write', 'group.admin')
+            forbidden = not val(gr_name, 'can write into group validator')
+            #parent group need to be existing
+            if gr and forbidden:
                 msg = M(self, 'permission_denied', state)
                 raise formencode.Invalid(msg, value, state,
                     error_dict=dict(repo_type=msg)
                 )
+    return _validator
+
+
+def CanCreateGroup(can_create_in_root=False):
+    class _validator(formencode.validators.FancyValidator):
+        messages = {
+            'permission_denied': _(u"You don't have permissions "
+                                   "to create a group in this location")
+        }
+
+        def to_python(self, value, state):
+            #root location
+            if value in [-1, "-1"]:
+                return None
+            return value
+
+        def validate_python(self, value, state):
+            #TODO: REMOVE THIS !!
+            ################################
+            import ipdb;ipdb.set_trace()
+            print 'setting ipdb debuggin for rhodecode.model.validators._validator.validate_python'
+            ################################
+            
+
+            gr = RepoGroup.get(value)
+            gr_name = gr.group_name if gr else None  # None means ROOT location
+
+            if can_create_in_root and gr is None:
+                #we can create in root, we're fine no validations required
+                return
+
+            forbidden_in_root = gr is None and can_create_in_root is False
+            val = HasReposGroupPermissionAny('group.admin')
+            forbidden = not val(gr_name, 'can create group validator')
+            if forbidden_in_root or forbidden:
+                msg = M(self, 'permission_denied', state)
+                raise formencode.Invalid(msg, value, state,
+                    error_dict=dict(group_parent_id=msg)
+                )
+
     return _validator
 
 

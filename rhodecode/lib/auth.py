@@ -659,7 +659,6 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
 
     def check_permissions(self):
         repo_name = get_repo_slug(request)
-
         try:
             user_perms = set([self.user_perms['repositories'][repo_name]])
         except KeyError:
@@ -682,6 +681,7 @@ class HasReposGroupPermissionAllDecorator(PermsDecorator):
             user_perms = set([self.user_perms['repositories_groups'][group_name]])
         except KeyError:
             return False
+
         if self.required_perms.issubset(user_perms):
             return True
         return False
@@ -695,11 +695,11 @@ class HasReposGroupPermissionAnyDecorator(PermsDecorator):
 
     def check_permissions(self):
         group_name = get_repos_group_slug(request)
-
         try:
             user_perms = set([self.user_perms['repositories_groups'][group_name]])
         except KeyError:
             return False
+
         if self.required_perms.intersection(user_perms):
             return True
         return False

@@ -90,7 +90,8 @@ class TestAdminReposController(TestController):
         ## create GROUP
         group_name = 'sometest'
         gr = ReposGroupModel().create(group_name=group_name,
-                                      group_description='test',)
+                                      group_description='test',
+                                      owner=TEST_USER_ADMIN_LOGIN)
         self.Session().commit()
 
         repo_name = 'ingroup'

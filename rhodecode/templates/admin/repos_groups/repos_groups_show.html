@@ -51,12 +51,12 @@
                       <td>${gr.group_description}</td>
                       <td><b>${gr_cn}</b></td>
                       <td>
-                       <a href="${h.url('edit_repos_group',id=gr.group_id)}" title="${_('edit')}">
+                       <a href="${h.url('edit_repos_group',group_name=gr.group_name)}" title="${_('edit')}">
                          ${h.submit('edit_%s' % gr.group_name,_('edit'),class_="edit_icon action_button")}
                        </a>
                       </td>
                       <td>
-                       ${h.form(url('repos_group', id=gr.group_id),method='delete')}
+                       ${h.form(url('repos_group', group_name=gr.group_name),method='delete')}
                          ${h.submit('remove_%s' % gr.name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+ungettext('Confirm to delete this group: %s with %s repository','Confirm to delete this group: %s with %s repositories',gr_cn) % (gr.name,gr_cn)+"');")}
                        ${h.end_form()}
                       </td>

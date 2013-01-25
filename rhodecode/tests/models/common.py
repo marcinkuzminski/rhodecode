@@ -21,7 +21,7 @@ def _make_group(path, desc='desc', parent_id=None,
         return gr
     if isinstance(parent_id, RepoGroup):
         parent_id = parent_id.group_id
-    gr = ReposGroupModel().create(path, desc, parent_id)
+    gr = ReposGroupModel().create(path, desc, TEST_USER_ADMIN_LOGIN, parent_id)
     return gr
 
 

@@ -54,7 +54,6 @@ def make_map(config):
         :param match_dict:
         """
         repos_group_name = match_dict.get('group_name')
-
         return is_valid_repos_group(repos_group_name, config['base_path'])
 
     def check_int(environ, match_dict):
@@ -158,33 +157,33 @@ def make_map(config):
                   action="new", conditions=dict(method=["GET"]))
         m.connect("formatted_new_repos_group", "/repos_groups/new.{format}",
                   action="new", conditions=dict(method=["GET"]))
-        m.connect("update_repos_group", "/repos_groups/{id}",
+        m.connect("update_repos_group", "/repos_groups/{group_name:.*?}",
                   action="update", conditions=dict(method=["PUT"],
-                                                   function=check_int))
-        m.connect("delete_repos_group", "/repos_groups/{id}",
+                                                   function=check_group))
+        m.connect("delete_repos_group", "/repos_groups/{group_name:.*?}",
                   action="delete", conditions=dict(method=["DELETE"],
-                                                   function=check_int))
-        m.connect("edit_repos_group", "/repos_groups/{id:.*?}/edit",
+                                                   function=check_group))
+        m.connect("edit_repos_group", "/repos_groups/{group_name:.*?}/edit",
                   action="edit", conditions=dict(method=["GET"],))
         m.connect("formatted_edit_repos_group",
-                  "/repos_groups/{id}.{format}/edit",
+                  "/repos_groups/{group_name:.*?}.{format}/edit",
                   action="edit", conditions=dict(method=["GET"],
-                                                 function=check_int))
-        m.connect("repos_group", "/repos_groups/{id}",
+                                                 function=check_group))
+        m.connect("repos_group", "/repos_groups/{group_name:.*?}",
                   action="show", conditions=dict(method=["GET"],
-                                                 function=check_int))
-        m.connect("formatted_repos_group", "/repos_groups/{id}.{format}",
+                                                 function=check_group))
+        m.connect("formatted_repos_group", "/repos_groups/{group_name:.*?}.{format}",
                   action="show", conditions=dict(method=["GET"],
-                                                 function=check_int))
+                                                 function=check_group))
         # ajax delete repos group perm user
         m.connect('delete_repos_group_user_perm',
-                  "/delete_repos_group_user_perm/{group_name:.*}",
+                  "/delete_repos_group_user_perm/{group_name:.*?}",
              action="delete_repos_group_user_perm",
              conditions=dict(method=["DELETE"], function=check_group))
 
         # ajax delete repos group perm users_group
         m.connect('delete_repos_group_users_group_perm',
-                  "/delete_repos_group_users_group_perm/{group_name:.*}",
+                  "/delete_repos_group_users_group_perm/{group_name:.*?}",
                   action="delete_repos_group_users_group_perm",
                   conditions=dict(method=["DELETE"], function=check_group))
 

@@ -79,7 +79,8 @@ class TestReposGroups(unittest.TestCase):
                           {'group_name': HG_REPO, })
         gr = model.create(group_name='test_gr', group_description='desc',
                           parent=None,
-                          just_db=True)
+                          just_db=True,
+                          owner=TEST_USER_ADMIN_LOGIN)
         self.assertRaises(formencode.Invalid,
                           validator.to_python, {'group_name': gr.group_name, })
 
@@ -150,7 +151,8 @@ class TestReposGroups(unittest.TestCase):
 
         gr = ReposGroupModel().create(group_name='group_test',
                                       group_description='desc',
-                                      parent=None,)
+                                      parent=None,
+                                      owner=TEST_USER_ADMIN_LOGIN)
         self.assertRaises(formencode.Invalid,
                           validator.to_python, {'repo_name': gr.group_name})
 

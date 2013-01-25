@@ -77,11 +77,15 @@ class CachedRepoList(object):
     super fast
     """
 
-    def __init__(self, db_repo_list, repos_path, order_by=None):
+    def __init__(self, db_repo_list, repos_path, order_by=None, perm_set=None):
         self.db_repo_list = db_repo_list
         self.repos_path = repos_path
         self.order_by = order_by
         self.reversed = (order_by or '').startswith('-')
+        if not perm_set:
+            perm_set = ['repository.read', 'repository.write',
+                        'repository.admin']
+        self.perm_set = perm_set
 
     def __len__(self):
         return len(self.db_repo_list)
@@ -98,7 +102,7 @@ class CachedRepoList(object):
             scmr = dbr.scm_instance_cached(cache_map)
             # check permission at this level
             if not HasRepoPermissionAny(
-                'repository.read', 'repository.write', 'repository.admin'
+                *self.perm_set
             )(dbr.repo_name, 'get repo check'):
                 continue
 
@@ -143,7 +147,7 @@ class SimpleCachedRepoList(CachedRepoList):
         for dbr in self.db_repo_list:
             # check permission at this level
             if not HasRepoPermissionAny(
-                'repository.read', 'repository.write', 'repository.admin'
+                *self.perm_set
             )(dbr.repo_name, 'get repo check'):
                 continue
 
@@ -160,8 +164,18 @@ class SimpleCachedRepoList(CachedRepoList):
 
 class GroupList(object):
 
-    def __init__(self, db_repo_group_list):
+    def __init__(self, db_repo_group_list, perm_set=None):
+        """
+        Creates iterator from given list of group objects, additionally
+        checking permission for them from perm_set var
+
+        :param db_repo_group_list:
+        :param perm_set: list of permissons to check
+        """
         self.db_repo_group_list = db_repo_group_list
+        if not perm_set:
+            perm_set = ['group.read', 'group.write', 'group.admin']
+        self.perm_set = perm_set
 
     def __len__(self):
         return len(self.db_repo_group_list)
@@ -173,7 +187,7 @@ class GroupList(object):
         for dbgr in self.db_repo_group_list:
             # check permission at this level
             if not HasReposGroupPermissionAny(
-                'group.read', 'group.write', 'group.admin'
+                *self.perm_set
             )(dbgr.group_name, 'get group repo check'):
                 continue
 
