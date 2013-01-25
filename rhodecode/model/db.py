@@ -1004,7 +1004,8 @@ class Repository(Base, BaseModel):
             cs_cache = cs_cache.__json__()
 
         if cs_cache != self.changeset_cache:
-            last_change = cs_cache.get('date') or self.last_change
+            _default = datetime.datetime.fromtimestamp(0)
+            last_change = cs_cache.get('date') or self.last_change or _default
             log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
             self.updated_on = last_change
             self.changeset_cache = cs_cache
