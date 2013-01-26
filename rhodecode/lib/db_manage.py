@@ -704,7 +704,8 @@ class DbManage(object):
                 reg_perm.permission = perm
                 self.sa.add(reg_perm)
 
-    def finish(self):
+    @staticmethod
+    def check_waitress():
         """
         Function executed at the end of setup
         """

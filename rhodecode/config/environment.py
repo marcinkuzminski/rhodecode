@@ -20,6 +20,7 @@ from rhodecode.lib.auth import set_available_permissions
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config,\
     load_rcextensions, check_git_version
 from rhodecode.lib.utils2 import engine_from_config, str2bool
+from rhodecode.lib.db_manage import DbManage
 from rhodecode.model import init_model
 from rhodecode.model.scm import ScmModel
 
@@ -88,7 +89,7 @@ def load_environment(global_conf, app_conf, initial=False):
 
     #check git version
     check_git_version()
-
+    DbManage.check_waitress()
     # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
