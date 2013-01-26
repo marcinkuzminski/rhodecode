@@ -80,7 +80,7 @@ def get_scms_for_path(path):
             continue
         dirname = os.path.join(path, 'rm__.' + key)
         if os.path.isdir(dirname):
-            return [None]
+            return result
         # We still need to check if it's not bare repository as
         # bare repos don't have working directories
         try:
@@ -130,6 +130,7 @@ def get_highlighted_code(name, code, type='terminal'):
         logging.debug("Couldn't guess Lexer, will not use pygments.")
         content = code
     return content
+
 
 def parse_changesets(text):
     """

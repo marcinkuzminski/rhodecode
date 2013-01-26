@@ -171,7 +171,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         raise
 
 
-def get_repos(path, recursive=False):
+def get_repos(path, recursive=False, skip_removed_repos=True):
     """
     Scans given path for repos and return (name,(type,path)) tuple
 
@@ -181,6 +181,7 @@ def get_repos(path, recursive=False):
 
     # remove ending slash for better results
     path = path.rstrip(os.sep)
+    log.debug('now scanning in %s location recursive:%s...' % (path, recursive))
 
     def _get_repos(p):
         if not os.access(p, os.W_OK):
@@ -189,6 +190,15 @@ def get_repos(path, recursive=False):
             if os.path.isfile(os.path.join(p, dirpath)):
                 continue
             cur_path = os.path.join(p, dirpath)
+
+            # skip removed repos
+            if skip_removed_repos and REMOVED_REPO_PAT.match(dirpath):
+                continue
+
+            #skip .<somethin> dirs
+            if dirpath.startswith('.'):
+                continue
+
             try:
                 scm_info = get_scm(cur_path)
                 yield scm_info[1].split(path, 1)[-1].lstrip(os.sep), scm_info
@@ -202,6 +212,9 @@ def get_repos(path, recursive=False):
                         yield inner_scm
 
     return _get_repos(path)
+
+#alias for backward compat
+get_filesystem_repos = get_repos
 
 
 def is_valid_repo(repo_name, base_path, scm=None):

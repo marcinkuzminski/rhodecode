@@ -46,7 +46,7 @@ from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils2 import safe_str, safe_unicode
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
-from rhodecode.lib.utils import get_repos as get_filesystem_repos, make_ui, \
+from rhodecode.lib.utils import get_filesystem_repos, make_ui, \
     action_logger, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
@@ -224,10 +224,6 @@ class ScmModel(BaseModel):
         repos = {}
 
         for name, path in get_filesystem_repos(repos_path, recursive=True):
-            # skip removed repos
-            if REMOVED_REPO_PAT.match(name) or path[0] is None:
-                continue
-
             # name need to be decomposed and put back together using the /
             # since this is internal storage separator for rhodecode
             name = Repository.normalize_repo_name(name)
@@ -247,7 +243,7 @@ class ScmModel(BaseModel):
                         repos[name] = klass(path[1])
             except OSError:
                 continue
-
+        log.debug('found %s paths with repositories' % (len(repos)))
         return repos
 
     def get_repos(self, all_repos=None, sort_key=None, simple=False):
