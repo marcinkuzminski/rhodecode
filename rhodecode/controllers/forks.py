@@ -94,8 +94,13 @@ class ForksController(BaseRepoController):
                                             c.repo_last_rev) * 100)
 
         defaults = RepoModel()._get_defaults(repo_name)
+        # alter the description to indicate a fork
+        defaults['description'] = ('fork of repository: %s \n%s'
+                                   % (defaults['repo_name'],
+                                      defaults['description']))
         # add suffix to fork
         defaults['repo_name'] = '%s-fork' % defaults['repo_name']
+
         return defaults
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
