@@ -177,7 +177,7 @@
     ${comment.comment_inline_form()}
 
     ## render comments and inlines
-    ${comment.generate_comments()}
+    ${comment.generate_comments(include_pr=True)}
 
     % if not c.pull_request.is_closed():
       ## main comment form and it status

@@ -108,7 +108,7 @@
 </%def>
 
 ## generate inline comments and the main ones
-<%def name="generate_comments()">
+<%def name="generate_comments(include_pr=False)">
 <div class="comments">
     <div id="inline-comments-container">
     ## generate inlines for this changeset
@@ -119,7 +119,7 @@
         <div id="comment-tr-${co.comment_id}">
           ## only render comments that are not from pull request, or from
           ## pull request and a status change
-          %if not co.pull_request or co.pull_request and co.status_change:
+          %if not co.pull_request or (co.pull_request and co.status_change) or include_pr:
           ${comment_block(co)}
           %endif
         </div>
