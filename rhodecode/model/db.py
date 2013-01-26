@@ -1653,22 +1653,25 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
+        invalidated_keys = []
         if key:
             key, _prefix, _org_key = cls._get_key(key)
             inv_objs = Session().query(cls).filter(cls.cache_key == key).all()
         elif repo_name:
             inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
-        log.debug('marking %s key[s] for invalidation based on key=%s,repo_name=%s'
-                  % (len(inv_objs), key, repo_name))
         try:
             for inv_obj in inv_objs:
                 inv_obj.cache_active = False
+                log.debug('marking %s key for invalidation based on key=%s,repo_name=%s'
+                  % (inv_obj, key, repo_name))
+                invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             Session().rollback()
+        return invalidated_keys
 
     @classmethod
     def set_valid(cls, key):
