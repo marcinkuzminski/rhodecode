@@ -201,12 +201,22 @@ class ReposController(BaseController):
 
     @HasPermissionAllDecorator('hg.admin')
     def new(self, format='html'):
-        """GET /repos/new: Form to create a new item"""
+        """
+        WARNING: this function is depracated see settings.create_repo !!
+
+        GET /repos/new: Form to create a new item
+        """
+
         new_repo = request.GET.get('repo', '')
+        parent_group = request.GET.get('parent_group')
+
         c.new_repo = repo_name_slug(new_repo)
         self.__load_defaults()
         ## apply the defaults from defaults page
         defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        if parent_group:
+            defaults.update({'repo_group': parent_group})
+
         return htmlfill.render(
             render('admin/repos/repo_add.html'),
             defaults=defaults,

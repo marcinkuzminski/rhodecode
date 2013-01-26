@@ -488,10 +488,14 @@ class SettingsController(BaseController):
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
 
         new_repo = request.GET.get('repo', '')
+        parent_group = request.GET.get('parent_group')
         c.new_repo = repo_name_slug(new_repo)
 
         ## apply the defaults from defaults page
         defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
+        if parent_group:
+            defaults.update({'repo_group': parent_group})
+
         return htmlfill.render(
             render('admin/repos/repo_add_create_repository.html'),
             defaults=defaults,
