@@ -25,8 +25,10 @@
               ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
-               % if not c.file.is_binary:
-                ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+               % if c.on_branch_head and c.file.is_binary is False:
+                ${h.link_to(_('edit on branch:%s' % c.changeset.branch),h.url('files_edit_home',repo_name=c.repo_name,revision=c.changeset.branch,f_path=c.f_path),class_="ui-btn")}
+               %else:
+                ${h.link_to(_('edit on branch:?'), '#', class_="ui-btn disabled tooltip", title=_('Editing files allowed only when on branch head revision'))}
                % endif
               % endif
             </div>

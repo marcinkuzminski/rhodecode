@@ -128,6 +128,7 @@ class FilesController(BaseRepoController):
         c.branch = request.GET.get('branch', None)
         c.f_path = f_path
         c.annotate = annotate
+        c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         cur_rev = c.changeset.revision
 
         # prev link
@@ -160,6 +161,9 @@ class FilesController(BaseRepoController):
                 c.file_changeset = (c.changeset
                                     if c.changeset.revision < file_last_cs.revision
                                     else file_last_cs)
+                #determine if we're on branch head
+                _branches = c.rhodecode_repo.branches
+                c.on_branch_head = revision in _branches.keys() + _branches.values() 
                 _hist = []
                 c.file_history = []
                 if c.load_full_history:
@@ -260,7 +264,7 @@ class FilesController(BaseRepoController):
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
-        repo = Repository.get_by_repo_name(repo_name)
+        repo = c.rhodecode_db_repo
         if repo.enable_locking and repo.locked[0]:
             h.flash(_('This repository is has been locked by %s on %s')
                 % (h.person_by_id(repo.locked[0]),
@@ -268,6 +272,17 @@ class FilesController(BaseRepoController):
                   'warning')
             return redirect(h.url('files_home',
                                   repo_name=repo_name, revision='tip'))
+
+        # check if revision is a branch identifier- basically we cannot
+        # create multiple heads via file editing
+        _branches = repo.scm_instance.branches
+        # check if revision is a branch name or branch hash
+        if revision not in _branches.keys() + _branches.values():
+            h.flash(_('You can only edit files with revision '
+                      'being a valid branch '), category='warning')
+            return redirect(h.url('files_home',
+                                  repo_name=repo_name, revision='tip',
+                                  f_path=f_path))
 
         r_post = request.POST
 
@@ -277,7 +292,7 @@ class FilesController(BaseRepoController):
         if c.file.is_binary:
             return redirect(url('files_home', repo_name=c.repo_name,
                          revision=c.cs.raw_id, f_path=f_path))
-
+        c.default_message = _('Edited file %s via RhodeCode') % (f_path)
         c.f_path = f_path
 
         if r_post:
@@ -289,8 +304,7 @@ class FilesController(BaseRepoController):
             mode = detect_mode(first_line, 0)
             content = convert_line_endings(r_post.get('content'), mode)
 
-            message = r_post.get('message') or (_('Edited %s via RhodeCode')
-                                                % (f_path))
+            message = r_post.get('message') or c.default_message
             author = self.rhodecode_user.full_contact
 
             if content == old_content:
@@ -298,7 +312,6 @@ class FilesController(BaseRepoController):
                     category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
-
             try:
                 self.scm_model.commit_change(repo=c.rhodecode_repo,
                                              repo_name=repo_name, cs=c.cs,
@@ -334,15 +347,14 @@ class FilesController(BaseRepoController):
                                          redirect_after=False)
         if c.cs is None:
             c.cs = EmptyChangeset(alias=c.rhodecode_repo.alias)
-
+        c.default_message = (_('Added file via RhodeCode'))
         c.f_path = f_path
 
         if r_post:
             unix_mode = 0
             content = convert_line_endings(r_post.get('content'), unix_mode)
 
-            message = r_post.get('message') or (_('Added %s via RhodeCode')
-                                                % (f_path))
+            message = r_post.get('message') or c.default_message
             location = r_post.get('location')
             filename = r_post.get('filename')
             file_obj = r_post.get('upload_file', None)
