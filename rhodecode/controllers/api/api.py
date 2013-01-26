@@ -202,6 +202,32 @@ class ApiController(JSONRPCController):
                 'Error occurred during rescan repositories action'
             )
 
+    def invalidate_cache(self, apiuser, repoid):
+        """
+        Dispatch cache invalidation action on given repo
+
+        :param apiuser:
+        :param repoid:
+        """
+        repo = get_repo_or_error(repoid)
+        if HasPermissionAnyApi('hg.admin')(user=apiuser) is False:
+            # check if we have admin permission for this repo !
+            if HasRepoPermissionAnyApi('repository.admin',
+                                       'repository.write')(user=apiuser,
+                                            repo_name=repo.repo_name) is False:
+                raise JSONRPCError('repository `%s` does not exist' % (repoid))
+
+        try:
+            invalidated_keys = ScmModel().mark_for_invalidation(repo.repo_name)
+            Session().commit()
+            return ('Cache for repository `%s` was invalidated: '
+                    'invalidated cache keys: %s' % (repoid, invalidated_keys))
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError(
+                'Error occurred during cache invalidation action'
+            )
+
     def lock(self, apiuser, repoid, locked, userid=Optional(OAttr('apiuser'))):
         """
         Set locking state on particular repository by given user, if

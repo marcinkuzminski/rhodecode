@@ -152,6 +152,28 @@ OUTPUT::
     error :  null
 
 
+invalidate_cache
+----------------
+
+Invalidate cache for repository.
+This command can be executed only using api_key belonging to user with admin
+rights or regular user that have write or admin or write access to repository.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "invalidate_cache"
+    args :    {
+                "repoid" : "<reponame or repo_id>"
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : "Cache for repository `<reponame>` was invalidated: invalidated cache keys: <list_of_cache_keys>"
+    error :  null
+
 lock
 ----
 

@@ -286,6 +286,25 @@ class BaseTestApi(object):
         expected = 'Error occurred during rescan repositories action'
         self._compare_error(id_, expected, given=response.body)
 
+    def test_api_invalidate_cache(self):
+        id_, params = _build_data(self.apikey, 'invalidate_cache',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+
+        expected = ("Cache for repository `%s` was invalidated: "
+                    "invalidated cache keys: %s" % (self.REPO,
+                                                    [unicode(self.REPO)]))
+        self._compare_ok(id_, expected, given=response.body)
+
+    @mock.patch.object(ScmModel, 'mark_for_invalidation', crash)
+    def test_api_invalidate_cache_error(self):
+        id_, params = _build_data(self.apikey, 'invalidate_cache',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+
+        expected = 'Error occurred during cache invalidation action'
+        self._compare_error(id_, expected, given=response.body)
+
     def test_api_lock_repo_lock_aquire(self):
         id_, params = _build_data(self.apikey, 'lock',
                                   userid=TEST_USER_ADMIN_LOGIN,
