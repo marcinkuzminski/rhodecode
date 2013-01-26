@@ -58,6 +58,7 @@ if sys.version_info < (2, 6):
 
 if sys.version_info < (2, 7):
     requirements.append("unittest2")
+    requirements.append("argparse")
 
 if is_windows:
     requirements.append("mercurial==2.4.2")
