@@ -1177,15 +1177,11 @@ class RepoGroup(Base, BaseModel):
                                   self.group_name)
 
     @classmethod
-    def groups_choices(cls, groups=None, check_perms=False, show_empty_group=True):
+    def groups_choices(cls, groups=None, show_empty_group=True):
         from webhelpers.html import literal as _literal
-        from rhodecode.model.scm import ScmModel
         if not groups:
             groups = cls.query().all()
-        if check_perms:
-            #filter group user have access to, it's done
-            #magically inside ScmModel based on current user
-            groups = ScmModel().get_repos_groups(groups)
+
         repo_groups = []
         if show_empty_group:
             repo_groups = [('-1', '-- no parent --')]

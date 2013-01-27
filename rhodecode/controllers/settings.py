@@ -44,7 +44,7 @@ from rhodecode.model.forms import RepoSettingsForm
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, Repository
 from rhodecode.model.meta import Session
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.scm import ScmModel, GroupList
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,9 @@ class SettingsController(BaseRepoController):
         super(SettingsController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
+        acl_groups = GroupList(RepoGroup.query().all(),
+                               perm_set=['group.write', 'group.admin'])
+        c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         repo_model = RepoModel()
@@ -73,8 +75,7 @@ class SettingsController(BaseRepoController):
         """
         self.__load_defaults()
 
-        c.repo_info = db_repo = Repository.get_by_repo_name(repo_name)
-        repo = db_repo.scm_instance
+        c.repo_info = Repository.get_by_repo_name(repo_name)
 
         if c.repo_info is None:
             h.not_mapped_error(repo_name)

@@ -45,7 +45,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
     RhodeCodeSetting
 from rhodecode.model.forms import RepoForm
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.scm import ScmModel, GroupList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
 from sqlalchemy.sql.expression import func
@@ -68,7 +68,9 @@ class ReposController(BaseController):
         super(ReposController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
+        acl_groups = GroupList(RepoGroup.query().all(),
+                               perm_set=['group.write', 'group.admin'])
+        c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
 
         repo_model = RepoModel()
