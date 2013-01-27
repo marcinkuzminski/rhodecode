@@ -55,6 +55,11 @@ Troubleshooting
 :Q: **RhodeCode is slow for me, how can i make it faster?**
 :A: See the :ref:`performance` section
 
+|
+
+:Q: **UnicodeDecodeError on Apache mod_wsgi**
+:A: Pleas read: https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/modwsgi/#if-you-get-a-unicodeencodeerror
+
 For further questions search the `Issues tracker`_, or post a message in the
 `google group rhodecode`_
 
