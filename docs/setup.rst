@@ -528,10 +528,20 @@ Sample config for nginx using proxy::
     }
 
     server {
-       listen          80;
-       server_name     hg.myserver.com;
+       listen          443;
+       server_name     rhodecode.myserver.com;
        access_log      /var/log/nginx/rhodecode.access.log;
        error_log       /var/log/nginx/rhodecode.error.log;
+
+       ssl on;
+       ssl_certificate     rhodecode.myserver.com.crt;
+       ssl_certificate_key rhodecode.myserver.com.key;
+
+       ssl_session_timeout 5m;
+
+       ssl_protocols SSLv3 TLSv1;
+       ssl_ciphers DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:EDH-RSA-DES-CBC3-SHA:AES256-SHA:DES-CBC3-SHA:AES128-SHA:RC4-SHA:RC4-MD5;
+       ssl_prefer_server_ciphers on;
 
        # uncomment if you have nginx with chunking module compiled
        # fixes the issues of having to put postBuffer data for large git
