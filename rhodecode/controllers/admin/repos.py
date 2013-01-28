@@ -138,7 +138,8 @@ class ReposController(BaseController):
                         .all()
 
         repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
-                                                   admin=True)
+                                                   admin=True,
+                                                   super_user_actions=True)
         #json used to render the grid
         c.data = json.dumps(repos_data)
 

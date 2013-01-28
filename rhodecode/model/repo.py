@@ -143,7 +143,8 @@ class RepoModel(BaseModel):
         kwargs.update(dict(_=_, h=h, c=c))
         return tmpl.render(*args, **kwargs)
 
-    def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True):
+    def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
+                          super_user_actions=False):
         _render = self._render_datatable
 
         def quick_menu(repo_name):
@@ -175,7 +176,7 @@ class RepoModel(BaseModel):
                 return h.urlify_text(h.truncate(desc, 60))
 
         def repo_actions(repo_name):
-            return _render('repo_actions', repo_name)
+            return _render('repo_actions', repo_name, super_user_actions)
 
         def owner_actions(user_id, username):
             return _render('user_name', user_id, username)
