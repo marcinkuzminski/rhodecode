@@ -391,6 +391,19 @@ var toggleFollowingRepo = function(target,fallows_repo_id,token,user_id){
     return false;
 }
 
+var showRepoSize = function(target, repo_name, token){
+    var args= 'auth_token='+token;
+    
+    // start loading
+    YUD.get(target).innerHTML = _TM['loading...'];
+    var url = REPO_SIZE_URL.replace('__NAME__', repo_name);
+    YUC.asyncRequest('POST',url,{
+        success:function(o){
+        	YUD.get(target).innerHTML = JSON.parse(o.responseText);
+        }
+    },args);
+    return false;	
+}
 
 /**
  * TOOLTIP IMPL.

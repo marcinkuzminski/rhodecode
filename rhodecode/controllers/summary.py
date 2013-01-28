@@ -30,20 +30,22 @@ import urllib
 from time import mktime
 from datetime import timedelta, date
 from urlparse import urlparse
-from rhodecode.lib.compat import product
-
-from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
-    NodeDoesNotExistError
 
 from pylons import tmpl_context as c, request, url, config
 from pylons.i18n.translation import _
+from webob.exc import HTTPBadRequest
 
 from beaker.cache import cache_region, region_invalidate
 
+from rhodecode.lib.compat import product
+from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
+    NodeDoesNotExistError
 from rhodecode.config.conf import ALL_READMES, ALL_EXTS, LANGUAGES_EXTENSIONS_MAP
 from rhodecode.model.db import Statistics, CacheInvalidation
+from rhodecode.lib.utils import jsonify
 from rhodecode.lib.utils2 import safe_unicode
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
+    NotAnonymous
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.markup_renderer import MarkupRenderer
@@ -185,6 +187,14 @@ class SummaryController(BaseRepoController):
         c.readme_data, c.readme_file = \
             self.__get_readme_data(c.rhodecode_db_repo)
         return render('summary/summary.html')
+
+    @NotAnonymous()
+    @jsonify
+    def repo_size(self, repo_name):
+        if request.is_xhr:
+            return _('repository size: %s') % c.rhodecode_db_repo._repo_size()
+        else:
+            raise HTTPBadRequest()
 
     def __get_readme_data(self, db_repo):
         repo_name = db_repo.repo_name

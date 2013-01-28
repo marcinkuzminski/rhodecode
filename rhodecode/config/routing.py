@@ -422,6 +422,10 @@ def make_map(config):
                 controller='summary',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('repo_size', '/{repo_name:.*?}/repo_size',
+                controller='summary', action='repo_size',
+                conditions=dict(function=check_repo))
+
     rmap.connect('repos_group_home', '/{group_name:.*}',
                 controller='admin/repos_groups', action="show_by_name",
                 conditions=dict(function=check_group))

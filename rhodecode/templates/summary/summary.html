@@ -62,6 +62,12 @@
                             onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
                       </span>
                       %endif
+                      <div style="float:right;padding:0px 0px 0px 0px">
+                         <span class="reposize tooltip" title="${_('Click to show size of repository')}"
+                            onclick="javascript:showRepoSize('repo_size','${c.dbrepo.repo_name}','${str(h.get_token())}')">
+                         </span>
+                         <span id="repo_size"></span>
+                      </div>                                    
                   %endif:
 
                    ## locking icon

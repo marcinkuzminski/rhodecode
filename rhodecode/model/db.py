@@ -1076,6 +1076,11 @@ class Repository(Base, BaseModel):
                                       pr_id, pr_repo]
         return grouped
 
+    def _repo_size(self):
+        from rhodecode.lib import helpers as h
+        log.debug('calculating repository size...')
+        return h.format_byte_size(self.scm_instance.size)
+
     #==========================================================================
     # SCM CACHE INSTANCE
     #==========================================================================

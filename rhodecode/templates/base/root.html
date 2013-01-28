@@ -54,7 +54,9 @@
             };
             var _TM = TRANSLATION_MAP;
             var TOGGLE_FOLLOW_URL  = "${h.url('toggle_following')}";
-            var LAZY_CS_URL = "${h.url('changeset_info', repo_name='__NAME__', revision='__REV__')}"
+            var LAZY_CS_URL = "${h.url('changeset_info', repo_name='__NAME__', revision='__REV__')}";
+            var REPO_SIZE_URL = "${h.url('repo_size', repo_name='__NAME__')}";
+
             </script>
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js', ver=c.rhodecode_version)}"></script>
             <!--[if lt IE 9]>
