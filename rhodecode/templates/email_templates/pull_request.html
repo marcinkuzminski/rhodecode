@@ -2,9 +2,9 @@
 <%inherit file="main.html"/>
 
 ${_('User %s opened pull request for repository %s and wants you to review changes.') % (('<b>%s</b>' % pr_user_created),pr_repo_url) |n}
+<div>${_('View this pull request here')}: ${pr_url}</div>
 <div>${_('title')}: ${pr_title}</div>
 <div>${_('description')}:</div>
-<div>${_('View this pull request here')}: ${pr_url}</div>
 <p>
 ${body}
 </p>
