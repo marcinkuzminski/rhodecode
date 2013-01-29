@@ -58,7 +58,7 @@ class ChangesetCommentsModel(BaseModel):
         return user_objects
 
     def create(self, text, repo, user, revision=None, pull_request=None,
-               f_path=None, line_no=None, status_change=None):
+               f_path=None, line_no=None, status_change=None, send_email=True):
         """
         Creates new comment for changeset or pull request.
         IF status_change is not none this comment is associated with a
@@ -72,6 +72,7 @@ class ChangesetCommentsModel(BaseModel):
         :param f_path:
         :param line_no:
         :param status_change:
+        :param send_email:
         """
         if not text:
             return
@@ -164,24 +165,26 @@ class ChangesetCommentsModel(BaseModel):
                                    repo_name=pull_request.other_repo.repo_name,
                                    qualified=True)
             }
-        # create notification objects, and emails
-        NotificationModel().create(
-            created_by=user, subject=subj, body=body,
-            recipients=recipients, type_=notification_type,
-            email_kwargs=email_kwargs
-        )
 
-        mention_recipients = set(self._extract_mentions(body))\
-                                .difference(recipients)
-        if mention_recipients:
-            email_kwargs.update({'pr_mention': True})
-            subj = _('[Mention]') + ' ' + subj
+        if send_email:
+            # create notification objects, and emails
             NotificationModel().create(
                 created_by=user, subject=subj, body=body,
-                recipients=mention_recipients,
-                type_=notification_type,
+                recipients=recipients, type_=notification_type,
                 email_kwargs=email_kwargs
             )
+
+            mention_recipients = set(self._extract_mentions(body))\
+                                    .difference(recipients)
+            if mention_recipients:
+                email_kwargs.update({'pr_mention': True})
+                subj = _('[Mention]') + ' ' + subj
+                NotificationModel().create(
+                    created_by=user, subject=subj, body=body,
+                    recipients=mention_recipients,
+                    type_=notification_type,
+                    email_kwargs=email_kwargs
+                )
 
         return comment
 

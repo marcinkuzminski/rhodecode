@@ -132,10 +132,11 @@ class ChangesetStatusModel(BaseModel):
         if not comment:
             from rhodecode.model.comment import ChangesetCommentsModel
             comment = ChangesetCommentsModel().create(
-                text='Auto status change',
+                text='Auto status change to %s' % status,
                 repo=repo,
                 user=user,
                 pull_request=pull_request,
+                send_email=False
             )
         if revision:
             q = q.filter(ChangesetStatus.repo == repo)
