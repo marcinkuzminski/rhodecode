@@ -53,7 +53,10 @@ class PullRequestModel(BaseModel):
 
     def get_all(self, repo):
         repo = self._get_repo(repo)
-        return PullRequest.query().filter(PullRequest.other_repo == repo).all()
+        return PullRequest.query()\
+                .filter(PullRequest.other_repo == repo)\
+                .order_by(PullRequest.created_on)\
+                .all()
 
     def create(self, created_by, org_repo, org_ref, other_repo, other_ref,
                revisions, reviewers, title, description=None):
