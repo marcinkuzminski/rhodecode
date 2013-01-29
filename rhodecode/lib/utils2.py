@@ -357,23 +357,27 @@ def age(prevdate):
     :rtype: unicode
     :returns: unicode words describing age
     """
-
+    now = datetime.datetime.now()
+    now = now.replace(microsecond=0)
     order = ['year', 'month', 'day', 'hour', 'minute', 'second']
     deltas = {}
     future = False
 
-    # Get date parts deltas
-    now = datetime.datetime.now()
     if prevdate > now:
         now, prevdate = prevdate, now
         future = True
 
+    # Get date parts deltas
     for part in order:
-        deltas[part] = getattr(now, part) - getattr(prevdate, part)
+        if future:
+            import dateutil
+            d = dateutil.relativedelta.relativedelta(now, prevdate)
+            deltas[part] = getattr(d, part + 's')
+        else:
+            deltas[part] = getattr(now, part) - getattr(prevdate, part)
 
     # Fix negative offsets (there is 1 second between 10:59:59 and 11:00:00,
     # not 1 hour, -59 minutes and -59 seconds)
-
     for num, length in [(5, 60), (4, 60), (3, 24)]:  # seconds, minutes, hours
         part = order[num]
         carry_part = order[num - 1]
