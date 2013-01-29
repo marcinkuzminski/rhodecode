@@ -234,9 +234,9 @@ class NotificationModel(BaseModel):
 
         data = dict(
             user=notification.created_by_user.username,
-            action=_map[notification.type_]
+            action=_map[notification.type_] % {'when': when},
         )
-        return (tmpl % data) % {'when': when}
+        return tmpl % data
 
 
 class EmailNotificationModel(BaseModel):
