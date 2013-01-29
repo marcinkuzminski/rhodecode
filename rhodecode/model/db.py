@@ -1866,6 +1866,10 @@ class PullRequest(Base, BaseModel):
     def is_closed(self):
         return self.status == self.STATUS_CLOSED
 
+    @property
+    def last_review_status(self):
+        return self.statuses[-1].status 
+
     def __json__(self):
         return dict(
           revisions=self.revisions
