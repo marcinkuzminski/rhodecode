@@ -132,7 +132,7 @@ class ChangesetStatusModel(BaseModel):
         if not comment:
             from rhodecode.model.comment import ChangesetCommentsModel
             comment = ChangesetCommentsModel().create(
-                text='Auto status change to %s' % status,
+                text='Auto status change to %s' % (ChangesetStatus.get_status_lbl(status)),
                 repo=repo,
                 user=user,
                 pull_request=pull_request,
