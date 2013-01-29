@@ -4874,3 +4874,8 @@ table.code-difftable .code pre{
 	background-color: inherit !important;
 	
 }
+
+div:target {
+	border: solid 2px #ee0 !important;
+	margin: -2px;
+}
