@@ -33,7 +33,7 @@
           <div class="input">
             <div class="changeset-status-container" style="float:none;clear:both">
             %if c.current_changeset_status:
-              <div title="${_('Pull request status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
+              <div title="${_('Pull request status')}" class="changeset-status-lbl">${h.changeset_status_lbl(c.current_changeset_status)}</div>
               <div class="changeset-status-ico" style="padding:1px 4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
             %endif
             </div>
