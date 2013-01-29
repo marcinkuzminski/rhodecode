@@ -134,7 +134,7 @@
                   </div>
               %endfor
               % if c.limited_diff:
-                <h5>${_('Changeset was too big and was cut off...')}</h5>
+                <h5>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1)}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h5>
               % endif
             </div>
         </div>
@@ -146,7 +146,7 @@
     ${diff_block.diff_block(c.changes[c.changeset.raw_id])}
 
     % if c.limited_diff:
-      <h4>${_('Changeset was too big and was cut off...')}</h4>
+      <h4>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1)}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h4>
     % endif
 
     ## template for inline comment form
