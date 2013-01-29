@@ -97,8 +97,9 @@ class PullRequestModel(BaseModel):
         )
         subject = safe_unicode(
             h.link_to(
-              _('%(user)s wants you to review pull request #%(pr_id)s') % \
+              _('%(user)s wants you to review pull request #%(pr_id)s: %(pr_title)s') % \
                 {'user': created_by_user.username,
+                 'pr_title': new.title,
                  'pr_id': new.pull_request_id},
                 pr_url
             )
