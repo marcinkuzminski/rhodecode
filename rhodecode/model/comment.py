@@ -92,7 +92,6 @@ class ChangesetCommentsModel(BaseModel):
         elif pull_request:
             pull_request = self.__get_pull_request(pull_request)
             comment.pull_request = pull_request
-            desc = pull_request.pull_request_id
         else:
             raise Exception('Please specify revision or pull_request_id')
 
@@ -138,8 +137,11 @@ class ChangesetCommentsModel(BaseModel):
                 qualified=True,
             )
             subj = safe_unicode(
-                h.link_to('Re pull request: %(desc)s %(line)s' % \
-                          {'desc': desc, 'line': line}, _url)
+                h.link_to('Re pull request #%(pr_id)s: %(desc)s %(line)s' % \
+                          {'desc': comment.pull_request.title,
+                           'pr_id': comment.pull_request.pull_request_id,
+                           'line': line},
+                          _url)
             )
 
             notification_type = Notification.TYPE_PULL_REQUEST_COMMENT
