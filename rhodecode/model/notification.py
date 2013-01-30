@@ -72,7 +72,7 @@ class NotificationModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
 
         if recipients and not getattr(recipients, '__iter__', False):
-            raise Exception('recipients must be a list of iterable')
+            raise Exception('recipients must be a list or iterable')
 
         created_by_obj = self._get_user(created_by)
 
@@ -242,7 +242,7 @@ class NotificationModel(BaseModel):
 class EmailNotificationModel(BaseModel):
 
     TYPE_CHANGESET_COMMENT = Notification.TYPE_CHANGESET_COMMENT
-    TYPE_PASSWORD_RESET = 'passoword_link'
+    TYPE_PASSWORD_RESET = 'password_link'
     TYPE_REGISTRATION = Notification.TYPE_REGISTRATION
     TYPE_PULL_REQUEST = Notification.TYPE_PULL_REQUEST
     TYPE_PULL_REQUEST_COMMENT = Notification.TYPE_PULL_REQUEST_COMMENT
