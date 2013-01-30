@@ -2115,26 +2115,24 @@ a.metatag[tag="license"]:hover {
 #quick_login .full_name {
     color: #FFFFFF;
     font-weight: bold;
-    padding: 3px;
+    padding: 3px 3px 3px 6px;
 }
 #quick_login .big_gravatar {
     padding:4px 0px 0px 6px;
 }
-#quick_login .inbox {
+#quick_login .notifications {
     padding:4px 0px 0px 6px;
     color: #FFFFFF;
     font-weight: bold;
 }
-#quick_login .inbox a {
+#quick_login .notifications a {
     color: #FFFFFF;
 }
-#quick_login .email, #quick_login .email a {
+#quick_login .email, #quick_login .unread {
     color: #FFFFFF;
-    padding: 3px;
-
+    padding: 3px 3px 3px 6px;
 }
 #quick_login .links .logout {
-
 }
 
 #quick_login div.form div.fields {
