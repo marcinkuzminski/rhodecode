@@ -521,7 +521,7 @@ def make_map(config):
                 controller='pullrequests', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
 
-    rmap.connect('summary_home', '/{repo_name:.*?}/summary',
+    rmap.connect('summary_home_summary', '/{repo_name:.*?}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 
     rmap.connect('shortlog_home', '/{repo_name:.*?}/shortlog',
