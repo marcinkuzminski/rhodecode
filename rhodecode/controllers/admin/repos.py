@@ -38,7 +38,7 @@ import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, HasRepoPermissionAllDecorator
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.meta import Session
@@ -53,7 +53,7 @@ from sqlalchemy.sql.expression import func
 log = logging.getLogger(__name__)
 
 
-class ReposController(BaseController):
+class ReposController(BaseRepoController):
     """
     REST Controller styled on the Atom Publishing Protocol"""
     # To properly map this controller, ensure your config/routing.py

@@ -102,7 +102,8 @@ def make_map(config):
         m.connect("/repos/{repo_name:.*?}",
              action="delete", conditions=dict(method=["DELETE"],
                                               function=check_repo))
-        m.connect("edit_repo", "/repos/{repo_name:.*?}/edit",
+        # no longer used:
+        m.connect("edit_repo_admin", "/repos/{repo_name:.*?}/edit",
              action="edit", conditions=dict(method=["GET"],
                                             function=check_repo))
         m.connect("formatted_edit_repo", "/repos/{repo_name:.*?}.{format}/edit",
@@ -433,6 +434,11 @@ def make_map(config):
     rmap.connect('changeset_home', '/{repo_name:.*?}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
+
+    rmap.connect("edit_repo", "/{repo_name:.*?}/edit",
+                 controller='admin/repos', action="edit",
+                 conditions=dict(method=["GET"], function=check_repo)
+                 )
 
     #still working url for backward compat.
     rmap.connect('raw_changeset_home_depraced',

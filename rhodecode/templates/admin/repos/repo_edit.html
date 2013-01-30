@@ -6,15 +6,15 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
-    ${h.link_to(_('Repositories'),h.url('repos'))}
+    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
     &raquo;
-    ${_('edit')} &raquo; ${h.link_to(c.repo_info.just_name,h.url('summary_home',repo_name=c.repo_name))}
+    ${_('edit')}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('admin')}
+    ${self.menu('options')}
 </%def>
 
 <%def name="main()">
