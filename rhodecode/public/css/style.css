@@ -1349,6 +1349,7 @@ tbody .yui-dt-editable { cursor: pointer }
 
 #content div.box div.form div.fields div.field {
     height: 1%;
+    min-height: 12px;
     border-bottom: 1px solid #DDD;
     clear: both;
     margin: 0;
