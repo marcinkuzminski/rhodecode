@@ -164,7 +164,7 @@
         %if current not in ['home','admin', 'search', 'journal']:
             ##REGULAR MENU
             <li ${is_current('summary')}>
-               <a class="menu_link" title="${_('Summary')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
+               <a class="menu_link" title="${_('Summary page')}" href="${h.url('summary_home',repo_name=c.repo_name)}">
                <span class="icon">
                    <img src="${h.url('/images/icons/clipboard_16.png')}" alt="${_('Summary')}" />
                </span>
@@ -172,7 +172,7 @@
                </a>
             </li>
             <li ${is_current('changelog')}>
-               <a class="menu_link" title="${_('Changelog')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
+               <a class="menu_link" title="${_('Changeset list')}" href="${h.url('changelog_home',repo_name=c.repo_name)}">
                <span class="icon">
                    <img src="${h.url('/images/icons/time.png')}" alt="${_('Changelog')}" />
                </span>
@@ -191,7 +191,7 @@
                 </ul>
             </li>
             <li ${is_current('files')}>
-               <a class="menu_link" title="${_('Files')}" href="${h.url('files_home',repo_name=c.repo_name)}">
+               <a class="menu_link" title="${_('Show repository content')}" href="${h.url('files_home',repo_name=c.repo_name)}">
                <span class="icon">
                    <img src="${h.url('/images/icons/file.png')}" alt="${_('Files')}" />
                </span>
@@ -295,7 +295,7 @@
             ##ROOT MENU
             %if c.rhodecode_user.username != 'default':
              <li ${is_current('journal')}>
-                <a class="menu_link" title="${_('Journal')}"  href="${h.url('journal')}">
+                <a class="menu_link" title="${_('Show recent activity')}"  href="${h.url('journal')}">
                 <span class="icon">
                     <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
                 </span>
@@ -313,7 +313,7 @@
              </li>
             %endif
             <li ${is_current('search')}>
-                <a class="menu_link" title="${_('Search')}"  href="${h.url('search')}">
+                <a class="menu_link" title="${_('Search in repositories')}"  href="${h.url('search')}">
                 <span class="icon">
                     <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
                 </span>
