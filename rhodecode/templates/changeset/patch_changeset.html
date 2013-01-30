@@ -4,7 +4,7 @@
 # Date ${c.changeset.date}
 # Node ID ${c.changeset.raw_id}
 ${c.parent_tmpl}
-${c.changeset.message}
+${c.changeset.message |n}
 
 %elif h.is_git(c.rhodecode_repo):
 From 35d9475598be9f807cd800e51212b8f1efbeacd9 Mon Sep 17 00:00:00 2001
