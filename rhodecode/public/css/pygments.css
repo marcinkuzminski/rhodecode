@@ -11,13 +11,13 @@ div.codeblock {
     -moz-border-radius: 4px;
     border-radius: 4px;
 }
-div.codeblock .code-header{
+div.codeblock .code-header {
     border-bottom: 1px solid #CCCCCC;
     background: #EEEEEE;
     padding:10px 0 10px 0;
 }
 
-div.codeblock .code-header .stats{
+div.codeblock .code-header .stats {
     clear: both;
     padding: 6px 8px 6px 10px;
     border-bottom: 1px solid rgb(204, 204, 204);
@@ -25,42 +25,42 @@ div.codeblock .code-header .stats{
     margin-bottom: 6px;
 }
 
-div.codeblock .code-header .stats .left{
+div.codeblock .code-header .stats .left {
     float:left;
 }
-div.codeblock .code-header .stats .left.img{
+div.codeblock .code-header .stats .left.img {
     margin-top:-2px;
 }
-div.codeblock .code-header .stats .left.item{
+div.codeblock .code-header .stats .left.item {
     float:left;
     padding: 0 9px 0 9px;
     border-right:1px solid #ccc;
 }
-div.codeblock .code-header .stats .left.item pre{
+div.codeblock .code-header .stats .left.item pre {
 }
-div.codeblock .code-header .stats .left.item.last{
+div.codeblock .code-header .stats .left.item.last {
     border-right:none;
 }
-div.codeblock .code-header .stats .buttons{
+div.codeblock .code-header .stats .buttons {
     float:right;
     padding-right:4px;
 }
 
-div.codeblock .code-header .author{
+div.codeblock .code-header .author {
     margin-left:25px;
     font-weight: bold;
     height: 25px;
 }
-div.codeblock .code-header .author .user{
+div.codeblock .code-header .author .user {
     padding-top:3px;
 }
-div.codeblock .code-header .commit{
+div.codeblock .code-header .commit {
     margin-left:25px;
     font-weight: normal;
     white-space:pre;
 }
 
-div.codeblock .code-body table{
+div.codeblock .code-body table {
     width: 0 !important;
     border: 0px !important;
 }
@@ -80,16 +80,16 @@ div.search-code-body {
     padding: 5px 0px 5px 10px;
 }
 
-div.search-code-body pre .match{
+div.search-code-body pre .match {
     background-color: #FAFFA6;
 }
-div.search-code-body pre .break{
+div.search-code-body pre .break {
     background-color: #DDE7EF;
     width: 100%;
     color: #747474;
     display: block;
 }
-div.annotatediv{
+div.annotatediv {
     margin-left:2px;
     margin-right:4px;
 }
