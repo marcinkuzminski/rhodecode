@@ -1868,7 +1868,7 @@ class PullRequest(Base, BaseModel):
 
     @property
     def last_review_status(self):
-        return self.statuses[-1].status
+        return self.statuses[-1].status if self.statuses else ''
 
     def __json__(self):
         return dict(
