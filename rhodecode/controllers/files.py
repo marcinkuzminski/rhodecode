@@ -163,7 +163,7 @@ class FilesController(BaseRepoController):
                                     else file_last_cs)
                 #determine if we're on branch head
                 _branches = c.rhodecode_repo.branches
-                c.on_branch_head = revision in _branches.keys() + _branches.values() 
+                c.on_branch_head = revision in _branches.keys() + _branches.values()
                 _hist = []
                 c.file_history = []
                 if c.load_full_history:

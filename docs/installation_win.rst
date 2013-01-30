@@ -32,7 +32,7 @@ choose "All - Offline Install ISO image file" in the previous page and
 choose "Visual C++ 2008 Express" when installing.
 
 .. note::
-    
+
   Using other versions of Visual Studio will lead to random crashes.
   You must use Visual Studio 2008!"
 

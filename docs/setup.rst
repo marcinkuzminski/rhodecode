@@ -126,11 +126,11 @@ the `-f` option, indexing will run always in "incremental" mode.
 
 For an incremental index build use::
 
-	paster make-index production.ini
+    paster make-index production.ini
 
 For a full index rebuild use::
 
-	paster make-index production.ini -f
+    paster make-index production.ini -f
 
 
 building index just for chosen repositories is possible with such command::

@@ -131,7 +131,7 @@
     %else:
       ${h.form(h.url('repo_settings_delete', repo_name=repo_name),method='delete')}
         ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
-      ${h.end_form()}        
+      ${h.end_form()}
     %endif
     </div>
   </div>

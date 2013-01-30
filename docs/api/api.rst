@@ -312,7 +312,7 @@ OUTPUT::
                 "ldap_dn" :     "<ldap_dn>",
                 "last_login":   "<last_login>",
               },
-    	      …
+              …
             ]
     error:  null
 
