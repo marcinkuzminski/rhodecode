@@ -87,7 +87,7 @@ def whoosh_index(repo_location, full_index):
 
 @task(ignore_result=True)
 @dbsession
-def get_commits_stats(repo_name, ts_min_y, ts_max_y):
+def get_commits_stats(repo_name, ts_min_y, ts_max_y, recurse_limit=100):
     log = get_logger(get_commits_stats)
     DBS = get_session()
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
@@ -240,8 +240,12 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         lock.release()
 
         # execute another task if celery is enabled
-        if len(repo.revisions) > 1 and CELERY_ON:
-            run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
+        if len(repo.revisions) > 1 and CELERY_ON and recurse_limit > 0:
+            recurse_limit -= 1
+            run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y,
+                     recurse_limit)
+        if recurse_limit <= 0:
+            log.debug('Breaking recursive mode due to reach of recurse limit')
         return True
     except LockHeld:
         log.info('LockHeld')

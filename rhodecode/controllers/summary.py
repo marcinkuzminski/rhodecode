@@ -140,7 +140,9 @@ class SummaryController(BaseRepoController):
         if dbrepo.enable_statistics:
             c.show_stats = True
             c.no_data_msg = _('No data loaded yet')
-            run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y, ts_max_y)
+            recurse_limit = 500  # don't recurse more than 500 times when parsing
+            run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y,
+                     ts_max_y, recurse_limit)
         else:
             c.show_stats = False
             c.no_data_msg = _('Statistics are disabled for this repository')
