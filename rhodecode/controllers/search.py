@@ -29,7 +29,7 @@ from pylons.i18n.translation import _
 from pylons import request, config, tmpl_context as c
 
 from rhodecode.lib.auth import LoginRequired
-from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.indexers import CHGSETS_SCHEMA, SCHEMA, CHGSET_IDX_NAME, \
     IDX_NAME, WhooshResultWrapper
 
@@ -46,14 +46,14 @@ from rhodecode.lib.utils2 import safe_str, safe_int
 log = logging.getLogger(__name__)
 
 
-class SearchController(BaseController):
+class SearchController(BaseRepoController):
 
     @LoginRequired()
     def __before__(self):
         super(SearchController, self).__before__()
 
-    def index(self, search_repo=None):
-        c.repo_name = search_repo
+    def index(self, repo_name=None):
+        c.repo_name = repo_name
         c.formated_results = []
         c.runtime = ''
         c.cur_query = request.GET.get('q', None)
