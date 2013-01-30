@@ -145,10 +145,10 @@
                   <label>${_('Clone url')}:</label>
               </div>
               <div class="input ${summary(c.show_stats)}">
-                  <div  style="display:none" id="clone_by_name" class="ui-btn clone">${_('Show by Name')}</div>
+                  <input style="width:80%" type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}"/>
+                  <input style="display:none;width:80%" type="text" id="clone_url_id" readonly="readonly" value="${c.clone_repo_url_id}"/>
+                  <div style="display:none" id="clone_by_name" class="ui-btn clone">${_('Show by Name')}</div>
                   <div id="clone_by_id" class="ui-btn clone">${_('Show by ID')}</div>
-                  <input style="width:80%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}"/>
-                  <input style="display:none;width:80%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="${c.clone_repo_url_id}"/>
               </div>
              </div>
 
