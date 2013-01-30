@@ -39,7 +39,7 @@ from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
-    RhodeCodeSetting
+    RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
 
@@ -314,6 +314,13 @@ class RepoModel(BaseModel):
             new_name = cur_repo.get_new_name(kwargs['repo_name'])
             cur_repo.repo_name = new_name
 
+            #handle extra fields
+            for field in filter(lambda k: k.startswith(RepositoryField.PREFIX), kwargs):
+                k = RepositoryField.un_prefix_key(field)
+                ex_field = RepositoryField.get_by_key_name(key=k, repo=cur_repo)
+                if ex_field:
+                    ex_field.field_value = kwargs[field]
+                    self.sa.add(ex_field)
             self.sa.add(cur_repo)
 
             if org_repo_name != new_name:

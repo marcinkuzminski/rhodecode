@@ -204,6 +204,22 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
     return _RepoForm
 
 
+def RepoFieldForm():
+    class _RepoFieldForm(formencode.Schema):
+        filter_extra_fields = True
+        allow_extra_fields = True
+
+        new_field_key = All(v.FieldKey(),
+                            v.UnicodeString(strip=True, min=3, not_empty=True))
+        new_field_value = v.UnicodeString(not_empty=False, if_missing='')
+        new_field_type = v.OneOf(['str', 'unicode', 'list', 'tuple'],
+                                 if_missing='str')
+        new_field_label = v.UnicodeString(not_empty=False)
+        new_field_desc = v.UnicodeString(not_empty=False)
+
+    return _RepoFieldForm
+
+
 def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
                      repo_groups=[], landing_revs=[]):
     class _RepoForm(formencode.Schema):
@@ -266,6 +282,7 @@ def ApplicationVisualisationForm():
         rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
 
         rhodecode_lightweight_dashboard = v.StringBoolean(if_missing=False)
+        rhodecode_repository_fields = v.StringBoolean(if_missing=False)
         rhodecode_lightweight_journal = v.StringBoolean(if_missing=False)
 
     return _ApplicationVisualisationForm

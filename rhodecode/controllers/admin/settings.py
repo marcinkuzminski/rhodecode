@@ -204,6 +204,11 @@ class SettingsController(BaseController):
                     form_result['rhodecode_lightweight_dashboard']
                 Session().add(sett4)
 
+                sett4 = RhodeCodeSetting.get_by_name_or_create('repository_fields')
+                sett4.app_settings_value = \
+                    form_result['rhodecode_repository_fields']
+                Session().add(sett4)
+
                 Session().commit()
                 set_rhodecode_config(config)
                 h.flash(_('Updated visualisation settings'),

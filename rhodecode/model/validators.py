@@ -784,3 +784,16 @@ def ValidIp():
                                          value, state)
 
     return _validator
+
+
+def FieldKey():
+    class _validator(formencode.validators.FancyValidator):
+        messages = dict(
+            badFormat=_('Key name can only consist of letters, '
+                        'underscore, dash or numbers'),)
+
+        def validate_python(self, value, state):
+            if not re.match('[a-zA-Z0-9_-]+$', value):
+                raise formencode.Invalid(self.message('badFormat', state),
+                                         value, state)
+    return _validator

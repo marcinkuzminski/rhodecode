@@ -42,7 +42,7 @@ from rhodecode.lib.utils import invalidate_cache, action_logger
 
 from rhodecode.model.forms import RepoSettingsForm
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup, Repository
+from rhodecode.model.db import RepoGroup, Repository, RepositoryField
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel, GroupList
 
@@ -75,7 +75,7 @@ class SettingsController(BaseRepoController):
         """
         self.__load_defaults()
 
-        c.repo_info = Repository.get_by_repo_name(repo_name)
+        c.repo_info = db_repo = Repository.get_by_repo_name(repo_name)
 
         if c.repo_info is None:
             h.not_mapped_error(repo_name)
@@ -84,7 +84,8 @@ class SettingsController(BaseRepoController):
         ##override defaults for exact repo info here git/hg etc
         choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
         c.landing_revs_choices = choices
-
+        c.repo_fields = RepositoryField.query()\
+            .filter(RepositoryField.repository == db_repo).all()
         defaults = RepoModel()._get_defaults(repo_name)
 
         return defaults

@@ -128,7 +128,22 @@
                     </div>
                 </div>
              </div>
-
+            %if c.visual.repository_fields:
+              ## EXTRA FIELDS
+              %for field in c.repo_fields:
+                <div class="field">
+                    <div class="label">
+                        <label for="${field.field_key_prefixed}">${field.field_label} (${field.field_key}):</label>
+                    </div>
+                    <div class="input input-medium">
+                        ${h.text(field.field_key_prefixed, field.field_value, class_='medium')}
+                        %if field.field_desc:
+                          <span class="help-block">${field.field_desc}</span>
+                        %endif
+                    </div>
+                 </div>
+              %endfor
+            %endif
             <div class="field">
                 <div class="label">
                     <label for="input">${_('Permissions')}:</label>
@@ -286,4 +301,68 @@
         ${h.end_form()}
 </div>
 
+##TODO: this should be controlled by the VISUAL setting
+%if c.visual.repository_fields:
+<div class="box box-left" style="clear:left">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Extra fields')}</h5>
+    </div>
+
+    <div class="emails_wrap">
+      <table class="noborder">
+      %for field in c.repo_fields:
+        <tr>
+            <td>${field.field_label} (${field.field_key})</td>
+            <td>${field.field_type}</td>
+            <td>
+              ${h.form(url('delete_repo_fields', repo_name=c.repo_info.repo_name, field_id=field.repo_field_id),method='delete')}
+                  ${h.submit('remove_%s' % field.repo_field_id, _('delete'), id="remove_field_%s" % field.repo_field_id,
+                  class_="delete_icon action_button", onclick="return confirm('"+_('Confirm to delete this field: %s') % field.field_key+"');")}
+              ${h.end_form()}
+            </td>
+        </tr>
+      %endfor
+      </table>
+    </div>
+
+    ${h.form(url('create_repo_fields', repo_name=c.repo_info.repo_name),method='put')}
+    <div class="form">
+        <!-- fields -->
+        <div class="fields">
+             <div class="field">
+                <div class="label">
+                    <label for="new_field_key">${_('New field key')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('new_field_key', class_='small')}
+                </div>
+             </div>
+             <div class="field">
+                <div class="label">
+                    <label for="new_field_label">${_('New field label')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('new_field_label', class_='small', placeholder=_('Enter short label'))}
+                </div>             
+             </div>
+
+             <div class="field">
+                <div class="label">
+                    <label for="new_field_desc">${_('New field description')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('new_field_desc', class_='small', placeholder=_('Enter description of a field'))}
+                </div>             
+             </div>
+
+            <div class="buttons">
+              ${h.submit('save',_('Add'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            </div>
+        </div>
+    </div>
+    ${h.end_form()}
+</div>
+%endif
 </%def>

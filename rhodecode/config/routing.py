@@ -145,6 +145,14 @@ def make_map(config):
         m.connect('repo_locking', "/repo_locking/{repo_name:.*?}",
                   action="repo_locking", conditions=dict(method=["PUT"],
                                                       function=check_repo))
+        #repo fields
+        m.connect('create_repo_fields', "/repo_fields/{repo_name:.*?}/new",
+                  action="create_repo_field", conditions=dict(method=["PUT"],
+                                                      function=check_repo))
+
+        m.connect('delete_repo_fields', "/repo_fields/{repo_name:.*?}/{field_id}",
+                  action="delete_repo_field", conditions=dict(method=["DELETE"],
+                                                      function=check_repo))
 
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/repos_groups') as m:

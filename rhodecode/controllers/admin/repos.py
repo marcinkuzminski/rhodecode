@@ -43,8 +43,8 @@ from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
-    RhodeCodeSetting
-from rhodecode.model.forms import RepoForm
+    RhodeCodeSetting, RepositoryField
+from rhodecode.model.forms import RepoForm, RepoFieldForm 
 from rhodecode.model.scm import ScmModel, GroupList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
@@ -117,6 +117,9 @@ class ReposController(BaseRepoController):
         else:
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
+
+        c.repo_fields = RepositoryField.query()\
+            .filter(RepositoryField.repository == db_repo).all()
 
         defaults = RepoModel()._get_defaults(repo_name)
 
@@ -491,3 +494,38 @@ class ReposController(BaseRepoController):
             encoding="UTF-8",
             force_defaults=False
         )
+
+    @HasPermissionAllDecorator('hg.admin')
+    def create_repo_field(self, repo_name):
+        try:
+            form_result = RepoFieldForm()().to_python(dict(request.POST))
+            new_field = RepositoryField()
+            new_field.repository = Repository.get_by_repo_name(repo_name)
+            new_field.field_key = form_result['new_field_key']
+            new_field.field_type = form_result['new_field_type']  # python type
+            new_field.field_value = form_result['new_field_value']  # set initial blank value
+            new_field.field_desc = form_result['new_field_desc']
+            new_field.field_label = form_result['new_field_label']
+            Session().add(new_field)
+            Session().commit()
+
+        except Exception, e:
+            log.error(traceback.format_exc())
+            msg = _('An error occurred during creation of field')
+            if isinstance(e, formencode.Invalid):
+                msg += ". " + e.msg
+            h.flash(msg, category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+
+    @HasPermissionAllDecorator('hg.admin')
+    def delete_repo_field(self, repo_name, field_id):
+        field = RepositoryField.get_or_404(field_id)
+        try:
+            Session().delete(field)
+            Session().commit()
+        except Exception, e:
+            log.error(traceback.format_exc())
+            msg = _('An error occurred during removal of field')
+            h.flash(msg, category='error')
+        return redirect(url('edit_repo', repo_name=repo_name))
+    

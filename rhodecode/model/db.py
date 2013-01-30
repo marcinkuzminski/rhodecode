@@ -668,6 +668,44 @@ class UsersGroupMember(Base, BaseModel):
         self.user_id = u_id
 
 
+class RepositoryField(Base, BaseModel):
+    __tablename__ = 'repositories_fields'
+    __table_args__ = (
+        UniqueConstraint('repository_id', 'field_key'),  # no-multi field
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+    PREFIX = 'ex_'  # prefix used in form to not conflict with already existing fields
+
+    repo_field_id = Column("repo_field_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
+    field_key = Column("field_key", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_label = Column("field_label", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_value = Column("field_value", String(10000, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_desc = Column("field_desc", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_type = Column("field_type", String(256), nullable=False, unique=None)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+
+    repository = relationship('Repository')
+
+    @property
+    def field_key_prefixed(self):
+        return 'ex_%s' % self.field_key
+
+    @classmethod
+    def un_prefix_key(cls, key):
+        if key.startswith(cls.PREFIX):
+            return key[len(cls.PREFIX):]
+        return key
+
+    @classmethod
+    def get_by_key_name(cls, key, repo):
+        row = cls.query()\
+                .filter(cls.repository == repo)\
+                .filter(cls.field_key == key).scalar()
+        return row
+
+
 class Repository(Base, BaseModel):
     __tablename__ = 'repositories'
     __table_args__ = (
@@ -706,6 +744,8 @@ class Repository(Base, BaseModel):
     followers = relationship('UserFollowing',
                              primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id',
                              cascade='all')
+    extra_fields = relationship('RepositoryField',
+                                cascade="all, delete, delete-orphan")
 
     logs = relationship('UserLog')
     comments = relationship('ChangesetComment', cascade="all, delete, delete-orphan")
@@ -932,6 +972,11 @@ class Repository(Base, BaseModel):
             enable_downloads=repo.enable_downloads,
             last_changeset=repo.changeset_cache
         )
+        rc_config = RhodeCodeSetting.get_app_settings()
+        repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
+        if repository_fields:
+            for f in self.extra_fields:
+                data[f.field_key_prefixed] = f.field_value
 
         return data
 
