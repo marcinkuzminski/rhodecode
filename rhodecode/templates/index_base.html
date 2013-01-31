@@ -80,7 +80,6 @@
                     <th class="left">${_('Last change')}</th>
                     <th class="left">${_('Tip')}</th>
                     <th class="left">${_('Owner')}</th>
-                    <th class="left">${_('RSS')}</th>
                     <th class="left">${_('Atom')}</th>
                 </tr>
             </thead>
@@ -113,9 +112,6 @@
                     </td>
                     ##
                     <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
-                    <td>
-                      ${dt.rss(repo['name'])}
-                    </td>
                     <td>
                       ${dt.atom(repo['name'])}
                     </td>
@@ -183,7 +179,6 @@
           {key:"tip",label:"${_('Tip')}",sortable:true,
               sortOptions: { sortFunction: revisionSort }},
           {key:"owner",label:"${_('Owner')}",sortable:true},
-          {key:"rss",label:"",sortable:false},
           {key:"atom",label:"",sortable:false},
       ];
 
@@ -200,7 +195,6 @@
               {key:"last_change"},
               {key:"tip"},
               {key:"owner"},
-              {key:"rss"},
               {key:"atom"},
           ]
       };
@@ -241,7 +235,6 @@
                {key:"last_change"},
                {key:"last_changeset"},
                {key:"owner"},
-               {key:"rss"},
                {key:"atom"},
             ]
          };
@@ -276,7 +269,6 @@
             {key:"last_changeset",label:"${_('Tip')}",sortable:true,
                 sortOptions: { sortFunction: revisionSort }},
             {key:"owner",label:"${_('Owner')}",sortable:true},
-            {key:"rss",label:"",sortable:false},
             {key:"atom",label:"",sortable:false},
         ];
 
