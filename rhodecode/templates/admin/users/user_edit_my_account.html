@@ -40,11 +40,6 @@
            <li>
              <span><a id="show_pullrequests" class="link-white" href="#pullrequests">${_('My pull requests')}</a> </span>
            </li>
-           %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-             <li>
-               <span>${h.link_to(_('Add repo'),h.url('admin_settings_create_repository'))}</span>
-             </li>
-           %endif
          </ul>
     </div>
     <!-- end box / title -->

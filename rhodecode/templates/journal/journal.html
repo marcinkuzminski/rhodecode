@@ -56,11 +56,6 @@
                <li>
                  <span><a id="show_my" class="link-white" href="#my">${_('My repos')}</a> </span>
                </li>
-               %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-                 <li>
-                   <span>${h.link_to(_('Add repo'),h.url('admin_settings_create_repository'))}</span>
-                 </li>
-               %endif
              </ul>
         </div>
 
