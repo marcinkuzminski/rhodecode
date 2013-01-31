@@ -191,9 +191,6 @@ class SimpleHg(BaseVCSController):
         self.__inject_extras(repo_path, baseui, extras)
 
         try:
-            # invalidate cache on push
-            if action == 'push':
-                self._invalidate_cache(repo_name)
             log.info('%s action on HG repo "%s" by "%s" from %s' %
                      (action, repo_name, username, ip_addr))
             app = self.__make_app(repo_path, baseui, extras)
@@ -207,6 +204,10 @@ class SimpleHg(BaseVCSController):
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
+        finally:
+            # invalidate cache on push
+            if action == 'push':
+                self._invalidate_cache(repo_name)
 
     def __make_app(self, repo_name, baseui, extras):
         """

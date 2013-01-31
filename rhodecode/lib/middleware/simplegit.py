@@ -229,9 +229,6 @@ class SimpleGit(BaseVCSController):
 
         try:
             self._handle_githooks(repo_name, action, baseui, environ)
-            # invalidate cache on push
-            if action == 'push':
-                self._invalidate_cache(repo_name)
             log.info('%s action on GIT repo "%s" by "%s" from %s' %
                      (action, repo_name, username, ip_addr))
             app = self.__make_app(repo_name, repo_path, extras)
@@ -242,6 +239,10 @@ class SimpleGit(BaseVCSController):
         except Exception:
             log.error(traceback.format_exc())
             return HTTPInternalServerError()(environ, start_response)
+        finally:
+            # invalidate cache on push
+            if action == 'push':
+                self._invalidate_cache(repo_name)
 
     def __make_app(self, repo_name, repo_path, extras):
         """
