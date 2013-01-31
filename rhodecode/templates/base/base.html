@@ -2,8 +2,9 @@
 <%inherit file="root.html"/>
 
 <!-- HEADER -->
+<div id="header-dd"></div>
 <div id="header">
-    <div id="header-inner" class="title hover">
+    <div id="header-inner" class="title">
         <div id="logo">
             <h1><a href="${h.url('home')}">${c.rhodecode_name}</a></h1>
         </div>
@@ -357,5 +358,10 @@
       }
       return false;
      });
+
+     YUE.on('header-dd', 'click',function(e){
+         YUD.addClass('header-inner', 'hover');	 
+     });
+
 </script>
 </%def>

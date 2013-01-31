@@ -243,8 +243,6 @@ div:hover > a.permalink {
 }
 
 #header {
-    margin: 0;
-    padding: 0 10px;
 }
 
 #header ul#logged-user {
@@ -310,6 +308,26 @@ div:hover > a.permalink {
 #header ul#logged-user li.highlight a:hover {
     color: #FFF;
 }
+#header-dd {
+    clear: both;
+    position: fixed !important;
+    background-color: #003B76;
+    opacity: 0.01;
+    cursor: pointer;
+    min-height: 10px;	
+    width: 100% !important;
+    -webkit-border-radius: 0px 0px 4px 4px;
+    -khtml-border-radius: 0px 0px 4px 4px;
+    -moz-border-radius: 0px 0px 4px 4px;
+    border-radius: 0px 0px 4px 4px;
+}
+
+#header-dd:hover{
+	opacity: 0.2;
+    -webkit-transition: opacity 0.5s ease-in-out;
+    -moz-transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.5s ease-in-out;	
+}
 
 #header #header-inner {
     min-height: 44px;
@@ -335,14 +353,13 @@ div:hover > a.permalink {
     border-radius: 4px 4px 4px 4px;
 }
 #header #header-inner.hover {
-    position: fixed !important;
     width: 100% !important;
-    margin-left: -10px !important;
-    z-index: 10000;
     -webkit-border-radius: 0px 0px 0px 0px;
     -khtml-border-radius: 0px 0px 0px 0px;
     -moz-border-radius: 0px 0px 0px 0px;
     border-radius: 0px 0px 0px 0px;
+    position: fixed !important;
+    z-index: 10000;    
 }
 
 .ie7 #header #header-inner.hover,
@@ -3485,7 +3502,7 @@ div.gravatar img {
 #content {
     clear: both;
     overflow: hidden;
-    padding: 54px 10px 14px 10px;
+    padding: 10px 10px 14px 10px;
 }
 
 #content div.box div.title div.search {
