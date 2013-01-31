@@ -40,6 +40,7 @@ from rhodecode.lib.utils2 import safe_unicode
 
 from rhodecode.lib.vcs.utils.hgcompat import discovery, localrepo, scmutil, \
     findcommonoutgoing
+from rhodecode.lib.vcs.utils import safe_str
 
 log = logging.getLogger(__name__)
 
@@ -174,12 +175,26 @@ class PullRequestModel(BaseModel):
         changesets = []
 
         if alias == 'hg':
+            # lookup up the exact node id
+            _revset_predicates = {
+                    'branch': 'branch',
+                    'book': 'bookmark',
+                    'tag': 'tag',
+                    'rev': 'id',
+                }
+            org_rev_spec = "%s('%s')" % (_revset_predicates[org_ref[0]],
+                                         safe_str(org_ref[1]))
+            org_rev = scmutil.revsingle(org_repo._repo,
+                                         org_rev_spec)
+            other_rev_spec = "%s('%s')" % (_revset_predicates[other_ref[0]],
+                                           safe_str(other_ref[1]))
+            other_rev = scmutil.revsingle(other_repo._repo, other_rev_spec)
 
             #case two independent repos
             if org_repo != other_repo:
                 revs = [
                     org_repo._repo.lookup(org_ref[1]),
-                    org_repo._repo.lookup(other_ref[1]),
+                    org_repo._repo.lookup(other_ref[1]), # lookup up in the wrong repo!
                 ]
     
                 obj = findcommonoutgoing(org_repo._repo,
@@ -200,20 +215,9 @@ class PullRequestModel(BaseModel):
 
             #no remote compare do it on the same repository
             else:
-                _revset_predicates = {
-                        'branch': 'branch',
-                        'book': 'bookmark',
-                        'tag': 'tag',
-                        'rev': 'id',
-                    }
-
-                revs = [
-                    "ancestors(%s('%s')) and not ancestors(%s('%s'))" % (
-                        _revset_predicates[other_ref[0]], other_ref[1],
-                        _revset_predicates[org_ref[0]], org_ref[1],
-                   )
-                ]
-
+                revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
+                        (other_rev, org_rev)]
+    
                 out = scmutil.revrange(org_repo._repo, revs)
                 for cs in (out):
                     changesets.append(org_repo.get_changeset(cs))
@@ -232,7 +236,7 @@ class PullRequestModel(BaseModel):
 
     def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
         """
-        Returns incomming changesets for mercurial repositories
+        Returns incoming changesets for mercurial repositories
 
         :param org_repo:
         :type org_repo:
