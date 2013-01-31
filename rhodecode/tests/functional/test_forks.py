@@ -66,7 +66,7 @@ class TestForksController(TestController):
                                     repo_name=repo_name))
 
         response.mustcontain(
-            """<a href="/%s/summary">%s</a>""" % (fork_name, fork_name)
+            """<a href="/%s">%s</a>""" % (fork_name, fork_name)
         )
 
         #remove this fork
@@ -95,7 +95,7 @@ class TestForksController(TestController):
                                     repo_name=repo_name))
 
         response.mustcontain(
-            """<a href="/%s/summary">%s</a>""" % (fork_name, fork_name)
+            """<a href="/%s">%s</a>""" % (fork_name, fork_name)
         )
 
         #remove this fork

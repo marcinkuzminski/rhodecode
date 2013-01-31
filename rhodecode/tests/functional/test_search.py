@@ -56,7 +56,7 @@ class TestSearchController(TestController):
     def test_search_commit_message_hg_repo(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index',
-                                    search_repo=HG_REPO),
+                                    repo_name=HG_REPO),
                     {'q': 'bother to ask where to fetch repo during tests',
                      'type': 'commit'})
 

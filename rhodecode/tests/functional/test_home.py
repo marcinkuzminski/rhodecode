@@ -15,7 +15,7 @@ class TestHomeController(TestController):
         response = self.app.get(url(controller='home', action='index'))
         #if global permission is set
         response.mustcontain('Add repository')
-        response.mustcontain('href="/%s/summary"' % HG_REPO)
+        response.mustcontain('href="/%s"' % HG_REPO)
 
         response.mustcontain("""<img class="icon" title="Mercurial repository" """
                         """alt="Mercurial repository" src="/images/icons/hg"""
