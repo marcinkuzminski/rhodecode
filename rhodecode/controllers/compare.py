@@ -3,7 +3,7 @@
     rhodecode.controllers.compare
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    compare controller for pylons showoing differences between two
+    compare controller for pylons showing differences between two
     repos, branches, bookmarks or tips
 
     :created_on: May 6, 2012
@@ -89,7 +89,6 @@ class CompareController(BaseRepoController):
         org_ref = (org_ref_type, org_ref)
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('repo', org_repo)
-        incoming_changesets = str2bool(request.GET.get('bundle', False))
         c.fulldiff = fulldiff = request.GET.get('fulldiff')
         rev_start = request.GET.get('rev_start')
         rev_end = request.GET.get('rev_end')
@@ -97,8 +96,7 @@ class CompareController(BaseRepoController):
         c.swap_url = h.url('compare_url', repo_name=other_repo,
               org_ref_type=other_ref[0], org_ref=other_ref[1],
               other_ref_type=org_ref[0], other_ref=org_ref[1],
-              repo=org_repo, as_form=request.GET.get('as_form'),
-              bundle=incoming_changesets)
+              repo=org_repo, as_form=request.GET.get('as_form'))
 
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
@@ -142,7 +140,7 @@ class CompareController(BaseRepoController):
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
 
-        if not incoming_changesets and c.cs_ranges and c.org_repo != c.other_repo:
+        if c.cs_ranges and c.org_repo != c.other_repo:
             # case we want a simple diff without incoming changesets, just
             # for review purposes. Make the diff on the forked repo, with
             # revision that is common ancestor
@@ -155,8 +153,7 @@ class CompareController(BaseRepoController):
 
         diff_limit = self.cut_off_limit if not fulldiff else None
 
-        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
-                             remote_compare=incoming_changesets)
+        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)

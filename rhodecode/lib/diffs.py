@@ -28,23 +28,15 @@
 import re
 import difflib
 import logging
-import traceback
 
 from itertools import tee, imap
 
-from mercurial import patch
-from mercurial.mdiff import diffopts
-from mercurial.bundlerepo import bundlerepository
-
 from pylons.i18n.translation import _
 
-from rhodecode.lib.compat import BytesIO
-from rhodecode.lib.vcs.utils.hgcompat import localrepo
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
-from rhodecode.lib.utils import make_ui
 from rhodecode.lib.utils2 import safe_unicode
 
 log = logging.getLogger(__name__)
@@ -692,20 +684,8 @@ class DiffProcessor(object):
         return self.adds, self.removes
 
 
-class InMemoryBundleRepo(bundlerepository):
-    def __init__(self, ui, path, bundlestream):
-        self._tempparent = None
-        localrepo.localrepository.__init__(self, ui, path)
-        self.ui.setconfig('phases', 'publish', False)
-
-        self.bundle = bundlestream
-
-        # dict with the mapping 'filename' -> position in the bundle
-        self.bundlefilespos = {}
-
-
 def differ(org_repo, org_ref, other_repo, other_ref,
-           remote_compare=False, context=3, ignore_whitespace=False):
+           context=3, ignore_whitespace=False):
     """
     General differ between branches, bookmarks, revisions of two remote or
     local but related repositories
@@ -732,38 +712,5 @@ def differ(org_repo, org_ref, other_repo, other_ref,
         _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
             ignore_whitespace=ignore_whitespace, context=context)
         return _diff
-
-    elif remote_compare:
-        opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
-        org_repo_peer = localrepo.locallegacypeer(org_repo.local())
-        # create a bundle (uncompressed if other repo is not local)
-        if org_repo_peer.capable('getbundle'):
-            # disable repo hooks here since it's just bundle !
-            # patch and reset hooks section of UI config to not run any
-            # hooks on fetching archives with subrepos
-            for k, _ in org_repo.ui.configitems('hooks'):
-                org_repo.ui.setconfig('hooks', k, None)
-            unbundle = org_repo.getbundle('incoming', common=None,
-                                          heads=None)
-
-            buf = BytesIO()
-            while True:
-                chunk = unbundle._stream.read(1024 * 4)
-                if not chunk:
-                    break
-                buf.write(chunk)
-
-            buf.seek(0)
-            # replace chunked _stream with data that can do tell() and seek()
-            unbundle._stream = buf
-
-            ui = make_ui('db')
-            bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
-                                            bundlestream=unbundle)
-
-            return ''.join(patch.diff(bundlerepo,
-                                      node1=other_repo[other_ref].node(),
-                                      node2=org_repo[org_ref].node(),
-                                      opts=opts))
 
     return ''
