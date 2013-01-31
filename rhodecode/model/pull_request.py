@@ -172,31 +172,34 @@ class PullRequestModel(BaseModel):
         """
 
         changesets = []
-        #case two independent repos
-        if org_repo != other_repo:
-            revs = [
-                org_repo._repo.lookup(org_ref[1]),
-                org_repo._repo.lookup(other_ref[1]),
-            ]
 
-            obj = findcommonoutgoing(org_repo._repo,
-                        localrepo.locallegacypeer(other_repo._repo.local()),
-                        revs,
-                        force=True)
-            revs = obj.missing
+        if alias == 'hg':
 
-            for cs in map(binascii.hexlify, revs):
-                _cs = org_repo.get_changeset(cs)
-                changesets.append(_cs)
-            # in case we have revisions filter out the ones not in given range
-            if org_ref[0] == 'rev' and other_ref[0] == 'rev':
-                revs = [x.raw_id for x in changesets]
-                start = org_ref[1]
-                stop = other_ref[1]
-                changesets = changesets[revs.index(start):revs.index(stop) + 1]
-        else:
+            #case two independent repos
+            if org_repo != other_repo:
+                revs = [
+                    org_repo._repo.lookup(org_ref[1]),
+                    org_repo._repo.lookup(other_ref[1]),
+                ]
+    
+                obj = findcommonoutgoing(org_repo._repo,
+                            localrepo.locallegacypeer(other_repo._repo.local()),
+                            revs,
+                            force=True)
+                revs = obj.missing
+    
+                for cs in map(binascii.hexlify, revs):
+                    _cs = org_repo.get_changeset(cs)
+                    changesets.append(_cs)
+                # in case we have revisions filter out the ones not in given range
+                if org_ref[0] == 'rev' and other_ref[0] == 'rev':
+                    revs = [x.raw_id for x in changesets]
+                    start = org_ref[1]
+                    stop = other_ref[1]
+                    changesets = changesets[revs.index(start):revs.index(stop) + 1]
+
             #no remote compare do it on the same repository
-            if alias == 'hg':
+            else:
                 _revset_predicates = {
                         'branch': 'branch',
                         'book': 'bookmark',
@@ -214,14 +217,16 @@ class PullRequestModel(BaseModel):
                 out = scmutil.revrange(org_repo._repo, revs)
                 for cs in (out):
                     changesets.append(org_repo.get_changeset(cs))
-            elif alias == 'git':
-                so, se = org_repo.run_git_command(
-                    'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
-                                                                     other_ref[1])
-                )
-                ids = re.findall(r'[0-9a-fA-F]{40}', so)
-                for cs in (ids):
-                    changesets.append(org_repo.get_changeset(cs))
+
+        elif alias == 'git':
+            assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
+            so, se = org_repo.run_git_command(
+                'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
+                                                                       other_ref[1])
+            )
+            ids = re.findall(r'[0-9a-fA-F]{40}', so)
+            for cs in (ids):
+                changesets.append(org_repo.get_changeset(cs))
 
         return changesets
 
