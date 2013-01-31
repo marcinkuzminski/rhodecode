@@ -36,7 +36,7 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController
 from rhodecode.lib.diffs import DiffProcessor, LimitedDiffContainer
 from rhodecode.model.db import CacheInvalidation
-from rhodecode.lib.utils2 import safe_int, str2bool
+from rhodecode.lib.utils2 import safe_int, str2bool, safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class FeedController(BaseRepoController):
             desc_msg.append('\n\n')
             desc_msg.append(diff_processor.as_raw())
         desc_msg.append('</pre>')
-        return desc_msg
+        return map(safe_unicode, desc_msg)
 
     def atom(self, repo_name):
         """Produce an atom-1.0 feed via feedgenerator module"""
