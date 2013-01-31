@@ -433,6 +433,7 @@ def create_repo_fork(form_data, cur_user):
                    fork_name, '', DBS)
     # finally commit at latest possible stage
     DBS.commit()
+    fork_repo.update_changeset_cache()
 
 
 def __get_codes_stats(repo_name):
