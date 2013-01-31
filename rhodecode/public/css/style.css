@@ -696,6 +696,14 @@ div:hover > a.permalink {
     padding: 12px 9px 7px 24px;
 }
 
+#header #header-inner #quick li ul li a.shortlog, #header #header-inner #quick li ul li a.shortlog:hover {
+    background: #FFF url("../images/icons/clock_16.png") no-repeat 4px 9px;
+    width: 167px;
+    margin: 0;
+    padding: 12px 9px 7px 24px;
+}
+
+
 #header #header-inner #quick li ul li a.delete, #header #header-inner #quick li ul li a.delete:hover {
     background: #FFF url("../images/icons/delete.png") no-repeat 4px 9px;
     width: 167px;
