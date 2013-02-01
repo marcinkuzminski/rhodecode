@@ -92,9 +92,9 @@ class TestCompareController(TestController):
                                     repo_name=repo2.repo_name,
                                     org_ref_type="branch",
                                     org_ref=rev1,
+                                    other_repo=repo1.repo_name,
                                     other_ref_type="branch",
                                     other_ref=rev2,
-                                    repo=repo1.repo_name
                                     ))
 
         try:
@@ -150,9 +150,9 @@ class TestCompareController(TestController):
                                     repo_name=repo2.repo_name,
                                     org_ref_type="branch",
                                     org_ref=rev1,
+                                    other_repo=repo1.repo_name,
                                     other_ref_type="branch",
                                     other_ref=rev2,
-                                    repo=repo1.repo_name
                                     ))
 
         try:

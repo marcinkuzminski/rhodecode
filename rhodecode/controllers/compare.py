@@ -88,15 +88,16 @@ class CompareController(BaseRepoController):
         org_repo = c.rhodecode_db_repo.repo_name
         org_ref = (org_ref_type, org_ref)
         other_ref = (other_ref_type, other_ref)
-        other_repo = request.GET.get('repo', org_repo)
+        other_repo = request.GET.get('other_repo', org_repo)
         c.fulldiff = fulldiff = request.GET.get('fulldiff')
         rev_start = request.GET.get('rev_start')
         rev_end = request.GET.get('rev_end')
 
-        c.swap_url = h.url('compare_url', repo_name=other_repo,
-              org_ref_type=other_ref[0], org_ref=other_ref[1],
-              other_ref_type=org_ref[0], other_ref=org_ref[1],
-              repo=org_repo, as_form=request.GET.get('as_form'))
+        c.swap_url = h.url('compare_url', as_form=request.GET.get('as_form'),
+            repo_name=other_repo,
+            org_ref_type=other_ref[0], org_ref=other_ref[1],
+            repo=org_repo,
+            other_ref_type=org_ref[0], other_ref=org_ref[1])
 
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
         c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
