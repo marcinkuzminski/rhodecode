@@ -91,8 +91,9 @@ data_files = []
 # additional files that goes into package itself
 package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
-description = ('Mercurial repository browser/management with '
-               'build in push/pull server and full text search')
+description = ('RhodeCode is a fast and powerful management tool '
+               'for Mercurial and GIT with a built in push/pull server, '
+               'full text search and code-review.)
 keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
                      'code review', 'repo groups', 'ldap'
                       'repository management', 'hgweb replacement'
