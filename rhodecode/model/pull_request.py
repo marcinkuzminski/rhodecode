@@ -190,21 +190,21 @@ class PullRequestModel(BaseModel):
 
             #case two independent repos
             if org_repo != other_repo:
-                hgrepo = unionrepo.unionrepository(org_repo.baseui,
-                                                   org_repo.path,
-                                                   other_repo.path)
-                revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
-                        (org_rev, other_rev)]
+                hgrepo = unionrepo.unionrepository(other_repo.baseui,
+                                                   other_repo.path,
+                                                   org_repo.path)
+                # all the changesets we are looking for will be in other_repo,
+                # so rev numbers from hgrepo can be used in other_repo
 
             #no remote compare do it on the same repository
             else:
-                hgrepo = org_repo._repo
-                revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
-                        (other_rev, org_rev)]
+                hgrepo = other_repo._repo
 
+            revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
+                    (other_rev, org_rev)]
             out = scmutil.revrange(hgrepo, revs)
             for cs in (out):
-                changesets.append(org_repo.get_changeset(cs))
+                changesets.append(other_repo.get_changeset(cs))
 
         elif alias == 'git':
             assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos

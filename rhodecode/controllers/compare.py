@@ -132,7 +132,7 @@ class CompareController(BaseRepoController):
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
-        c.target_repo = c.repo_name
+        c.target_repo = c.other_repo.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
         if partial:
@@ -150,7 +150,7 @@ class CompareController(BaseRepoController):
                                       if c.cs_ranges[0].parents
                                       else EmptyChangeset(), 'raw_id'))
             log.debug('Changed org_ref from %s to %s' % (_org_ref, org_ref))
-            other_repo = org_repo
+            org_repo = other_repo
 
         diff_limit = self.cut_off_limit if not fulldiff else None
 

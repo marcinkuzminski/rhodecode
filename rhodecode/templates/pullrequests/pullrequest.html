@@ -140,12 +140,12 @@
       YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
       //url template
       var url = "${h.url('compare_url',
-                         repo_name='__org_repo__',
-                         org_ref_type='__org_ref_type__',
-                         org_ref='__org_ref__',
-                         other_repo='__other_repo__',
-                         other_ref_type='__other_ref_type__',
-                         other_ref='__other_ref__',
+                         repo_name='__other_repo__',
+                         org_ref_type='__other_ref_type__',
+                         org_ref='__other_ref__',
+                         other_repo='__org_repo__',
+                         other_ref_type='__org_ref_type__',
+                         other_ref='__org_ref__',
                          as_form=True,
                          rev_start=request.GET.get('rev_start',''),
                          rev_end=request.GET.get('rev_end',''))}";

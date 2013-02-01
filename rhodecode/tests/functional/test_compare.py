@@ -89,16 +89,16 @@ class TestCompareController(TestController):
         rev1 = 'default'
         rev2 = 'default'
         response = self.app.get(url(controller='compare', action='index',
-                                    repo_name=repo2.repo_name,
+                                    repo_name=repo1.repo_name,
                                     org_ref_type="branch",
-                                    org_ref=rev1,
-                                    other_repo=repo1.repo_name,
+                                    org_ref=rev2,
+                                    other_repo=repo2.repo_name,
                                     other_ref_type="branch",
-                                    other_ref=rev2,
+                                    other_ref=rev1,
                                     ))
 
         try:
-            response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
+            response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, rev2, repo2.repo_name, rev1))
             response.mustcontain("""Showing 2 commits""")
             response.mustcontain("""1 file changed with 2 insertions and 0 deletions""")
 
@@ -108,9 +108,9 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/changeset/%s">r1:%s</a>""" % (repo2.repo_name, cs1.raw_id, cs1.short_id))
             response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
             ## files
-            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
             #swap
-            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo1.repo_name, rev1, rev2, repo2.repo_name))
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)
@@ -147,16 +147,16 @@ class TestCompareController(TestController):
         rev1 = 'default'
         rev2 = 'default'
         response = self.app.get(url(controller='compare', action='index',
-                                    repo_name=repo2.repo_name,
+                                    repo_name=repo1.repo_name,
                                     org_ref_type="branch",
-                                    org_ref=rev1,
-                                    other_repo=repo1.repo_name,
+                                    org_ref=rev2,
+                                    other_repo=repo2.repo_name,
                                     other_ref_type="branch",
-                                    other_ref=rev2,
+                                    other_ref=rev1,
                                     ))
 
         try:
-            response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
+            response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, rev2, repo2.repo_name, rev1))
             response.mustcontain("""Showing 2 commits""")
             response.mustcontain("""1 file changed with 2 insertions and 0 deletions""")
 
@@ -166,9 +166,9 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/changeset/%s">r1:%s</a>""" % (repo2.repo_name, cs1.raw_id, cs1.short_id))
             response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
             ## files
-            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
             #swap
-            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo1.repo_name, rev1, rev2, repo2.repo_name))
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)
