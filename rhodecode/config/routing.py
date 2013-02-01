@@ -390,7 +390,8 @@ def make_map(config):
     #SEARCH
     rmap.connect('search', '%s/search' % ADMIN_PREFIX, controller='search',)
     rmap.connect('search_repo_admin', '%s/search/{repo_name:.*}' % ADMIN_PREFIX,
-                 controller='search')
+                 controller='search',
+                 conditions=dict(function=check_repo))
     rmap.connect('search_repo', '/{repo_name:.*?}/search',
                  controller='search',
                  conditions=dict(function=check_repo),
