@@ -2133,8 +2133,15 @@ a.metatag[tag="license"]:hover {
     color: #FFFFFF;
     font-weight: bold;
 }
-#quick_login .notifications a {
+#quick_login .notifications a,
+#quick_login .unread a {
     color: #FFFFFF;
+    display: block;
+    padding: 2px;    
+}
+#quick_login .notifications a:hover,
+#quick_login .unread a:hover {
+    background-color: inherit !important;
 }
 #quick_login .email, #quick_login .unread {
     color: #FFFFFF;

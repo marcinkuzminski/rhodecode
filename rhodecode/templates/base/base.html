@@ -122,7 +122,7 @@
                 <div class="email">${c.rhodecode_user.email}</div>
                 <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
                 <div class="notifications"><a href="${h.url('notifications')}">${_('Notifications')}</a></div>
-                <div class="unread">${_('Unread')}: ${c.unread_notifications}</div>
+                <div class="unread"><a href="${h.url('notifications')}">${_('Unread')}: ${c.unread_notifications}</a></div>
             </div>
             <div class="links_right">
             <ol class="links">
