@@ -126,9 +126,8 @@ class CompareController(BaseRepoController):
             org_ref = ('rev', rev_start)
             other_ref = ('rev', rev_end)
 
-        c.cs_ranges = PullRequestModel().get_compare_data(
-                                    org_repo, org_ref, other_repo, other_ref,
-                                    )
+        c.cs_ranges, ancestor = PullRequestModel().get_compare_data(
+            org_repo, org_ref, other_repo, other_ref)
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
@@ -141,15 +140,14 @@ class CompareController(BaseRepoController):
         c.org_ref = org_ref[1]
         c.other_ref = other_ref[1]
 
-        if c.cs_ranges and c.org_repo != c.other_repo:
-            # case we want a simple diff without incoming changesets, just
-            # for review purposes. Make the diff on the forked repo, with
+        if ancestor  and c.org_repo != c.other_repo:
+            # case we want a simple diff without incoming changesets,
+            # previewing what will be merged.
+            # Make the diff on the forked repo, with
             # revision that is common ancestor
             _org_ref = org_ref
-            org_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
-                                      if c.cs_ranges[0].parents
-                                      else EmptyChangeset(), 'raw_id'))
-            log.debug('Changed org_ref from %s to %s' % (_org_ref, org_ref))
+            log.debug('Using ancestor %s as org_ref instead of %s', ancestor, _org_ref)
+            org_ref = ('rev', ancestor)
             org_repo = other_repo
 
         diff_limit = self.cut_off_limit if not fulldiff else None

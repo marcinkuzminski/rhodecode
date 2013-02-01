@@ -713,4 +713,4 @@ def differ(org_repo, org_ref, other_repo, other_ref,
             ignore_whitespace=ignore_whitespace, context=context)
         return _diff
 
-    return ''
+    return '' # FIXME: when is it ever relevant to return nothing?

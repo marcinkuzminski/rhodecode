@@ -160,8 +160,8 @@ class PullRequestModel(BaseModel):
 
     def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref):
         """
-        Returns a list of changesets that are incoming from org_repo@org_ref
-        to other_repo@other_ref
+        Returns a list of changesets that can be merged from org_repo@org_ref
+        to other_repo@other_ref ... and the ancestor that would be used for merge
 
         :param org_repo:
         :param org_ref:
@@ -170,7 +170,7 @@ class PullRequestModel(BaseModel):
         :param tmp:
         """
 
-        changesets = []
+        ancestor = None
 
         if alias == 'hg':
             # lookup up the exact node id
@@ -202,9 +202,14 @@ class PullRequestModel(BaseModel):
 
             revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
                     (other_rev, org_rev)]
-            out = scmutil.revrange(hgrepo, revs)
-            for cs in (out):
-                changesets.append(other_repo.get_changeset(cs))
+            changesets = [other_repo.get_changeset(cs)
+                          for cs in scmutil.revrange(hgrepo, revs)]
+
+            if org_repo != other_repo:
+                ancestors = scmutil.revrange(hgrepo,
+                     ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
+                if len(ancestors) == 1:
+                    ancestor = hgrepo[ancestors[0]].hex()
 
         elif alias == 'git':
             assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
@@ -212,11 +217,10 @@ class PullRequestModel(BaseModel):
                 'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
                                                                        other_ref[1])
             )
-            ids = re.findall(r'[0-9a-fA-F]{40}', so)
-            for cs in (ids):
-                changesets.append(org_repo.get_changeset(cs))
+            changesets = [org_repo.get_changeset(cs)
+                          for cs in re.findall(r'[0-9a-fA-F]{40}', so)]
 
-        return changesets
+        return changesets, ancestor
 
     def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
         """
@@ -242,7 +246,7 @@ class PullRequestModel(BaseModel):
         other_repo_scm = other_repo.scm_instance
 
         alias = org_repo.scm_instance.alias
-        cs_ranges = self._get_changesets(alias,
-                                         org_repo_scm, org_ref,
-                                         other_repo_scm, other_ref)
-        return cs_ranges
+        cs_ranges, ancestor = self._get_changesets(alias,
+                                                   org_repo_scm, org_ref,
+                                                   other_repo_scm, other_ref)
+        return cs_ranges, ancestor
