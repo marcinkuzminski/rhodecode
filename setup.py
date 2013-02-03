@@ -93,7 +93,7 @@ package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
 description = ('RhodeCode is a fast and powerful management tool '
                'for Mercurial and GIT with a built in push/pull server, '
-               'full text search and code-review.)
+               'full text search and code-review.')
 keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
                      'code review', 'repo groups', 'ldap'
                       'repository management', 'hgweb replacement'
