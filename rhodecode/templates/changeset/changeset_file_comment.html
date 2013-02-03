@@ -134,7 +134,7 @@
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form ac">
         ${h.form(post_url)}
-        <strong>${_('Leave a comment')}</strong>
+        <strong>${_('Leave a comment or change status by checking `change status` checkbox')}</strong>
         <div class="clearfix">
             <div class="comment-help">
                 ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
