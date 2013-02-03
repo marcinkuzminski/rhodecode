@@ -722,7 +722,8 @@ class PermsFunction(object):
         self.repo_name = None
         self.group_name = None
 
-    def __call__(self, check_Location=''):
+    def __call__(self, check_location=''):
+        #TODO: put user as attribute here
         user = request.user
         cls_name = self.__class__.__name__
         check_scope = {
@@ -735,19 +736,19 @@ class PermsFunction(object):
         }.get(cls_name, '?')
         log.debug('checking cls:%s %s usr:%s %s @ %s', cls_name,
                   self.required_perms, user, check_scope,
-                  check_Location or 'unspecified location')
+                  check_location or 'unspecified location')
         if not user:
             log.debug('Empty request user')
             return False
         self.user_perms = user.permissions
         if self.check_permissions():
             log.debug('Permission to %s granted for user: %s @ %s', self.repo_name, user,
-                      check_Location or 'unspecified location')
+                      check_location or 'unspecified location')
             return True
 
         else:
             log.debug('Permission to %s denied for user: %s @ %s', self.repo_name, user,
-                        check_Location or 'unspecified location')
+                        check_location or 'unspecified location')
             return False
 
     def check_permissions(self):
@@ -770,9 +771,9 @@ class HasPermissionAny(PermsFunction):
 
 
 class HasRepoPermissionAll(PermsFunction):
-    def __call__(self, repo_name=None, check_Location=''):
+    def __call__(self, repo_name=None, check_location=''):
         self.repo_name = repo_name
-        return super(HasRepoPermissionAll, self).__call__(check_Location)
+        return super(HasRepoPermissionAll, self).__call__(check_location)
 
     def check_permissions(self):
         if not self.repo_name:
@@ -790,9 +791,9 @@ class HasRepoPermissionAll(PermsFunction):
 
 
 class HasRepoPermissionAny(PermsFunction):
-    def __call__(self, repo_name=None, check_Location=''):
+    def __call__(self, repo_name=None, check_location=''):
         self.repo_name = repo_name
-        return super(HasRepoPermissionAny, self).__call__(check_Location)
+        return super(HasRepoPermissionAny, self).__call__(check_location)
 
     def check_permissions(self):
         if not self.repo_name:
@@ -810,9 +811,9 @@ class HasRepoPermissionAny(PermsFunction):
 
 
 class HasReposGroupPermissionAny(PermsFunction):
-    def __call__(self, group_name=None, check_Location=''):
+    def __call__(self, group_name=None, check_location=''):
         self.group_name = group_name
-        return super(HasReposGroupPermissionAny, self).__call__(check_Location)
+        return super(HasReposGroupPermissionAny, self).__call__(check_location)
 
     def check_permissions(self):
         try:
@@ -827,9 +828,9 @@ class HasReposGroupPermissionAny(PermsFunction):
 
 
 class HasReposGroupPermissionAll(PermsFunction):
-    def __call__(self, group_name=None, check_Location=''):
+    def __call__(self, group_name=None, check_location=''):
         self.group_name = group_name
-        return super(HasReposGroupPermissionAll, self).__call__(check_Location)
+        return super(HasReposGroupPermissionAll, self).__call__(check_location)
 
     def check_permissions(self):
         try:
