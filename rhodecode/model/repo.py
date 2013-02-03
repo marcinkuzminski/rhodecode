@@ -602,12 +602,12 @@ class RepoModel(BaseModel):
 
         :param repo_name:
         """
+        repo = self._get_repo(repo_name)
         try:
             obj = self.sa.query(Statistics)\
-                    .filter(Statistics.repository ==
-                            self.get_by_repo_name(repo_name))\
-                    .one()
-            self.sa.delete(obj)
+                    .filter(Statistics.repository == repo).scalar()
+            if obj:
+                self.sa.delete(obj)
         except:
             log.error(traceback.format_exc())
             raise
