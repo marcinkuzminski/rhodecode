@@ -201,7 +201,7 @@ class PullRequestModel(BaseModel):
                 hgrepo = org_repo._repo
                 revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
                         (other_rev, org_rev)]
-    
+
             out = scmutil.revrange(hgrepo, revs)
             for cs in (out):
                 changesets.append(org_repo.get_changeset(cs))

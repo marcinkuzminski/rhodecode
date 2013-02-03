@@ -44,7 +44,7 @@ from rhodecode.lib.helpers import get_token
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
     RhodeCodeSetting, RepositoryField
-from rhodecode.model.forms import RepoForm, RepoFieldForm 
+from rhodecode.model.forms import RepoForm, RepoFieldForm
 from rhodecode.model.scm import ScmModel, GroupList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
@@ -528,4 +528,3 @@ class ReposController(BaseRepoController):
             msg = _('An error occurred during removal of field')
             h.flash(msg, category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
-    
