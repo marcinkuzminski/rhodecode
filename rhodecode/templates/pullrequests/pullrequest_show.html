@@ -119,7 +119,7 @@
                 %endfor
               </div>
               % if c.limited_diff:
-                <h5>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1)}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h5>
+                <h5>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1, **request.GET.mixed())}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h5>
               % endif
           </div>
       </div>
@@ -178,7 +178,7 @@
       ${diff_block.diff_block_simple([c.changes[fid]])}
     %endfor
     % if c.limited_diff:
-      <h4>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1)}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h4>
+      <h4>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1, **request.GET.mixed())}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h4>
     % endif
 
 
