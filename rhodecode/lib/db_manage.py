@@ -43,6 +43,7 @@ from sqlalchemy.engine import create_engine
 from rhodecode.model.repos_group import ReposGroupModel
 #from rhodecode.model import meta
 from rhodecode.model.meta import Session, Base
+from rhodecode.model.repo import RepoModel
 
 
 log = logging.getLogger(__name__)
@@ -288,6 +289,9 @@ class DbManage(object):
 
             def step_10(self):
                 pass
+
+            def step_11(self):
+                self.klass.update_repo_info()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
@@ -548,6 +552,9 @@ class DbManage(object):
             fixed = True
             self.populate_default_permissions()
         return fixed
+
+    def update_repo_info(self):
+        RepoModel.update_repoinfo()
 
     def config_prompt(self, test_repo_path='', retries=3):
         defaults = self.cli_args

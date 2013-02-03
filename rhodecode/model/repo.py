@@ -42,6 +42,7 @@ from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 
 log = logging.getLogger(__name__)
@@ -142,6 +143,17 @@ class RepoModel(BaseModel):
         tmpl = template.get_def(tmpl)
         kwargs.update(dict(_=_, h=h, c=c))
         return tmpl.render(*args, **kwargs)
+
+    @classmethod
+    def update_repoinfo(cls, repositories=None):
+        if not repositories:
+            repositories = Repository.getAll()
+        for repo in repositories:
+            scm_repo = repo.scm_instance_no_cache
+            last_cs = EmptyChangeset()
+            if scm_repo:
+                last_cs = scm_repo.get_changeset()
+            repo.update_changeset_cache(last_cs)
 
     def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
                           super_user_actions=False):

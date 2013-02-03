@@ -32,9 +32,10 @@ import string
 
 from os.path import dirname as dn, join as jn
 from rhodecode.model import init_model
-from rhodecode.lib.utils2 import engine_from_config, safe_str
-from rhodecode.model.db import RhodeCodeUi, Repository
-from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.utils2 import engine_from_config
+from rhodecode.model.db import Repository
+from rhodecode.model.repo import RepoModel
+from rhodecode.model.meta import Session
 
 
 #to get the rhodecode import
@@ -70,13 +71,12 @@ class UpdateCommand(BasePasterCommand):
                                if self.options.repo_update_list else None
 
         if repo_update_list:
-            repo_list = Repository.query().filter(Repository.repo_name.in_(repo_update_list))
+            repo_list = Repository.query()\
+                .filter(Repository.repo_name.in_(repo_update_list))
         else:
             repo_list = Repository.getAll()
-        for repo in repo_list:
-            last_cs = (repo.scm_instance.get_changeset() if repo.scm_instance
-                           else EmptyChangeset())
-            repo.update_changeset_cache(last_cs)
+        RepoModel.update_repoinfo(repositories=repo_list)
+        Session().commit()
 
     def update_parser(self):
         self.parser.add_option('--update-only',
