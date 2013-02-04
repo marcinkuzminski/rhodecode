@@ -75,26 +75,21 @@ class PullrequestsController(BaseRepoController):
         bookmarks_group = ([('book:%s:%s' % (k, v), k) for
                          k, v in repo.bookmarks.iteritems()], _("Bookmarks"))
         tags_group = ([('tag:%s:%s' % (k, v), k) for
-                         k, v in repo.tags.iteritems()], _("Tags"))
+                         k, v in repo.tags.iteritems()
+                         if k != 'tip'], _("Tags"))
+
+        tip = repo.tags['tip']
+        tipref = 'tag:tip:%s' % tip
+        colontip = ':' + tip
+        tips = [x[1] for x in branches_group[0] + bookmarks_group[0] + tags_group[0]
+                if x[0].endswith(colontip)]
+        tags_group[0].append((tipref, 'tip (%s)' % ', '.join(tips)))
 
         hist_l.append(bookmarks_group)
         hist_l.append(branches_group)
         hist_l.append(tags_group)
 
-        return hist_l
-
-    def _get_default_rev(self, repo):
-        """
-        Get's default revision to do compare on pull request
-
-        :param repo:
-        """
-        repo = repo.scm_instance
-        if 'default' in repo.branches:
-            return 'default'
-        else:
-            #if repo doesn't have default branch return first found
-            return repo.branches.keys()[0]
+        return hist_l, tipref
 
     def _get_is_allowed_change_status(self, pull_request):
         owner = self.rhodecode_user.user_id == pull_request.user_id
@@ -128,18 +123,18 @@ class PullrequestsController(BaseRepoController):
         c.org_repos.append((org_repo.repo_name, '%s/%s' % (
                                 org_repo.user.username, org_repo.repo_name))
                            )
-        c.org_refs = self._get_repo_refs(org_repo.scm_instance)
+        c.default_org_repo = org_repo.repo_name
+        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance)
 
         c.other_repos = []
         # add org repo to other so we can open pull request against itself
         c.other_repos.extend(c.org_repos)
         c.default_other_repo = org_repo.repo_name
-        c.default_other_refs = self._get_repo_refs(org_repo.scm_instance)
-        c.default_other_ref = self._get_default_rev(org_repo)
+        c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.scm_instance)
         other_repos_info[org_repo.repo_name] = {
             'gravatar': h.gravatar_url(org_repo.user.email, 24),
             'description': org_repo.description,
-            'revs': h.select('other_ref', '', c.default_other_refs, class_='refs')
+            'revs': h.select('other_ref', c.default_other_ref, c.default_other_refs, class_='refs')
         }
 
         # gather forks and add to this list ... even though it is rare to request forks to pull their parent
@@ -147,19 +142,17 @@ class PullrequestsController(BaseRepoController):
             c.other_repos.append((fork.repo_name, '%s/%s' % (
                                     fork.user.username, fork.repo_name))
                                  )
+            refs, default_ref = self._get_repo_refs(fork.scm_instance)
             other_repos_info[fork.repo_name] = {
                 'gravatar': h.gravatar_url(fork.user.email, 24),
                 'description': fork.description,
-                'revs': h.select('other_ref', '',
-                                 self._get_repo_refs(fork.scm_instance),
-                                 class_='refs')
+                'revs': h.select('other_ref', default_ref, refs, class_='refs')
             }
 
         # add parents of this fork also, but only if it's not empty
         if org_repo.parent and org_repo.parent.scm_instance.revisions:
             c.default_other_repo = org_repo.parent.repo_name
-            c.default_other_refs = self._get_repo_refs(org_repo.parent.scm_instance)
-            c.default_other_ref = self._get_default_rev(org_repo.parent)
+            c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.parent.scm_instance)
             c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
                                         org_repo.parent.user.username,
                                         org_repo.parent.repo_name))
@@ -167,9 +160,7 @@ class PullrequestsController(BaseRepoController):
             other_repos_info[org_repo.parent.repo_name] = {
                 'gravatar': h.gravatar_url(org_repo.parent.user.email, 24),
                 'description': org_repo.parent.description,
-                'revs': h.select('other_ref', '',
-                                 self._get_repo_refs(org_repo.parent.scm_instance),
-                                 class_='refs')
+                'revs': h.select('other_ref', c.default_other_ref, c.default_other_refs, class_='refs')
             }
 
         c.other_repos_info = json.dumps(other_repos_info)
