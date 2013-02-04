@@ -169,12 +169,6 @@
     	  url = url.replace('__'+k+'__',rev_data[k]);
       }
 
-      YUE.on('other_repo', 'change', function(e){
-          var repo_name = e.currentTarget.value;
-          // replace the <select> of changed repo
-          YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
-      });
-
       ypjax(url,'pull_request_overview', function(data){
           var sel_box = YUQ('#pull_request_form #other_repo')[0];
           var repo_name = sel_box.options[sel_box.selectedIndex].value;
@@ -187,6 +181,13 @@
           setSelectValue(YUD.get('other_ref'), rev_data['other_ref']);
       })
   }
+
+  YUE.on('other_repo', 'change', function(e){
+      var repo_name = e.currentTarget.value;
+      // replace the <select> of changed repo
+      YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
+  });
+
   YUE.on('refresh','click',function(e){
      loadPreview()
   })
