@@ -493,8 +493,8 @@ def make_map(config):
                  controller='compare', action='index',
                  conditions=dict(function=check_repo),
                  requirements=dict(
-                            org_ref_type='(branch|book|tag|rev|org_ref_type)',
-                            other_ref_type='(branch|book|tag|rev|other_ref_type)')
+                            org_ref_type='(branch|book|tag|rev|__org_ref_type__)',
+                            other_ref_type='(branch|book|tag|rev|__other_ref_type__)')
                  )
 
     rmap.connect('pullrequest_home',

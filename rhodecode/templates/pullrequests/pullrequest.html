@@ -138,40 +138,35 @@
 
   var loadPreview = function(){
       YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
+      //url template
       var url = "${h.url('compare_url',
-                         repo_name='org_repo',
-                         org_ref_type='org_ref_type', org_ref='org_ref',
-                         other_repo='other_repo',
-                         other_ref_type='other_ref_type', other_ref='other_ref',
+                         repo_name='__org_repo__',
+                         org_ref_type='__org_ref_type__',
+                         org_ref='__org_ref__',
+                         other_repo='__other_repo__',
+                         other_ref_type='__other_ref_type__',
+                         other_ref='__other_ref__',
                          as_form=True,
                          rev_start=request.GET.get('rev_start',''),
                          rev_end=request.GET.get('rev_end',''))}";
-
+      var org_repo = YUQ('#pull_request_form #org_repo')[0].value;
+      var org_ref = YUQ('#pull_request_form #org_ref')[0].value.split(':');
+      
+      var other_repo = YUQ('#pull_request_form #other_repo')[0].value;
+      var other_ref = YUQ('#pull_request_form #other_ref')[0].value.split(':');
+      
       var select_refs = YUQ('#pull_request_form select.refs')
-      var rev_data = {}; // gather the org/other ref and repo here
-      for(var i=0;i<select_refs.length;i++){
-        var select_ref = select_refs[i];
-        var select_ref_data = select_ref.value.split(':');
-        var key = null;
-        var val = null;
-
-        if(select_ref_data.length>1){
-          key = select_ref.name+"_type";
-          val = select_ref_data[0];
-          url = url.replace(key,val);
-          rev_data[key] = val;
-
-          key = select_ref.name;
-          val = select_ref_data[1];
-          url = url.replace(key,val);
-          rev_data[key] = val;
-
-        }else{
-          key = select_ref.name;
-          val = select_ref.value;
-          url = url.replace(key,val);
-          rev_data[key] = val;
-        }
+      var rev_data = {
+    	  'org_repo': org_repo,
+    	  'org_ref': org_ref[1],
+    	  'org_ref_type': org_ref[0],
+    	  'other_repo': other_repo,
+          'other_ref': other_ref[1],
+          'other_ref_type': other_ref[0],    	  
+      }; // gather the org/other ref and repo here
+      
+      for (k in rev_data){
+    	  url = url.replace('__'+k+'__',rev_data[k]);
       }
 
       YUE.on('other_repo', 'change', function(e){
