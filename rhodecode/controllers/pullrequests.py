@@ -299,7 +299,6 @@ class PullrequestsController(BaseRepoController):
                                   else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
-        c.target_repo = other_repo.repo_name
         # defines that we need hidden inputs with changesets
         c.as_form = request.GET.get('as_form', False)
 
