@@ -120,9 +120,7 @@ class PullrequestsController(BaseRepoController):
         other_repos_info = {}
 
         c.org_repos = []
-        c.org_repos.append((org_repo.repo_name, '%s/%s' % (
-                                org_repo.user.username, org_repo.repo_name))
-                           )
+        c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
         c.default_org_repo = org_repo.repo_name
         c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance)
 
@@ -132,19 +130,15 @@ class PullrequestsController(BaseRepoController):
         c.default_other_repo = org_repo.repo_name
         c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.scm_instance)
         other_repos_info[org_repo.repo_name] = {
-            'gravatar': h.gravatar_url(org_repo.user.email, 24),
             'description': org_repo.description,
             'revs': h.select('other_ref', c.default_other_ref, c.default_other_refs, class_='refs')
         }
 
         # gather forks and add to this list ... even though it is rare to request forks to pull their parent
         for fork in org_repo.forks:
-            c.other_repos.append((fork.repo_name, '%s/%s' % (
-                                    fork.user.username, fork.repo_name))
-                                 )
+            c.other_repos.append((fork.repo_name, fork.repo_name))
             refs, default_ref = self._get_repo_refs(fork.scm_instance)
             other_repos_info[fork.repo_name] = {
-                'gravatar': h.gravatar_url(fork.user.email, 24),
                 'description': fork.description,
                 'revs': h.select('other_ref', default_ref, refs, class_='refs')
             }
@@ -153,12 +147,8 @@ class PullrequestsController(BaseRepoController):
         if org_repo.parent and org_repo.parent.scm_instance.revisions:
             c.default_other_repo = org_repo.parent.repo_name
             c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.parent.scm_instance)
-            c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
-                                        org_repo.parent.user.username,
-                                        org_repo.parent.repo_name))
-                                     )
+            c.other_repos.append((org_repo.parent.repo_name, org_repo.parent.repo_name))
             other_repos_info[org_repo.parent.repo_name] = {
-                'gravatar': h.gravatar_url(org_repo.parent.user.email, 24),
                 'description': org_repo.parent.description,
                 'revs': h.select('other_ref', c.default_other_ref, c.default_other_refs, class_='refs')
             }
