@@ -48,13 +48,8 @@
                     <img id="other_repo_gravatar" alt="gravatar" src=""/>
                 </div>
                 <span style="font-size: 20px">
-                ${h.select('other_repo',c.default_pull_request ,c.other_repos,class_='refs')}:${h.select('other_ref',c.default_pull_request_rev,c.default_revs,class_='refs')}
+                ${h.select('other_repo',c.default_pull_request,c.other_repos,class_='refs')}:${h.select('other_ref',c.default_pull_request_rev,c.default_revs,class_='refs')}
                 </span>
-         <span style="padding:3px">
-           <a id="refresh" href="#" class="tooltip" title="${h.tooltip(_('refresh overview'))}">
-             <img style="margin:3px" class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
-           </a>
-         </span>
                  <div id="other_repo_desc" style="padding:5px 3px 3px 42px;"></div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
@@ -182,15 +177,22 @@
       })
   }
 
+  ## refresh automatically when something changes (org_repo can't change)
+
+  YUE.on('org_ref', 'change', function(e){
+     loadPreview();
+  });
+
   YUE.on('other_repo', 'change', function(e){
       var repo_name = e.currentTarget.value;
       // replace the <select> of changed repo
       YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
+      loadPreview();
   });
 
-  YUE.on('refresh','click',function(e){
-     loadPreview()
-  })
+  YUE.on('other_ref', 'change', function(e){
+     loadPreview();
+  });
 
   //lazy load overview after 0.5s
   setTimeout(loadPreview, 500)
