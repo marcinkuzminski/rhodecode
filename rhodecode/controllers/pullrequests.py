@@ -124,27 +124,25 @@ class PullrequestsController(BaseRepoController):
 
         other_repos_info = {}
 
-        c.org_refs = self._get_repo_refs(c.rhodecode_repo)
         c.org_repos = []
-        c.other_repos = []
         c.org_repos.append((org_repo.repo_name, '%s/%s' % (
                                 org_repo.user.username, c.repo_name))
                            )
+        c.org_refs = self._get_repo_refs(c.rhodecode_repo)
 
-        # add org repo to other so we can open pull request agains itself
+        c.other_repos = []
+        # add org repo to other so we can open pull request against itself
         c.other_repos.extend(c.org_repos)
-
-        c.default_pull_request = org_repo.repo_name  # repo name pre-selected
-        c.default_pull_request_rev = self._get_default_rev(org_repo)  # revision pre-selected
-        c.default_revs = self._get_repo_refs(org_repo.scm_instance)
-        #add orginal repo
+        c.default_other_repo = org_repo.repo_name
+        c.default_other_refs = self._get_repo_refs(org_repo.scm_instance)
+        c.default_other_ref = self._get_default_rev(org_repo)
         other_repos_info[org_repo.repo_name] = {
             'gravatar': h.gravatar_url(org_repo.user.email, 24),
             'description': org_repo.description,
-            'revs': h.select('other_ref', '', c.default_revs, class_='refs')
+            'revs': h.select('other_ref', '', c.default_other_refs, class_='refs')
         }
 
-        #gather forks and add to this list
+        # gather forks and add to this list ... even though it is rare to request forks to pull their parent
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, '%s/%s' % (
                                     fork.user.username, fork.repo_name))
@@ -156,11 +154,12 @@ class PullrequestsController(BaseRepoController):
                                  self._get_repo_refs(fork.scm_instance),
                                  class_='refs')
             }
-        #add parents of this fork also, but only if it's not empty
+
+        # add parents of this fork also, but only if it's not empty
         if org_repo.parent and org_repo.parent.scm_instance.revisions:
-            c.default_pull_request = org_repo.parent.repo_name
-            c.default_pull_request_rev = self._get_default_rev(org_repo.parent)
-            c.default_revs = self._get_repo_refs(org_repo.parent.scm_instance)
+            c.default_other_repo = org_repo.parent.repo_name
+            c.default_other_refs = self._get_repo_refs(org_repo.parent.scm_instance)
+            c.default_other_ref = self._get_default_rev(org_repo.parent)
             c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
                                         org_repo.parent.user.username,
                                         org_repo.parent.repo_name))
