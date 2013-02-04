@@ -126,9 +126,9 @@ class PullrequestsController(BaseRepoController):
 
         c.org_repos = []
         c.org_repos.append((org_repo.repo_name, '%s/%s' % (
-                                org_repo.user.username, c.repo_name))
+                                org_repo.user.username, org_repo.repo_name))
                            )
-        c.org_refs = self._get_repo_refs(c.rhodecode_repo)
+        c.org_refs = self._get_repo_refs(org_repo.scm_instance)
 
         c.other_repos = []
         # add org repo to other so we can open pull request against itself
