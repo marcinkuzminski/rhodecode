@@ -4284,7 +4284,7 @@ div.rst-block  pre {
 /** comment form **/
 
 .status-block {
-    height:80px;
+    min-height:80px;
     clear:both
 }
 
