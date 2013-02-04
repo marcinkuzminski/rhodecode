@@ -108,12 +108,11 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/changeset/%s">r1:%s</a>""" % (repo2.repo_name, cs1.raw_id, cs1.short_id))
             response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
             ## files
-            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2))
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)
-
 
     def test_compare_forks_on_branch_extra_commits_origin_has_incomming_hg(self):
         self.log_user()
@@ -166,7 +165,7 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/changeset/%s">r1:%s</a>""" % (repo2.repo_name, cs1.raw_id, cs1.short_id))
             response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
             ## files
-            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2))
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
         finally:
             RepoModel().delete(r2_id)
