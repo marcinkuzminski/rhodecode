@@ -96,7 +96,7 @@ class CompareController(BaseRepoController):
         c.swap_url = h.url('compare_url', as_form=request.GET.get('as_form'),
             repo_name=other_repo,
             org_ref_type=other_ref[0], org_ref=other_ref[1],
-            repo=org_repo,
+            other_repo=org_repo,
             other_ref_type=org_ref[0], other_ref=org_ref[1])
 
         c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)

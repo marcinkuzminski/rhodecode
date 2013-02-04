@@ -109,7 +109,8 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
             ## files
             response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
-
+            #swap
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo1.repo_name, rev1, rev2, repo2.repo_name))
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)
@@ -166,7 +167,8 @@ class TestCompareController(TestController):
             response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
             ## files
             response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
-
+            #swap
+            response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo1.repo_name, rev1, rev2, repo2.repo_name))
         finally:
             RepoModel().delete(r2_id)
             RepoModel().delete(r1_id)
