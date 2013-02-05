@@ -28,7 +28,7 @@ import traceback
 import formencode
 from formencode import htmlfill
 
-from webob.exc import HTTPInternalServerError
+from webob.exc import HTTPInternalServerError, HTTPForbidden
 from pylons import request, session, tmpl_context as c, url
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
@@ -37,7 +37,8 @@ from sqlalchemy.exc import IntegrityError
 import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator, HasRepoPermissionAllDecorator
+    HasPermissionAnyDecorator, HasRepoPermissionAllDecorator, NotAnonymous,\
+    HasPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
@@ -61,7 +62,6 @@ class ReposController(BaseRepoController):
     #     map.resource('repo', 'repos')
 
     @LoginRequired()
-    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def __before__(self):
         c.admin_user = session.get('admin_user')
         c.admin_username = session.get('admin_username')
@@ -148,7 +148,7 @@ class ReposController(BaseRepoController):
 
         return render('admin/repos/repos.html')
 
-    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
+    @NotAnonymous()
     def create(self):
         """
         POST /repos: Create a new item"""
@@ -160,6 +160,20 @@ class ReposController(BaseRepoController):
             form_result = RepoForm(repo_groups=c.repo_groups_choices,
                                    landing_revs=c.landing_revs_choices)()\
                             .to_python(dict(request.POST))
+            #we check ACLs after form, since we want to display nicer errors
+            #if form forbids creation of repos inside a group we don't have
+            #perms for
+            if not HasPermissionAny('hg.admin', 'hg.create.repository')():
+                #you're not super admin nor have global create permissions,
+                #but maybe you have at least write permission to a parent group ?
+                parent_group = request.POST.get('repo_group')
+                _gr = RepoGroup.get(parent_group)
+                gr_name = _gr.group_name if _gr else None
+                if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
+                    msg = _('no permission to create repository in root location')
+                    raise formencode.Invalid('', form_result, None,
+                                             error_dict={'repo_group': msg})
+
             new_repo = RepoModel().create(form_result,
                                           self.rhodecode_user.user_id)
             if form_result['clone_uri']:
@@ -181,16 +195,8 @@ class ReposController(BaseRepoController):
                               self.sa)
             Session().commit()
         except formencode.Invalid, errors:
-
-            c.new_repo = errors.value['repo_name']
-
-            if request.POST.get('user_created'):
-                r = render('admin/repos/repo_add_create_repository.html')
-            else:
-                r = render('admin/repos/repo_add.html')
-
             return htmlfill.render(
-                r,
+                render('admin/repos/repo_add.html'),
                 defaults=errors.value,
                 errors=errors.error_dict or {},
                 prefix_error=False,
@@ -201,7 +207,9 @@ class ReposController(BaseRepoController):
             msg = _('error occurred during creation of repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
-            return redirect(url('repos'))
+            if c.rhodecode_user.is_admin:
+                return redirect(url('repos'))
+            return redirect(url('home'))
         #redirect to our new repo !
         return redirect(url('summary_home', repo_name=new_repo.repo_name))
 
@@ -213,10 +221,7 @@ class ReposController(BaseRepoController):
         GET /repos/new: Form to create a new item
         """
 
-        new_repo = request.GET.get('repo', '')
         parent_group = request.GET.get('parent_group')
-
-        c.new_repo = repo_name_slug(new_repo)
         self.__load_defaults()
         ## apply the defaults from defaults page
         defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)

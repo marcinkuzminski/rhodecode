@@ -37,7 +37,8 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator, NotAnonymous
+    HasPermissionAnyDecorator, NotAnonymous, HasPermissionAny,\
+    HasReposGroupPermissionAll, HasReposGroupPermissionAny
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
@@ -54,6 +55,7 @@ from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.compat import json
+from webob.exc import HTTPForbidden
 log = logging.getLogger(__name__)
 
 
@@ -484,9 +486,17 @@ class SettingsController(BaseController):
         return render('admin/users/user_edit_my_account_pullrequests.html')
 
     @NotAnonymous()
-    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
     def create_repository(self):
         """GET /_admin/create_repository: Form to create a new item"""
+        new_repo = request.GET.get('repo', '')
+        parent_group = request.GET.get('parent_group')
+        if not HasPermissionAny('hg.admin', 'hg.create.repository')():
+            #you're not super admin nor have global create permissions,
+            #but maybe you have at least write permission to a parent group ?
+            _gr = RepoGroup.get(parent_group)
+            gr_name = _gr.group_name if _gr else None
+            if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
+                raise HTTPForbidden
 
         acl_groups = GroupList(RepoGroup.query().all(),
                                perm_set=['group.write', 'group.admin'])
@@ -494,8 +504,6 @@ class SettingsController(BaseController):
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
 
-        new_repo = request.GET.get('repo', '')
-        parent_group = request.GET.get('parent_group')
         c.new_repo = repo_name_slug(new_repo)
 
         ## apply the defaults from defaults page
@@ -504,7 +512,7 @@ class SettingsController(BaseController):
             defaults.update({'repo_group': parent_group})
 
         return htmlfill.render(
-            render('admin/repos/repo_add_create_repository.html'),
+            render('admin/repos/repo_add.html'),
             defaults=defaults,
             errors={},
             prefix_error=False,
