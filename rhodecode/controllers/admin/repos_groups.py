@@ -106,6 +106,15 @@ class ReposGroupsController(BaseController):
 
         return data
 
+    def _revoke_perms_on_yourself(self, form_result):
+        _up = filter(lambda u: c.rhodecode_user.username == u[0],
+                     form_result['perms_updates'])
+        _new = filter(lambda u: c.rhodecode_user.username == u[0],
+                      form_result['perms_new'])
+        if _new and _new[0][1] != 'group.admin' or _up and _up[0][1] != 'group.admin':
+            return True
+        return False
+
     def index(self, format='html'):
         """GET /repos_groups: All items in the collection"""
         # url('repos_groups')
@@ -200,6 +209,12 @@ class ReposGroupsController(BaseController):
         )()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
+            if not c.rhodecode_user.is_admin:
+                if self._revoke_perms_on_yourself(form_result):
+                    msg = _('Cannot revoke permission for yourself as admin')
+                    h.flash(msg, category='warning')
+                    raise Exception('revoke admin permission on self')
+
             new_gr = ReposGroupModel().update(group_name, form_result)
             Session().commit()
             h.flash(_('updated repos group %s') \
@@ -272,6 +287,11 @@ class ReposGroupsController(BaseController):
         :param group_name:
         """
         try:
+            if not c.rhodecode_user.is_admin:
+                if c.rhodecode_user.user_id == safe_int(request.POST['user_id']):
+                    msg = _('Cannot revoke permission for yourself as admin')
+                    h.flash(msg, category='warning')
+                    raise Exception('revoke admin permission on self')
             recursive = str2bool(request.POST.get('recursive', False))
             ReposGroupModel().delete_permission(
                 repos_group=group_name, obj=request.POST['user_id'],

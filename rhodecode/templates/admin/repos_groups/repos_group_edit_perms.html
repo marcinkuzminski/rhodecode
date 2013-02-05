@@ -9,7 +9,9 @@
     </tr>
     ## USERS
     %for r2p in c.repos_group.repo_group_to_perm:
+        ##forbid revoking permission from yourself
         <tr id="id${id(r2p.user.username)}">
+            %if c.rhodecode_user.user_id != r2p.user.user_id or c.rhodecode_user.is_admin:
             <td>${h.radio('u_perm_%s' % r2p.user.username,'group.none')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'group.read')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'group.write')}</td>
@@ -24,6 +26,17 @@
                 </span>
               %endif
             </td>
+            %else:
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.none', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.read', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.write', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.admin', disabled="disabled")}</td>
+            <td style="white-space: nowrap;">
+                <img class="perm-gravatar" src="${h.gravatar_url(r2p.user.email,14)}"/>${r2p.user.username if r2p.user.username != 'default' else _('default')}
+            </td>
+            <td>
+            </td>
+            %endif
         </tr>
     %endfor
 
