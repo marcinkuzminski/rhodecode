@@ -75,6 +75,14 @@ This will upgrade the schema and update some of the defaults in the database,
 and will always recheck the settings of the application, if there are no new
 options that need to be set.
 
+
+.. note::
+   DB schema upgrade library has some limitations and can sometimes fail if you try to
+   upgrade from older major releases. In such case simply run upgrades sequentially, eg.
+   upgrading from 1.2.X to 1.5.X should be done like that: 1.2.X. > 1.3.X > 1.4.X > 1.5.X
+   You can always specify what version of RhodeCode you want to install for example in pip
+   `pip install RhodeCode==1.3.6`
+
 You may find it helpful to clear out your log file so that new errors are
 readily apparent::
 

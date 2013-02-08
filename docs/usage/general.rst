@@ -13,7 +13,15 @@ delete a repository from filesystem, it renames it in a special way so it's
 not possible to push,clone or access repository. It's worth a notice that,
 even if someone will be given administrative access to RhodeCode and will
 delete a repository You can easy restore such action by restoring `rm__<date>`
-from the repository name, and internal repository storage (.hg/.git)
+from the repository name, and internal repository storage (.hg/.git). There
+is also a special command for cleaning such archived repos::
+
+    paster cleanup-repos --older-than=30d production.ini
+
+This command will scan for archived repositories that are older than 30d,
+display them and ask if you want to delete them (there's a --dont-ask flag also)
+If you host big amount of repositories with forks that are constantly deleted
+it's recommended that you run such command via crontab.
 
 Follow current branch in file view
 ----------------------------------
@@ -31,7 +39,7 @@ Checkboxes in compare view allow users to view combined compare view. You can
 only show the range between the first and last checkbox (no cherry pick).
 Clicking more than one checkbox will activate a link in top saying
 `Show selected changes <from-rev> -> <to-rev>` clicking this will bring
-compare view
+compare view. In this view also it's possible to switch to combined compare.
 
 Compare view is also available from the journal on pushes having more than
 one changeset

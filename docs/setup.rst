@@ -689,8 +689,8 @@ Here is a sample excerpt from an Apache Virtual Host configuration file::
    into above configuration
 
 .. note::
-   RhodeCode cannot be runned in multiprocess mode in apache, make sure
-   you don't specify `processes=num` directive in the config
+   Running RhodeCode in multiprocess mode in apache is not supported,
+   make sure you don't specify `processes=num` directive in the config
 
 
 Example wsgi dispatch script::
