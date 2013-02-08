@@ -140,10 +140,10 @@
                          rev_end=request.GET.get('rev_end',''))}";
       var org_repo = YUQ('#pull_request_form #org_repo')[0].value;
       var org_ref = YUQ('#pull_request_form #org_ref')[0].value.split(':');
-      
+
       var other_repo = YUQ('#pull_request_form #other_repo')[0].value;
       var other_ref = YUQ('#pull_request_form #other_ref')[0].value.split(':');
-      
+
       var select_refs = YUQ('#pull_request_form select.refs')
       var rev_data = {
     	  'org_repo': org_repo,
@@ -151,9 +151,9 @@
     	  'org_ref_type': org_ref[0],
     	  'other_repo': other_repo,
           'other_ref': other_ref[1],
-          'other_ref_type': other_ref[0],    	  
+          'other_ref_type': other_ref[0],
       }; // gather the org/other ref and repo here
-      
+
       for (k in rev_data){
     	  url = url.replace('__'+k+'__',rev_data[k]);
       }

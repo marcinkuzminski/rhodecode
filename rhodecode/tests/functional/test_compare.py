@@ -157,7 +157,7 @@ class TestCompareController(TestController):
                                         other_repo=repo2.repo_name,
                                         other_ref_type="branch",
                                         other_ref=rev1,
-                                        ))            
+                                        ))
             response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, rev2, repo2.repo_name, rev1))
             response.mustcontain("""Showing 2 commits""")
             response.mustcontain("""1 file changed with 2 insertions and 0 deletions""")
@@ -180,7 +180,7 @@ class TestCompareController(TestController):
         repo1:
             cs1:
             cs2:
-        repo1-fork- in which we will cherry pick bottom changesets 
+        repo1-fork- in which we will cherry pick bottom changesets
             cs1:
             cs2:
             cs3: x
@@ -229,7 +229,7 @@ class TestCompareController(TestController):
                                         other_ref=rev2,
                                         rev_start=cs3.raw_id,
                                         rev_end=cs5.raw_id,
-                                        ))            
+                                        ))
             response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
             response.mustcontain("""Showing 3 commits""")
             response.mustcontain("""1 file changed with 3 insertions and 0 deletions""")
@@ -254,7 +254,7 @@ class TestCompareController(TestController):
         repo1:
             cs1:
             cs2:
-        repo1-fork- in which we will cherry pick bottom changesets 
+        repo1-fork- in which we will cherry pick bottom changesets
             cs1:
             cs2:
             cs3:
@@ -347,7 +347,7 @@ class TestCompareController(TestController):
                                         other_ref_type="rev",
                                         other_ref=rev2,
                                         other_repo=HG_FORK,
-                                        ))            
+                                        ))
             response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, rev1, HG_FORK, rev2))
             ## outgoing changesets between those revisions
 
@@ -432,7 +432,7 @@ class TestCompareController(TestController):
                                         other_ref_type="branch",
                                         other_ref=rev2,
                                         repo=r1_name,
-                                        ))            
+                                        ))
             #response.mustcontain('%s@%s -&gt; %s@%s' % (r2_name, rev1, r1_name, rev2))
 
             #add new commit into parent !

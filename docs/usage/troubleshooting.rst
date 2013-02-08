@@ -63,7 +63,7 @@ Troubleshooting
 |
 
 :Q: **Requests hanging on Windows**
-:A: Please try out with disabled Antivirus software, there are some known problems with Eset Anitivirus. Make sure 
+:A: Please try out with disabled Antivirus software, there are some known problems with Eset Anitivirus. Make sure
     you have installed latest windows patches (especially KB2789397)
 
 
