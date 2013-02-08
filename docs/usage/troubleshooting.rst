@@ -58,7 +58,14 @@ Troubleshooting
 |
 
 :Q: **UnicodeDecodeError on Apache mod_wsgi**
-:A: Pleas read: https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/modwsgi/#if-you-get-a-unicodeencodeerror
+:A: Please read: https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/modwsgi/#if-you-get-a-unicodeencodeerror
+
+|
+
+:Q: **Requests hanging on Windows**
+:A: Please try out with disabled Antivirus software, there are some known problems with Eset Anitivirus. Make sure 
+    you have installed latest windows patches (especially KB2789397)
+
 
 For further questions search the `Issues tracker`_, or post a message in the
 `google group rhodecode`_
