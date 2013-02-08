@@ -52,7 +52,7 @@ class UpdateCommand(BasePasterCommand):
     min_args = 1
 
     usage = "CONFIG_FILE"
-    summary = "Cleanup deleted repos"
+    summary = "Updates repositories caches for last changeset"
     group_name = "RhodeCode"
     takes_config_file = -1
     parser = Command.standard_parser(verbose=True)
