@@ -91,7 +91,8 @@ class CleanupCommand(BasePasterCommand):
         for dn, dirs, f in os.walk(safe_str(repos_location)):
             for loc in dirs:
                 if REMOVED_REPO_PAT.match(loc):
-                    to_remove.append([loc, self._extract_date(loc)])
+                    to_remove.append([os.path.join(dn, loc),
+                                      self._extract_date(loc)])
 
         #filter older than (if present)!
         now = datetime.datetime.now()
