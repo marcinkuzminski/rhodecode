@@ -105,7 +105,7 @@ class MakeIndex(BasePasterCommand):
     min_args = 1
 
     usage = "CONFIG_FILE"
-    summary = "Creates index for full text search given configuration file"
+    summary = "Creates or update full text search index"
     group_name = "RhodeCode"
     takes_config_file = -1
     parser = Command.standard_parser(verbose=True)

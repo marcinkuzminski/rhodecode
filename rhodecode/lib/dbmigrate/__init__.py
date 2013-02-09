@@ -41,7 +41,7 @@ class UpgradeDb(BasePasterCommand):
     min_args = 1
 
     usage = "CONFIG_FILE"
-    summary = "Upgrades current db to newer version given configuration file"
+    summary = "Upgrades current db to newer version"
     group_name = "RhodeCode"
 
     parser = Command.standard_parser(verbose=True)
