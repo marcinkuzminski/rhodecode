@@ -704,6 +704,20 @@ class BasePasterCommand(Command):
         conf = paste.deploy.appconfig('config:' + self.path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
 
+    def _init_session(self):
+        """
+        Inits SqlAlchemy Session
+        """
+        logging.config.fileConfig(self.path_to_ini_file)
+        from pylons import config
+        from rhodecode.model import init_model
+        from rhodecode.lib.utils2 import engine_from_config
+
+        #get to remove repos !!
+        add_cache(config)
+        engine = engine_from_config(config, 'sqlalchemy.db1.')
+        init_model(engine)
+
 
 def check_git_version():
     """

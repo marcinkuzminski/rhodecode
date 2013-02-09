@@ -158,11 +158,12 @@ setup(
     main = pylons.util:PylonsInstaller
 
     [paste.global_paster_command]
-    setup-rhodecode=rhodecode.config.setup_rhodecode:SetupCommand
-    cleanup-repos=rhodecode.lib.cleanup:CleanupCommand
-    update-repoinfo=rhodecode.lib.update_repoinfo:UpdateCommand
+    setup-rhodecode=rhodecode.lib.paster_commands.setup_rhodecode:Command
+    cleanup-repos=rhodecode.lib.paster_commands.cleanup:Command
+    update-repoinfo=rhodecode.lib.paster_commands.update_repoinfo:Command
+    make-rcext=rhodecode.lib.paster_commands.make_rcextensions:Command
+    repo-scan=rhodecode.lib.paster_commands.repo_scan:Command
     make-index=rhodecode.lib.indexers:MakeIndex
-    make-rcext=rhodecode.config.rcextensions.make_rcextensions:MakeRcExt
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
     """,

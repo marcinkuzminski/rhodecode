@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.lib.cleanup
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    rhodecode.lib.paster_commands.make_rcextensions
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    uodate-repoinfo paster command for RhodeCode
 
     :created_on: Jul 14, 2012
     :author: marcink
@@ -24,47 +26,36 @@ from __future__ import with_statement
 
 import os
 import sys
-import re
-import shutil
 import logging
-import datetime
 import string
 
 from os.path import dirname as dn, join as jn
-from rhodecode.model import init_model
-from rhodecode.lib.utils2 import engine_from_config
+#to get the rhodecode import
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
+from rhodecode.lib.utils import BasePasterCommand
+
 from rhodecode.model.db import Repository
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 
-
-#to get the rhodecode import
-sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
-
-from rhodecode.lib.utils import BasePasterCommand, Command, add_cache
-
 log = logging.getLogger(__name__)
 
 
-class UpdateCommand(BasePasterCommand):
+class Command(BasePasterCommand):
 
     max_args = 1
     min_args = 1
 
     usage = "CONFIG_FILE"
-    summary = "Updates repositories caches for last changeset"
     group_name = "RhodeCode"
     takes_config_file = -1
-    parser = Command.standard_parser(verbose=True)
+    parser = BasePasterCommand.standard_parser(verbose=True)
+    summary = "Updates repositories caches for last changeset"
 
     def command(self):
-        logging.config.fileConfig(self.path_to_ini_file)
-        from pylons import config
-
-        #get to remove repos !!
-        add_cache(config)
-        engine = engine_from_config(config, 'sqlalchemy.db1.')
-        init_model(engine)
+        #get SqlAlchemy session
+        self._init_session()
 
         repo_update_list = map(string.strip,
                                self.options.repo_update_list.split(',')) \
@@ -77,6 +68,7 @@ class UpdateCommand(BasePasterCommand):
             repo_list = Repository.getAll()
         RepoModel.update_repoinfo(repositories=repo_list)
         Session().commit()
+        log.info('Updated cache for %s repositories' % (len(repo_list)))
 
     def update_parser(self):
         self.parser.add_option('--update-only',
