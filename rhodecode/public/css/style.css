@@ -347,10 +347,10 @@ div:hover > a.permalink {
     padding: 0;
     display: block;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
-    -webkit-border-radius: 4px 4px 4px 4px;
-    -khtml-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px;
-    border-radius: 4px 4px 4px 4px;
+    -webkit-border-radius: 0px 0px 4px 4px;
+    -khtml-border-radius: 0px 0px 4px 4px;
+    -moz-border-radius: 0px 0px 4px 4px;
+    border-radius: 0px 0px 4px 4px;
 }
 #header #header-inner.hover {
     width: 100% !important;
@@ -3503,6 +3503,10 @@ div.gravatar img {
     clear: both;
     overflow: hidden;
     padding: 10px 10px 14px 10px;
+}
+
+#content.hover {
+    padding: 55px 10px 14px 10px !important;
 }
 
 #content div.box div.title div.search {
