@@ -106,15 +106,16 @@ class CachedRepoList(object):
             )(dbr.repo_name, 'get repo check'):
                 continue
 
-            if scmr is None:
+            try:
+                last_change = scmr.last_change
+                tip = h.get_changeset_safe(scmr, 'tip')
+            except Exception:
                 log.error(
                     '%s this repository is present in database but it '
-                    'cannot be created as an scm instance' % dbr.repo_name
+                    'cannot be created as an scm instance, org_exc:%s'
+                    % (dbr.repo_name, traceback.format_exc())
                 )
                 continue
-
-            last_change = scmr.last_change
-            tip = h.get_changeset_safe(scmr, 'tip')
 
             tmp_d = {}
             tmp_d['name'] = dbr.repo_name
