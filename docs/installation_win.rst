@@ -13,8 +13,13 @@ Target OS: Windows XP SP3 32bit English (Clean installation)
 .. note::
 
    This installation is for 32bit systems, for 64bit windows you might need
-   to download proper 64bit version of "Windows Installer" and Win32py
-   extensions
+   to download proper 64bit versions of the different packages(Windows Installer, Win32py extensions)
+   plus some extra tweaks.
+   These extra steps haven been marked as "64bit".
+   Tested on Windows Server 2008 R2 SP1, 9-feb-2013.
+   If you run into any 64bit related problems, please check these pages:
+   - http://blog.victorjabur.com/2011/06/05/compiling-python-2-7-modules-on-windows-32-and-64-using-msvc-2008-express/
+   - http://bugs.python.org/issue7511
 
 Step1 - Install Visual Studio 2008 Express
 ------------------------------------------
@@ -41,6 +46,15 @@ choose "Visual C++ 2008 Express" when installing.
   Silverlight Runtime and SQL Server 2008 Express Edition are not
   required, you can uncheck them
 
+.. note::
+64bit: You also need to install the Microsoft Windows SDK for .NET 3.5 SP1 (.NET 4.0 won't work).
+Download from: http://www.microsoft.com/en-us/download/details.aspx?id=3138
+
+.. note::
+64bit: You also need to copy and rename a .bat file to make the Visual C++ compiler work.
+I am not sure why this is not necessary for 32bit.
+Copy C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars64.bat to C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat
+
 
 Step2 - Install Python
 ----------------------
@@ -54,6 +68,8 @@ Installer". While writing this guide, the latest version was v2.7.3.
 Remember the specific major and minor version installed, because it will
 be needed in the next step. In this case, it is "2.7".
 
+.. note::
+64bit: Just download and install the 64bit version of python.
 
 Step3 - Install Win32py extensions
 ----------------------------------
@@ -68,6 +84,10 @@ http://sourceforge.net/projects/pywin32/files/
   When writing this guide, the file was:
   http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/pywin32-217.win32-py2.7.exe/download
 
+  .. note::
+64bit: Download and install the 64bit version.
+At the time of writing you can find this at: 
+http://sourceforge.net/projects/pywin32/files/pywin32/Build%20218/pywin32-218.win-amd64-py2.7.exe/download
 
 Step4 - Python BIN
 ------------------
@@ -145,6 +165,18 @@ Close previously opened command prompt/s, and open a Visual Studio 2008
 Command Prompt (**IMPORTANT!!**). To do so, go to Start Menu, and then open
 "Microsoft Visual C++ 2008 Express Edition" -> "Visual Studio Tools" ->
 "Visual Studio 2008 Command Prompt"
+
+.. note::
+64bit: For 64bit you need to modify the shortcut that is used to start the
+Visual Studio 2008 Command Prompt. Use right-mouse click to open properties.
+Change commandline from::
+
+%comspec% /k ""C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat"" x86
+
+to::
+
+%comspec% /k ""C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat"" amd64
+
 
 In that CMD (loaded with VS2008 PATHs) type::
 
