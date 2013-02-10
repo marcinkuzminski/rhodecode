@@ -283,7 +283,9 @@ class PullrequestsController(BaseRepoController):
         c.as_form = request.GET.get('as_form', False)
 
         c.org_ref = org_ref[1]
+        c.org_ref_type = org_ref[0]
         c.other_ref = other_ref[1]
+        c.other_ref_type = other_ref[0]
 
         diff_limit = self.cut_off_limit if not fulldiff else None
 

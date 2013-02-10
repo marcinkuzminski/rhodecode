@@ -137,7 +137,9 @@ class CompareController(BaseRepoController):
             return render('compare/compare_cs.html')
 
         c.org_ref = org_ref[1]
+        c.org_ref_type = org_ref[0]
         c.other_ref = other_ref[1]
+        c.other_ref_type = other_ref[0]
 
         if ancestor  and c.org_repo != c.other_repo:
             # case we want a simple diff without incoming changesets,

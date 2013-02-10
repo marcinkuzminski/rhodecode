@@ -48,7 +48,9 @@
       <div class="code-header">
           <div class="changeset_header">
               <div class="changeset_file">
-                  <a href="#">${h.safe_unicode(filenode_path)}</a>
+                  ${h.safe_unicode(filenode_path)} |
+                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.org_ref)}">${c.org_ref_type}@${c.org_ref}</a> -&gt;
+                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.other_ref)}">${c.other_ref_type}@${c.other_ref}</a>
               </div>
           </div>
       </div>
