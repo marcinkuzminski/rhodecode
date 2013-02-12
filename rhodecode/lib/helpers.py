@@ -751,14 +751,14 @@ HasReposGroupPermissionAny
 
 def gravatar_url(email_address, size=30):
     from pylons import url  # doh, we need to re-import url to mock it later
-
-    if (not str2bool(config['app_conf'].get('use_gravatar')) or
-        not email_address or email_address == 'anonymous@rhodecode.org'):
+    _def = 'anonymous@rhodecode.org'
+    use_gravatar = str2bool(config['app_conf'].get('use_gravatar'))
+    email_address = email_address or _def
+    if (not use_gravatar or not email_address or email_address == _def):
         f = lambda a, l: min(l, key=lambda x: abs(x - a))
         return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
 
-    if(str2bool(config['app_conf'].get('use_gravatar')) and
-       config['app_conf'].get('alternative_gravatar_url')):
+    if use_gravatar and config['app_conf'].get('alternative_gravatar_url'):
         tmpl = config['app_conf'].get('alternative_gravatar_url', '')
         parsed_url = urlparse.urlparse(url.current(qualified=True))
         tmpl = tmpl.replace('{email}', email_address)\
