@@ -37,7 +37,7 @@ from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 
 log = logging.getLogger(__name__)
 
@@ -703,12 +703,13 @@ def differ(org_repo, org_ref, other_repo, other_ref,
     org_repo = org_repo_scm._repo
     other_repo = other_repo_scm._repo
 
-    org_ref = org_ref[1]
-    other_ref = other_ref[1]
+    org_ref = safe_str(org_ref[1])
+    other_ref = safe_str(other_ref[1])
 
     if org_repo_scm == other_repo_scm:
         log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo.path, org_ref, other_repo.path, other_ref))
+                  % (org_repo.path, org_ref,
+                     other_repo.path, other_ref))
         _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
             ignore_whitespace=ignore_whitespace, context=context)
         return _diff
