@@ -11,9 +11,17 @@ Repository deleting
 Currently when admin/owner deletes a repository, RhodeCode does not physically
 delete a repository from filesystem, it renames it in a special way so it's
 not possible to push,clone or access repository. It's worth a notice that,
-even if someone will be given administrative access to RhodeCode and will 
+even if someone will be given administrative access to RhodeCode and will
 delete a repository You can easy restore such action by restoring `rm__<date>`
-from the repository name, and internal repository storage (.hg/.git)
+from the repository name, and internal repository storage (.hg/.git). There
+is also a special command for cleaning such archived repos::
+
+    paster cleanup-repos --older-than=30d production.ini
+
+This command will scan for archived repositories that are older than 30d,
+display them and ask if you want to delete them (there's a --dont-ask flag also)
+If you host big amount of repositories with forks that are constantly deleted
+it's recommended that you run such command via crontab.
 
 Follow current branch in file view
 ----------------------------------
@@ -31,7 +39,7 @@ Checkboxes in compare view allow users to view combined compare view. You can
 only show the range between the first and last checkbox (no cherry pick).
 Clicking more than one checkbox will activate a link in top saying
 `Show selected changes <from-rev> -> <to-rev>` clicking this will bring
-compare view
+compare view. In this view also it's possible to switch to combined compare.
 
 Compare view is also available from the journal on pushes having more than
 one changeset
@@ -44,21 +52,21 @@ Due to complicated nature of repository grouping, often urls of repositories
 can change.
 
 example::
-  
+
   #before
   http://server.com/repo_name
   # after insertion to test_group group the url will be
   http://server.com/test_group/repo_name
-  
+
 This can be an issue for build systems and any other hardcoded scripts, moving
-repository to a group leads to a need for changing external systems. To 
-overcome this RhodeCode introduces a non changable replacement url. It's 
+repository to a group leads to a need for changing external systems. To
+overcome this RhodeCode introduces a non changable replacement url. It's
 simply an repository ID prefixed with `_` above urls are also accessible as::
 
   http://server.com/_<ID>
-  
+
 Since ID are always the same moving the repository will not affect such url.
-the _<ID> syntax can be used anywhere in the system so urls with repo_name 
+the _<ID> syntax can be used anywhere in the system so urls with repo_name
 for changelogs, files and other can be exchanged with _<ID> syntax.
 
 
@@ -71,7 +79,7 @@ on errors the mails will have a detailed traceback of error.
 
 
 Mails are also sent for code comments. If someone comments on a changeset
-mail is sent to all participants, the person who commited the changeset 
+mail is sent to all participants, the person who commited the changeset
 (if present in RhodeCode), and to all people mentioned with @mention system.
 
 
@@ -96,12 +104,12 @@ Currently it support following options:
 
 
 .. note::
-    
-    - *`svn -> hg` cloning requires `hgsubversion` library to be installed.*
+
+    * `svn -> hg` cloning requires `hgsubversion` library to be installed.*
 
 If you need to clone repositories that are protected via basic auth, you
-might pass the url with stored credentials inside eg. 
-`http://user:passw@remote.server/repo, RhodeCode will try to login and clone
+might pass the url with stored credentials inside eg.
+`http://user:passw@remote.server/repo`, RhodeCode will try to login and clone
 using given credentials. Please take a note that they will be stored as
-plaintext inside the database. RhodeCode will remove auth info when showing the 
+plaintext inside the database. RhodeCode will remove auth info when showing the
 clone url in summary page.

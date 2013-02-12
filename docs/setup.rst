@@ -8,14 +8,14 @@ Setup
 Setting up RhodeCode
 --------------------
 
-First, you will need to create a RhodeCode configuration file. Run the 
+First, you will need to create a RhodeCode configuration file. Run the
 following command to do this::
- 
+
     paster make-config RhodeCode production.ini
 
 - This will create the file `production.ini` in the current directory. This
-  configuration file contains the various settings for RhodeCode, e.g proxy 
-  port, email settings, usage of static files, cache, celery settings and 
+  configuration file contains the various settings for RhodeCode, e.g proxy
+  port, email settings, usage of static files, cache, celery settings and
   logging.
 
 
@@ -30,36 +30,36 @@ the following command::
 
 This will prompt you for a "root" path. This "root" path is the location where
 RhodeCode will store all of its repositories on the current machine. After
-entering this "root" path ``setup-rhodecode`` will also prompt you for a username 
-and password for the initial admin account which ``setup-rhodecode`` sets 
+entering this "root" path ``setup-rhodecode`` will also prompt you for a username
+and password for the initial admin account which ``setup-rhodecode`` sets
 up for you.
 
 setup process can be fully automated, example for lazy::
 
     paster setup-rhodecode production.ini --user=marcink --password=secret --email=marcin@rhodecode.org --repos=/home/marcink/my_repos
-    
 
-- The ``setup-rhodecode`` command will create all of the needed tables and an 
-  admin account. When choosing a root path you can either use a new empty 
+
+- The ``setup-rhodecode`` command will create all of the needed tables and an
+  admin account. When choosing a root path you can either use a new empty
   location, or a location which already contains existing repositories. If you
-  choose a location which contains existing repositories RhodeCode will simply 
-  add all of the repositories at the chosen location to it's database. 
+  choose a location which contains existing repositories RhodeCode will simply
+  add all of the repositories at the chosen location to it's database.
   (Note: make sure you specify the correct path to the root).
 - Note: the given path for mercurial_ repositories **must** be write accessible
-  for the application. It's very important since the RhodeCode web interface 
-  will work without write access, but when trying to do a push it will 
+  for the application. It's very important since the RhodeCode web interface
+  will work without write access, but when trying to do a push it will
   eventually fail with permission denied errors unless it has write access.
 
 You are now ready to use RhodeCode, to run it simply execute::
- 
+
     paster serve production.ini
- 
-- This command runs the RhodeCode server. The web app should be available at the 
-  127.0.0.1:5000. This ip and port is configurable via the production.ini 
+
+- This command runs the RhodeCode server. The web app should be available at the
+  127.0.0.1:5000. This ip and port is configurable via the production.ini
   file created in previous step
-- Use the admin account you created above when running ``setup-rhodecode`` 
+- Use the admin account you created above when running ``setup-rhodecode``
   to login to the web app.
-- The default permissions on each repository is read, and the owner is admin. 
+- The default permissions on each repository is read, and the owner is admin.
   Remember to update these if needed.
 - In the admin panel you can toggle ldap, anonymous, permissions settings. As
   well as edit more advanced options on users and repositories
@@ -70,10 +70,10 @@ functionality. To do this simply execute::
     paster make-rcext production.ini
 
 This will create `rcextensions` package in the same place that your `ini` file
-lives. With `rcextensions` it's possible to add additional mapping for whoosh, 
+lives. With `rcextensions` it's possible to add additional mapping for whoosh,
 stats and add additional code into the push/pull/create/delete repo hooks.
 For example for sending signals to build-bots such as jenkins.
-Please see the `__init__.py` file inside `rcextensions` package 
+Please see the `__init__.py` file inside `rcextensions` package
 for more details.
 
 
@@ -86,11 +86,11 @@ parallel with RhodeCode. (Repository access via ssh is a standard "out of
 the box" feature of mercurial_ and you can use this to access any of the
 repositories that RhodeCode is hosting. See PublishingRepositories_)
 
-RhodeCode repository structures are kept in directories with the same name 
+RhodeCode repository structures are kept in directories with the same name
 as the project. When using repository groups, each group is a subdirectory.
 This allows you to easily use ssh for accessing repositories.
 
-In order to use ssh you need to make sure that your web-server and the users 
+In order to use ssh you need to make sure that your web-server and the users
 login accounts have the correct permissions set on the appropriate directories.
 (Note that these permissions are independent of any permissions you have set up
 using the RhodeCode web interface.)
@@ -108,17 +108,17 @@ Note: In an advanced setup, in order for your ssh access to use the same
 permissions as set up via the RhodeCode web interface, you can create an
 authentication hook to connect to the rhodecode db and runs check functions for
 permissions against that.
-    
+
 Setting up Whoosh full text search
 ----------------------------------
 
 Starting from version 1.1 the whoosh index can be build by using the paster
 command ``make-index``. To use ``make-index`` you must specify the configuration
-file that stores the location of the index. You may specify the location of the 
-repositories (`--repo-location`).  If not specified, this value is retrieved 
-from the RhodeCode database.  This was required prior to 1.2.  Starting from 
-version 1.2 it is also possible to specify a comma separated list of 
-repositories (`--index-only`) to build index only on chooses repositories 
+file that stores the location of the index. You may specify the location of the
+repositories (`--repo-location`).  If not specified, this value is retrieved
+from the RhodeCode database.  This was required prior to 1.2.  Starting from
+version 1.2 it is also possible to specify a comma separated list of
+repositories (`--index-only`) to build index only on chooses repositories
 skipping any other found in repos location
 
 You may optionally pass the option `-f` to enable a full index rebuild. Without
@@ -126,24 +126,24 @@ the `-f` option, indexing will run always in "incremental" mode.
 
 For an incremental index build use::
 
-	paster make-index production.ini 
+    paster make-index production.ini
 
 For a full index rebuild use::
 
-	paster make-index production.ini -f 
+    paster make-index production.ini -f
 
 
 building index just for chosen repositories is possible with such command::
- 
+
  paster make-index production.ini --index-only=vcs,rhodecode
 
 
 In order to do periodical index builds and keep your index always up to date.
-It's recommended to do a crontab entry for incremental indexing. 
+It's recommended to do a crontab entry for incremental indexing.
 An example entry might look like this::
- 
-    /path/to/python/bin/paster make-index /path/to/rhodecode/production.ini 
-  
+
+    /path/to/python/bin/paster make-index /path/to/rhodecode/production.ini
+
 When using incremental mode (the default) whoosh will check the last
 modification date of each file and add it to be reindexed if a newer file is
 available. The indexing daemon checks for any removed files and removes them
@@ -157,19 +157,19 @@ Setting up LDAP support
 -----------------------
 
 RhodeCode starting from version 1.1 supports ldap authentication. In order
-to use LDAP, you have to install the python-ldap_ package. This package is 
+to use LDAP, you have to install the python-ldap_ package. This package is
 available via pypi, so you can install it by running
 
 using easy_install::
 
     easy_install python-ldap
- 
+
 using pip::
 
     pip install python-ldap
 
 .. note::
-   python-ldap requires some certain libs on your system, so before installing 
+   python-ldap requires some certain libs on your system, so before installing
    it check that you have at least `openldap`, and `sasl` libraries.
 
 LDAP settings are located in admin->ldap section,
@@ -232,12 +232,12 @@ Connection Security : required
 
     No encryption
         Plain non encrypted connection
-        
+
     LDAPS connection
-        Enable ldaps connection. It will likely require `Port`_ to be set to 
-        a different value (standard LDAPS port is 636). When LDAPS is enabled 
+        Enable ldaps connection. It will likely require `Port`_ to be set to
+        a different value (standard LDAPS port is 636). When LDAPS is enabled
         then `Certificate Checks`_ is required.
-        
+
     START_TLS on LDAP connection
         START TLS connection
 
@@ -245,7 +245,7 @@ Connection Security : required
 
 Certificate Checks : optional
     How SSL certificates verification is handled - this is only useful when
-    `Enable LDAPS`_ is enabled.  Only DEMAND or HARD offer full SSL security 
+    `Enable LDAPS`_ is enabled.  Only DEMAND or HARD offer full SSL security
     while the other options are susceptible to man-in-the-middle attacks.  SSL
     certificates can be installed to /etc/openldap/cacerts so that the
     DEMAND or HARD options can be used with self-signed certificates or
@@ -305,7 +305,7 @@ LDAP Search Scope : required
 
 .. _Login Attribute:
 
-Login Attribute : required        
+Login Attribute : required
     The LDAP record attribute that will be matched as the USERNAME or
     ACCOUNT used to connect to RhodeCode.  This will be added to `LDAP
     Filter`_ for locating the User object.  If `LDAP Filter`_ is specified as
@@ -423,7 +423,7 @@ reverse-proxy setup with basic auth::
       RewriteCond %{LA-U:REMOTE_USER} (.+)
       RewriteRule .* - [E=RU:%1]
       RequestHeader set X-Forwarded-User %{RU}e
-    </Location> 
+    </Location>
 
 In order for RhodeCode to start using the forwarded username, you should set
 the following in the [app:main] section of your .ini file::
@@ -450,27 +450,27 @@ uncomment following variables in the ini file::
 
 `url_pat` is the regular expression that will fetch issues from commit messages.
 Default regex will match issues in format of #<number> eg. #300.
- 
-Matched issues will be replace with the link specified as `issue_server_link` 
+
+Matched issues will be replace with the link specified as `issue_server_link`
 {id} will be replaced with issue id, and {repo} with repository name.
-Since the # is striped `issue_prefix` is added as a prefix to url. 
-`issue_prefix` can be something different than # if you pass 
+Since the # is striped `issue_prefix` is added as a prefix to url.
+`issue_prefix` can be something different than # if you pass
 ISSUE- as issue prefix this will generate an url in format::
- 
-  <a href="https://myissueserver.com/example_repo/issue/300">ISSUE-300</a>  
+
+  <a href="https://myissueserver.com/example_repo/issue/300">ISSUE-300</a>
 
 Hook management
 ---------------
 
 Hooks can be managed in similar way to this used in .hgrc files.
 To access hooks setting click `advanced setup` on Hooks section of Mercurial
-Settings in Admin. 
+Settings in Admin.
 
 There are 4 built in hooks that cannot be changed (only enable/disable by
 checkboxes on previos section).
-To add another custom hook simply fill in first section with 
+To add another custom hook simply fill in first section with
 <name>.<hook_type> and the second one with hook path. Example hooks
-can be found at *rhodecode.lib.hooks*. 
+can be found at *rhodecode.lib.hooks*.
 
 
 Changing default encoding
@@ -488,7 +488,7 @@ Setting Up Celery
 -----------------
 
 Since version 1.1 celery is configured by the rhodecode ini configuration files.
-Simply set use_celery=true in the ini file then add / change the configuration 
+Simply set use_celery=true in the ini file then add / change the configuration
 variables inside the ini file.
 
 Remember that the ini files use the format with '.' not with '_' like celery.
@@ -501,9 +501,9 @@ In order to start using celery run::
 
 
 .. note::
-   Make sure you run this command from the same virtualenv, and with the same 
+   Make sure you run this command from the same virtualenv, and with the same
    user that rhodecode runs.
-   
+
 HTTPS support
 -------------
 
@@ -511,7 +511,7 @@ There are two ways to enable https:
 
 - Set HTTP_X_URL_SCHEME in your http server headers, than rhodecode will
   recognize this headers and make proper https redirections
-- Alternatively, change the `force_https = true` flag in the ini configuration 
+- Alternatively, change the `force_https = true` flag in the ini configuration
   to force using https, no headers are needed than to enable https
 
 
@@ -526,39 +526,49 @@ Sample config for nginx using proxy::
         #server 127.0.0.1:5001;
         #server 127.0.0.1:5002;
     }
-    
+
     server {
-       listen          80;
-       server_name     hg.myserver.com;
+       listen          443;
+       server_name     rhodecode.myserver.com;
        access_log      /var/log/nginx/rhodecode.access.log;
        error_log       /var/log/nginx/rhodecode.error.log;
 
+       ssl on;
+       ssl_certificate     rhodecode.myserver.com.crt;
+       ssl_certificate_key rhodecode.myserver.com.key;
+
+       ssl_session_timeout 5m;
+
+       ssl_protocols SSLv3 TLSv1;
+       ssl_ciphers DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:EDH-RSA-DES-CBC3-SHA:AES256-SHA:DES-CBC3-SHA:AES128-SHA:RC4-SHA:RC4-MD5;
+       ssl_prefer_server_ciphers on;
+
        # uncomment if you have nginx with chunking module compiled
        # fixes the issues of having to put postBuffer data for large git
-       # pushes       
+       # pushes
        #chunkin on;
        #error_page 411 = @my_411_error;
        #location @my_411_error {
        #    chunkin_resume;
        #}
-       
+
        # uncomment if you want to serve static files by nginx
        #root /path/to/installation/rhodecode/public;
-       
+
        location / {
             try_files $uri @rhode;
        }
-    
+
        location @rhode {
             proxy_pass      http://rc;
             include         /etc/nginx/proxy.conf;
        }
 
-    }  
-  
+    }
+
 Here's the proxy.conf. It's tuned so it will not timeout on long
 pushes or large pushes::
-    
+
     proxy_redirect              off;
     proxy_set_header            Host $host;
     proxy_set_header            X-Url-Scheme $scheme;
@@ -573,7 +583,7 @@ pushes or large pushes::
     proxy_send_timeout          7200;
     proxy_read_timeout          7200;
     proxy_buffers               8 32k;
- 
+
 Also, when using root path with nginx you might set the static files to false
 in the production.ini file::
 
@@ -595,24 +605,24 @@ Here is a sample configuration file for apache using proxy::
     <VirtualHost *:80>
             ServerName hg.myserver.com
             ServerAlias hg.myserver.com
-    
+
             <Proxy *>
               Order allow,deny
               Allow from all
             </Proxy>
-    
+
             #important !
             #Directive to properly generate url (clone url) for pylons
             ProxyPreserveHost On
-    
+
             #rhodecode instance
             ProxyPass / http://127.0.0.1:5000/
             ProxyPassReverse / http://127.0.0.1:5000/
-            
+
             #to enable https use line below
             #SetEnvIf X-Url-Scheme https HTTPS=1
-            
-    </VirtualHost> 
+
+    </VirtualHost>
 
 
 Additional tutorial
@@ -628,7 +638,7 @@ Apache subdirectory part::
       ProxyPass http://127.0.0.1:5000/<someprefix>
       ProxyPassReverse http://127.0.0.1:5000/<someprefix>
       SetEnvIf X-Url-Scheme https HTTPS=1
-    </Location> 
+    </Location>
 
 Besides the regular apache setup you will need to add the following line
 into [app:main] section of your .ini file::
@@ -639,7 +649,7 @@ Add the following at the end of the .ini file::
 
     [filter:proxy-prefix]
     use = egg:PasteDeploy#prefix
-    prefix = /<someprefix> 
+    prefix = /<someprefix>
 
 
 then change <someprefix> into your choosen prefix
@@ -675,12 +685,12 @@ Here is a sample excerpt from an Apache Virtual Host configuration file::
     WSGIPassAuthorization On
 
 .. note::
-   when running apache as root please add: `user=www-data group=www-data` 
+   when running apache as root please add: `user=www-data group=www-data`
    into above configuration
 
 .. note::
-   RhodeCode cannot be runned in multiprocess mode in apache, make sure
-   you don't specify `processes=num` directive in the config
+   Running RhodeCode in multiprocess mode in apache is not supported,
+   make sure you don't specify `processes=num` directive in the config
 
 
 Example wsgi dispatch script::
@@ -688,13 +698,13 @@ Example wsgi dispatch script::
     import os
     os.environ["HGENCODING"] = "UTF-8"
     os.environ['PYTHON_EGG_CACHE'] = '/home/web/rhodecode/.egg-cache'
-    
+
     # sometimes it's needed to set the curent dir
-    os.chdir('/home/web/rhodecode/') 
+    os.chdir('/home/web/rhodecode/')
 
     import site
     site.addsitedir("/home/web/rhodecode/pyenv/lib/python2.6/site-packages")
-    
+
     from paste.deploy import loadapp
     from paste.script.util.logging_config import fileConfig
 

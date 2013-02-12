@@ -4,6 +4,26 @@
 Changelog
 =========
 
+1.5.3 (**2013-02-12**)
+----------------------
+
+news
+++++
+
+- IP restrictions now also enabled for IPv6
+
+fixes
++++++
+
+- fixed issues with private checkbox not always working
+- fixed #746 unicodeDedode errors on feed controllers
+- fixes issue #756 cleanup repos didn't properly compose paths of repos to be cleaned up.
+- fixed cache invalidation issues together with vcs_full_cache option
+- repo scan should skip directories with starting with '.'
+- fixes for issue #731, update-repoinfo sometimes failed to update data when changesets
+  were initial commits
+- recursive mode of setting permission skips private repositories
+
 1.5.2 (**2013-01-14**)
 ----------------------
 
