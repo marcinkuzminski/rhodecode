@@ -1051,7 +1051,8 @@ def urlify_commit(text_, repository=None, link_=None):
     newtext = urlify_changesets(escaper(text_), repository)
 
     try:
-        conf = config['app_conf']
+        from rhodecode import CONFIG
+        conf = CONFIG
 
         # allow multiple issue servers to be used
         valid_indices = [
