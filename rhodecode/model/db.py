@@ -679,7 +679,7 @@ class RepositoryField(Base, BaseModel):
 
     repo_field_id = Column("repo_field_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
-    field_key = Column("field_key", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_key = Column("field_key", String(250, convert_unicode=False, assert_unicode=None))
     field_label = Column("field_label", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
     field_value = Column("field_value", String(10000, convert_unicode=False, assert_unicode=None), nullable=False)
     field_desc = Column("field_desc", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
