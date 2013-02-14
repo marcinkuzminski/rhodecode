@@ -399,6 +399,15 @@ class User(Base, BaseModel):
     def is_admin(self):
         return self.admin
 
+    @property
+    def AuthUser(self):
+        """
+        Returns instance of AuthUser for this user
+        """
+        from rhodecode.lib.auth import AuthUser
+        return AuthUser(user_id=self.user_id, api_key=self.api_key,
+                        username=self.username)
+
     def __unicode__(self):
         return u"<%s('id:%s:%s')>" % (self.__class__.__name__,
                                      self.user_id, self.username)
