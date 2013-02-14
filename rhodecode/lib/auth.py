@@ -401,6 +401,22 @@ class  AuthUser(object):
         return self.admin
 
     @property
+    def repos_admin(self):
+        """
+        Returns list of repositories you're an admin of
+        """
+        return [x[0] for x in self.permissions['repositories'].iteritems()
+                if x[1] == 'repository.admin']
+
+    @property
+    def groups_admin(self):
+        """
+        Returns list of repositories groups you're an admin of
+        """
+        return [x[0] for x in self.permissions['repositories_groups'].iteritems()
+                if x[1] == 'group.admin']
+
+    @property
     def ip_allowed(self):
         """
         Checks if ip_addr used in constructor is allowed from defined list of

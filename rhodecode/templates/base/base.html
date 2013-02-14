@@ -234,24 +234,36 @@
                 %endif
 
                 % if h.HasPermissionAll('hg.admin')('access admin main page'):
-                 <li>
-                   ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}
-                    <%def name="admin_menu()">
-                    <ul>
-                        <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal')}</li>
-                        <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
-                        <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
-                        <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
-                        <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
-                        <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
-                        <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
-                        <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
-                        <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
-                    </ul>
-                    </%def>
-                    ## ADMIN MENU
-                    ${admin_menu()}
-                 </li>
+                   <li>
+                     ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}
+                      <%def name="admin_menu()">
+                      <ul>
+                          <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal')}</li>
+                          <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
+                          <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+                          <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
+                          <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
+                          <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
+                          <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
+                          <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
+                          <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
+                      </ul>
+                      </%def>
+                      ## ADMIN MENU
+                      ${admin_menu()}
+                   </li>
+                ## if you're a admin of any groups, show admin menu for it
+                % elif c.rhodecode_user.groups_admin:
+                   <li>
+                     ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}
+                      <%def name="admin_menu_simple()">
+                      <ul>
+                          <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+                      </ul>
+                      </%def>
+                      ## ADMIN MENU
+                      ${admin_menu_simple()}
+                   </li>
                 % endif
                </ul>
             </li>
@@ -322,7 +334,7 @@
                 <span>${_('Search')}</span>
                 </a>
             </li>
-            %if h.HasPermissionAll('hg.admin')('access admin main page'):
+            % if h.HasPermissionAll('hg.admin')('access admin main page'):
             <li ${is_current('admin')}>
                <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
                <span class="icon">
@@ -332,7 +344,17 @@
                </a>
                 ${admin_menu()}
             </li>
-            %endif
+            % elif c.rhodecode_user.groups_admin:
+            <li ${is_current('admin')}>
+               <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
+               <span class="icon">
+                   <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
+               </span>
+               <span>${_('Admin')}</span>
+               </a>
+                ${admin_menu_simple()}
+            </li>                
+            % endif
             ${usermenu()}
         %endif
 <script type="text/javascript">
