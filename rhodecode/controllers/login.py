@@ -126,20 +126,16 @@ class LoginController(BaseController):
     @HasPermissionAnyDecorator('hg.admin', 'hg.register.auto_activate',
                                'hg.register.manual_activate')
     def register(self):
-        c.auto_active = False
-        for perm in User.get_by_username('default').user_perms:
-            if perm.permission.permission_name == 'hg.register.auto_activate':
-                c.auto_active = True
-                break
+        c.auto_active = 'hg.register.auto_activate' in User.get_by_username('default')\
+            .AuthUser.permissions['global']
 
         if request.POST:
-
             register_form = RegisterForm()()
             try:
                 form_result = register_form.to_python(dict(request.POST))
                 form_result['active'] = c.auto_active
                 UserModel().create_registration(form_result)
-                h.flash(_('You have successfully registered into rhodecode'),
+                h.flash(_('You have successfully registered into RhodeCode'),
                             category='success')
                 Session().commit()
                 return redirect(url('login_home'))
