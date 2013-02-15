@@ -160,19 +160,6 @@ class ReposController(BaseRepoController):
             form_result = RepoForm(repo_groups=c.repo_groups_choices,
                                    landing_revs=c.landing_revs_choices)()\
                             .to_python(dict(request.POST))
-            #we check ACLs after form, since we want to display nicer errors
-            #if form forbids creation of repos inside a group we don't have
-            #perms for
-            if not HasPermissionAny('hg.admin', 'hg.create.repository')():
-                #you're not super admin nor have global create permissions,
-                #but maybe you have at least write permission to a parent group ?
-                parent_group = request.POST.get('repo_group')
-                _gr = RepoGroup.get(parent_group)
-                gr_name = _gr.group_name if _gr else None
-                if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
-                    msg = _('no permission to create repository in root location')
-                    raise formencode.Invalid('', form_result, None,
-                                             error_dict={'repo_group': msg})
 
             new_repo = RepoModel().create(form_result,
                                           self.rhodecode_user.user_id)

@@ -20,7 +20,7 @@ from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
     ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.config.routing import ADMIN_PREFIX
-from rhodecode.lib.auth import HasReposGroupPermissionAny
+from rhodecode.lib.auth import HasReposGroupPermissionAny, HasPermissionAny
 
 # silence warnings and pylint
 UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set, \
@@ -472,10 +472,12 @@ def CanWriteGroup():
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'permission_denied': _(u"You don't have permissions "
-                                   "to create repository in this group")
+                                   "to create repository in this group"),
+            'permission_denied_root': _(u"no permission to create repository "
+                                        "in root location")
         }
 
-        def to_python(self, value, state):
+        def _to_python(self, value, state):
             #root location
             if value in [-1, "-1"]:
                 return None
@@ -485,6 +487,7 @@ def CanWriteGroup():
             gr = RepoGroup.get(value)
             gr_name = gr.group_name if gr else None  # None means ROOT location
             val = HasReposGroupPermissionAny('group.write', 'group.admin')
+            can_create_repos = HasPermissionAny('hg.admin', 'hg.create.repository')
             forbidden = not val(gr_name, 'can write into group validator')
             #parent group need to be existing
             if gr and forbidden:
@@ -492,6 +495,13 @@ def CanWriteGroup():
                 raise formencode.Invalid(msg, value, state,
                     error_dict=dict(repo_type=msg)
                 )
+            ## check if we can write to root location !
+            elif gr is None and can_create_repos() is False:
+                msg = M(self, 'permission_denied_root', state)
+                raise formencode.Invalid(msg, value, state,
+                    error_dict=dict(repo_type=msg)
+                )
+
     return _validator
 
 
