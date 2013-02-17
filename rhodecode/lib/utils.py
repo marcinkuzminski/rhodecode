@@ -550,6 +550,26 @@ def load_rcextensions(root_path):
         log.debug('adding extra into INDEX_EXTENSIONS')
         conf.INDEX_EXTENSIONS.extend(getattr(EXT, 'EXTRA_INDEX_EXTENSIONS', []))
 
+        # auto check if the module is not missing any data, set to default if is
+        # this will help autoupdate new feature of rcext module
+        from rhodecode.config import rcextensions
+        for k in dir(rcextensions):
+            if not k.startswith('_') and not hasattr(EXT, k):
+                setattr(EXT, k, getattr(rcextensions, k))
+
+
+def get_custom_lexer(extension):
+    """
+    returns a custom lexer if it's defined in rcextensions module, or None
+    if there's no custom lexer defined
+    """
+    import rhodecode
+    from pygments import lexers
+    #check if we didn't define this extension as other lexer
+    if rhodecode.EXTENSIONS and extension in rhodecode.EXTENSIONS.EXTRA_LEXERS:
+        _lexer_name = rhodecode.EXTENSIONS.EXTRA_LEXERS[extension]
+        return lexers.get_lexer_by_name(_lexer_name)
+
 
 #==============================================================================
 # TEST FUNCTIONS AND CREATORS

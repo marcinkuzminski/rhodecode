@@ -41,7 +41,7 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven, _make_safe_id_component
 
 from rhodecode.lib.annotate import annotate_highlight
-from rhodecode.lib.utils import repo_name_slug
+from rhodecode.lib.utils import repo_name_slug, get_custom_lexer
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
     get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict
 from rhodecode.lib.markup_renderer import MarkupRenderer
@@ -253,13 +253,14 @@ class CodeHtmlFormatter(HtmlFormatter):
 
 
 def pygmentize(filenode, **kwargs):
-    """pygmentize function using pygments
+    """
+    pygmentize function using pygments
 
     :param filenode:
     """
-
-    return literal(code_highlight(filenode.content,
-                                  filenode.lexer, CodeHtmlFormatter(**kwargs)))
+    lexer = get_custom_lexer(filenode.extension) or filenode.lexer
+    return literal(code_highlight(filenode.content, lexer,
+                                  CodeHtmlFormatter(**kwargs)))
 
 
 def pygmentize_annotation(repo_name, filenode, **kwargs):

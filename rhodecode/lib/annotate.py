@@ -10,13 +10,12 @@
     :copyright: (C) 2011-2012 Marcin Kuzminski <marcin@python-works.com>
     :license: GPLv3, see COPYING for more details.
 """
+import StringIO
 
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
-
-import StringIO
 
 
 def annotate_highlight(filenode, annotate_from_changeset_func=None,
@@ -34,11 +33,12 @@ def annotate_highlight(filenode, annotate_from_changeset_func=None,
     :param headers: dictionary with headers (keys are whats in ``order``
       parameter)
     """
+    from rhodecode.lib.utils import get_custom_lexer
     options['linenos'] = True
     formatter = AnnotateHtmlFormatter(filenode=filenode, order=order,
         headers=headers,
         annotate_from_changeset_func=annotate_from_changeset_func, **options)
-    lexer = filenode.lexer
+    lexer = get_custom_lexer(filenode.extension) or filenode.lexer
     highlighted = highlight(filenode.content, lexer, formatter)
     return highlighted
 
