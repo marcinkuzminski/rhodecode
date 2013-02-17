@@ -6,6 +6,7 @@ import traceback
 
 from webob import Request, Response, exc
 
+import rhodecode
 from rhodecode.lib import subprocessio
 
 log = logging.getLogger(__name__)
@@ -82,10 +83,11 @@ class GitRepository(object):
         # if you do add '\n' as part of data, count it.
         server_advert = '# service=%s' % git_command
         packet_len = str(hex(len(server_advert) + 4)[2:].rjust(4, '0')).lower()
+        _git_path = rhodecode.CONFIG.get('git_path', 'git')
         try:
             out = subprocessio.SubprocessIOChunker(
-                r'git %s --stateless-rpc --advertise-refs "%s"' % (
-                                git_command[4:], self.content_path),
+                r'%s %s --stateless-rpc --advertise-refs "%s"' % (
+                            _git_path, git_command[4:], self.content_path),
                 starting_values=[
                     packet_len + server_advert + '0000'
                 ]
@@ -142,8 +144,9 @@ class GitRepository(object):
         if git_command in [u'git-receive-pack']:
             # updating refs manually after each push.
             # Needed for pre-1.7.0.4 git clients using regular HTTP mode.
-            cmd = (u'git --git-dir "%s" '
-                    'update-server-info' % self.content_path)
+            _git_path = rhodecode.CONFIG.get('git_path', 'git')
+            cmd = (u'%s --git-dir "%s" '
+                    'update-server-info' % (_git_path, self.content_path))
             log.debug('handling cmd %s' % cmd)
             subprocess.call(cmd, shell=True)
 

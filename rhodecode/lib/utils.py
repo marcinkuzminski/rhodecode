@@ -744,13 +744,12 @@ def check_git_version():
     Checks what version of git is installed in system, and issues a warning
     if it's too old for RhodeCode to properly work.
     """
-    import subprocess
-    from distutils.version import StrictVersion
     from rhodecode import BACKENDS
+    from rhodecode.lib.vcs.backends.git.repository import GitRepository
+    from distutils.version import StrictVersion
 
-    p = subprocess.Popen('git --version', shell=True,
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
+    stdout, stderr = GitRepository._run_git_command('--version')
+
     ver = (stdout.split(' ')[-1] or '').strip() or '0.0.0'
     if len(ver.split('.')) > 3:
         #StrictVersion needs to be only 3 element type

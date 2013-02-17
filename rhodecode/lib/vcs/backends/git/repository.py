@@ -20,7 +20,8 @@ import urllib2
 from dulwich.repo import Repo, NotGitRepository
 from dulwich.objects import Tag
 from string import Template
-from subprocess import Popen, PIPE
+
+import rhodecode
 from rhodecode.lib.vcs.backends.base import BaseRepository
 from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
@@ -91,17 +92,14 @@ class GitRepository(BaseRepository):
         """
         return self._get_all_revisions()
 
-    def run_git_command(self, cmd):
+    @classmethod
+    def _run_git_command(cls, cmd, **opts):
         """
         Runs given ``cmd`` as git command and returns tuple
-        (returncode, stdout, stderr).
-
-        .. note::
-           This method exists only until log/blame functionality is implemented
-           at Dulwich (see https://bugs.launchpad.net/bugs/645142). Parsing
-           os command's output is road to hell...
+        (stdout, stderr).
 
         :param cmd: git command to be executed
+        :param opts: env options to pass into Subprocess command
         """
 
         _copts = ['-c', 'core.quotepath=false', ]
@@ -116,23 +114,29 @@ class GitRepository(BaseRepository):
             del gitenv['GIT_DIR']
         gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
-        cmd = ['git'] + _copts + cmd
+        _git_path = rhodecode.CONFIG.get('git_path', 'git')
+        cmd = [_git_path] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
         try:
-            opts = dict(
+            _opts = dict(
                 env=gitenv,
                 shell=False,
             )
-            if os.path.isdir(self.path):
-                opts['cwd'] = self.path
-            p = subprocessio.SubprocessIOChunker(cmd, **opts)
+            _opts.update(opts)
+            p = subprocessio.SubprocessIOChunker(cmd, **_opts)
         except (EnvironmentError, OSError), err:
             log.error(traceback.format_exc())
             raise RepositoryError("Couldn't run git command (%s).\n"
                                   "Original error was:%s" % (cmd, err))
 
         return ''.join(p.output), ''.join(p.error)
+
+    def run_git_command(self, cmd):
+        opts = {}
+        if os.path.isdir(self.path):
+            opts['cwd'] = self.path
+        return self._run_git_command(cmd, **opts)
 
     @classmethod
     def _check_url(cls, url):

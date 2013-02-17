@@ -2,6 +2,7 @@ import re
 from itertools import chain
 from dulwich import objects
 from subprocess import Popen, PIPE
+import rhodecode
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.exceptions import ChangesetError
@@ -362,8 +363,9 @@ class GitChangeset(BaseChangeset):
             frmt = 'zip'
         else:
             frmt = 'tar'
-        cmd = 'git archive --format=%s --prefix=%s/ %s' % (frmt, prefix,
-            self.raw_id)
+        _git_path = rhodecode.CONFIG.get('git_path', 'git')
+        cmd = '%s archive --format=%s --prefix=%s/ %s' % (_git_path, 
+                                                frmt, prefix, self.raw_id)
         if kind == 'tgz':
             cmd += ' | gzip -9'
         elif kind == 'tbz2':
