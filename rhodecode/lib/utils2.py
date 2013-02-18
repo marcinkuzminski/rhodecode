@@ -370,8 +370,8 @@ def age(prevdate):
     # Get date parts deltas
     for part in order:
         if future:
-            import dateutil
-            d = dateutil.relativedelta.relativedelta(now, prevdate)
+            from dateutil import relativedelta
+            d = relativedelta.relativedelta(now, prevdate)
             deltas[part] = getattr(d, part + 's')
         else:
             deltas[part] = getattr(now, part) - getattr(prevdate, part)
