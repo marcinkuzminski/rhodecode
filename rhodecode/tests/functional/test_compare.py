@@ -27,7 +27,7 @@ def _fork_repo(fork_name, vcs_type, parent=None):
         update_after_clone=False,
         fork_parent_id=Repository.get_by_repo_name(_REPO),
     )
-    repo = RepoModel().create_fork(form_data, cur_user=TEST_USER_ADMIN_LOGIN)
+    RepoModel().create_fork(form_data, cur_user=TEST_USER_ADMIN_LOGIN)
 
     Session().commit()
     return Repository.get_by_repo_name(fork_name)
@@ -87,7 +87,6 @@ class TestCompareController(TestController):
 
         #fork this repo
         repo2 = _fork_repo('one-fork', 'hg', parent='one')
-        Session().commit()
         self.r2_id = repo2.repo_id
 
         #add two extra commit into fork
@@ -138,7 +137,6 @@ class TestCompareController(TestController):
 
         #fork this repo
         repo2 = _fork_repo('one-fork', 'hg', parent='one')
-        Session().commit()
         self.r2_id = repo2.repo_id
 
         #now commit something to origin repo
@@ -178,18 +176,17 @@ class TestCompareController(TestController):
         response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
     def test_compare_cherry_pick_changesets_from_bottom(self):
-        """
-        repo1:
-            cs1:
-            cs2:
-        repo1-fork- in which we will cherry pick bottom changesets
-            cs1:
-            cs2:
-            cs3: x
-            cs4: x
-            cs5: x
-            cs6:
-        """
+
+#        repo1:
+#            cs0:
+#            cs1:
+#        repo1-fork- in which we will cherry pick bottom changesets
+#            cs0:
+#            cs1:
+#            cs2: x
+#            cs3: x
+#            cs4: x
+#            cs5:
         #make repo1, and cs1+cs2
         self.log_user()
 
@@ -200,25 +197,89 @@ class TestCompareController(TestController):
         self.r1_id = repo1.repo_id
 
         #commit something !
-        cs1 = _commit_change(repo1.repo_name, filename='file1', content='line1\n',
+        cs0 = _commit_change(repo1.repo_name, filename='file1', content='line1\n',
                              message='commit1', vcs_type='hg', parent=None,
                              newfile=True)
-        cs2 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\n',
-                             message='commit2', vcs_type='hg', parent=cs1)
+        cs1 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\n',
+                             message='commit2', vcs_type='hg', parent=cs0)
         #fork this repo
         repo2 = _fork_repo('repo1-fork', 'hg', parent='repo1')
-        Session().commit()
         self.r2_id = repo2.repo_id
         #now make cs3-6
-        cs3 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\n',
-                             message='commit3', vcs_type='hg', parent=cs2)
-        cs4 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\n',
-                             message='commit4', vcs_type='hg', parent=cs3)
-        cs5 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\n',
-                             message='commit5', vcs_type='hg', parent=cs4)
-        cs6 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\nline6\n',
-                             message='commit6', vcs_type='hg', parent=cs5)
+        cs2 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\n',
+                             message='commit3', vcs_type='hg', parent=cs1)
+        cs3 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\n',
+                             message='commit4', vcs_type='hg', parent=cs2)
+        cs4 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\n',
+                             message='commit5', vcs_type='hg', parent=cs3)
+        cs5 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\nline6\n',
+                             message='commit6', vcs_type='hg', parent=cs4)
 
+        rev1 = 'tip'
+        rev2 = 'tip'
+
+        response = self.app.get(url(controller='compare', action='index',
+                                    repo_name=repo2.repo_name,
+                                    org_ref_type="tag",
+                                    org_ref=rev1,
+                                    other_repo=repo1.repo_name,
+                                    other_ref_type="tag",
+                                    other_ref=rev2,
+                                    rev_start=cs2.raw_id,
+                                    rev_end=cs4.raw_id,
+                                    ))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, cs2.short_id, repo1.repo_name, cs4.short_id))
+        response.mustcontain("""Showing 3 commits""")
+        response.mustcontain("""1 file changed with 3 insertions and 0 deletions""")
+
+        response.mustcontain("""<div class="message tooltip" title="commit3" style="white-space:normal">commit3</div>""")
+        response.mustcontain("""<div class="message tooltip" title="commit4" style="white-space:normal">commit4</div>""")
+        response.mustcontain("""<div class="message tooltip" title="commit5" style="white-space:normal">commit5</div>""")
+
+        response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo1.repo_name, cs2.raw_id, cs2.short_id))
+        response.mustcontain("""<a href="/%s/changeset/%s">r3:%s</a>""" % (repo1.repo_name, cs3.raw_id, cs3.short_id))
+        response.mustcontain("""<a href="/%s/changeset/%s">r4:%s</a>""" % (repo1.repo_name, cs4.raw_id, cs4.short_id))
+        ## files
+        response.mustcontain("""#C--826e8142e6ba">file1</a>""")
+
+    def test_compare_cherry_pick_changesets_from_top(self):
+#        repo1:
+#            cs0:
+#            cs1:
+#        repo1-fork- in which we will cherry pick bottom changesets
+#            cs0:
+#            cs1:
+#            cs2:
+#            cs3: x
+#            cs4: x
+#            cs5: x
+#
+        #make repo1, and cs1+cs2
+        self.log_user()
+        repo1 = RepoModel().create_repo(repo_name='repo1', repo_type='hg',
+                                        description='diff-test',
+                                        owner=TEST_USER_ADMIN_LOGIN)
+        Session().commit()
+        self.r1_id = repo1.repo_id
+
+        #commit something !
+        cs0 = _commit_change(repo1.repo_name, filename='file1', content='line1\n',
+                             message='commit1', vcs_type='hg', parent=None,
+                             newfile=True)
+        cs1 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\n',
+                             message='commit2', vcs_type='hg', parent=cs0)
+        #fork this repo
+        repo2 = _fork_repo('repo1-fork', 'hg', parent='repo1')
+        self.r2_id = repo2.repo_id
+        #now make cs3-6
+        cs2 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\n',
+                             message='commit3', vcs_type='hg', parent=cs1)
+        cs3 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\n',
+                             message='commit4', vcs_type='hg', parent=cs2)
+        cs4 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\n',
+                             message='commit5', vcs_type='hg', parent=cs3)
+        cs5 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\nline6\n',
+                             message='commit6', vcs_type='hg', parent=cs4)
         rev1 = 'tip'
         rev2 = 'tip'
 
@@ -232,91 +293,20 @@ class TestCompareController(TestController):
                                     rev_start=cs3.raw_id,
                                     rev_end=cs5.raw_id,
                                     ))
-        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
+
+        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, cs3.short_id, repo1.repo_name, cs5.short_id))
         response.mustcontain("""Showing 3 commits""")
         response.mustcontain("""1 file changed with 3 insertions and 0 deletions""")
 
-        response.mustcontain("""<div class="message tooltip" title="commit3" style="white-space:normal">commit3</div>""")
         response.mustcontain("""<div class="message tooltip" title="commit4" style="white-space:normal">commit4</div>""")
         response.mustcontain("""<div class="message tooltip" title="commit5" style="white-space:normal">commit5</div>""")
+        response.mustcontain("""<div class="message tooltip" title="commit6" style="white-space:normal">commit6</div>""")
 
-        response.mustcontain("""<a href="/%s/changeset/%s">r3:%s</a>""" % (repo2.repo_name, cs3.raw_id, cs3.short_id))
-        response.mustcontain("""<a href="/%s/changeset/%s">r4:%s</a>""" % (repo2.repo_name, cs4.raw_id, cs4.short_id))
-        response.mustcontain("""<a href="/%s/changeset/%s">r5:%s</a>""" % (repo2.repo_name, cs5.raw_id, cs5.short_id))
+        response.mustcontain("""<a href="/%s/changeset/%s">r3:%s</a>""" % (repo1.repo_name, cs3.raw_id, cs3.short_id))
+        response.mustcontain("""<a href="/%s/changeset/%s">r4:%s</a>""" % (repo1.repo_name, cs4.raw_id, cs4.short_id))
+        response.mustcontain("""<a href="/%s/changeset/%s">r5:%s</a>""" % (repo1.repo_name, cs5.raw_id, cs5.short_id))
         ## files
-        response.mustcontain("""<a href="/%s/compare/tag@%s...tag@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
-        #swap
-        response.mustcontain("""<a href="/%s/compare/tag@%s...tag@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo1.repo_name, rev1, rev2, repo2.repo_name))
-
-    def test_compare_cherry_pick_changesets_from_top(self):
-        """
-        repo1:
-            cs1:
-            cs2:
-        repo1-fork- in which we will cherry pick bottom changesets
-            cs1:
-            cs2:
-            cs3:
-            cs4: x
-            cs5: x
-            cs6: x
-        """
-        #make repo1, and cs1+cs2
-        self.log_user()
-        repo1 = RepoModel().create_repo(repo_name='repo1', repo_type='hg',
-                                        description='diff-test',
-                                        owner=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
-        self.r1_id = repo1.repo_id
-
-        #commit something !
-        cs1 = _commit_change(repo1.repo_name, filename='file1', content='line1\n',
-                             message='commit1', vcs_type='hg', parent=None,
-                             newfile=True)
-        cs2 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\n',
-                             message='commit2', vcs_type='hg', parent=cs1)
-        #fork this repo
-        repo2 = _fork_repo('repo1-fork', 'hg', parent='repo1')
-        Session().commit()
-        self.r2_id = repo1.repo_id
-        #now make cs3-6
-        cs3 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\n',
-                             message='commit3', vcs_type='hg', parent=cs2)
-        cs4 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\n',
-                             message='commit4', vcs_type='hg', parent=cs3)
-        cs5 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\n',
-                             message='commit5', vcs_type='hg', parent=cs4)
-        cs6 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\nline6\n',
-                             message='commit6', vcs_type='hg', parent=cs5)
-        rev1 = 'tip'
-        rev2 = 'tip'
-
-        response = self.app.get(url(controller='compare', action='index',
-                                    repo_name=repo2.repo_name,
-                                    org_ref_type="tag",
-                                    org_ref=rev1,
-                                    other_repo=repo1.repo_name,
-                                    other_ref_type="tag",
-                                    other_ref=rev2,
-                                    rev_start=cs4.raw_id,
-                                    rev_end=cs6.raw_id,
-                                    ))
-
-        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, rev1, repo1.repo_name, rev2))
-        response.mustcontain("""Showing 3 commits""")
-        response.mustcontain("""1 file changed with 3 insertions and 0 deletions""")
-
-        response.mustcontain("""<div class="message tooltip" title="commit3" style="white-space:normal">commit4</div>""")
-        response.mustcontain("""<div class="message tooltip" title="commit4" style="white-space:normal">commit5</div>""")
-        response.mustcontain("""<div class="message tooltip" title="commit5" style="white-space:normal">commit6</div>""")
-
-        response.mustcontain("""<a href="/%s/changeset/%s">r4:%s</a>""" % (repo2.repo_name, cs4.raw_id, cs4.short_id))
-        response.mustcontain("""<a href="/%s/changeset/%s">r5:%s</a>""" % (repo2.repo_name, cs5.raw_id, cs5.short_id))
-        response.mustcontain("""<a href="/%s/changeset/%s">r6:%s</a>""" % (repo2.repo_name, cs6.raw_id, cs6.short_id))
-        ## files
-        response.mustcontain("""<a href="/%s/compare/tag@%s...tag@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
-        #swap
-        response.mustcontain("""<a href="/%s/compare/tag@%s...tag@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo1.repo_name, rev1, rev2, repo2.repo_name))
+        response.mustcontain("""#C--826e8142e6ba">file1</a>""")
 
     def test_compare_cherry_pick_changeset_mixed_branches(self):
         """
@@ -328,8 +318,8 @@ class TestCompareController(TestController):
     def test_compare_remote_branches_hg(self):
         self.log_user()
 
-        _fork_repo(HG_FORK, 'hg')
-
+        repo2 = _fork_repo(HG_FORK, 'hg')
+        self.r2_id = repo2.repo_id
         rev1 = '56349e29c2af'
         rev2 = '7d4bc8ec6be5'
 

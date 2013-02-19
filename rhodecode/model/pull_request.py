@@ -227,13 +227,9 @@ class PullRequestModel(BaseModel):
         Returns incoming changesets for mercurial repositories
 
         :param org_repo:
-        :type org_repo:
         :param org_ref:
-        :type org_ref:
         :param other_repo:
-        :type other_repo:
         :param other_ref:
-        :type other_ref:
         """
 
         if len(org_ref) != 2 or not isinstance(org_ref, (list, tuple)):

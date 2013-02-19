@@ -40,9 +40,7 @@ from rhodecode.lib import diffs
 from rhodecode.model.db import Repository
 from rhodecode.model.pull_request import PullRequestModel
 from webob.exc import HTTPBadRequest
-from rhodecode.lib.utils2 import str2bool
 from rhodecode.lib.diffs import LimitedDiffContainer
-from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -99,32 +97,50 @@ class CompareController(BaseRepoController):
             other_repo=org_repo,
             other_ref_type=org_ref[0], other_ref=org_ref[1])
 
-        c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
-        c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
-
-        if c.org_repo is None:
-            log.error('Could not find org repo %s' % org_repo)
-            raise HTTPNotFound
-        if c.other_repo is None:
-            log.error('Could not find other repo %s' % other_repo)
-            raise HTTPNotFound
-
-        if c.org_repo != c.other_repo and h.is_git(c.rhodecode_repo):
-            log.error('compare of two remote repos not available for GIT REPOS')
-            raise HTTPNotFound
-
-        if c.org_repo.scm_instance.alias != c.other_repo.scm_instance.alias:
-            log.error('compare of two different kind of remote repos not available')
-            raise HTTPNotFound
-
         partial = request.environ.get('HTTP_X_PARTIAL_XHR')
+
+        org_repo = Repository.get_by_repo_name(org_repo)
+        other_repo = Repository.get_by_repo_name(other_repo)
+
         self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
         self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
 
+        if org_repo is None:
+            log.error('Could not find org repo %s' % org_repo)
+            raise HTTPNotFound
+        if other_repo is None:
+            log.error('Could not find other repo %s' % other_repo)
+            raise HTTPNotFound
+
+        if org_repo != other_repo and h.is_git(org_repo):
+            log.error('compare of two remote repos not available for GIT REPOS')
+            raise HTTPNotFound
+
+        if org_repo.scm_instance.alias != other_repo.scm_instance.alias:
+            log.error('compare of two different kind of remote repos not available')
+            raise HTTPNotFound
+
+        c.org_repo = org_repo
+        c.other_repo = other_repo
+        c.org_ref = org_ref[1]
+        c.other_ref = other_ref[1]
+        c.org_ref_type = org_ref[0]
+        c.other_ref_type = other_ref[0]
+
         if rev_start and rev_end:
-            #replace our org_ref with given CS
+            # swap revs with cherry picked ones, save them for display
+            #org_ref = ('rev', rev_start)
+            #other_ref = ('rev', rev_end)
+            c.org_ref = rev_start[:12]
+            c.other_ref = rev_end[:12]
+            # get parent of
+            # rev start to include it in the diff
+            _cs = other_repo.scm_instance.get_changeset(rev_start)
+            rev_start = _cs.parents[0].raw_id
             org_ref = ('rev', rev_start)
             other_ref = ('rev', rev_end)
+            #if we cherry pick it's not remote, make the other_repo org_repo
+            org_repo = other_repo
 
         c.cs_ranges, ancestor = PullRequestModel().get_compare_data(
             org_repo, org_ref, other_repo, other_ref)
@@ -136,18 +152,13 @@ class CompareController(BaseRepoController):
         if partial:
             return render('compare/compare_cs.html')
 
-        c.org_ref = org_ref[1]
-        c.org_ref_type = org_ref[0]
-        c.other_ref = other_ref[1]
-        c.other_ref_type = other_ref[0]
-
-        if ancestor  and c.org_repo != c.other_repo:
+        if ancestor and org_repo != other_repo:
             # case we want a simple diff without incoming changesets,
             # previewing what will be merged.
             # Make the diff on the forked repo, with
             # revision that is common ancestor
-            _org_ref = org_ref
-            log.debug('Using ancestor %s as org_ref instead of %s', ancestor, _org_ref)
+            log.debug('Using ancestor %s as org_ref instead of %s'
+                      % (ancestor, org_ref))
             org_ref = ('rev', ancestor)
             org_repo = other_repo
 
