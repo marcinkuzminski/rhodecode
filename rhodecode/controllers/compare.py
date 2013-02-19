@@ -137,7 +137,7 @@ class CompareController(BaseRepoController):
             # get parent of
             # rev start to include it in the diff
             _cs = other_repo.scm_instance.get_changeset(rev_start)
-            rev_start = _cs.parents[0].raw_id if _cs.parents else EmptyChangeset()
+            rev_start = _cs.parents[0].raw_id if _cs.parents else EmptyChangeset().raw_id
             org_ref = ('rev', rev_start)
             other_ref = ('rev', rev_end)
             #if we cherry pick it's not remote, make the other_repo org_repo

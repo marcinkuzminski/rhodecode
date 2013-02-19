@@ -39,6 +39,7 @@ from rhodecode.lib.utils2 import safe_unicode
 
 from rhodecode.lib.vcs.utils.hgcompat import scmutil
 from rhodecode.lib.vcs.utils import safe_str
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -180,13 +181,21 @@ class PullRequestModel(BaseModel):
                     'tag': 'tag',
                     'rev': 'id',
                 }
+
             org_rev_spec = "%s('%s')" % (_revset_predicates[org_ref[0]],
                                          safe_str(org_ref[1]))
-            org_rev = scmutil.revsingle(org_repo._repo,
-                                         org_rev_spec)
+            if org_ref[1] == EmptyChangeset().raw_id:
+                org_rev = org_ref[1]
+            else:
+                org_rev = org_repo._repo[scmutil.revrange(org_repo._repo,
+                                                          [org_rev_spec])[-1]]
             other_rev_spec = "%s('%s')" % (_revset_predicates[other_ref[0]],
                                            safe_str(other_ref[1]))
-            other_rev = scmutil.revsingle(other_repo._repo, other_rev_spec)
+            if other_ref[1] == EmptyChangeset().raw_id:
+                other_rev = other_ref[1]
+            else:
+                other_rev = other_repo._repo[scmutil.revrange(other_repo._repo,
+                                                        [other_rev_spec])[-1]]
 
             #case two independent repos
             if org_repo != other_repo:
