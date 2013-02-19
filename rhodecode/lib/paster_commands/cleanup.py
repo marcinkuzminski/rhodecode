@@ -85,10 +85,17 @@ class Command(BasePasterCommand):
         repos_location = RhodeCodeUi.get_repos_location()
         to_remove = []
         for dn, dirs, f in os.walk(safe_str(repos_location)):
-            for loc in dirs:
+            alldirs = list(dirs)
+            del dirs[:]
+            if ('.hg' in alldirs or
+                'objects' in alldirs and ('refs' in alldirs or 'packed-refs' in f)):
+                continue
+            for loc in alldirs:
                 if REMOVED_REPO_PAT.match(loc):
                     to_remove.append([os.path.join(dn, loc),
                                       self._extract_date(loc)])
+                else:
+                    dirs.append(loc)
 
         #filter older than (if present)!
         now = datetime.datetime.now()
