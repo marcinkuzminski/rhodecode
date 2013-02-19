@@ -116,9 +116,9 @@ class Command(BasePasterCommand):
                     % (safe_str(x[0]), safe_str(x[1])) for x in to_remove]))
 
         if remove:
-            for name, date_ in to_remove:
-                print >> sys.stdout, 'removing repository %s' % name
-                shutil.rmtree(os.path.join(repos_location, name))
+            for path, date_ in to_remove:
+                print >> sys.stdout, 'removing repository %s' % path
+                shutil.rmtree(path))
         else:
             print 'nothing done exiting...'
             sys.exit(0)
