@@ -41,6 +41,7 @@ from rhodecode.model.db import Repository
 from rhodecode.model.pull_request import PullRequestModel
 from webob.exc import HTTPBadRequest
 from rhodecode.lib.diffs import LimitedDiffContainer
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -136,7 +137,7 @@ class CompareController(BaseRepoController):
             # get parent of
             # rev start to include it in the diff
             _cs = other_repo.scm_instance.get_changeset(rev_start)
-            rev_start = _cs.parents[0].raw_id
+            rev_start = _cs.parents[0].raw_id if _cs.parents else EmptyChangeset()
             org_ref = ('rev', rev_start)
             other_ref = ('rev', rev_end)
             #if we cherry pick it's not remote, make the other_repo org_repo
