@@ -996,24 +996,29 @@ def urlify_changesets(text_, repository):
     :param text_:
     :param repository:
     """
-
-    URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
+    from pylons import url  # doh, we need to re-import url to mock it later
+    URL_PAT = re.compile(r'(?:^|\s)([0-9a-fA-F]{12,40})(?:$|\s)')
 
     def url_func(match_obj):
         rev = match_obj.groups()[0]
         pref = ''
+        suf = ''
         if match_obj.group().startswith(' '):
             pref = ' '
+        if match_obj.group().endswith(' '):
+            suf = ' '
         tmpl = (
         '%(pref)s<a class="%(cls)s" href="%(url)s">'
         '%(rev)s'
         '</a>'
+        '%(suf)s'
         )
         return tmpl % {
          'pref': pref,
          'cls': 'revision-link',
          'url': url('changeset_home', repo_name=repository, revision=rev),
          'rev': rev,
+         'suf': suf
         }
 
     newtext = URL_PAT.sub(url_func, text_)

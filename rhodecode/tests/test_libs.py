@@ -66,41 +66,37 @@ TEST_URLS += [
 
 class TestLibs(unittest.TestCase):
 
-    def test_uri_filter(self):
+    @parameterized.expand(TEST_URLS)
+    def test_uri_filter(self, test_url, expected, expected_creds):
         from rhodecode.lib.utils2 import uri_filter
+        self.assertEqual(uri_filter(test_url), expected)
 
-        for url in TEST_URLS:
-            self.assertEqual(uri_filter(url[0]), url[1])
-
-    def test_credentials_filter(self):
+    @parameterized.expand(TEST_URLS)
+    def test_credentials_filter(self, test_url, expected, expected_creds):
         from rhodecode.lib.utils2 import credentials_filter
+        self.assertEqual(credentials_filter(test_url), expected_creds)
 
-        for url in TEST_URLS:
-            self.assertEqual(credentials_filter(url[0]), url[2])
-
-    def test_str2bool(self):
+    @parameterized.expand([('t', True),
+                           ('true', True),
+                           ('y', True),
+                           ('yes', True),
+                           ('on', True),
+                           ('1', True),
+                           ('Y', True),
+                           ('yeS', True),
+                           ('Y', True),
+                           ('TRUE', True),
+                           ('T', True),
+                           ('False', False),
+                           ('F', False),
+                           ('FALSE', False),
+                           ('0', False),
+                           ('-1', False),
+                           ('', False)
+    ])
+    def test_str2bool(self, str_bool, expected):
         from rhodecode.lib.utils2 import str2bool
-        test_cases = [
-            ('t', True),
-            ('true', True),
-            ('y', True),
-            ('yes', True),
-            ('on', True),
-            ('1', True),
-            ('Y', True),
-            ('yeS', True),
-            ('Y', True),
-            ('TRUE', True),
-            ('T', True),
-            ('False', False),
-            ('F', False),
-            ('FALSE', False),
-            ('0', False),
-            ('-1', False),
-            ('', False), ]
-
-        for case in test_cases:
-            self.assertEqual(str2bool(case[0]), case[1])
+        self.assertEqual(str2bool(str_bool), expected)
 
     def test_mention_extractor(self):
         from rhodecode.lib.utils2 import extract_mentioned_users
@@ -212,3 +208,47 @@ class TestLibs(unittest.TestCase):
                 em = 'test@foo.com'
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'https://server.com/%s/%s' % (_md5(em), 24)
+
+    @parameterized.expand([
+      ("",
+       ""),
+      ("git-svn-id: https://svn.apache.org/repos/asf/libcloud/trunk@1441655 13f79535-47bb-0310-9956-ffa450edef68",
+       "git-svn-id: https://svn.apache.org/repos/asf/libcloud/trunk@1441655 13f79535-47bb-0310-9956-ffa450edef68"),
+      ("from rev 000000000000",
+       "from rev url[000000000000]"),
+      ("from rev 000000000000123123 also rev 000000000000",
+       "from rev url[000000000000123123] also rev url[000000000000]"),
+      ("this should-000 00",
+       "this should-000 00"),
+      ("longtextffffffffff rev 123123123123",
+       "longtextffffffffff rev url[123123123123]"),
+      ("rev ffffffffffffffffffffffffffffffffffffffffffffffffff",
+       "rev ffffffffffffffffffffffffffffffffffffffffffffffffff"),
+      ("ffffffffffff some text traalaa",
+       "url[ffffffffffff] some text traalaa"),
+       ("""Multi line
+       123123123123 
+       some text 123123123123""",
+       """Multi line
+       url[123123123123] 
+       some text url[123123123123]""")
+    ])
+    def test_urlify_changesets(self, sample, expected):
+        import re
+
+        def fake_url(self, *args, **kwargs):
+            return '/some-url'
+
+        #quickly change expected url[] into a link
+        URL_PAT = re.compile(r'(?:url\[)(.+?)(?:\])')
+
+        def url_func(match_obj):
+            _url = match_obj.groups()[0]
+            tmpl = """<a class="revision-link" href="/some-url">%s</a>"""
+            return tmpl % _url
+
+        expected = URL_PAT.sub(url_func, expected)
+
+        with mock.patch('pylons.url', fake_url):
+            from rhodecode.lib.helpers import urlify_changesets
+            self.assertEqual(urlify_changesets(sample, 'repo_name'), expected)
