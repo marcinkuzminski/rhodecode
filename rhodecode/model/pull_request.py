@@ -55,7 +55,7 @@ class PullRequestModel(BaseModel):
         repo = self._get_repo(repo)
         return PullRequest.query()\
                 .filter(PullRequest.other_repo == repo)\
-                .order_by(PullRequest.created_on)\
+                .order_by(PullRequest.created_on.desc())\
                 .all()
 
     def create(self, created_by, org_repo, org_ref, other_repo, other_ref,
@@ -78,7 +78,7 @@ class PullRequestModel(BaseModel):
         self.sa.add(new)
         Session().flush()
         #members
-        for member in reviewers:
+        for member in set(reviewers):
             _usr = self._get_user(member)
             reviewer = PullRequestReviewers(_usr, new)
             self.sa.add(reviewer)
@@ -116,6 +116,7 @@ class PullRequestModel(BaseModel):
             'pr_url': pr_url,
             'pr_revisions': revisions
         }
+
         notif.create(created_by=created_by_user, subject=subject, body=body,
                      recipients=reviewers,
                      type_=Notification.TYPE_PULL_REQUEST, email_kwargs=kwargs)

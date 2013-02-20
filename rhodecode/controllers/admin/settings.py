@@ -477,12 +477,16 @@ class SettingsController(BaseController):
         c.my_pull_requests = PullRequest.query()\
                                 .filter(PullRequest.user_id ==
                                         self.rhodecode_user.user_id)\
+                                .order_by(PullRequest.created_on.desc())\
                                 .all()
-        c.participate_in_pull_requests = \
+
+        c.participate_in_pull_requests = sorted(
             [x.pull_request for x in PullRequestReviewers.query()\
                                     .filter(PullRequestReviewers.user_id ==
                                             self.rhodecode_user.user_id)\
-                                    .all()]
+                                    .all()],
+                                    key=lambda o: o.created_on, reverse=True)
+
         return render('admin/users/user_edit_my_account_pullrequests.html')
 
     @NotAnonymous()
