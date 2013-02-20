@@ -13,7 +13,8 @@ the best performance.
   more important to have faster disk than faster CPU.
 
 * Slowness on initial page can be easily fixed by grouping repositories, and/or
-  increasing cache size (see below)
+  increasing cache size (see below), that includes using lightweight dashboard
+  option and vcs_full_cache setting in .ini file
 
 
 Follow these few steps to improve performance of RhodeCode system.
@@ -41,10 +42,23 @@ Follow these few steps to improve performance of RhodeCode system.
 
 3. Scale RhodeCode horizontally
 
-    - running two or more instances on the same server can speed up things a lot
-    - load balance using round robin or ip hash
-    - you need to handle consistent user session storage by switching to
-      db sessions, client side sessions or sharing session data folder across
-      instances. See http://beaker.readthedocs.org/ docs for details.
-    - remember that each instance needs it's own .ini file and unique
-      `instance_id` set in them
+    Scaling horizontally can give huge performance increase when dealing with
+    large traffic (large amount of users, CI servers etc). RhodeCode can be
+    scaled horizontally on one (recommended) or multiple machines. In order
+    to scale horizontally you need to do the following:
+    
+    - each instance needs it's own .ini file and unique `instance_id` set in them
+    - each instance `data` storage needs to be configured to be stored on a 
+      shared disk storage, preferably together with repositories. This `data`
+      dir contains template caches, sessions, whoosh index and it's used for
+      tasks locking (so it's safe across multiple instances). Set the
+      `cache_dir`, `index_dir`, `beaker.cache.data_dir`, `beaker.cache.lock_dir`
+      variables in each .ini file to shared location across RhodeCode instances 
+    - if celery is used each instance should run separate celery instance, but
+      the message broken should be common to all of them (ex one rabbitmq
+      shared server)    
+    - load balance using round robin or ip hash, recommended is writing LB rules
+      that will separate regular user traffic from automated processes like CI
+      servers or build bots.
+
+
