@@ -286,6 +286,20 @@ class ReposController(BaseRepoController):
             h.not_mapped_error(repo_name)
             return redirect(url('repos'))
         try:
+            _forks = repo.forks.count()
+            if _forks and request.POST.get('forks'):
+                do = request.POST['forks']
+                if do == 'detach_forks':
+                    for r in repo.forks:
+                        log.debug('Detaching fork %s from repo %s' % (r, repo))
+                        r.fork = None
+                        Session().add(r)
+                    h.flash(_('detached %s forks') % _forks, category='success')
+                elif do == 'delete_forks':
+                    for r in repo.forks:
+                        log.debug('Deleting fork %s of repo %s' % (r, repo))
+                        repo_model.delete(r)
+                    h.flash(_('deleted %s forks') % _forks, category='success')
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
                               repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
