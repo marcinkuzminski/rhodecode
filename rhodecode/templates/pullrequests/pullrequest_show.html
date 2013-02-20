@@ -28,7 +28,7 @@
       <div id="summary" class="fields">
          <div class="field">
           <div class="label-summary">
-              <label>${_('Status')}:</label>
+              <label>${_('Review status')}:</label>
           </div>
           <div class="input">
             <div class="changeset-status-container" style="float:none;clear:both">
@@ -140,7 +140,7 @@
                   <div style="float:left">${member.full_name} (${_('owner') if c.pull_request.user_id == member.user_id else _('reviewer')})</div>
                   <input type="hidden" value="${member.user_id}" name="review_members" />
                   %if not c.pull_request.is_closed() and (h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.user_id == c.rhodecode_user.user_id):
-                  <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
+                  <span class="delete_icon action_button" onclick="removeReviewMember(${member.user_id})"></span>
                   %endif
                 </div>
               </li>
@@ -152,11 +152,11 @@
             %if h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.author.user_id == c.rhodecode_user.user_id:
             <div class="reviewer_ac">
                ${h.text('user', class_='yui-ac-input')}
-               <span class="help-block">${_('Add reviewer to this pull request.')}</span>
+               <span class="help-block">${_('Add or remove reviewer to this pull request.')}</span>
                <div id="reviewers_container"></div>
             </div>
             <div style="padding:0px 10px">
-             <span id="update_pull_request" class="ui-btn xsmall">${_('save')}</span>
+             <span id="update_pull_request" class="ui-btn xsmall">${_('save changes')}</span>
             </div>
             %endif
           </div>
@@ -167,9 +167,14 @@
     <script>
     var _USERS_AC_DATA = ${c.users_array|n};
     var _GROUPS_AC_DATA = ${c.users_groups_array|n};
+    // TODO: switch this to pyroutes
     AJAX_COMMENT_URL = "${url('pullrequest_comment',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}";
     AJAX_COMMENT_DELETE_URL = "${url('pullrequest_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";
-    AJAX_UPDATE_PULLREQUEST = "${url('pullrequest_update',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}"
+
+    pyroutes.register('pullrequest_comment', "${url('pullrequest_comment',repo_name='%(repo_name)s',pull_request_id='%(pull_request_id)s')}", ['repo_name', 'pull_request_id']);
+    pyroutes.register('pullrequest_comment_delete', "${url('pullrequest_comment_delete',repo_name='%(repo_name)s',comment_id='%(comment_id)s')}", ['repo_name', 'comment_id']);
+    pyroutes.register('pullrequest_update', "${url('pullrequest_update',repo_name='%(repo_name)s',pull_request_id='%(pull_request_id)s')}", ['repo_name', 'pull_request_id']);
+    
     </script>
 
     ## diff block
@@ -228,7 +233,7 @@
           renderInlineComments(file_comments);
 
           YUE.on(YUD.get('update_pull_request'),'click',function(e){
-              updateReviewers();
+              updateReviewers(undefined, "${c.repo_name}", "${c.pull_request.pull_request_id}");
           })
       })
     </script>

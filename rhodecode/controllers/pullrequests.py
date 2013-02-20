@@ -129,16 +129,25 @@ class PullrequestsController(BaseRepoController):
         c.other_repos.extend(c.org_repos)
         c.default_other_repo = org_repo.repo_name
         c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.scm_instance)
+        usr_data = lambda usr: dict(user_id=usr.user_id,
+                                    username=usr.username,
+                                    firstname=usr.firstname,
+                                    lastname=usr.lastname,
+                                    gravatar_link=h.gravatar_url(usr.email, 14))
         other_repos_info[org_repo.repo_name] = {
+            'user': usr_data(org_repo.user),
             'description': org_repo.description,
-            'revs': h.select('other_ref', c.default_other_ref, c.default_other_refs, class_='refs')
+            'revs': h.select('other_ref', c.default_other_ref,
+                             c.default_other_refs, class_='refs')
         }
 
-        # gather forks and add to this list ... even though it is rare to request forks to pull their parent
+        # gather forks and add to this list ... even though it is rare to 
+        # request forks to pull their parent
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, fork.repo_name))
             refs, default_ref = self._get_repo_refs(fork.scm_instance)
             other_repos_info[fork.repo_name] = {
+                'user': usr_data(fork.user),
                 'description': fork.description,
                 'revs': h.select('other_ref', default_ref, refs, class_='refs')
             }
@@ -149,12 +158,15 @@ class PullrequestsController(BaseRepoController):
             c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.parent.scm_instance)
             c.other_repos.append((org_repo.parent.repo_name, org_repo.parent.repo_name))
             other_repos_info[org_repo.parent.repo_name] = {
+                'user': usr_data(org_repo.parent.user),
                 'description': org_repo.parent.description,
-                'revs': h.select('other_ref', c.default_other_ref, c.default_other_refs, class_='refs')
+                'revs': h.select('other_ref', c.default_other_ref,
+                                 c.default_other_refs, class_='refs')
             }
 
         c.other_repos_info = json.dumps(other_repos_info)
-        c.review_members = [org_repo.user]
+        # other repo owner
+        c.review_members = []
         return render('/pullrequests/pullrequest.html')
 
     @NotAnonymous()

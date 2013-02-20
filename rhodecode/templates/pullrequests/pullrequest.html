@@ -67,7 +67,7 @@
                   <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
                   <div style="float:left">${member.full_name} (${_('owner')})</div>
                   <input type="hidden" value="${member.user_id}" name="review_members" />
-                  <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
+                  <span class="delete_icon action_button" onclick="removeReviewMember(${member.user_id})"></span>
                 </div>
               </li>
             %endfor
@@ -161,12 +161,18 @@
       ypjax(url,'pull_request_overview', function(data){
           var sel_box = YUQ('#pull_request_form #other_repo')[0];
           var repo_name = sel_box.options[sel_box.selectedIndex].value;
+          var _data = other_repos_info[repo_name];
           YUD.get('pull_request_overview_url').href = url;
           YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
           YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
           YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
           // select back the revision that was just compared
           setSelectValue(YUD.get('other_ref'), rev_data['other_ref']);
+          // reset && add the reviewer based on selected repo
+          YUD.get('review_members').innerHTML = '';
+          addReviewMember(_data.user.user_id, _data.user.firstname,
+        		          _data.user.lastname, _data.user.username,
+        		          _data.user.gravatar_link);
       })
   }
 

@@ -53,9 +53,8 @@
                 'Selection link': "${_('Selection link')}",
             };
             var _TM = TRANSLATION_MAP;
+
             var TOGGLE_FOLLOW_URL  = "${h.url('toggle_following')}";
-            var LAZY_CS_URL = "${h.url('changeset_info', repo_name='__NAME__', revision='__REV__')}";
-            var REPO_SIZE_URL = "${h.url('repo_size', repo_name='__NAME__')}";
 
             </script>
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js', ver=c.rhodecode_version)}"></script>
@@ -64,6 +63,7 @@
             <![endif]-->
             <script type="text/javascript" src="${h.url('/js/yui.flot.js', ver=c.rhodecode_version)}"></script>
             <script type="text/javascript" src="${h.url('/js/native.history.js', ver=c.rhodecode_version)}"></script>
+            <script type="text/javascript" src="${h.url('/js/pyroutes_map.js', ver=c.rhodecode_version)}"></script>
             <script type="text/javascript" src="${h.url('/js/rhodecode.js', ver=c.rhodecode_version)}"></script>
            ## EXTRA FOR JS
            ${self.js_extra()}
@@ -82,6 +82,10 @@
               tooltip_activate();
               show_more_event();
               show_changeset_tooltip();
+              // routes registration
+              pyroutes.register('toggle_following', "${h.url('toggle_following')}");
+              pyroutes.register('changeset_info', "${h.url('changeset_info', repo_name='%(repo_name)s', revision='%(revision)s')}", ['repo_name', 'revision']);
+              pyroutes.register('repo_size', "${h.url('repo_size', repo_name='%(repo_name)s')}", ['repo_name']);              
            })
             </script>
         </%def>
