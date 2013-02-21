@@ -9,9 +9,9 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(_(u'Home'),h.url('/'))}
     &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
+    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
     &raquo;
-    ${_('Changeset')} - <span class='hash'>r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}</span>
+    ${_('changeset')} - <span class='hash'>r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}</span>
 </%def>
 
 <%def name="page_nav()">
