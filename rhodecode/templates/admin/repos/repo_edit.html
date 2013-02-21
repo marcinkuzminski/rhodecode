@@ -292,10 +292,10 @@
            <div class="fields">
                ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
               %if c.repo_info.forks.count():
-                    - ${ungettext('this repository has %s fork', 'this repository has %s forks', c.repo_info.forks.count()) % c.repo_info.forks.count()} 
+                    - ${ungettext('this repository has %s fork', 'this repository has %s forks', c.repo_info.forks.count()) % c.repo_info.forks.count()}
                     <input type="radio" name="forks" value="detach_forks" checked="checked"/> <label for="forks">${_('Detach forks')}</label>
                     <input type="radio" name="forks" value="delete_forks" /> <label for="forks">${_('Delete forks')}</label>
-              %endif               
+              %endif
            </div>
            <div class="field" style="border:none;color:#888">
            <ul>

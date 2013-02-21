@@ -364,7 +364,7 @@ class GitChangeset(BaseChangeset):
         else:
             frmt = 'tar'
         _git_path = rhodecode.CONFIG.get('git_path', 'git')
-        cmd = '%s archive --format=%s --prefix=%s/ %s' % (_git_path, 
+        cmd = '%s archive --format=%s --prefix=%s/ %s' % (_git_path,
                                                 frmt, prefix, self.raw_id)
         if kind == 'tgz':
             cmd += ' | gzip -9'

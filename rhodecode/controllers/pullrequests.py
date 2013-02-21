@@ -141,7 +141,7 @@ class PullrequestsController(BaseRepoController):
                              c.default_other_refs, class_='refs')
         }
 
-        # gather forks and add to this list ... even though it is rare to 
+        # gather forks and add to this list ... even though it is rare to
         # request forks to pull their parent
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, fork.repo_name))

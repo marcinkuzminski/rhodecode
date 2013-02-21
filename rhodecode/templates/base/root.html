@@ -85,7 +85,7 @@
               // routes registration
               pyroutes.register('toggle_following', "${h.url('toggle_following')}");
               pyroutes.register('changeset_info', "${h.url('changeset_info', repo_name='%(repo_name)s', revision='%(revision)s')}", ['repo_name', 'revision']);
-              pyroutes.register('repo_size', "${h.url('repo_size', repo_name='%(repo_name)s')}", ['repo_name']);              
+              pyroutes.register('repo_size', "${h.url('repo_size', repo_name='%(repo_name)s')}", ['repo_name']);
            })
             </script>
         </%def>

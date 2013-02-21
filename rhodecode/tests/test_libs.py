@@ -227,10 +227,10 @@ class TestLibs(unittest.TestCase):
       ("ffffffffffff some text traalaa",
        "url[ffffffffffff] some text traalaa"),
        ("""Multi line
-       123123123123 
+       123123123123
        some text 123123123123""",
        """Multi line
-       url[123123123123] 
+       url[123123123123]
        some text url[123123123123]""")
     ])
     def test_urlify_changesets(self, sample, expected):
