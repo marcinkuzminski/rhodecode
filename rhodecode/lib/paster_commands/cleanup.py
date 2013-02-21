@@ -125,23 +125,26 @@ class Command(BasePasterCommand):
         if remove:
             for path, date_ in to_remove:
                 print >> sys.stdout, 'removing repository %s' % path
-                shutil.rmtree(path))
+                shutil.rmtree(path)
         else:
             print 'nothing done exiting...'
             sys.exit(0)
 
     def update_parser(self):
-        self.parser.add_option('--older-than',
-                          action='store',
-                          dest='older_than',
-                          help=(
-                            "only remove repos that have been removed "
-                            "at least given time ago "
-                            "ex. --older-than=30d deletes repositores "
-                            "removed more than 30days ago. Possible options "
-                            "d[ays]/h[ours]/m[inutes]/s[seconds]. OPTIONAL"),
-                          )
-        self.parser.add_option('--dont-ask',
-                               action='store_true',
-                               dest='dont_ask',
-                               help=("Don't ask to remove repos"))
+        self.parser.add_option(
+            '--older-than',
+            action='store',
+            dest='older_than',
+            help=("only remove repos that have been removed "
+                 "at least given time ago "
+                 "ex. --older-than=30d deletes repositores "
+                 "removed more than 30days ago. Possible options "
+                 "d[ays]/h[ours]/m[inutes]/s[seconds]. OPTIONAL")
+            )
+
+        self.parser.add_option(
+            '--dont-ask',
+            action="store_true",
+            dest="dont_ask",
+            help="Don't ask to remove repos"
+        )
