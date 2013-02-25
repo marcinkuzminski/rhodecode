@@ -207,7 +207,7 @@ class GitRepository(BaseRepository):
                 else:
                     return Repo.init(self.path)
             else:
-                return Repo(self.path)
+                return self._repo
         except (NotGitRepository, OSError), err:
             raise RepositoryError(err)
 
