@@ -49,8 +49,8 @@
           <div class="changeset_header">
               <div class="changeset_file">
                   ${h.safe_unicode(filenode_path)} |
-                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.org_ref)}">${c.org_ref_type}@${c.org_ref}</a> -&gt;
-                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.other_ref)}">${c.other_ref_type}@${c.other_ref}</a>
+                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.org_ref)}" title="${_('show file at latest version in this repo')}">${c.org_ref_type}@${h.short_id(c.org_ref) if c.org_ref_type=='rev' else c.org_ref}</a> -&gt;
+                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.other_ref)}" title="${_('show file at initial version in this repo')}">${c.other_ref_type}@${h.short_id(c.other_ref) if c.other_ref_type=='rev' else c.other_ref}</a>
               </div>
           </div>
       </div>
