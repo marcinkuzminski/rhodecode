@@ -978,6 +978,11 @@ def fancy_file_stats(stats):
 
 
 def urlify_text(text_):
+    """
+    Extrac urls from text and make html links out of them
+
+    :param text_:
+    """
 
     url_pat = re.compile(r'''(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'''
                          '''|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)''')
@@ -994,7 +999,7 @@ def urlify_changesets(text_, repository):
     Extract revision ids from changeset and make link from them
 
     :param text_:
-    :param repository:
+    :param repository: repo name to build the URL with
     """
     from pylons import url  # doh, we need to re-import url to mock it later
     URL_PAT = re.compile(r'(?:^|\s)([0-9a-fA-F]{12,40})(?:$|\s)')
@@ -1037,6 +1042,7 @@ def urlify_commit(text_, repository=None, link_=None):
     :param link_: changeset link
     """
     import traceback
+    from pylons import url  # doh, we need to re-import url to mock it later
 
     def escaper(string):
         return string.replace('<', '&lt;').replace('>', '&gt;')
@@ -1054,6 +1060,9 @@ def urlify_commit(text_, repository=None, link_=None):
 
     # urlify changesets - extrac revisions and make link out of them
     newtext = urlify_changesets(escaper(text_), repository)
+
+    # extract http/https links and make them real urls
+    newtext = urlify_text(newtext)
 
     try:
         from rhodecode import CONFIG
