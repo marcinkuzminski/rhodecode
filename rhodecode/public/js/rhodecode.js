@@ -302,12 +302,25 @@ var pyroutes = (function() {
             }
             if (matchlist.hasOwnProperty(route_name)) {
                 var route = matchlist[route_name];
+                // param substitution
                 for(var i=0; i < route[1].length; i++) {
 
                    if (!params.hasOwnProperty(route[1][i]))
                         throw new Error(route[1][i] + ' missing in "' + route_name + '" route generation');
                 }
                 result = sprintf(route[0], params);
+                
+                var ret = [];
+                //extra params => GET
+                for(param in params){
+                	if (route[1].indexOf(param) == -1){
+                		ret.push(encodeURIComponent(param) + "=" + encodeURIComponent(params[param]));	
+                	}
+                }
+                var _parts = ret.join("&");
+                if(_parts){
+                	result = result +'?'+ _parts
+                }
             }
 
             return result;
