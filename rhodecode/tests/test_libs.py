@@ -209,6 +209,21 @@ class TestLibs(unittest.TestCase):
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'https://server.com/%s/%s' % (_md5(em), 24)
 
+    def _quick_url(self, text, tmpl="""<a class="revision-link" href="%s">%s</a>""", url_=None):
+        """
+        Changes `some text url[foo]` => `some text <a href="/">foo</a>
+
+        :param text:
+        """
+        import re
+        #quickly change expected url[] into a link
+        URL_PAT = re.compile(r'(?:url\[)(.+?)(?:\])')
+
+        def url_func(match_obj):
+            _url = match_obj.groups()[0]
+            return tmpl % (url_ or '/some-url', _url)
+        return URL_PAT.sub(url_func, text)
+
     @parameterized.expand([
       ("",
        ""),
@@ -228,27 +243,48 @@ class TestLibs(unittest.TestCase):
        "url[ffffffffffff] some text traalaa"),
        ("""Multi line
        123123123123
-       some text 123123123123""",
+       some text 123123123123
+       sometimes !
+       """,
        """Multi line
        url[123123123123]
-       some text url[123123123123]""")
+       some text url[123123123123]
+       sometimes !
+       """)
     ])
     def test_urlify_changesets(self, sample, expected):
-        import re
-
         def fake_url(self, *args, **kwargs):
             return '/some-url'
 
-        #quickly change expected url[] into a link
-        URL_PAT = re.compile(r'(?:url\[)(.+?)(?:\])')
-
-        def url_func(match_obj):
-            _url = match_obj.groups()[0]
-            tmpl = """<a class="revision-link" href="/some-url">%s</a>"""
-            return tmpl % _url
-
-        expected = URL_PAT.sub(url_func, expected)
+        expected = self._quick_url(expected)
 
         with mock.patch('pylons.url', fake_url):
             from rhodecode.lib.helpers import urlify_changesets
             self.assertEqual(urlify_changesets(sample, 'repo_name'), expected)
+
+    @parameterized.expand([
+      ("",
+       "",
+       ""),
+      ("https://svn.apache.org/repos",
+       "url[https://svn.apache.org/repos]",
+       "https://svn.apache.org/repos"),
+      ("http://svn.apache.org/repos",
+       "url[http://svn.apache.org/repos]",
+       "http://svn.apache.org/repos"),
+      ("from rev a also rev http://google.com",
+       "from rev a also rev url[http://google.com]",
+       "http://google.com"),
+       ("""Multi line
+       https://foo.bar.com
+       some text lalala""",
+       """Multi line
+       url[https://foo.bar.com]
+       some text lalala""",
+       "https://foo.bar.com")
+    ])
+    def test_urlify_test(self, sample, expected, url_):
+        from rhodecode.lib.helpers import urlify_text
+        expected = self._quick_url(expected,
+                                   tmpl="""<a href="%s">%s</a>""", url_=url_)
+        self.assertEqual(urlify_text(sample), expected)

@@ -1004,21 +1004,16 @@ def urlify_changesets(text_, repository):
     :param repository: repo name to build the URL with
     """
     from pylons import url  # doh, we need to re-import url to mock it later
-    URL_PAT = re.compile(r'(?:^|\s)([0-9a-fA-F]{12,40})(?:$|\s)')
+    URL_PAT = re.compile(r'(^|\s)([0-9a-fA-F]{12,40})($|\s)')
 
     def url_func(match_obj):
-        rev = match_obj.groups()[0]
-        pref = ''
-        suf = ''
-        if match_obj.group().startswith(' '):
-            pref = ' '
-        if match_obj.group().endswith(' '):
-            suf = ' '
+        rev = match_obj.groups()[1]
+        pref = match_obj.groups()[0]
+        suf = match_obj.groups()[2]
+
         tmpl = (
         '%(pref)s<a class="%(cls)s" href="%(url)s">'
-        '%(rev)s'
-        '</a>'
-        '%(suf)s'
+        '%(rev)s</a>%(suf)s'
         )
         return tmpl % {
          'pref': pref,
