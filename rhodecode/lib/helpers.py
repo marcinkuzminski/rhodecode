@@ -977,7 +977,7 @@ def fancy_file_stats(stats):
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
 
-def urlify_text(text_):
+def urlify_text(text_, safe=True):
     """
     Extrac urls from text and make html links out of them
 
@@ -990,8 +990,10 @@ def urlify_text(text_):
     def url_func(match_obj):
         url_full = match_obj.groups()[0]
         return '<a href="%(url)s">%(url)s</a>' % ({'url': url_full})
-
-    return literal(url_pat.sub(url_func, text_))
+    _newtext = url_pat.sub(url_func, text_)
+    if safe:
+        return literal(_newtext)
+    return _newtext
 
 
 def urlify_changesets(text_, repository):
@@ -1062,7 +1064,7 @@ def urlify_commit(text_, repository=None, link_=None):
     newtext = urlify_changesets(escaper(text_), repository)
 
     # extract http/https links and make them real urls
-    newtext = urlify_text(newtext)
+    newtext = urlify_text(newtext, safe=False)
 
     try:
         from rhodecode import CONFIG
