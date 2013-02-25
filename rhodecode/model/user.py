@@ -42,6 +42,7 @@ from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserEmailMap, UserIpMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
+from rhodecode.model.meta import Session
 
 
 log = logging.getLogger(__name__)
@@ -316,11 +317,61 @@ class UserModel(BaseModel):
 
     def reset_password_link(self, data):
         from rhodecode.lib.celerylib import tasks, run_task
-        run_task(tasks.send_password_link, data['email'])
+        from rhodecode.model.notification import EmailNotificationModel
+        user_email = data['email']
+        try:
+            user = User.get_by_email(user_email)
+            if user:
+                log.debug('password reset user found %s' % user)
+                link = url('reset_password_confirmation', key=user.api_key,
+                           qualified=True)
+                reg_type = EmailNotificationModel.TYPE_PASSWORD_RESET
+                body = EmailNotificationModel().get_email_tmpl(reg_type,
+                                                    **{'user': user.short_contact,
+                                                       'reset_url': link})
+                log.debug('sending email')
+                run_task(tasks.send_email, user_email,
+                         _("password reset link"), body, body)
+                log.info('send new password mail to %s' % user_email)
+            else:
+                log.debug("password reset email %s not found" % user_email)
+        except:
+            log.error(traceback.format_exc())
+            return False
+
+        return True
 
     def reset_password(self, data):
         from rhodecode.lib.celerylib import tasks, run_task
-        run_task(tasks.reset_user_password, data['email'])
+        from rhodecode.lib import auth
+        user_email = data['email']
+        try:
+            try:
+                user = User.get_by_email(user_email)
+                new_passwd = auth.PasswordGenerator().gen_password(8,
+                                 auth.PasswordGenerator.ALPHABETS_BIG_SMALL)
+                if user:
+                    user.password = auth.get_crypt_password(new_passwd)
+                    user.api_key = auth.generate_api_key(user.username)
+                    Session().add(user)
+                    Session().commit()
+                    log.info('change password for %s' % user_email)
+                if new_passwd is None:
+                    raise Exception('unable to generate new password')
+            except:
+                log.error(traceback.format_exc())
+                Session().rollback()
+
+            run_task(tasks.send_email, user_email,
+                     _('Your new password'),
+                     _('Your new RhodeCode password:%s') % (new_passwd))
+            log.info('send new password mail to %s' % user_email)
+
+        except:
+            log.error('Failed to update user password')
+            log.error(traceback.format_exc())
+
+        return True
 
     def fill_data(self, auth_user, user_id=None, api_key=None):
         """
