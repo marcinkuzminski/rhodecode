@@ -102,7 +102,17 @@ class GitRepository(BaseRepository):
         :param opts: env options to pass into Subprocess command
         """
 
-        _copts = ['-c', 'core.quotepath=false', ]
+        if '_bare' in opts:
+            _copts = []
+            del opts['_bare']
+        else:
+            _copts = ['-c', 'core.quotepath=false', ]
+        safe_call = False
+        if '_safe' in opts:
+            #no exc on failure
+            del opts['_safe']
+            safe_call = True
+
         _str_cmd = False
         if isinstance(cmd, basestring):
             cmd = [cmd]
@@ -126,9 +136,13 @@ class GitRepository(BaseRepository):
             _opts.update(opts)
             p = subprocessio.SubprocessIOChunker(cmd, **_opts)
         except (EnvironmentError, OSError), err:
-            log.error(traceback.format_exc())
-            raise RepositoryError("Couldn't run git command (%s).\n"
-                                  "Original error was:%s" % (cmd, err))
+            tb_err = ("Couldn't run git command (%s).\n"
+                      "Original error was:%s\n" % (cmd, err))
+            log.error(tb_err)
+            if safe_call:
+                return '', err
+            else:
+                raise RepositoryError(tb_err)
 
         return ''.join(p.output), ''.join(p.error)
 

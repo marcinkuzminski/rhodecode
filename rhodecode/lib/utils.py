@@ -748,7 +748,8 @@ def check_git_version():
     from rhodecode.lib.vcs.backends.git.repository import GitRepository
     from distutils.version import StrictVersion
 
-    stdout, stderr = GitRepository._run_git_command('--version')
+    stdout, stderr = GitRepository._run_git_command('--version', _bare=True,
+                                                    _safe=True)
 
     ver = (stdout.split(' ')[-1] or '').strip() or '0.0.0'
     if len(ver.split('.')) > 3:
