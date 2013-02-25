@@ -474,18 +474,23 @@ class SettingsController(BaseController):
 
     @NotAnonymous()
     def my_account_my_pullrequests(self):
-        c.my_pull_requests = PullRequest.query()\
+        c.show_closed = request.GET.get('pr_show_closed')
+
+        def _filter(pr):
+            s = sorted(pr, key=lambda o: o.created_on, reverse=True)
+            if not c.show_closed:
+                s = filter(lambda p: p.status != PullRequest.STATUS_CLOSED, s)
+            return s
+
+        c.my_pull_requests = _filter(PullRequest.query()\
                                 .filter(PullRequest.user_id ==
                                         self.rhodecode_user.user_id)\
-                                .order_by(PullRequest.created_on.desc())\
-                                .all()
+                                .all())
 
-        c.participate_in_pull_requests = sorted(
-            [x.pull_request for x in PullRequestReviewers.query()\
-                                    .filter(PullRequestReviewers.user_id ==
-                                            self.rhodecode_user.user_id)\
-                                    .all()],
-                                    key=lambda o: o.created_on, reverse=True)
+        c.participate_in_pull_requests = _filter([
+                    x.pull_request for x in PullRequestReviewers.query()\
+                    .filter(PullRequestReviewers.user_id ==
+                            self.rhodecode_user.user_id).all()])
 
         return render('admin/users/user_edit_my_account_pullrequests.html')
 

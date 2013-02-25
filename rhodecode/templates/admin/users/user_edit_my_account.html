@@ -102,6 +102,7 @@
 </div>
 
 <script type="text/javascript">
+pyroutes.register('admin_settings_my_pullrequests', "${url('admin_settings_my_pullrequests')}", []);
 
 var show_perms = function(e){
     YUD.addClass('show_perms', 'current');
@@ -145,8 +146,15 @@ var show_pullrequests = function(e){
     YUD.setStyle('pullrequests_container','display','');
     YUD.setStyle('q_filter','display','none');
 
-    var url = "${h.url('admin_settings_my_pullrequests')}";
-    ypjax(url, 'pullrequests_container');
+    var url = pyroutes.url('admin_settings_my_pullrequests');
+    if(YUD.get('show_closed') && YUD.get('show_closed').checked) {
+    	var url = pyroutes.url('admin_settings_my_pullrequests', {'pr_show_closed': '1'});
+    }
+    ypjax(url, 'pullrequests_container', function(){
+        YUE.on('show_closed','change',function (e) {
+            show_pullrequests(e);
+        });    	
+    });
 }
 YUE.on('show_pullrequests','click',function(e){
     show_pullrequests(e)
@@ -270,6 +278,7 @@ function table_renderer(data){
           clearTimeout(filterTimeout);
           filterTimeout = setTimeout(updateFilter,600);
       });
+
     }
 </script>
 </%def>
