@@ -38,7 +38,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.permission import PermissionModel
 from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap
 
@@ -125,7 +125,7 @@ def get_users_group_or_error(usersgroupid):
 
     :param userid:
     """
-    users_group = UsersGroupModel().get_group(usersgroupid)
+    users_group = UserGroupModel().get_group(usersgroupid)
     if users_group is None:
         raise JSONRPCError('user group `%s` does not exist' % usersgroupid)
     return users_group
@@ -474,7 +474,7 @@ class ApiController(JSONRPCController):
         """
 
         result = []
-        for users_group in UsersGroupModel().get_all():
+        for users_group in UserGroupModel().get_all():
             result.append(users_group.get_api_data())
         return result
 
@@ -488,12 +488,12 @@ class ApiController(JSONRPCController):
         :param active:
         """
 
-        if UsersGroupModel().get_by_name(group_name):
+        if UserGroupModel().get_by_name(group_name):
             raise JSONRPCError("user group `%s` already exist" % group_name)
 
         try:
             active = Optional.extract(active)
-            ug = UsersGroupModel().create(name=group_name, active=active)
+            ug = UserGroupModel().create(name=group_name, active=active)
             Session().commit()
             return dict(
                 msg='created new user group `%s`' % group_name,
@@ -516,7 +516,7 @@ class ApiController(JSONRPCController):
         users_group = get_users_group_or_error(usersgroupid)
 
         try:
-            ugm = UsersGroupModel().add_user_to_group(users_group, user)
+            ugm = UserGroupModel().add_user_to_group(users_group, user)
             success = True if ugm != True else False
             msg = 'added member `%s` to user group `%s`' % (
                         user.username, users_group.users_group_name
@@ -549,7 +549,7 @@ class ApiController(JSONRPCController):
         users_group = get_users_group_or_error(usersgroupid)
 
         try:
-            success = UsersGroupModel().remove_user_from_group(users_group,
+            success = UserGroupModel().remove_user_from_group(users_group,
                                                                user)
             msg = 'removed member `%s` from user group `%s`' % (
                         user.username, users_group.users_group_name

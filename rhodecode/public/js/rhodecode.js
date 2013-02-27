@@ -1301,7 +1301,7 @@ var MembersAutoComplete = function (divid, cont, users_list, groups_list) {
             return matches;
         };
 
-    // Define a custom search function for the DataSource of usersGroups
+    // Define a custom search function for the DataSource of userGroups
     var matchGroups = function (sQuery) {
             // Case insensitive matching
             var query = sQuery.toLowerCase();
@@ -1719,7 +1719,7 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
             return matches;
         };
 
-    // Define a custom search function for the DataSource of usersGroups
+    // Define a custom search function for the DataSource of userGroups
     var matchGroups = function (sQuery) {
             // Case insensitive matching
             var query = sQuery.toLowerCase();

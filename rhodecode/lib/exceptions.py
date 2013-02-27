@@ -50,7 +50,7 @@ class UserOwnsReposException(Exception):
     pass
 
 
-class UsersGroupsAssignedException(Exception):
+class UserGroupsAssignedException(Exception):
     pass
 
 

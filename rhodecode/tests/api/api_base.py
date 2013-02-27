@@ -6,7 +6,7 @@ from rhodecode.tests import *
 from rhodecode.lib.compat import json
 from rhodecode.lib.auth import AuthUser
 from rhodecode.model.user import UserModel
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
@@ -43,19 +43,19 @@ def api_call(test_obj, params):
     return response
 
 
-TEST_USERS_GROUP = 'test_users_group'
+TEST_USER_GROUP = 'test_users_group'
 
 
-def make_users_group(name=TEST_USERS_GROUP):
-    gr = UsersGroupModel().create(name=name)
-    UsersGroupModel().add_user_to_group(users_group=gr,
+def make_users_group(name=TEST_USER_GROUP):
+    gr = UserGroupModel().create(name=name)
+    UserGroupModel().add_user_to_group(users_group=gr,
                                         user=TEST_USER_ADMIN_LOGIN)
     Session().commit()
     return gr
 
 
-def destroy_users_group(name=TEST_USERS_GROUP):
-    UsersGroupModel().delete(users_group=name, force=True)
+def destroy_users_group(name=TEST_USER_GROUP):
+    UserGroupModel().delete(users_group=name, force=True)
     Session().commit()
 
 
@@ -999,10 +999,10 @@ class BaseTestApi(object):
 
     def test_api_get_users_group(self):
         id_, params = _build_data(self.apikey, 'get_users_group',
-                                  usersgroupid=TEST_USERS_GROUP)
+                                  usersgroupid=TEST_USER_GROUP)
         response = api_call(self, params)
 
-        users_group = UsersGroupModel().get_group(TEST_USERS_GROUP)
+        users_group = UserGroupModel().get_group(TEST_USER_GROUP)
         members = []
         for user in users_group.members:
             user = user.user
@@ -1021,13 +1021,13 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = []
-        for gr_name in [TEST_USERS_GROUP, 'test_users_group2']:
-            users_group = UsersGroupModel().get_group(gr_name)
+        for gr_name in [TEST_USER_GROUP, 'test_users_group2']:
+            users_group = UserGroupModel().get_group(gr_name)
             ret = users_group.get_api_data()
             expected.append(ret)
         self._compare_ok(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group='test_users_group2')
+        UserGroupModel().delete(users_group='test_users_group2')
         Session().commit()
 
     def test_api_create_users_group(self):
@@ -1038,7 +1038,7 @@ class BaseTestApi(object):
 
         ret = {
             'msg': 'created new user group `%s`' % group_name,
-            'users_group': jsonify(UsersGroupModel()\
+            'users_group': jsonify(UserGroupModel()\
                                    .get_by_name(group_name)\
                                    .get_api_data())
         }
@@ -1049,13 +1049,13 @@ class BaseTestApi(object):
 
     def test_api_get_users_group_that_exist(self):
         id_, params = _build_data(self.apikey, 'create_users_group',
-                                  group_name=TEST_USERS_GROUP)
+                                  group_name=TEST_USER_GROUP)
         response = api_call(self, params)
 
-        expected = "user group `%s` already exist" % TEST_USERS_GROUP
+        expected = "user group `%s` already exist" % TEST_USER_GROUP
         self._compare_error(id_, expected, given=response.body)
 
-    @mock.patch.object(UsersGroupModel, 'create', crash)
+    @mock.patch.object(UserGroupModel, 'create', crash)
     def test_api_get_users_group_exception_occurred(self):
         group_name = 'exception_happens'
         id_, params = _build_data(self.apikey, 'create_users_group',
@@ -1067,7 +1067,7 @@ class BaseTestApi(object):
 
     def test_api_add_user_to_users_group(self):
         gr_name = 'test_group'
-        UsersGroupModel().create(gr_name)
+        UserGroupModel().create(gr_name)
         Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
@@ -1081,7 +1081,7 @@ class BaseTestApi(object):
                     'success': True}
         self._compare_ok(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
     def test_api_add_user_to_users_group_that_doesnt_exist(self):
@@ -1093,10 +1093,10 @@ class BaseTestApi(object):
         expected = 'user group `%s` does not exist' % 'false-group'
         self._compare_error(id_, expected, given=response.body)
 
-    @mock.patch.object(UsersGroupModel, 'add_user_to_group', crash)
+    @mock.patch.object(UserGroupModel, 'add_user_to_group', crash)
     def test_api_add_user_to_users_group_exception_occurred(self):
         gr_name = 'test_group'
-        UsersGroupModel().create(gr_name)
+        UserGroupModel().create(gr_name)
         Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
@@ -1106,13 +1106,13 @@ class BaseTestApi(object):
         expected = 'failed to add member to user group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
     def test_api_remove_user_from_users_group(self):
         gr_name = 'test_group_3'
-        gr = UsersGroupModel().create(gr_name)
-        UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
+        gr = UserGroupModel().create(gr_name)
+        UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
@@ -1126,14 +1126,14 @@ class BaseTestApi(object):
                     'success': True}
         self._compare_ok(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
-    @mock.patch.object(UsersGroupModel, 'remove_user_from_group', crash)
+    @mock.patch.object(UserGroupModel, 'remove_user_from_group', crash)
     def test_api_remove_user_from_users_group_exception_occurred(self):
         gr_name = 'test_group_3'
-        gr = UsersGroupModel().create(gr_name)
-        UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
+        gr = UserGroupModel().create(gr_name)
+        UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
@@ -1143,7 +1143,7 @@ class BaseTestApi(object):
         expected = 'failed to remove member from user group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
     @parameterized.expand([('none', 'repository.none'),
@@ -1224,13 +1224,13 @@ class BaseTestApi(object):
     def test_api_grant_users_group_permission(self, name, perm):
         id_, params = _build_data(self.apikey, 'grant_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,
+                                  usersgroupid=TEST_USER_GROUP,
                                   perm=perm)
         response = api_call(self, params)
 
         ret = {
             'msg': 'Granted perm: `%s` for user group: `%s` in repo: `%s`' % (
-                perm, TEST_USERS_GROUP, self.REPO
+                perm, TEST_USER_GROUP, self.REPO
             ),
             'success': True
         }
@@ -1241,7 +1241,7 @@ class BaseTestApi(object):
         perm = 'haha.no.permission'
         id_, params = _build_data(self.apikey, 'grant_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,
+                                  usersgroupid=TEST_USER_GROUP,
                                   perm=perm)
         response = api_call(self, params)
 
@@ -1253,28 +1253,28 @@ class BaseTestApi(object):
         perm = 'repository.read'
         id_, params = _build_data(self.apikey, 'grant_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,
+                                  usersgroupid=TEST_USER_GROUP,
                                   perm=perm)
         response = api_call(self, params)
 
         expected = 'failed to edit permission for user group: `%s` in repo: `%s`' % (
-                    TEST_USERS_GROUP, self.REPO
+                    TEST_USER_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_revoke_users_group_permission(self):
         RepoModel().grant_users_group_permission(repo=self.REPO,
-                                                 group_name=TEST_USERS_GROUP,
+                                                 group_name=TEST_USER_GROUP,
                                                  perm='repository.read')
         Session().commit()
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,)
+                                  usersgroupid=TEST_USER_GROUP,)
         response = api_call(self, params)
 
         expected = {
             'msg': 'Revoked perm for user group: `%s` in repo: `%s`' % (
-                TEST_USERS_GROUP, self.REPO
+                TEST_USER_GROUP, self.REPO
             ),
             'success': True
         }
@@ -1285,10 +1285,10 @@ class BaseTestApi(object):
 
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,)
+                                  usersgroupid=TEST_USER_GROUP,)
         response = api_call(self, params)
 
         expected = 'failed to edit permission for user group: `%s` in repo: `%s`' % (
-                    TEST_USERS_GROUP, self.REPO
+                    TEST_USER_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)

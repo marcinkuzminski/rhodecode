@@ -4,11 +4,11 @@ from rhodecode.tests import *
 from rhodecode.tests.models.common import _make_group
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup, User, UsersGroupRepoGroupToPerm
+from rhodecode.model.db import RepoGroup, User, UserGroupRepoGroupToPerm
 from rhodecode.model.user import UserModel
 
 from rhodecode.model.meta import Session
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 from rhodecode.lib.auth import AuthUser
 from rhodecode.tests.api.api_base import create_repo
 
@@ -51,7 +51,7 @@ class TestPermissions(unittest.TestCase):
             ReposGroupModel().delete(self.g2.group_id)
 
         if hasattr(self, 'ug1'):
-            UsersGroupModel().delete(self.ug1, force=True)
+            UserGroupModel().delete(self.ug1, force=True)
 
         Session().commit()
 
@@ -124,10 +124,10 @@ class TestPermissions(unittest.TestCase):
 
     def test_propagated_permission_from_users_group_by_explicit_perms_exist(self):
         # make group
-        self.ug1 = UsersGroupModel().create('G1')
+        self.ug1 = UserGroupModel().create('G1')
         # add user to group
 
-        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+        UserGroupModel().add_user_to_group(self.ug1, self.u1)
 
         # set permission to lower
         new_perm = 'repository.none'
@@ -158,10 +158,10 @@ class TestPermissions(unittest.TestCase):
 
     def test_propagated_permission_from_users_group(self):
         # make group
-        self.ug1 = UsersGroupModel().create('G1')
+        self.ug1 = UserGroupModel().create('G1')
         # add user to group
 
-        UsersGroupModel().add_user_to_group(self.ug1, self.u3)
+        UserGroupModel().add_user_to_group(self.ug1, self.u3)
 
         # grant perm for group this should override default permission from user
         new_perm_gr = 'repository.write'
@@ -183,9 +183,9 @@ class TestPermissions(unittest.TestCase):
 
     def test_propagated_permission_from_users_group_lower_weight(self):
         # make group
-        self.ug1 = UsersGroupModel().create('G1')
+        self.ug1 = UserGroupModel().create('G1')
         # add user to group
-        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+        UserGroupModel().add_user_to_group(self.ug1, self.u1)
 
         # set permission to lower
         new_perm_h = 'repository.write'
@@ -299,13 +299,13 @@ class TestPermissions(unittest.TestCase):
                                                 user=self.anon,
                                                 perm='group.none')
         # make group
-        self.ug1 = UsersGroupModel().create('G1')
+        self.ug1 = UserGroupModel().create('G1')
         # add user to group
-        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+        UserGroupModel().add_user_to_group(self.ug1, self.u1)
         Session().commit()
 
         # check if user is in the group
-        membrs = [x.user_id for x in UsersGroupModel().get(self.ug1.users_group_id).members]
+        membrs = [x.user_id for x in UserGroupModel().get(self.ug1.users_group_id).members]
         self.assertEqual(membrs, [self.u1.user_id])
         # add some user to that group
 
@@ -324,9 +324,9 @@ class TestPermissions(unittest.TestCase):
                                                        perm='group.read')
         Session().commit()
         # check if the
-        obj = Session().query(UsersGroupRepoGroupToPerm)\
-            .filter(UsersGroupRepoGroupToPerm.group == self.g1)\
-            .filter(UsersGroupRepoGroupToPerm.users_group == self.ug1)\
+        obj = Session().query(UserGroupRepoGroupToPerm)\
+            .filter(UserGroupRepoGroupToPerm.group == self.g1)\
+            .filter(UserGroupRepoGroupToPerm.users_group == self.ug1)\
             .scalar()
         self.assertEqual(obj.permission.permission_name, 'group.read')
 
@@ -440,9 +440,9 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
                          'repository.admin')
         #set his permission as user group, he should still be admin
-        self.ug1 = UsersGroupModel().create('G1')
+        self.ug1 = UserGroupModel().create('G1')
         # add user to group
-        UsersGroupModel().add_user_to_group(self.ug1, self.u1)
+        UserGroupModel().add_user_to_group(self.ug1, self.u1)
         RepoModel().grant_users_group_permission(repo, group_name=self.ug1,
                                                  perm='repository.none')
 

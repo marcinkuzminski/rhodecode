@@ -1,12 +1,12 @@
 import unittest
 from rhodecode.tests import *
 
-from rhodecode.model.db import User, UsersGroup, UsersGroupMember, UserEmailMap,\
+from rhodecode.model.db import User, UserGroup, UserGroupMember, UserEmailMap,\
     Permission
 from rhodecode.model.user import UserModel
 
 from rhodecode.model.meta import Session
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 
 
 class TestUser(unittest.TestCase):
@@ -23,18 +23,18 @@ class TestUser(unittest.TestCase):
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
         # make user group
-        users_group = UsersGroupModel().create('some_example_group')
+        users_group = UserGroupModel().create('some_example_group')
         Session().commit()
 
-        UsersGroupModel().add_user_to_group(users_group, usr)
+        UserGroupModel().add_user_to_group(users_group, usr)
         Session().commit()
 
-        self.assertEqual(UsersGroup.get(users_group.users_group_id), users_group)
-        self.assertEqual(UsersGroupMember.query().count(), 1)
+        self.assertEqual(UserGroup.get(users_group.users_group_id), users_group)
+        self.assertEqual(UserGroupMember.query().count(), 1)
         UserModel().delete(usr.user_id)
         Session().commit()
 
-        self.assertEqual(UsersGroupMember.query().all(), [])
+        self.assertEqual(UserGroupMember.query().all(), [])
 
     def test_additonal_email_as_main(self):
         usr = UserModel().create_or_update(username=u'test_user',

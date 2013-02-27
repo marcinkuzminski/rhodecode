@@ -33,7 +33,7 @@ from rhodecode.lib.utils2 import LazyProperty
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import RepoGroup, RhodeCodeUi, UserRepoGroupToPerm, \
-    User, Permission, UsersGroupRepoGroupToPerm, UsersGroup, Repository
+    User, Permission, UserGroupRepoGroupToPerm, UserGroup, Repository
 
 log = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ class ReposGroupModel(BaseModel):
     cls = RepoGroup
 
     def __get_users_group(self, users_group):
-        return self._get_instance(UsersGroup, users_group,
-                                  callback=UsersGroup.get_by_group_name)
+        return self._get_instance(UserGroup, users_group,
+                                  callback=UserGroup.get_by_group_name)
 
     def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
@@ -390,14 +390,14 @@ class ReposGroupModel(BaseModel):
         permission = self._get_perm(perm)
 
         # check if we have that permission already
-        obj = self.sa.query(UsersGroupRepoGroupToPerm)\
-            .filter(UsersGroupRepoGroupToPerm.group == repos_group)\
-            .filter(UsersGroupRepoGroupToPerm.users_group == group_name)\
+        obj = self.sa.query(UserGroupRepoGroupToPerm)\
+            .filter(UserGroupRepoGroupToPerm.group == repos_group)\
+            .filter(UserGroupRepoGroupToPerm.users_group == group_name)\
             .scalar()
 
         if obj is None:
             # create new
-            obj = UsersGroupRepoGroupToPerm()
+            obj = UserGroupRepoGroupToPerm()
 
         obj.group = repos_group
         obj.users_group = group_name
@@ -417,9 +417,9 @@ class ReposGroupModel(BaseModel):
         repos_group = self._get_repos_group(repos_group)
         group_name = self.__get_users_group(group_name)
 
-        obj = self.sa.query(UsersGroupRepoGroupToPerm)\
-            .filter(UsersGroupRepoGroupToPerm.group == repos_group)\
-            .filter(UsersGroupRepoGroupToPerm.users_group == group_name)\
+        obj = self.sa.query(UserGroupRepoGroupToPerm)\
+            .filter(UserGroupRepoGroupToPerm.group == repos_group)\
+            .filter(UserGroupRepoGroupToPerm.users_group == group_name)\
             .scalar()
         if obj:
             self.sa.delete(obj)

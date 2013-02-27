@@ -37,8 +37,8 @@ from rhodecode.lib.utils2 import safe_unicode, generate_api_key
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
-    UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
-    Notification, RepoGroup, UserRepoGroupToPerm, UsersGroupRepoGroupToPerm, \
+    UserToPerm, UserGroupRepoToPerm, UserGroupToPerm, UserGroupMember, \
+    Notification, RepoGroup, UserRepoGroupToPerm, UserGroupRepoGroupToPerm, \
     UserEmailMap, UserIpMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
@@ -513,12 +513,12 @@ class UserModel(BaseModel):
 
         # USER GROUPS comes first
         # user group global permissions
-        user_perms_from_users_groups = self.sa.query(UsersGroupToPerm)\
-            .options(joinedload(UsersGroupToPerm.permission))\
-            .join((UsersGroupMember, UsersGroupToPerm.users_group_id ==
-                   UsersGroupMember.users_group_id))\
-            .filter(UsersGroupMember.user_id == uid)\
-            .order_by(UsersGroupToPerm.users_group_id)\
+        user_perms_from_users_groups = self.sa.query(UserGroupToPerm)\
+            .options(joinedload(UserGroupToPerm.permission))\
+            .join((UserGroupMember, UserGroupToPerm.users_group_id ==
+                   UserGroupMember.users_group_id))\
+            .filter(UserGroupMember.user_id == uid)\
+            .order_by(UserGroupToPerm.users_group_id)\
             .all()
         #need to group here by groups since user can be in more than one group
         _grouped = [[x, list(y)] for x, y in
@@ -561,19 +561,19 @@ class UserModel(BaseModel):
 
         # user group for repositories permissions
         user_repo_perms_from_users_groups = \
-         self.sa.query(UsersGroupRepoToPerm, Permission, Repository,)\
-            .join((Repository, UsersGroupRepoToPerm.repository_id ==
+         self.sa.query(UserGroupRepoToPerm, Permission, Repository,)\
+            .join((Repository, UserGroupRepoToPerm.repository_id ==
                    Repository.repo_id))\
-            .join((Permission, UsersGroupRepoToPerm.permission_id ==
+            .join((Permission, UserGroupRepoToPerm.permission_id ==
                    Permission.permission_id))\
-            .join((UsersGroupMember, UsersGroupRepoToPerm.users_group_id ==
-                   UsersGroupMember.users_group_id))\
-            .filter(UsersGroupMember.user_id == uid)\
+            .join((UserGroupMember, UserGroupRepoToPerm.users_group_id ==
+                   UserGroupMember.users_group_id))\
+            .filter(UserGroupMember.user_id == uid)\
             .all()
 
         multiple_counter = collections.defaultdict(int)
         for perm in user_repo_perms_from_users_groups:
-            r_k = perm.UsersGroupRepoToPerm.repository.repo_name
+            r_k = perm.UserGroupRepoToPerm.repository.repo_name
             multiple_counter[r_k] += 1
             p = perm.Permission.permission_name
             cur_perm = user.permissions[RK][r_k]
@@ -619,18 +619,18 @@ class UserModel(BaseModel):
         #======================================================================
         # user group for repo groups permissions
         user_repo_group_perms_from_users_groups = \
-         self.sa.query(UsersGroupRepoGroupToPerm, Permission, RepoGroup)\
-         .join((RepoGroup, UsersGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\
-         .join((Permission, UsersGroupRepoGroupToPerm.permission_id
+         self.sa.query(UserGroupRepoGroupToPerm, Permission, RepoGroup)\
+         .join((RepoGroup, UserGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\
+         .join((Permission, UserGroupRepoGroupToPerm.permission_id
                 == Permission.permission_id))\
-         .join((UsersGroupMember, UsersGroupRepoGroupToPerm.users_group_id
-                == UsersGroupMember.users_group_id))\
-         .filter(UsersGroupMember.user_id == uid)\
+         .join((UserGroupMember, UserGroupRepoGroupToPerm.users_group_id
+                == UserGroupMember.users_group_id))\
+         .filter(UserGroupMember.user_id == uid)\
          .all()
 
         multiple_counter = collections.defaultdict(int)
         for perm in user_repo_group_perms_from_users_groups:
-            g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
+            g_k = perm.UserGroupRepoGroupToPerm.group.group_name
             multiple_counter[g_k] += 1
             p = perm.Permission.permission_name
             cur_perm = user.permissions[GK][g_k]

@@ -54,7 +54,7 @@
                 %endif
             </td>
             <td>
-                <span class="delete_icon action_button" onclick="ajaxActionUsersGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionUserGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
                 ${_('revoke')}
                 </span>
             </td>
@@ -101,7 +101,7 @@ function ajaxActionUser(user_id, field_id) {
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 
-function ajaxActionUsersGroup(users_group_id,field_id){
+function ajaxActionUserGroup(users_group_id,field_id){
     var sUrl = "${h.url('delete_repo_users_group',repo_name=c.repo_name)}";
     var callback = {
         success:function(o){

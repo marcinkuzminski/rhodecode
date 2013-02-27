@@ -28,33 +28,33 @@ import logging
 import traceback
 
 from rhodecode.model import BaseModel
-from rhodecode.model.db import UsersGroupMember, UsersGroup,\
-    UsersGroupRepoToPerm, Permission, UsersGroupToPerm, User
-from rhodecode.lib.exceptions import UsersGroupsAssignedException
+from rhodecode.model.db import UserGroupMember, UserGroup,\
+    UserGroupRepoToPerm, Permission, UserGroupToPerm, User
+from rhodecode.lib.exceptions import UserGroupsAssignedException
 
 log = logging.getLogger(__name__)
 
 
-class UsersGroupModel(BaseModel):
+class UserGroupModel(BaseModel):
 
-    cls = UsersGroup
+    cls = UserGroup
 
     def __get_users_group(self, users_group):
-        return self._get_instance(UsersGroup, users_group,
-                                  callback=UsersGroup.get_by_group_name)
+        return self._get_instance(UserGroup, users_group,
+                                  callback=UserGroup.get_by_group_name)
 
     def get(self, users_group_id, cache=False):
-        return UsersGroup.get(users_group_id)
+        return UserGroup.get(users_group_id)
 
     def get_group(self, users_group):
         return self.__get_users_group(users_group)
 
     def get_by_name(self, name, cache=False, case_insensitive=False):
-        return UsersGroup.get_by_group_name(name, cache, case_insensitive)
+        return UserGroup.get_by_group_name(name, cache, case_insensitive)
 
     def create(self, name, active=True):
         try:
-            new = UsersGroup()
+            new = UserGroup()
             new.users_group_name = name
             new.users_group_active = active
             self.sa.add(new)
@@ -76,7 +76,7 @@ class UsersGroupModel(BaseModel):
                     if v:
                         v = [v] if isinstance(v, basestring) else v
                         for u_id in set(v):
-                            member = UsersGroupMember(users_group.users_group_id, u_id)
+                            member = UserGroupMember(users_group.users_group_id, u_id)
                             members_list.append(member)
                     setattr(users_group, 'members', members_list)
                 setattr(users_group, k, v)
@@ -99,11 +99,11 @@ class UsersGroupModel(BaseModel):
             users_group = self.__get_users_group(users_group)
 
             # check if this group is not assigned to repo
-            assigned_groups = UsersGroupRepoToPerm.query()\
-                .filter(UsersGroupRepoToPerm.users_group == users_group).all()
+            assigned_groups = UserGroupRepoToPerm.query()\
+                .filter(UserGroupRepoToPerm.users_group == users_group).all()
 
             if assigned_groups and force is False:
-                raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
+                raise UserGroupsAssignedException('RepoGroup assigned to %s' %
                                                    assigned_groups)
 
             self.sa.delete(users_group)
@@ -121,7 +121,7 @@ class UsersGroupModel(BaseModel):
                 return True
 
         try:
-            users_group_member = UsersGroupMember()
+            users_group_member = UserGroupMember()
             users_group_member.user = user
             users_group_member.users_group = users_group
 
@@ -160,23 +160,23 @@ class UsersGroupModel(BaseModel):
         users_group = self.__get_users_group(users_group)
         perm = self._get_perm(perm)
 
-        return UsersGroupToPerm.query()\
-            .filter(UsersGroupToPerm.users_group == users_group)\
-            .filter(UsersGroupToPerm.permission == perm).scalar() is not None
+        return UserGroupToPerm.query()\
+            .filter(UserGroupToPerm.users_group == users_group)\
+            .filter(UserGroupToPerm.permission == perm).scalar() is not None
 
     def grant_perm(self, users_group, perm):
         users_group = self.__get_users_group(users_group)
         perm = self._get_perm(perm)
 
         # if this permission is already granted skip it
-        _perm = UsersGroupToPerm.query()\
-            .filter(UsersGroupToPerm.users_group == users_group)\
-            .filter(UsersGroupToPerm.permission == perm)\
+        _perm = UserGroupToPerm.query()\
+            .filter(UserGroupToPerm.users_group == users_group)\
+            .filter(UserGroupToPerm.permission == perm)\
             .scalar()
         if _perm:
             return
 
-        new = UsersGroupToPerm()
+        new = UserGroupToPerm()
         new.users_group = users_group
         new.permission = perm
         self.sa.add(new)
@@ -185,8 +185,8 @@ class UsersGroupModel(BaseModel):
         users_group = self.__get_users_group(users_group)
         perm = self._get_perm(perm)
 
-        obj = UsersGroupToPerm.query()\
-            .filter(UsersGroupToPerm.users_group == users_group)\
-            .filter(UsersGroupToPerm.permission == perm).scalar()
+        obj = UserGroupToPerm.query()\
+            .filter(UserGroupToPerm.users_group == users_group)\
+            .filter(UserGroupToPerm.permission == perm).scalar()
         if obj:
             self.sa.delete(obj)

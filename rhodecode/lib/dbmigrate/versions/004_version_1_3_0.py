@@ -21,8 +21,8 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add table `users_group_repo_group_to_perm`
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import UsersGroupRepoGroupToPerm
-    UsersGroupRepoGroupToPerm().__table__.create()
+    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import UserGroupRepoGroupToPerm
+    UserGroupRepoGroupToPerm().__table__.create()
 
     #==========================================================================
     # Add table `changeset_comments`
@@ -45,8 +45,8 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add unique to table `users_group_to_perm`
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import UsersGroupToPerm
-    tbl = UsersGroupToPerm().__table__
+    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import UserGroupToPerm
+    tbl = UserGroupToPerm().__table__
     cons = UniqueConstraint('users_group_id', 'permission_id', table=tbl)
     cons.create()
 

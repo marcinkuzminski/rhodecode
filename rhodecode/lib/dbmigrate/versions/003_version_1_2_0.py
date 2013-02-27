@@ -34,26 +34,26 @@ def upgrade(migrate_engine):
     #==========================================================================
     # Add table `users_groups`
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroup
-    UsersGroup().__table__.create()
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserGroup
+    UserGroup().__table__.create()
 
     #==========================================================================
     # Add table `users_groups_members`
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroupMember
-    UsersGroupMember().__table__.create()
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserGroupMember
+    UserGroupMember().__table__.create()
 
     #==========================================================================
     # Add table `users_group_repo_to_perm`
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroupRepoToPerm
-    UsersGroupRepoToPerm().__table__.create()
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserGroupRepoToPerm
+    UserGroupRepoToPerm().__table__.create()
 
     #==========================================================================
     # Add table `users_group_to_perm`
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UsersGroupToPerm
-    UsersGroupToPerm().__table__.create()
+    from rhodecode.lib.dbmigrate.schema.db_1_2_0 import UserGroupToPerm
+    UserGroupToPerm().__table__.create()
 
     #==========================================================================
     # Upgrade of `users` table
