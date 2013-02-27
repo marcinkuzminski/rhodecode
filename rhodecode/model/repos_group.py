@@ -79,7 +79,7 @@ class ReposGroupModel(BaseModel):
 
     def __create_group(self, group_name):
         """
-        makes repositories group on filesystem
+        makes repository group on filesystem
 
         :param repo_name:
         :param parent_id:
@@ -327,7 +327,7 @@ class ReposGroupModel(BaseModel):
 
     def grant_user_permission(self, repos_group, user, perm):
         """
-        Grant permission for user on given repositories group, or update
+        Grant permission for user on given repository group, or update
         existing one if found
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
@@ -356,7 +356,7 @@ class ReposGroupModel(BaseModel):
 
     def revoke_user_permission(self, repos_group, user):
         """
-        Revoke permission for user on given repositories group
+        Revoke permission for user on given repository group
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name
@@ -376,7 +376,7 @@ class ReposGroupModel(BaseModel):
 
     def grant_users_group_permission(self, repos_group, group_name, perm):
         """
-        Grant permission for user group on given repositories group, or update
+        Grant permission for user group on given repository group, or update
         existing one if found
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
@@ -407,7 +407,7 @@ class ReposGroupModel(BaseModel):
 
     def revoke_users_group_permission(self, repos_group, group_name):
         """
-        Revoke permission for user group on given repositories group
+        Revoke permission for user group on given repository group
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name

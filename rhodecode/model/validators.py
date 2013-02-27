@@ -133,7 +133,7 @@ def ValidUsersGroup(edit=False, old_data={}):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'invalid_group': _(u'Invalid user group name'),
-            'group_exist': _(u'Users group "%(usersgroup)s" already exists'),
+            'group_exist': _(u'User group "%(usersgroup)s" already exists'),
             'invalid_usersgroup_name':
                 _(u'user group name may only contain  alphanumeric '
                   'characters underscores, periods or dashes and must begin '
@@ -317,7 +317,7 @@ def ValidRepoName(edit=False, old_data={}):
                 _(u'Repository named %(repo)s already exists'),
             'repository_in_group_exists': _(u'Repository "%(repo)s" already '
                                             'exists in group "%(group)s"'),
-            'same_group_exists': _(u'Repositories group with name "%(repo)s" '
+            'same_group_exists': _(u'Repository group with name "%(repo)s" '
                                    'already exists')
         }
 

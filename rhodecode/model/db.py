@@ -1378,10 +1378,10 @@ class Permission(Base, BaseModel):
         ('repository.write', _('Repository write access')),
         ('repository.admin', _('Repository admin access')),
 
-        ('group.none', _('Repositories Group no access')),
-        ('group.read', _('Repositories Group read access')),
-        ('group.write', _('Repositories Group write access')),
-        ('group.admin', _('Repositories Group admin access')),
+        ('group.none', _('Repository group no access')),
+        ('group.read', _('Repository group read access')),
+        ('group.write', _('Repository group write access')),
+        ('group.admin', _('Repository group admin access')),
 
         ('hg.admin', _('RhodeCode Administrator')),
         ('hg.create.none', _('Repository creation disabled')),

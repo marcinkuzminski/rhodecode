@@ -520,7 +520,7 @@ fixes
   and groups
 - fixes #271 rare JSON serialization problem with statistics
 - fixes #337 missing validation check for conflicting names of a group with a
-  repositories group
+  repository group
 - #340 fixed session problem for mysql and celery tasks
 - fixed #331 RhodeCode mangles repository names if the a repository group
   contains the "full path" to the repositories

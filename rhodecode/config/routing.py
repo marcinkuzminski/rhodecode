@@ -48,7 +48,7 @@ def make_map(config):
 
     def check_group(environ, match_dict):
         """
-        check for valid repositories group for proper 404 handling
+        check for valid repository group for proper 404 handling
 
         :param environ:
         :param match_dict:
