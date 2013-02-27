@@ -3,7 +3,7 @@
     rhodecode.model.user_group
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    users groups model for RhodeCode
+    repo group model for RhodeCode
 
     :created_on: Jan 25, 2011
     :author: marcink
@@ -218,7 +218,7 @@ class ReposGroupModel(BaseModel):
                 if member_type == 'user':
                     # this updates also current one if found
                     _set_perm_user(obj, user=member, perm=perm)
-                ## set for users group
+                ## set for user group
                 else:
                     _set_perm_group(obj, users_group=member, perm=perm)
             # set new permissions
@@ -289,11 +289,11 @@ class ReposGroupModel(BaseModel):
     def delete_permission(self, repos_group, obj, obj_type, recursive):
         """
         Revokes permission for repos_group for given obj(user or users_group),
-        obj_type can be user or users group
+        obj_type can be user or user group
 
         :param repos_group:
-        :param obj: user or users group id
-        :param obj_type: user or users group type
+        :param obj: user or user group id
+        :param obj_type: user or user group type
         :param recursive: recurse to all children of group
         """
         from rhodecode.model.repo import RepoModel
@@ -376,13 +376,13 @@ class ReposGroupModel(BaseModel):
 
     def grant_users_group_permission(self, repos_group, group_name, perm):
         """
-        Grant permission for users group on given repositories group, or update
+        Grant permission for user group on given repositories group, or update
         existing one if found
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         :param perm: Instance of Permission, or permission_name
         """
         repos_group = self._get_repos_group(repos_group)
@@ -407,12 +407,12 @@ class ReposGroupModel(BaseModel):
 
     def revoke_users_group_permission(self, repos_group, group_name):
         """
-        Revoke permission for users group on given repositories group
+        Revoke permission for user group on given repositories group
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         """
         repos_group = self._get_repos_group(repos_group)
         group_name = self.__get_users_group(group_name)

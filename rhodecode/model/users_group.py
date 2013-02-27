@@ -3,7 +3,7 @@
     rhodecode.model.users_group
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    users group model for RhodeCode
+    user group model for RhodeCode
 
     :created_on: Oct 1, 2011
     :author: nvinot

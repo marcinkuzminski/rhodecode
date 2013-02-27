@@ -345,7 +345,7 @@ class ReposController(BaseRepoController):
     @HasRepoPermissionAllDecorator('repository.admin')
     def delete_perm_users_group(self, repo_name):
         """
-        DELETE an existing repository permission users group
+        DELETE an existing repository permission user group
 
         :param repo_name:
         """
@@ -358,7 +358,7 @@ class ReposController(BaseRepoController):
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of repository'
-                      ' users groups'),
+                      ' user groups'),
                     category='error')
             raise HTTPInternalServerError()
 

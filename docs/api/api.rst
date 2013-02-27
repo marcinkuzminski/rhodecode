@@ -436,7 +436,7 @@ OUTPUT::
 get_users_group
 ---------------
 
-Gets an existing users group. This command can be executed only using api_key
+Gets an existing user group. This command can be executed only using api_key
 belonging to user with admin rights.
 
 
@@ -446,7 +446,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_users_group"
     args :    {
-                "usersgroupid" : "<users group id or name>"
+                "usersgroupid" : "<user group id or name>"
               }
 
 OUTPUT::
@@ -479,7 +479,7 @@ OUTPUT::
 get_users_groups
 ----------------
 
-Lists all existing users groups. This command can be executed only using
+Lists all existing user groups. This command can be executed only using
 api_key belonging to user with admin rights.
 
 
@@ -507,7 +507,7 @@ OUTPUT::
 create_users_group
 ------------------
 
-Creates new users group. This command can be executed only using api_key
+Creates new user group. This command can be executed only using api_key
 belonging to user with admin rights
 
 
@@ -525,7 +525,7 @@ OUTPUT::
 
     id : <id_given_in_input>
     result: {
-              "msg": "created new users group `<groupname>`",
+              "msg": "created new user group `<groupname>`",
               "users_group": {
                      "users_group_id" : "<id>",
                      "group_name" :     "<groupname>",
@@ -538,7 +538,7 @@ OUTPUT::
 add_user_to_users_group
 -----------------------
 
-Adds a user to a users group. If user exists in that group success will be
+Adds a user to a user group. If user exists in that group success will be
 `false`. This command can be executed only using api_key
 belonging to user with admin rights
 
@@ -549,7 +549,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "add_user_users_group"
     args:     {
-                "usersgroupid" : "<users group id or name>",
+                "usersgroupid" : "<user group id or name>",
                 "userid" : "<user_id or username>",
               }
 
@@ -558,7 +558,7 @@ OUTPUT::
     id : <id_given_in_input>
     result: {
               "success": True|False # depends on if member is in group
-              "msg": "added member `<username>` to users group `<groupname>` |
+              "msg": "added member `<username>` to user group `<groupname>` |
                       User is already in that group"
             }
     error:  null
@@ -567,7 +567,7 @@ OUTPUT::
 remove_user_from_users_group
 ----------------------------
 
-Removes a user from a users group. If user is not in given group success will
+Removes a user from a user group. If user is not in given group success will
 be `false`. This command can be executed only
 using api_key belonging to user with admin rights
 
@@ -578,7 +578,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "remove_user_from_users_group"
     args:     {
-                "usersgroupid" : "<users group id or name>",
+                "usersgroupid" : "<user group id or name>",
                 "userid" : "<user_id or username>",
               }
 
@@ -587,7 +587,7 @@ OUTPUT::
     id : <id_given_in_input>
     result: {
               "success":  True|False,  # depends on if member is in group
-              "msg": "removed member <username> from users group <groupname> |
+              "msg": "removed member <username> from user group <groupname> |
                       User wasn't in group"
             }
     error:  null
@@ -929,7 +929,7 @@ OUTPUT::
 grant_users_group_permission
 ----------------------------
 
-Grant permission for users group on given repository, or update
+Grant permission for user group on given repository, or update
 existing one if found. This command can be executed only using
 api_key belonging to user with admin rights.
 
@@ -941,7 +941,7 @@ INPUT::
     method :  "grant_users_group_permission"
     args:     {
                 "repoid" : "<reponame or repo_id>"
-                "usersgroupid" : "<users group id or name>"
+                "usersgroupid" : "<user group id or name>"
                 "perm" : "(repository.(none|read|write|admin))",
               }
 
@@ -958,7 +958,7 @@ OUTPUT::
 revoke_users_group_permission
 -----------------------------
 
-Revoke permission for users group on given repository.This command can be
+Revoke permission for user group on given repository.This command can be
 executed only using api_key belonging to user with admin rights.
 
 INPUT::
@@ -968,7 +968,7 @@ INPUT::
     method  : "revoke_users_group_permission"
     args:     {
                 "repoid" : "<reponame or repo_id>"
-                "usersgroupid" : "<users group id or name>"
+                "usersgroupid" : "<user group id or name>"
               }
 
 OUTPUT::

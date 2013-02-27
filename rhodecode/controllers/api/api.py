@@ -121,13 +121,13 @@ def get_repo_or_error(repoid):
 
 def get_users_group_or_error(usersgroupid):
     """
-    Get users group by id or name or return JsonRPCError if not found
+    Get user group by id or name or return JsonRPCError if not found
 
     :param userid:
     """
     users_group = UsersGroupModel().get_group(usersgroupid)
     if users_group is None:
-        raise JSONRPCError('users group `%s` does not exist' % usersgroupid)
+        raise JSONRPCError('user group `%s` does not exist' % usersgroupid)
     return users_group
 
 
@@ -449,7 +449,7 @@ class ApiController(JSONRPCController):
     @HasPermissionAllDecorator('hg.admin')
     def get_users_group(self, apiuser, usersgroupid):
         """"
-        Get users group by name or id
+        Get user group by name or id
 
         :param apiuser:
         :param usersgroupid:
@@ -468,7 +468,7 @@ class ApiController(JSONRPCController):
     @HasPermissionAllDecorator('hg.admin')
     def get_users_groups(self, apiuser):
         """"
-        Get all users groups
+        Get all user groups
 
         :param apiuser:
         """
@@ -489,14 +489,14 @@ class ApiController(JSONRPCController):
         """
 
         if UsersGroupModel().get_by_name(group_name):
-            raise JSONRPCError("users group `%s` already exist" % group_name)
+            raise JSONRPCError("user group `%s` already exist" % group_name)
 
         try:
             active = Optional.extract(active)
             ug = UsersGroupModel().create(name=group_name, active=active)
             Session().commit()
             return dict(
-                msg='created new users group `%s`' % group_name,
+                msg='created new user group `%s`' % group_name,
                 users_group=ug.get_api_data()
             )
         except Exception:
@@ -506,7 +506,7 @@ class ApiController(JSONRPCController):
     @HasPermissionAllDecorator('hg.admin')
     def add_user_to_users_group(self, apiuser, usersgroupid, userid):
         """"
-        Add a user to a users group
+        Add a user to a user group
 
         :param apiuser:
         :param usersgroupid:
@@ -518,7 +518,7 @@ class ApiController(JSONRPCController):
         try:
             ugm = UsersGroupModel().add_user_to_group(users_group, user)
             success = True if ugm != True else False
-            msg = 'added member `%s` to users group `%s`' % (
+            msg = 'added member `%s` to user group `%s`' % (
                         user.username, users_group.users_group_name
                     )
             msg = msg if success else 'User is already in that group'
@@ -531,7 +531,7 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
-                'failed to add member to users group `%s`' % (
+                'failed to add member to user group `%s`' % (
                     users_group.users_group_name
                 )
             )
@@ -551,7 +551,7 @@ class ApiController(JSONRPCController):
         try:
             success = UsersGroupModel().remove_user_from_group(users_group,
                                                                user)
-            msg = 'removed member `%s` from users group `%s`' % (
+            msg = 'removed member `%s` from user group `%s`' % (
                         user.username, users_group.users_group_name
                     )
             msg = msg if success else "User wasn't in group"
@@ -560,7 +560,7 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
-                'failed to remove member from users group `%s`' % (
+                'failed to remove member from user group `%s`' % (
                         users_group.users_group_name
                     )
             )
@@ -890,7 +890,7 @@ class ApiController(JSONRPCController):
     def grant_users_group_permission(self, apiuser, repoid, usersgroupid,
                                      perm):
         """
-        Grant permission for users group on given repository, or update
+        Grant permission for user group on given repository, or update
         existing one if found
 
         :param apiuser:
@@ -909,7 +909,7 @@ class ApiController(JSONRPCController):
 
             Session().commit()
             return dict(
-                msg='Granted perm: `%s` for users group: `%s` in '
+                msg='Granted perm: `%s` for user group: `%s` in '
                     'repo: `%s`' % (
                     perm.permission_name, users_group.users_group_name,
                     repo.repo_name
@@ -919,7 +919,7 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
-                'failed to edit permission for users group: `%s` in '
+                'failed to edit permission for user group: `%s` in '
                 'repo: `%s`' % (
                     usersgroupid, repo.repo_name
                 )
@@ -928,7 +928,7 @@ class ApiController(JSONRPCController):
     @HasPermissionAllDecorator('hg.admin')
     def revoke_users_group_permission(self, apiuser, repoid, usersgroupid):
         """
-        Revoke permission for users group on given repository
+        Revoke permission for user group on given repository
 
         :param apiuser:
         :param repoid:
@@ -943,7 +943,7 @@ class ApiController(JSONRPCController):
 
             Session().commit()
             return dict(
-                msg='Revoked perm for users group: `%s` in repo: `%s`' % (
+                msg='Revoked perm for user group: `%s` in repo: `%s`' % (
                     users_group.users_group_name, repo.repo_name
                 ),
                 success=True
@@ -951,7 +951,7 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
-                'failed to edit permission for users group: `%s` in '
+                'failed to edit permission for user group: `%s` in '
                 'repo: `%s`' % (
                     users_group.users_group_name, repo.repo_name
                 )

@@ -464,7 +464,7 @@ class UserModel(BaseModel):
                 p = 'repository.admin'
                 user.permissions[RK][r_k] = p
 
-            # repositories groups
+            # repository groups
             for perm in default_repo_groups_perms:
                 rg_k = perm.UserRepoGroupToPerm.group.group_name
                 p = 'group.admin'
@@ -497,7 +497,7 @@ class UserModel(BaseModel):
 
             user.permissions[RK][r_k] = p
 
-        # defaults for repositories groups taken from default user permission
+        # defaults for repository groups taken from default user permission
         # on given group
         for perm in default_repo_groups_perms:
             rg_k = perm.UserRepoGroupToPerm.group.group_name
@@ -610,7 +610,7 @@ class UserModel(BaseModel):
             user.permissions[RK][r_k] = p
 
         #======================================================================
-        # !! PERMISSIONS FOR REPOSITORIES GROUPS !!
+        # !! PERMISSIONS FOR REPOSITORY GROUPS !!
         #======================================================================
         #======================================================================
         # check if user is part of user groups for this repository groups and

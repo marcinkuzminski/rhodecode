@@ -40,7 +40,7 @@
         </tr>
     %endfor
 
-    ## USERS GROUPS
+    ## USER GROUPS
     %for g2p in c.repos_group.users_group_to_perm:
         <tr id="id${id(g2p.users_group.users_group_name)}">
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'group.none')}</td>
@@ -113,7 +113,7 @@ function ajaxActionUsersGroup(users_group_id,field_id){
             tr.parentNode.removeChild(tr);
         },
         failure:function(o){
-            alert("${_('Failed to remove users group')}");
+            alert("${_('Failed to remove user group')}");
         },
     };
     var recursive = YUD.get('recursive').checked;

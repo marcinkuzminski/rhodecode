@@ -3,7 +3,7 @@
     rhodecode.controllers.admin.repos_groups
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Repositories groups controller for RhodeCode
+    Repository groups controller for RhodeCode
 
     :created_on: Mar 23, 2010
     :author: marcink
@@ -282,7 +282,7 @@ class ReposGroupsController(BaseController):
     @HasReposGroupPermissionAnyDecorator('group.admin')
     def delete_repos_group_user_perm(self, group_name):
         """
-        DELETE an existing repositories group permission user
+        DELETE an existing repository group permission user
 
         :param group_name:
         """
@@ -307,7 +307,7 @@ class ReposGroupsController(BaseController):
     @HasReposGroupPermissionAnyDecorator('group.admin')
     def delete_repos_group_users_group_perm(self, group_name):
         """
-        DELETE an existing repositories group permission users group
+        DELETE an existing repository group permission user group
 
         :param group_name:
         """
@@ -322,7 +322,7 @@ class ReposGroupsController(BaseController):
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of group'
-                      ' users groups'),
+                      ' user groups'),
                     category='error')
             raise HTTPInternalServerError()
 

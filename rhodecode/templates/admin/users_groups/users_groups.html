@@ -2,13 +2,13 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Users groups administration')} - ${c.rhodecode_name}
+    ${_('User groups administration')} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${_('users groups')}
+    ${_('user groups')}
 </%def>
 
 <%def name="page_nav()">
@@ -44,7 +44,7 @@
                     <td>
                         ${h.form(url('users_group', id=u_group.users_group_id),method='delete')}
                             ${h.submit('remove_',_('delete'),id="remove_group_%s" % u_group.users_group_id,
-                            class_="delete_icon action_button",onclick="return  confirm('"+_('Confirm to delete this users group: %s') % u_group.users_group_name+"');")}
+                            class_="delete_icon action_button",onclick="return  confirm('"+_('Confirm to delete this user group: %s') % u_group.users_group_name+"');")}
                         ${h.end_form()}
                     </td>
                 </tr>

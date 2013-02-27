@@ -3,7 +3,7 @@
     rhodecode.controllers.admin.users_groups
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Users Groups crud controller for pylons
+    User Groups crud controller for pylons
 
     :created_on: Jan 25, 2011
     :author: marcink
@@ -83,7 +83,7 @@ class UsersGroupsController(BaseController):
             action_logger(self.rhodecode_user,
                           'admin_created_users_group:%s' % gr,
                           None, self.ip_addr, self.sa)
-            h.flash(_('created users group %s') % gr, category='success')
+            h.flash(_('created user group %s') % gr, category='success')
             Session().commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
@@ -94,7 +94,7 @@ class UsersGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during creation of users group %s') \
+            h.flash(_('error occurred during creation of user group %s') \
                     % request.POST.get('users_group_name'), category='error')
 
         return redirect(url('users_groups'))
@@ -161,7 +161,7 @@ class UsersGroupsController(BaseController):
             action_logger(self.rhodecode_user,
                           'admin_updated_users_group:%s' % gr,
                           None, self.ip_addr, self.sa)
-            h.flash(_('updated users group %s') % gr, category='success')
+            h.flash(_('updated user group %s') % gr, category='success')
             Session().commit()
         except formencode.Invalid, errors:
             ug_model = UsersGroupModel()
@@ -183,7 +183,7 @@ class UsersGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of users group %s') \
+            h.flash(_('error occurred during update of user group %s') \
                     % request.POST.get('users_group_name'), category='error')
 
         return redirect(url('edit_users_group', id=id))
@@ -200,12 +200,12 @@ class UsersGroupsController(BaseController):
         try:
             UsersGroupModel().delete(usr_gr)
             Session().commit()
-            h.flash(_('successfully deleted users group'), category='success')
+            h.flash(_('successfully deleted user group'), category='success')
         except UsersGroupsAssignedException, e:
             h.flash(e, category='error')
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of users group'),
+            h.flash(_('An error occurred during deletion of user group'),
                     category='error')
         return redirect(url('users_groups'))
 
@@ -254,23 +254,23 @@ class UsersGroupsController(BaseController):
             if grant_create_perm:
                 usersgroup_model.revoke_perm(id, 'hg.create.none')
                 usersgroup_model.grant_perm(id, 'hg.create.repository')
-                h.flash(_("Granted 'repository create' permission to users group"),
+                h.flash(_("Granted 'repository create' permission to user group"),
                         category='success')
             else:
                 usersgroup_model.revoke_perm(id, 'hg.create.repository')
                 usersgroup_model.grant_perm(id, 'hg.create.none')
-                h.flash(_("Revoked 'repository create' permission to users group"),
+                h.flash(_("Revoked 'repository create' permission to user group"),
                         category='success')
 
             if grant_fork_perm:
                 usersgroup_model.revoke_perm(id, 'hg.fork.none')
                 usersgroup_model.grant_perm(id, 'hg.fork.repository')
-                h.flash(_("Granted 'repository fork' permission to users group"),
+                h.flash(_("Granted 'repository fork' permission to user group"),
                         category='success')
             else:
                 usersgroup_model.revoke_perm(id, 'hg.fork.repository')
                 usersgroup_model.grant_perm(id, 'hg.fork.none')
-                h.flash(_("Revoked 'repository fork' permission to users group"),
+                h.flash(_("Revoked 'repository fork' permission to user group"),
                         category='success')
 
             Session().commit()

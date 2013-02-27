@@ -196,7 +196,7 @@ news
 fixes
 +++++
 
-- fixed #570 explicit users group permissions can overwrite owner permissions
+- fixed #570 explicit user group permissions can overwrite owner permissions
 - fixed #578 set proper PATH with current Python for Git
   hooks to execute within same Python as RhodeCode
 - fixed issue with Git bare repos that ends with .git in name
@@ -385,7 +385,7 @@ news
 - created rcextensions module with additional mappings (ref #322) and
   post push/pull/create repo hooks callbacks
 - implemented #377 Users view for his own permissions on account page
-- #399 added inheritance of permissions for users group on repos groups
+- #399 added inheritance of permissions for user group on repos groups
 - #401 repository group is automatically pre-selected when adding repos
   inside a repository group
 - added alternative HTTP 403 response when client failed to authenticate. Helps
@@ -654,7 +654,7 @@ news
 - implemented #93 customizable changelog on combined revision ranges -
   equivalent of githubs compare view
 - implemented #108 extended and more powerful LDAP configuration
-- implemented #56 users groups
+- implemented #56 user groups
 - major code rewrites optimized codes for speed and memory usage
 - raw and diff downloads are now in git format
 - setup command checks for write access to given path
