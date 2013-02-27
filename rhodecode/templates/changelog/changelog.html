@@ -171,28 +171,6 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                         if(checked_checkboxes.length>0){
                             var rev_end = checked_checkboxes[0].name;
                             var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
-
-                            // now select all checkboxes in the middle.
-                            var checked = false;
-                            for (var i=0; i<checkboxes.length; i++){
-                                var cb = checkboxes[i];
-                                var rev = cb.name;
-
-                                if (rev == rev_end){
-                                    checked = true;
-                                }
-                                if (checked){
-                                    cb.checked = true;
-                                }
-                                else{
-                                    cb.checked = false;
-                                }
-                                if (rev == rev_start){
-                                    checked = false;
-                                }
-
-                            }
-
                             var url = url_tmpl.replace('__REVRANGE__',
                                     rev_start+'...'+rev_end);
 
