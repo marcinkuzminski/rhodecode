@@ -314,7 +314,7 @@ div:hover > a.permalink {
     background-color: #003B76;
     opacity: 0.01;
     cursor: pointer;
-    min-height: 10px;	
+    min-height: 10px;
     width: 100% !important;
     -webkit-border-radius: 0px 0px 4px 4px;
     -khtml-border-radius: 0px 0px 4px 4px;
@@ -326,7 +326,7 @@ div:hover > a.permalink {
 	opacity: 0.2;
     -webkit-transition: opacity 0.5s ease-in-out;
     -moz-transition: opacity 0.5s ease-in-out;
-    transition: opacity 0.5s ease-in-out;	
+    transition: opacity 0.5s ease-in-out;
 }
 
 #header #header-inner {
@@ -359,7 +359,7 @@ div:hover > a.permalink {
     -moz-border-radius: 0px 0px 0px 0px;
     border-radius: 0px 0px 0px 0px;
     position: fixed !important;
-    z-index: 10000;    
+    z-index: 10000;
 }
 
 .ie7 #header #header-inner.hover,
@@ -2154,7 +2154,7 @@ a.metatag[tag="license"]:hover {
 #quick_login .unread a {
     color: #FFFFFF;
     display: block;
-    padding: 2px;    
+    padding: 2px;
 }
 #quick_login .notifications a:hover,
 #quick_login .unread a:hover {

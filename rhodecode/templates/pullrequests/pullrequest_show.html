@@ -26,7 +26,7 @@
     %if c.pull_request.is_closed():
         <img src="${h.url('/images/icons/lock_go.png')}" title="${_('Closed')}"/>
     %endif
-    <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />    
+    <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />
     ${_('Title')}: ${c.pull_request.title}</h3>
 
     <div class="form">

@@ -153,7 +153,7 @@ var show_pullrequests = function(e){
     ypjax(url, 'pullrequests_container', function(){
         YUE.on('show_closed','change',function (e) {
             show_pullrequests(e);
-        });    	
+        });
     });
 }
 YUE.on('show_pullrequests','click',function(e){
