@@ -411,7 +411,7 @@ class  AuthUser(object):
     @property
     def groups_admin(self):
         """
-        Returns list of repositories groups you're an admin of
+        Returns list of repository groups you're an admin of
         """
         return [x[0] for x in self.permissions['repositories_groups'].iteritems()
                 if x[1] == 'group.admin']

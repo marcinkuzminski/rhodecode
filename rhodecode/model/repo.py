@@ -549,12 +549,12 @@ class RepoModel(BaseModel):
 
     def grant_users_group_permission(self, repo, group_name, perm):
         """
-        Grant permission for users group on given repository, or update
+        Grant permission for user group on given repository, or update
         existing one if found
 
         :param repo: Instance of Repository, repository_id, or repository name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         :param perm: Instance of Permission, or permission_name
         """
         repo = self._get_repo(repo)
@@ -579,11 +579,11 @@ class RepoModel(BaseModel):
 
     def revoke_users_group_permission(self, repo, group_name):
         """
-        Revoke permission for users group on given repository
+        Revoke permission for user group on given repository
 
         :param repo: Instance of Repository, repository_id, or repository name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         """
         repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)

@@ -132,10 +132,10 @@ def ValidRepoUser():
 def ValidUsersGroup(edit=False, old_data={}):
     class _validator(formencode.validators.FancyValidator):
         messages = {
-            'invalid_group': _(u'Invalid users group name'),
+            'invalid_group': _(u'Invalid user group name'),
             'group_exist': _(u'Users group "%(usersgroup)s" already exists'),
             'invalid_usersgroup_name':
-                _(u'users group name may only contain  alphanumeric '
+                _(u'user group name may only contain  alphanumeric '
                   'characters underscores, periods or dashes and must begin '
                   'with alphanumeric character')
         }
@@ -547,7 +547,7 @@ def ValidPerms(type_='repo'):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'perm_new_member_name':
-                _(u'This username or users group name is not valid')
+                _(u'This username or user group name is not valid')
         }
 
         def to_python(self, value, state):

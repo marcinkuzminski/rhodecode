@@ -1037,7 +1037,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         ret = {
-            'msg': 'created new users group `%s`' % group_name,
+            'msg': 'created new user group `%s`' % group_name,
             'users_group': jsonify(UsersGroupModel()\
                                    .get_by_name(group_name)\
                                    .get_api_data())
@@ -1052,7 +1052,7 @@ class BaseTestApi(object):
                                   group_name=TEST_USERS_GROUP)
         response = api_call(self, params)
 
-        expected = "users group `%s` already exist" % TEST_USERS_GROUP
+        expected = "user group `%s` already exist" % TEST_USERS_GROUP
         self._compare_error(id_, expected, given=response.body)
 
     @mock.patch.object(UsersGroupModel, 'create', crash)
@@ -1075,7 +1075,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = {
-                    'msg': 'added member `%s` to users group `%s`' % (
+                    'msg': 'added member `%s` to user group `%s`' % (
                                 TEST_USER_ADMIN_LOGIN, gr_name
                             ),
                     'success': True}
@@ -1090,7 +1090,7 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN)
         response = api_call(self, params)
 
-        expected = 'users group `%s` does not exist' % 'false-group'
+        expected = 'user group `%s` does not exist' % 'false-group'
         self._compare_error(id_, expected, given=response.body)
 
     @mock.patch.object(UsersGroupModel, 'add_user_to_group', crash)
@@ -1103,7 +1103,7 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN)
         response = api_call(self, params)
 
-        expected = 'failed to add member to users group `%s`' % gr_name
+        expected = 'failed to add member to user group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
@@ -1120,7 +1120,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = {
-                    'msg': 'removed member `%s` from users group `%s`' % (
+                    'msg': 'removed member `%s` from user group `%s`' % (
                                 TEST_USER_ADMIN_LOGIN, gr_name
                             ),
                     'success': True}
@@ -1140,7 +1140,7 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN)
         response = api_call(self, params)
 
-        expected = 'failed to remove member from users group `%s`' % gr_name
+        expected = 'failed to remove member from user group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
         UsersGroupModel().delete(users_group=gr_name)
@@ -1229,7 +1229,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         ret = {
-            'msg': 'Granted perm: `%s` for users group: `%s` in repo: `%s`' % (
+            'msg': 'Granted perm: `%s` for user group: `%s` in repo: `%s`' % (
                 perm, TEST_USERS_GROUP, self.REPO
             ),
             'success': True
@@ -1257,7 +1257,7 @@ class BaseTestApi(object):
                                   perm=perm)
         response = api_call(self, params)
 
-        expected = 'failed to edit permission for users group: `%s` in repo: `%s`' % (
+        expected = 'failed to edit permission for user group: `%s` in repo: `%s`' % (
                     TEST_USERS_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)
@@ -1273,7 +1273,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = {
-            'msg': 'Revoked perm for users group: `%s` in repo: `%s`' % (
+            'msg': 'Revoked perm for user group: `%s` in repo: `%s`' % (
                 TEST_USERS_GROUP, self.REPO
             ),
             'success': True
@@ -1288,7 +1288,7 @@ class BaseTestApi(object):
                                   usersgroupid=TEST_USERS_GROUP,)
         response = api_call(self, params)
 
-        expected = 'failed to edit permission for users group: `%s` in repo: `%s`' % (
+        expected = 'failed to edit permission for user group: `%s` in repo: `%s`' % (
                     TEST_USERS_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)

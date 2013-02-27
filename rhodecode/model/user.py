@@ -512,7 +512,7 @@ class UserModel(BaseModel):
                              'hg.create.none', 'hg.create.repository'])
 
         # USER GROUPS comes first
-        # users group global permissions
+        # user group global permissions
         user_perms_from_users_groups = self.sa.query(UsersGroupToPerm)\
             .options(joinedload(UsersGroupToPerm.permission))\
             .join((UsersGroupMember, UsersGroupToPerm.users_group_id ==
@@ -559,7 +559,7 @@ class UserModel(BaseModel):
         # permission should be selected based on selected method
         #======================================================================
 
-        # users group for repositories permissions
+        # user group for repositories permissions
         user_repo_perms_from_users_groups = \
          self.sa.query(UsersGroupRepoToPerm, Permission, Repository,)\
             .join((Repository, UsersGroupRepoToPerm.repository_id ==
@@ -617,7 +617,7 @@ class UserModel(BaseModel):
         # fill in his permission from it. _choose_perm decides of which
         # permission should be selected based on selected method
         #======================================================================
-        # users group for repo groups permissions
+        # user group for repo groups permissions
         user_repo_group_perms_from_users_groups = \
          self.sa.query(UsersGroupRepoGroupToPerm, Permission, RepoGroup)\
          .join((RepoGroup, UsersGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\

@@ -439,7 +439,7 @@ class TestPermissions(unittest.TestCase):
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
                          'repository.admin')
-        #set his permission as users group, he should still be admin
+        #set his permission as user group, he should still be admin
         self.ug1 = UsersGroupModel().create('G1')
         # add user to group
         UsersGroupModel().add_user_to_group(self.ug1, self.u1)

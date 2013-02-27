@@ -22,7 +22,7 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
 
         self.checkSessionFlash(response,
-                               'created users group %s' % TEST_USERS_GROUP)
+                               'created user group %s' % TEST_USERS_GROUP)
 
     def test_new(self):
         response = self.app.get(url('new_users_group'))
@@ -46,7 +46,7 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
 
         self.checkSessionFlash(response,
-                               'created users group %s' % users_group_name)
+                               'created user group %s' % users_group_name)
 
         gr = self.Session.query(UsersGroup)\
                            .filter(UsersGroup.users_group_name ==
@@ -70,7 +70,7 @@ class TestAdminUsersGroupsController(TestController):
 
         ug = UsersGroup.get_by_group_name(users_group_name)
         self.checkSessionFlash(response,
-                               'created users group %s' % users_group_name)
+                               'created user group %s' % users_group_name)
         ## ENABLE REPO CREATE ON A GROUP
         response = self.app.put(url('users_group_perm', id=ug.users_group_id),
                                  {'create_repo_perm': True})
@@ -139,7 +139,7 @@ class TestAdminUsersGroupsController(TestController):
 
         ug = UsersGroup.get_by_group_name(users_group_name)
         self.checkSessionFlash(response,
-                               'created users group %s' % users_group_name)
+                               'created user group %s' % users_group_name)
         ## ENABLE REPO CREATE ON A GROUP
         response = self.app.put(url('users_group_perm', id=ug.users_group_id),
                                  {'fork_repo_perm': True})

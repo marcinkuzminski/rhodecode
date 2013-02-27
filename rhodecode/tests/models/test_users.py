@@ -22,7 +22,7 @@ class TestUser(unittest.TestCase):
         Session().commit()
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
-        # make users group
+        # make user group
         users_group = UsersGroupModel().create('some_example_group')
         Session().commit()
 
