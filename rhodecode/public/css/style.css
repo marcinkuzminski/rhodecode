@@ -4828,3 +4828,8 @@ table.code-difftable .code pre {
 div.comment:target>.comment-wrapp {
     border: solid 2px #ee0 !important;
 }
+
+.lineno:target a {
+    border: solid 2px #ee0 !important;
+    margin: -2px;
+}
