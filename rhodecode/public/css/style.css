@@ -3025,7 +3025,7 @@ table.code-browser .submodule-dir {
     border: 2px solid #003367;
     font: 100% sans-serif;
     width: auto;
-    opacity: 1px;
+    opacity: 1;
     padding: 8px;
 
     white-space: pre-wrap;
@@ -3044,7 +3044,7 @@ table.code-browser .submodule-dir {
     border: 2px solid #003367;
     font: 100% sans-serif;
     width: auto;
-    opacity: 1px;
+    opacity: 1;
     padding: 8px;
     white-space: pre-wrap;
     -webkit-border-radius: 8px 8px 8px 8px;
@@ -3095,7 +3095,6 @@ table.code-browser .submodule-dir {
     position: absolute;
     width: 100%;
     background: #000;
-    -moz-opacity: 0.1px;
     opacity: .10;
     filter: alpha(opacity = 10);
     z-index: 9049;
@@ -3435,7 +3434,7 @@ table#permissions_manage {
 
 table#permissions_manage span.private_repo_msg {
     font-size: 0.8em;
-    opacity: 0.6px;
+    opacity: 0.6;
 }
 
 table#permissions_manage td.private_repo_msg {
