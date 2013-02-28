@@ -159,12 +159,12 @@
       }
 
       YUD.get('pull_request_overview').innerHTML = "${_('Loading ...')}";
+      YUD.get('pull_request_overview_url').href = url; // shouldn't have as_form ... but ...
+      YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
       ypjax(url,'pull_request_overview', function(data){
           var sel_box = YUQ('#pull_request_form #other_repo')[0];
           var repo_name = sel_box.options[sel_box.selectedIndex].value;
           var _data = other_repos_info[repo_name];
-          YUD.get('pull_request_overview_url').href = url;
-          YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
           YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
           YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
           // select back the revision that was just compared
