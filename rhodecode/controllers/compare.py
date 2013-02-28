@@ -83,12 +83,15 @@ class CompareController(BaseRepoController):
             raise HTTPBadRequest()
 
     def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
-
+        # org_ref will be evaluated in org_repo
         org_repo = c.rhodecode_db_repo.repo_name
         org_ref = (org_ref_type, org_ref)
+        # other_ref will be evaluated in other_repo
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('other_repo', org_repo)
-        c.fulldiff = fulldiff = request.GET.get('fulldiff')
+        # fulldiff disables cut_off_limit
+        c.fulldiff = request.GET.get('fulldiff')
+        # only consider this range of changesets
         rev_start = request.GET.get('rev_start')
         rev_end = request.GET.get('rev_end')
         # partial uses compare_cs.html template directly
@@ -163,7 +166,7 @@ class CompareController(BaseRepoController):
             org_ref = ('rev', ancestor)
             org_repo = other_repo
 
-        diff_limit = self.cut_off_limit if not fulldiff else None
+        diff_limit = self.cut_off_limit if not c.fulldiff else None
 
         _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
 

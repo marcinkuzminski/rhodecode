@@ -249,11 +249,7 @@ class PullRequestModel(BaseModel):
         if len(other_ref) != 2 or not isinstance(org_ref, (list, tuple)):
             raise Exception('other_ref must be a two element list/tuple')
 
-        org_repo_scm = org_repo.scm_instance
-        other_repo_scm = other_repo.scm_instance
-
-        alias = org_repo.scm_instance.alias
-        cs_ranges, ancestor = self._get_changesets(alias,
-                                                   org_repo_scm, org_ref,
-                                                   other_repo_scm, other_ref)
+        cs_ranges, ancestor = self._get_changesets(org_repo.scm_instance.alias,
+                                                   org_repo.scm_instance, org_ref,
+                                                   other_repo.scm_instance, other_ref)
         return cs_ranges, ancestor
