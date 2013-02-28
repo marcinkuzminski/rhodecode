@@ -158,6 +158,7 @@
     	  url = url.replace('__'+k+'__',rev_data[k]);
       }
 
+      YUD.get('pull_request_overview').innerHTML = "${_('Loading ...')}";
       ypjax(url,'pull_request_overview', function(data){
           var sel_box = YUQ('#pull_request_form #other_repo')[0];
           var repo_name = sel_box.options[sel_box.selectedIndex].value;
