@@ -146,12 +146,12 @@
 
       var select_refs = YUQ('#pull_request_form select.refs')
       var rev_data = {
-    	  'org_repo': org_repo,
-    	  'org_ref': org_ref[1],
-    	  'org_ref_type': org_ref[0],
-    	  'other_repo': other_repo,
-          'other_ref': other_ref[1],
-          'other_ref_type': other_ref[0],
+          'org_repo': org_repo,
+          'org_ref': org_ref[2],
+          'org_ref_type': 'rev',
+          'other_repo': other_repo,
+          'other_ref': other_ref[2],
+          'other_ref_type': 'rev',
       }; // gather the org/other ref and repo here
 
       for (k in rev_data){
