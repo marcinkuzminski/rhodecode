@@ -67,29 +67,33 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def _get_repo_refs(self, repo):
-        hist_l = []
-
-        branches_group = ([('branch:%s:%s' % (k, v), k) for
-                         k, v in repo.branches.iteritems()], _("Branches"))
-        bookmarks_group = ([('book:%s:%s' % (k, v), k) for
-                         k, v in repo.bookmarks.iteritems()], _("Bookmarks"))
-        tags_group = ([('tag:%s:%s' % (k, v), k) for
-                         k, v in repo.tags.iteritems()
-                         if k != 'tip'], _("Tags"))
+    def _get_repo_refs(self, repo, rev=None):
+        """return a structure with repo's interesting changesets, suitable for
+        the selectors in pullrequest.html"""
+        branches = [('branch:%s:%s' % (k, v), k)
+                    for k, v in repo.branches.iteritems()]
+        bookmarks = [('book:%s:%s' % (k, v), k)
+                     for k, v in repo.bookmarks.iteritems()]
+        tags = [('tag:%s:%s' % (k, v), k)
+                for k, v in repo.tags.iteritems()
+                if k != 'tip']
 
         tip = repo.tags['tip']
-        tipref = 'tag:tip:%s' % tip
         colontip = ':' + tip
-        tips = [x[1] for x in branches_group[0] + bookmarks_group[0] + tags_group[0]
+        tips = [x[1] for x in branches + bookmarks + tags
                 if x[0].endswith(colontip)]
-        tags_group[0].append((tipref, 'tip (%s)' % ', '.join(tips)))
+        selected = 'tag:tip:%s' % tip
+        special = [(selected, 'tip (%s)' % ', '.join(tips))]
 
-        hist_l.append(bookmarks_group)
-        hist_l.append(branches_group)
-        hist_l.append(tags_group)
+        if rev:
+            selected = 'rev:%s:%s' % (rev, rev)
+            special.append((selected, rev))            
 
-        return hist_l, tipref
+        return [(special, _("Special")),
+                (bookmarks, _("Bookmarks")),
+                (branches, _("Branches")),
+                (tags, _("Tags")),
+                ], selected
 
     def _get_is_allowed_change_status(self, pull_request):
         owner = self.rhodecode_user.user_id == pull_request.user_id
