@@ -160,56 +160,48 @@ div.options a {
 .top-left-rounded-corner {
     -webkit-border-top-left-radius: 8px;
     -khtml-border-radius-topleft: 8px;
-    -moz-border-radius-topleft: 8px;
     border-top-left-radius: 8px;
 }
 
 .top-right-rounded-corner {
     -webkit-border-top-right-radius: 8px;
     -khtml-border-radius-topright: 8px;
-    -moz-border-radius-topright: 8px;
     border-top-right-radius: 8px;
 }
 
 .bottom-left-rounded-corner {
     -webkit-border-bottom-left-radius: 8px;
     -khtml-border-radius-bottomleft: 8px;
-    -moz-border-radius-bottomleft: 8px;
     border-bottom-left-radius: 8px;
 }
 
 .bottom-right-rounded-corner {
     -webkit-border-bottom-right-radius: 8px;
     -khtml-border-radius-bottomright: 8px;
-    -moz-border-radius-bottomright: 8px;
     border-bottom-right-radius: 8px;
 }
 
 .top-left-rounded-corner-mid {
     -webkit-border-top-left-radius: 4px;
     -khtml-border-radius-topleft: 4px;
-    -moz-border-radius-topleft: 4px;
     border-top-left-radius: 4px;
 }
 
 .top-right-rounded-corner-mid {
     -webkit-border-top-right-radius: 4px;
     -khtml-border-radius-topright: 4px;
-    -moz-border-radius-topright: 4px;
     border-top-right-radius: 4px;
 }
 
 .bottom-left-rounded-corner-mid {
     -webkit-border-bottom-left-radius: 4px;
     -khtml-border-radius-bottomleft: 4px;
-    -moz-border-radius-bottomleft: 4px;
     border-bottom-left-radius: 4px;
 }
 
 .bottom-right-rounded-corner-mid {
     -webkit-border-bottom-right-radius: 4px;
     -khtml-border-radius-bottomright: 4px;
-    -moz-border-radius-bottomright: 4px;
     border-bottom-right-radius: 4px;
 }
 
@@ -248,7 +240,6 @@ div:hover > a.permalink {
     margin-bottom: 5px !important;
     -webkit-border-radius: 0px 0px 8px 8px;
     -khtml-border-radius: 0px 0px 8px 8px;
-    -moz-border-radius: 0px 0px 8px 8px;
     border-radius: 0px 0px 8px 8px;
     height: 37px;
     background-color: #003B76;
@@ -317,7 +308,6 @@ div:hover > a.permalink {
     width: 100% !important;
     -webkit-border-radius: 0px 0px 4px 4px;
     -khtml-border-radius: 0px 0px 4px 4px;
-    -moz-border-radius: 0px 0px 4px 4px;
     border-radius: 0px 0px 4px 4px;
 }
 
@@ -348,14 +338,12 @@ div:hover > a.permalink {
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
     -webkit-border-radius: 0px 0px 4px 4px;
     -khtml-border-radius: 0px 0px 4px 4px;
-    -moz-border-radius: 0px 0px 4px 4px;
     border-radius: 0px 0px 4px 4px;
 }
 #header #header-inner.hover {
     width: 100% !important;
     -webkit-border-radius: 0px 0px 0px 0px;
     -khtml-border-radius: 0px 0px 0px 0px;
-    -moz-border-radius: 0px 0px 0px 0px;
     border-radius: 0px 0px 0px 0px;
     position: fixed !important;
     z-index: 10000;
@@ -438,7 +426,6 @@ div:hover > a.permalink {
     padding: 0;
     -webkit-border-radius: 4px 4px 4px 4px;
     -khtml-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px;
     border-radius: 4px 4px 4px 4px;
 }
 
@@ -1095,7 +1082,6 @@ tbody .yui-dt-editable { cursor: pointer }
     padding: 0 0 10px;
     -webkit-border-radius: 4px 4px 4px 4px;
     -khtml-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px;
     border-radius: 4px 4px 4px 4px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
@@ -1622,7 +1608,6 @@ div.form div.fields div.field div.button {
     padding: 0;
     border: 1px solid #eee;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
 }
 
@@ -1889,7 +1874,6 @@ div.form div.fields div.field div.button {
     margin-right: 1px;
     -webkit-border-radius: 4px 4px 4px 4px;
     -khtml-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px;
     border-radius: 4px 4px 4px 4px;
 
     border: solid 1px #9CF;
@@ -1972,7 +1956,6 @@ a.metatag[tag="license"]:hover {
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
     -webkit-border-radius: 4px 4px 4px 4px;
     -khtml-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px;
     border-radius: 4px 4px 4px 4px;
 }
 
@@ -2093,7 +2076,6 @@ a.metatag[tag="license"]:hover {
     z-index: 999;
     -webkit-border-radius: 0px 0px 4px 4px;
     -khtml-border-radius: 0px 0px 4px 4px;
-    -moz-border-radius: 0px 0px 4px 4px;
     border-radius: 0px 0px 4px 4px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
@@ -2720,7 +2702,6 @@ h3.files_location {
     color: #444444;
     background: #FEA;
     -webkit-border-radius: 0px 0px 0px 6px;
-    -moz-border-radius: 0px 0px 0px 6px;
     border-radius: 0px 0px 0px 6px;
     padding: 1px;
 }
@@ -2755,7 +2736,6 @@ h3.files_location {
     text-transform: uppercase;
     white-space: nowrap;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
     margin-right: 2px;
 }
@@ -2781,7 +2761,6 @@ h3.files_location {
     color: #ffffff;
     white-space: nowrap;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 .right .logtags .branchtag a:hover, .logtags .branchtag a {
@@ -2799,7 +2778,6 @@ h3.files_location {
     color: #ffffff;
     white-space: nowrap;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 .right .logtags .tagtag a:hover, .logtags .tagtag a {
@@ -2818,7 +2796,6 @@ h3.files_location {
     text-transform: uppercase;
     white-space: nowrap;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 .right .logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
@@ -2836,7 +2813,6 @@ div.browserblock {
     line-height: 125%;
     padding: 0;
     -webkit-border-radius: 6px 6px 0px 0px;
-    -moz-border-radius: 6px 6px 0px 0px;
     border-radius: 6px 6px 0px 0px;
 }
 
@@ -3055,10 +3031,8 @@ table.code-browser .submodule-dir {
     white-space: pre-wrap;
     -webkit-border-radius: 8px 8px 8px 8px;
     -khtml-border-radius: 8px 8px 8px 8px;
-    -moz-border-radius: 8px 8px 8px 8px;
     border-radius: 8px 8px 8px 8px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
-    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
     -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
 
@@ -3075,7 +3049,6 @@ table.code-browser .submodule-dir {
     white-space: pre-wrap;
     -webkit-border-radius: 8px 8px 8px 8px;
     -khtml-border-radius: 8px 8px 8px 8px;
-    -moz-border-radius: 8px 8px 8px 8px;
     border-radius: 8px 8px 8px 8px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
 }
@@ -3432,10 +3405,8 @@ table.code-browser .submodule-dir {
     border-width: 1px;
     border-style: solid;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
@@ -3483,14 +3454,12 @@ div.gravatar {
     line-height:0;
     -webkit-border-radius: 3px;
     -khtml-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 
 div.gravatar img {
     -webkit-border-radius: 2px;
     -khtml-border-radius: 2px;
-    -moz-border-radius: 2px;
     border-radius: 2px;
 }
 
@@ -3538,7 +3507,6 @@ div.gravatar img {
     margin: 0px 3px 3px 0px;
     -webkit-border-radius: 4px 4px 4px 4px !important;
     -khtml-border-radius: 4px 4px 4px 4px !important;
-    -moz-border-radius: 4px 4px 4px 4px !important;
     border-radius: 4px 4px 4px 4px !important;
     cursor: pointer !important;
     padding: 3px 3px 3px 3px;
@@ -3563,7 +3531,6 @@ div.gravatar img {
     margin: 0px 0px 3px -4px;
     -webkit-border-radius: 0px 4px 4px 0px !important;
     -khtml-border-radius: 0px 4px 4px 0px !important;
-    -moz-border-radius: 0px 4px 4px 0px !important;
     border-radius: 0px 4px 4px 0px !important;
     width: 100px;
     text-align: center;
@@ -3804,7 +3771,6 @@ input.ui-button {
     padding: 6px 12px;
     -webkit-border-radius: 4px 4px 4px 4px;
     -khtml-border-radius: 4px 4px 4px 4px;
-    -moz-border-radius: 4px 4px 4px 4px;
     border-radius: 4px 4px 4px 4px;
     box-shadow: 0 1px 0 #ececec;
     cursor: pointer;
@@ -3982,7 +3948,6 @@ div#legend_container table td, div#legend_choices table td {
 .q_filter_box {
     -webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     border: 0 none;
     color: #AAAAAA;
@@ -4132,7 +4097,6 @@ div.readme .readme_box pre {
     overflow: auto;
     -webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 
@@ -4234,7 +4198,6 @@ div.rst-block  pre {
     overflow: auto;
     -webkit-box-shadow: rgba(0,0,0,0.07) 0 1px 2px inset;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 
@@ -4248,7 +4211,6 @@ div.rst-block  pre {
     border: 1px solid #ddd;
     margin-top: 10px;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
 }
 
@@ -4298,7 +4260,6 @@ div.rst-block  pre {
 .comment-form .clearfix {
     background: #EEE;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     padding: 10px;
 }
@@ -4384,7 +4345,6 @@ form.comment-form {
 .comment-inline-form .clearfix {
     background: #EEE;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     padding: 5px;
 }
@@ -4461,7 +4421,6 @@ form.comment-inline-form {
 .inline-comments .comment {
     border: 1px solid #ddd;
     -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
     border-radius: 4px;
     margin: 3px 3px 5px 5px;
     background-color: #FAFAFA;
@@ -4528,7 +4487,6 @@ form.comment-inline-form {
     background-color: #DEDEDE !important;
     border-radius: 4px !important;
     -webkit-border-radius: 4px !important;
-    -moz-border-radius: 4px !important;
 }
 
 .notification-header {
@@ -4553,7 +4511,6 @@ form.comment-inline-form {
 .notification-table {
     border: 1px solid #ccc;
     -webkit-border-radius: 6px 6px 6px 6px;
-    -moz-border-radius: 6px 6px 6px 6px;
     border-radius: 6px 6px 6px 6px;
     clear: both;
     margin: 0px 20px 0px 20px;
@@ -4604,7 +4561,6 @@ PULL REQUESTS
     text-transform: uppercase;
     white-space: nowrap;
     -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
 }
 
@@ -4671,7 +4627,6 @@ div.diffblock {
     /* new */
     line-height: 125%;
     -webkit-border-radius: 6px 6px 0px 0px;
-    -moz-border-radius: 6px 6px 0px 0px;
     border-radius: 6px 6px 0px 0px;
 }
 div.diffblock.margined {
