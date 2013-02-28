@@ -3548,7 +3548,7 @@ div.gravatar img {
 }
 
 .ui-btn.disabled:hover {
-    background-position:none;
+    background-position: 0;
     color: #999;
     text-decoration: none;
     box-shadow: none !important;
@@ -4709,8 +4709,7 @@ table.code-difftable td {
     padding: 0 !important;
     background: none !important;
     border:0 !important;
-    vertical-align: none !important;
-
+    vertical-align: baseline !important
 }
 table.code-difftable .context {
     background:none repeat scroll 0 0 #DDE7EF;
