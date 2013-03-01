@@ -2161,3 +2161,26 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 		});
 	}
 }
+
+
+// global hooks after DOM is loaded
+
+YUE.onDOMReady(function(){
+	YUE.on(YUQ('.diff-collapse-button'), 'click', function(e){
+		var button = e.currentTarget;
+		var t = YUD.get(button).getAttribute('target');
+	    console.log(t);
+		if(YUD.hasClass(t, 'hidden')){
+			YUD.removeClass(t, 'hidden');
+			YUD.get(button).innerHTML = "&uarr; {0} &uarr;".format(_TM['collapse diff']);
+		}
+		else if(!YUD.hasClass(t, 'hidden')){
+			YUD.addClass(t, 'hidden');
+			YUD.get(button).innerHTML = "&darr; {0} &darr;".format(_TM['expand diff']);
+		}
+	});
+	
+	
+	
+});
+

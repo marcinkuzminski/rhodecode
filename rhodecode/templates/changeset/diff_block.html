@@ -4,7 +4,10 @@
 ## ${diff_block.diff_block(change)}
 ##
 <%def name="diff_block(change)">
-
+<div class="diff-collapse">
+    <span target="${'diff-container-%s' % (id(change))}" class="diff-collapse-button">&uarr; ${_('collapse diff')} &uarr;</span>
+</div>
+<div class="diff-container" id="${'diff-container-%s' % (id(change))}">
 %for FID,(cs1, cs2, change, path, diff, stats) in change.iteritems():
     ##%if op !='removed':
     <div id="${FID}_target" style="clear:both;margin-top:25px"></div>
@@ -37,7 +40,7 @@
     </div>
     ##%endif
 %endfor
-
+</div>
 </%def>
 
 <%def name="diff_block_simple(change)">

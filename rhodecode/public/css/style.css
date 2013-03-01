@@ -244,7 +244,6 @@ div:hover > a.permalink {
 
 #header {
 }
-
 #header ul#logged-user {
     margin-bottom: 5px !important;
     -webkit-border-radius: 0px 0px 8px 8px;
@@ -4639,6 +4638,23 @@ PULL REQUESTS
 /*****************************************************************************
                                   DIFFS CSS
 ******************************************************************************/
+.diff-collapse{
+	text-align: center;
+}
+.diff-collapse-button{
+	cursor: pointer;
+	color: #666;
+	font-size: 16px;
+}
+.diff-container {
+	margin-bottom: -15px;
+}
+
+.diff-container.hidden{
+	display: none;
+	overflow: hidden;
+}
+
 
 div.diffblock {
     overflow: auto;
