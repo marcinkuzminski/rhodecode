@@ -3936,6 +3936,10 @@ div.form div.fields div.field div.highlight, #content div.box div.form div.field
     padding: 0;
 }
 
+#login div.form div.fields div.field div.input input.large {
+    width: 250px;
+}
+
 #login div.form div.fields div.field div.checkbox, #register div.form div.fields div.field div.checkbox {
     margin: 0 0 0 184px;
     padding: 0;
