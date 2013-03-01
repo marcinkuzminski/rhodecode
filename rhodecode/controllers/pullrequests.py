@@ -121,12 +121,17 @@ class PullrequestsController(BaseRepoController):
                     category='warning')
             redirect(url('summary_home', repo_name=org_repo.repo_name))
 
+        org_rev = request.GET.get('rev_end')
+        # rev_start is not directly useful - its parent could however be used
+        # as default for other and thus give a simple compare view
+        #other_rev = request.POST.get('rev_start')
+
         other_repos_info = {}
 
         c.org_repos = []
         c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
         c.default_org_repo = org_repo.repo_name
-        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance)
+        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, org_rev)
 
         c.other_repos = []
         # add org repo to other so we can open pull request against itself
@@ -196,17 +201,6 @@ class PullrequestsController(BaseRepoController):
         other_ref = _form['other_ref']
         revisions = _form['revisions']
         reviewers = _form['review_members']
-
-        # if we have cherry picked pull request we don't care what is in
-        # org_ref/other_ref
-        rev_start = request.POST.get('rev_start')
-        rev_end = request.POST.get('rev_end')
-
-        if rev_start and rev_end:
-            # this is swapped to simulate that rev_end is a revision from
-            # parent of the fork
-            org_ref = 'rev:%s:%s' % (rev_end, rev_end)
-            other_ref = 'rev:%s:%s' % (rev_start, rev_start)
 
         title = _form['pullrequest_title']
         description = _form['pullrequest_desc']

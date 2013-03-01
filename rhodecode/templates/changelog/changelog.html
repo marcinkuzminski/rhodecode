@@ -32,7 +32,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     <canvas id="graph_canvas"></canvas>
                 </div>
                 <div id="graph_content">
-                    <div class="info_box" style="clear: both;padding: 10px 6px;text-align: right;">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
                     <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
                     <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
 
@@ -160,11 +160,15 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             }
                         }
                         if(YUD.get('open_new_pr')){
-                          if(checked_checkboxes.length>0){
-                            // modify open pull request to show we have selected cs
-                            YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
-                          }else{
-                            YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
+                          if(checked_checkboxes.length>1){
+                              YUD.setStyle('open_new_pr','display','none');
+                            } else {
+                               YUD.setStyle('open_new_pr','display','');
+                            if(checked_checkboxes.length>0){
+                              YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
+                            }else{
+                              YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
+                            }
                           }
                         }
 
@@ -191,6 +195,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                         else{
                             YUD.setStyle('rev_range_container','display','none');
                             YUD.setStyle('rev_range_clear','display','none');
+                            YUD.get('open_new_pr').href = pr_tmpl
                             YUD.setStyle('compare_fork','display','');
                         }
                     };
