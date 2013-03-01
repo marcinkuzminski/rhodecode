@@ -44,6 +44,7 @@ from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
     safe_unicode, remove_suffix, remove_prefix
@@ -1053,15 +1054,18 @@ class Repository(Base, BaseModel):
         """
         from rhodecode.lib.vcs.backends.base import BaseChangeset
         if cs_cache is None:
-            cs_cache = self.get_changeset()
+            cs_cache = EmptyChangeset()
+            # use no-cache version here
+            scm_repo = self.scm_instance_no_cache
+            if scm_repo:
+                cs_cache = scm_repo.get_changeset()
+
         if isinstance(cs_cache, BaseChangeset):
             cs_cache = cs_cache.__json__()
 
-        if (cs_cache != self.changeset_cache
-            or not self.last_change
-            or not self.changeset_cache):
+        if (cs_cache != self.changeset_cache or not self.changeset_cache):
             _default = datetime.datetime.fromtimestamp(0)
-            last_change = cs_cache.get('date') or self.last_change or _default
+            last_change = cs_cache.get('date') or _default
             log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
             self.updated_on = last_change
             self.changeset_cache = cs_cache
@@ -1188,7 +1192,8 @@ class Repository(Base, BaseModel):
         repo_full_path = self.repo_full_path
         try:
             alias = get_scm(repo_full_path)[0]
-            log.debug('Creating instance of %s repository' % alias)
+            log.debug('Creating instance of %s repository from %s'
+                      % (alias, repo_full_path))
             backend = get_backend(alias)
         except VCSError:
             log.error(traceback.format_exc())

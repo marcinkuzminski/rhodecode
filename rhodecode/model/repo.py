@@ -149,11 +149,7 @@ class RepoModel(BaseModel):
         if not repositories:
             repositories = Repository.getAll()
         for repo in repositories:
-            scm_repo = repo.scm_instance_no_cache
-            last_cs = EmptyChangeset()
-            if scm_repo:
-                last_cs = scm_repo.get_changeset()
-            repo.update_changeset_cache(last_cs)
+            repo.update_changeset_cache()
 
     def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
                           super_user_actions=False):
