@@ -4640,6 +4640,7 @@ PULL REQUESTS
 ******************************************************************************/
 .diff-collapse{
 	text-align: center;
+	margin-bottom: -15px;
 }
 .diff-collapse-button{
 	cursor: pointer;
@@ -4647,7 +4648,7 @@ PULL REQUESTS
 	font-size: 16px;
 }
 .diff-container {
-	margin-bottom: -15px;
+	
 }
 
 .diff-container.hidden{
@@ -4744,12 +4745,14 @@ div.diffblock pre.raw {
 table.code-difftable {
     border-collapse: collapse;
     width: 99%;
+    border-radius: 0px !important;
 }
 table.code-difftable td {
     padding: 0 !important;
     background: none !important;
     border:0 !important;
     vertical-align: none !important;
+    
 }
 table.code-difftable .context {
     background:none repeat scroll 0 0 #DDE7EF;
