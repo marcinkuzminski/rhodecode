@@ -68,6 +68,8 @@ def run_task(task, *args, **kwargs):
         except socket.error, e:
             if isinstance(e, IOError) and e.errno == 111:
                 log.debug('Unable to connect to celeryd. Sync execution')
+                global CELERY_ON
+                CELERY_ON = False
             else:
                 log.error(traceback.format_exc())
         except KeyError, e:
