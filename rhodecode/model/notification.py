@@ -28,6 +28,7 @@ import os
 import logging
 import traceback
 
+from pylons import tmpl_context as c
 from pylons.i18n.translation import _
 
 import rhodecode
@@ -272,7 +273,8 @@ class EmailNotificationModel(BaseModel):
         email_template = self._tmpl_lookup.get_template(base)
         # translator and helpers inject
         _kwargs = {'_': _,
-                   'h': h}
+                   'h': h,
+                   'c': c}
         _kwargs.update(kwargs)
         log.debug('rendering tmpl %s with kwargs %s' % (base, _kwargs))
         return email_template.render(**_kwargs)
