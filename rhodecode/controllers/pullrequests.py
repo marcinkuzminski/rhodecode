@@ -403,11 +403,15 @@ class PullrequestsController(BaseRepoController):
         status = request.POST.get('changeset_status')
         change_status = request.POST.get('change_changeset_status')
         text = request.POST.get('text')
+        close_pr = request.POST.get('save_close')
 
         allowed_to_change_status = self._get_is_allowed_change_status(pull_request)
         if status and change_status and allowed_to_change_status:
-            text = text or (_('Status change -> %s')
+            _def = (_('status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
+            if close_pr:
+                _def = _('Closing with') + ' ' + _def
+            text = text or _def
         comm = ChangesetCommentsModel().create(
             text=text,
             repo=c.rhodecode_db_repo.repo_id,
@@ -416,7 +420,9 @@ class PullrequestsController(BaseRepoController):
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
             status_change=(ChangesetStatus.get_status_lbl(status)
-            if status and change_status and allowed_to_change_status else None)
+                           if status and change_status
+                           and allowed_to_change_status else None),
+            closing_pr=close_pr
         )
 
         action_logger(self.rhodecode_user,
@@ -434,7 +440,7 @@ class PullrequestsController(BaseRepoController):
                     pull_request=pull_request_id
                 )
 
-            if request.POST.get('save_close'):
+            if close_pr:
                 if status in ['rejected', 'approved']:
                     PullRequestModel().close_pull_request(pull_request_id)
                     action_logger(self.rhodecode_user,

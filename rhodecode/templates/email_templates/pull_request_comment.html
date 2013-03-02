@@ -1,13 +1,18 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="main.html"/>
-
-${_('User %s commented on pull request #%s for repository %s') % ('<b>%s</b>' % pr_comment_user, pr_id, pr_target_repo) |n}
+${_('Pull request #%s for repository %s') % (pr_id, pr_target_repo) |n}
+##message from user goes here
+<p>
+${pr_comment_user}: <br/>
+${body}
+</p>
 <div>${_('View this comment here')}: ${pr_comment_url}</div>
 
-<p>
-${body}
-
 %if status_change:
-    <span>${_('New status')} -&gt; ${status_change}</span>
+	%if closing_pr:
+	   <span>${_('Closing pull request with status')} -&gt; ${status_change}</span>
+	%else:
+	   <span>${_('New status')} -&gt; ${status_change}</span>
+	%endif
 %endif
 </p>

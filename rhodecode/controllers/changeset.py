@@ -329,7 +329,7 @@ class ChangesetController(BaseRepoController):
             text = text or (_('Status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
 
-        comm = ChangesetCommentsModel().create(
+        c.co = comm = ChangesetCommentsModel().create(
             text=text,
             repo=c.rhodecode_db_repo.repo_id,
             user=c.rhodecode_user.user_id,
@@ -371,12 +371,11 @@ class ChangesetController(BaseRepoController):
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('changeset_home', repo_name=repo_name,
                                   revision=revision))
-
+        #only ajax below
         data = {
            'target_id': h.safeid(h.safe_unicode(request.POST.get('f_path'))),
         }
         if comm:
-            c.co = comm
             data.update(comm.get_dict())
             data.update({'rendered_text':
                          render('changeset/changeset_comment_block.html')})
