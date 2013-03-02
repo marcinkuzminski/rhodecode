@@ -4652,7 +4652,7 @@ PULL REQUESTS
 	font-size: 16px;
 }
 .diff-container {
-	
+
 }
 
 .diff-container.hidden{
@@ -4756,7 +4756,7 @@ table.code-difftable td {
     background: none !important;
     border:0 !important;
     vertical-align: none !important;
-    
+
 }
 table.code-difftable .context {
     background:none repeat scroll 0 0 #DDE7EF;
