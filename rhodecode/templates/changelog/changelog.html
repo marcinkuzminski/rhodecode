@@ -176,7 +176,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             var link = (rev_start == rev_end)
                               	? _TM['Show selected change __S']
                             	: _TM['Show selected changes __S -> __E'];
-                            
+
                             link = link.replace('__S',rev_start.substr(0,6));
                             link = link.replace('__E',rev_end.substr(0,6));
                             YUD.get('rev_range_container').href = url;

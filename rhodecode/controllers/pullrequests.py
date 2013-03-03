@@ -87,7 +87,7 @@ class PullrequestsController(BaseRepoController):
 
         if rev:
             selected = 'rev:%s:%s' % (rev, rev)
-            special.append((selected, rev))            
+            special.append((selected, rev))
 
         return [(special, _("Special")),
                 (bookmarks, _("Bookmarks")),
