@@ -232,6 +232,7 @@ ul#context-actions {
 #context-state {
 	background-color: #336699;
 	border-top: 1px solid #517da8;
+	min-height: 36px;
 /*	overflow: hidden;*/
 }
 

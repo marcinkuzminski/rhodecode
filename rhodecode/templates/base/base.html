@@ -109,10 +109,11 @@
       %endif
     </div>
     <div id="context-state">
-      <button id="revision-changer">
+      <!--button id="revision-changer">
         <span class="branch-name">graphics/shader-move</span>
         <span class="revision">@73318:8d3d6ee94072</span>
-      </button>
+      </button-->
+      &nbsp;
       <ul id="context-pages" class="horizontal-list">
         <li ${is_current('summary')}><a href="${h.url('summary_home', repo_name=c.repo_name)}" class="summary">${_('Summary')}</a></li>
         <li ${is_current('changelog')}><a href="${h.url('changelog_home', repo_name=c.repo_name)}" class="changelogs">${_('Changelogs')}</a></li>
