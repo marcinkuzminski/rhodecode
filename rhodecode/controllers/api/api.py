@@ -34,6 +34,7 @@ from rhodecode.lib.auth import PasswordGenerator, AuthUser, \
     HasPermissionAllDecorator, HasPermissionAnyDecorator, \
     HasPermissionAnyApi, HasRepoPermissionAnyApi
 from rhodecode.lib.utils import map_groups, repo2db_mapper
+from rhodecode.lib.utils2 import str2bool
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
@@ -257,7 +258,7 @@ class ApiController(JSONRPCController):
         if isinstance(userid, Optional):
             userid = apiuser.user_id
         user = get_user_or_error(userid)
-        locked = bool(locked)
+        locked = str2bool(locked)
         try:
             if locked:
                 Repository.lock(repo, user.user_id)
