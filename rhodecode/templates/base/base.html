@@ -71,9 +71,9 @@
   <ul class="admin_menu">
       <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal')}</li>
       <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
-      <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+      <li>${h.link_to(_('repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
       <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
-      <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
+      <li>${h.link_to(_('user groups'),h.url('users_groups'),class_='groups')}</li>
       <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
       <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
       <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
@@ -233,7 +233,7 @@
                             <label for="username">${_('Username')}:</label>
                         </div>
                         <div class="input">
-                            ${h.text('username',class_='focus',size=40)}
+                            ${h.text('username',class_='focus')}
                         </div>
 
                     </div>
@@ -242,7 +242,7 @@
                             <label for="password">${_('Password')}:</label>
                         </div>
                         <div class="input">
-                            ${h.password('password',class_='focus',size=40)}
+                            ${h.password('password',class_='focus')}
                         </div>
 
                     </div>

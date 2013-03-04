@@ -16,7 +16,7 @@ from formencode.validators import (
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib import ipaddr
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
+from rhodecode.model.db import RepoGroup, Repository, UserGroup, User,\
     ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.config.routing import ADMIN_PREFIX
@@ -129,13 +129,13 @@ def ValidRepoUser():
     return _validator
 
 
-def ValidUsersGroup(edit=False, old_data={}):
+def ValidUserGroup(edit=False, old_data={}):
     class _validator(formencode.validators.FancyValidator):
         messages = {
-            'invalid_group': _(u'Invalid users group name'),
-            'group_exist': _(u'Users group "%(usersgroup)s" already exists'),
-            'invalid_usersgroup_name':
-                _(u'users group name may only contain  alphanumeric '
+            'invalid_group': _(u'Invalid user group name'),
+            'group_exist': _(u'User group "%(usergroup)s" already exists'),
+            'invalid_usergroup_name':
+                _(u'user group name may only contain alphanumeric '
                   'characters underscores, periods or dashes and must begin '
                   'with alphanumeric character')
         }
@@ -150,19 +150,19 @@ def ValidUsersGroup(edit=False, old_data={}):
             old_ugname = None
             if edit:
                 old_id = old_data.get('users_group_id')
-                old_ugname = UsersGroup.get(old_id).users_group_name
+                old_ugname = UserGroup.get(old_id).users_group_name
 
             if old_ugname != value or not edit:
-                is_existing_group = UsersGroup.get_by_group_name(value,
+                is_existing_group = UserGroup.get_by_group_name(value,
                                                         case_insensitive=True)
                 if is_existing_group:
-                    msg = M(self, 'group_exist', state, usersgroup=value)
+                    msg = M(self, 'group_exist', state, usergroup=value)
                     raise formencode.Invalid(msg, value, state,
                         error_dict=dict(users_group_name=msg)
                     )
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                msg = M(self, 'invalid_usersgroup_name', state)
+                msg = M(self, 'invalid_usergroup_name', state)
                 raise formencode.Invalid(msg, value, state,
                     error_dict=dict(users_group_name=msg)
                 )
@@ -317,7 +317,7 @@ def ValidRepoName(edit=False, old_data={}):
                 _(u'Repository named %(repo)s already exists'),
             'repository_in_group_exists': _(u'Repository "%(repo)s" already '
                                             'exists in group "%(group)s"'),
-            'same_group_exists': _(u'Repositories group with name "%(repo)s" '
+            'same_group_exists': _(u'Repository group with name "%(repo)s" '
                                    'already exists')
         }
 
@@ -547,7 +547,7 @@ def ValidPerms(type_='repo'):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'perm_new_member_name':
-                _(u'This username or users group name is not valid')
+                _(u'This username or user group name is not valid')
         }
 
         def to_python(self, value, state):
@@ -604,9 +604,9 @@ def ValidPerms(type_='repo'):
                             .filter(User.active == True)\
                             .filter(User.username == k).one()
                     if t is 'users_group':
-                        self.user_db = UsersGroup.query()\
-                            .filter(UsersGroup.users_group_active == True)\
-                            .filter(UsersGroup.users_group_name == k).one()
+                        self.user_db = UserGroup.query()\
+                            .filter(UserGroup.users_group_active == True)\
+                            .filter(UserGroup.users_group_name == k).one()
 
                 except Exception:
                     log.exception('Updated permission failed')

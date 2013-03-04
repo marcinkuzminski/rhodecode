@@ -83,22 +83,27 @@ class CompareController(BaseRepoController):
             raise HTTPBadRequest()
 
     def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
-
+        # org_ref will be evaluated in org_repo
         org_repo = c.rhodecode_db_repo.repo_name
         org_ref = (org_ref_type, org_ref)
+        # other_ref will be evaluated in other_repo
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('other_repo', org_repo)
-        c.fulldiff = fulldiff = request.GET.get('fulldiff')
+        # fulldiff disables cut_off_limit
+        c.fulldiff = request.GET.get('fulldiff')
+        # only consider this range of changesets
         rev_start = request.GET.get('rev_start')
         rev_end = request.GET.get('rev_end')
-
-        c.swap_url = h.url('compare_url', as_form=request.GET.get('as_form'),
+        # partial uses compare_cs.html template directly
+        partial = request.environ.get('HTTP_X_PARTIAL_XHR')
+        # as_form puts hidden input field with changeset revisions
+        c.as_form = partial and request.GET.get('as_form')
+        # swap url for compare_diff page - never partial and never as_form
+        c.swap_url = h.url('compare_url',
             repo_name=other_repo,
             org_ref_type=other_ref[0], org_ref=other_ref[1],
             other_repo=org_repo,
             other_ref_type=org_ref[0], other_ref=org_ref[1])
-
-        partial = request.environ.get('HTTP_X_PARTIAL_XHR')
 
         org_repo = Repository.get_by_repo_name(org_repo)
         other_repo = Repository.get_by_repo_name(other_repo)
@@ -148,8 +153,6 @@ class CompareController(BaseRepoController):
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
-        # defines that we need hidden inputs with changesets
-        c.as_form = request.GET.get('as_form', False)
         if partial:
             return render('compare/compare_cs.html')
 
@@ -163,7 +166,7 @@ class CompareController(BaseRepoController):
             org_ref = ('rev', ancestor)
             org_repo = other_repo
 
-        diff_limit = self.cut_off_limit if not fulldiff else None
+        diff_limit = self.cut_off_limit if not c.fulldiff else None
 
         _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
 

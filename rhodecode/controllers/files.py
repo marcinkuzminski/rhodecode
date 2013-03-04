@@ -486,6 +486,8 @@ class FilesController(BaseRepoController):
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
                 try:
                     node1 = c.changeset_1.get_node(f_path)
+                    if node1.is_dir():
+                        raise NodeError('%s path is a %s not a file' % (node1, type(node1)))
                 except NodeDoesNotExistError:
                     c.changeset_1 = EmptyChangeset(cs=diff1,
                                                    revision=c.changeset_1.revision,
@@ -499,6 +501,7 @@ class FilesController(BaseRepoController):
                 c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
                 try:
                     node2 = c.changeset_2.get_node(f_path)
+                    raise NodeError('%s path is a %s not a file' % (node2, type(node2)))
                 except NodeDoesNotExistError:
                     c.changeset_2 = EmptyChangeset(cs=diff2,
                                                    revision=c.changeset_2.revision,

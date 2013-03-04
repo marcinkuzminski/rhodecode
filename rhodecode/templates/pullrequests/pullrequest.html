@@ -30,7 +30,7 @@
                 <span style="font-size: 20px">
                 ${h.select('org_repo','',c.org_repos,class_='refs')}:${h.select('org_ref',c.default_org_ref,c.org_refs,class_='refs')}
                 </span>
-                 <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
+                 <div style="padding:5px 3px 3px 20px;">${c.rhodecode_db_repo.description}</div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
@@ -44,7 +44,7 @@
                 <span style="font-size: 20px">
                 ${h.select('other_repo',c.default_other_repo,c.other_repos,class_='refs')}:${h.select('other_ref',c.default_other_ref,c.default_other_refs,class_='refs')}
                 </span>
-                 <div id="other_repo_desc" style="padding:5px 3px 3px 42px;"></div>
+                 <div id="other_repo_desc" style="padding:5px 3px 3px 20px;"></div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
@@ -146,24 +146,25 @@
 
       var select_refs = YUQ('#pull_request_form select.refs')
       var rev_data = {
-    	  'org_repo': org_repo,
-    	  'org_ref': org_ref[1],
-    	  'org_ref_type': org_ref[0],
-    	  'other_repo': other_repo,
-          'other_ref': other_ref[1],
-          'other_ref_type': other_ref[0],
+          'org_repo': org_repo,
+          'org_ref': org_ref[2],
+          'org_ref_type': 'rev',
+          'other_repo': other_repo,
+          'other_ref': other_ref[2],
+          'other_ref_type': 'rev',
       }; // gather the org/other ref and repo here
 
       for (k in rev_data){
-    	  url = url.replace('__'+k+'__',rev_data[k]);
+          url = url.replace('__'+k+'__',rev_data[k]);
       }
 
+      YUD.get('pull_request_overview').innerHTML = "${_('Loading ...')}";
+      YUD.get('pull_request_overview_url').href = url; // shouldn't have as_form ... but ...
+      YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
       ypjax(url,'pull_request_overview', function(data){
           var sel_box = YUQ('#pull_request_form #other_repo')[0];
           var repo_name = sel_box.options[sel_box.selectedIndex].value;
           var _data = other_repos_info[repo_name];
-          YUD.get('pull_request_overview_url').href = url;
-          YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
           YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
           YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
           // select back the revision that was just compared
@@ -171,8 +172,8 @@
           // reset && add the reviewer based on selected repo
           YUD.get('review_members').innerHTML = '';
           addReviewMember(_data.user.user_id, _data.user.firstname,
-        		          _data.user.lastname, _data.user.username,
-        		          _data.user.gravatar_link);
+                          _data.user.lastname, _data.user.username,
+                          _data.user.gravatar_link);
       })
   }
 

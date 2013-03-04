@@ -684,9 +684,9 @@ def action_parser(user_log, feed=False, parse_cs=False):
                                     get_user_name, 'user_add.png'),
     'admin_updated_user':          (_('[updated] user'),
                                     get_user_name, 'user_edit.png'),
-    'admin_created_users_group':   (_('[created] users group'),
+    'admin_created_users_group':   (_('[created] user group'),
                                     get_users_group, 'group_add.png'),
-    'admin_updated_users_group':   (_('[updated] users group'),
+    'admin_updated_users_group':   (_('[updated] user group'),
                                     get_users_group, 'group_edit.png'),
     'user_commented_revision':     (_('[commented] on revision in repository'),
                                     get_cs_links, 'comment_add.png'),
@@ -977,7 +977,7 @@ def fancy_file_stats(stats):
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
 
-def urlify_text(text_):
+def urlify_text(text_, safe=True):
     """
     Extrac urls from text and make html links out of them
 
@@ -990,8 +990,10 @@ def urlify_text(text_):
     def url_func(match_obj):
         url_full = match_obj.groups()[0]
         return '<a href="%(url)s">%(url)s</a>' % ({'url': url_full})
-
-    return literal(url_pat.sub(url_func, text_))
+    _newtext = url_pat.sub(url_func, text_)
+    if safe:
+        return literal(_newtext)
+    return _newtext
 
 
 def urlify_changesets(text_, repository):
@@ -1002,21 +1004,16 @@ def urlify_changesets(text_, repository):
     :param repository: repo name to build the URL with
     """
     from pylons import url  # doh, we need to re-import url to mock it later
-    URL_PAT = re.compile(r'(?:^|\s)([0-9a-fA-F]{12,40})(?:$|\s)')
+    URL_PAT = re.compile(r'(^|\s)([0-9a-fA-F]{12,40})($|\s)')
 
     def url_func(match_obj):
-        rev = match_obj.groups()[0]
-        pref = ''
-        suf = ''
-        if match_obj.group().startswith(' '):
-            pref = ' '
-        if match_obj.group().endswith(' '):
-            suf = ' '
+        rev = match_obj.groups()[1]
+        pref = match_obj.groups()[0]
+        suf = match_obj.groups()[2]
+
         tmpl = (
         '%(pref)s<a class="%(cls)s" href="%(url)s">'
-        '%(rev)s'
-        '</a>'
-        '%(suf)s'
+        '%(rev)s</a>%(suf)s'
         )
         return tmpl % {
          'pref': pref,
@@ -1062,7 +1059,7 @@ def urlify_commit(text_, repository=None, link_=None):
     newtext = urlify_changesets(escaper(text_), repository)
 
     # extract http/https links and make them real urls
-    newtext = urlify_text(newtext)
+    newtext = urlify_text(newtext, safe=False)
 
     try:
         from rhodecode import CONFIG

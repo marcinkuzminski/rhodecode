@@ -47,7 +47,7 @@ choose "Visual C++ 2008 Express" when installing.
    required, you can uncheck them
 
 .. note::
-   
+
    64bit: You also need to install the Microsoft Windows SDK for .NET 3.5 SP1 (.NET 4.0 won't work).
    Download from: http://www.microsoft.com/en-us/download/details.aspx?id=3138
 
@@ -90,7 +90,7 @@ http://sourceforge.net/projects/pywin32/files/
   .. note::
 
      64bit: Download and install the 64bit version.
-     At the time of writing you can find this at: 
+     At the time of writing you can find this at:
      http://sourceforge.net/projects/pywin32/files/pywin32/Build%20218/pywin32-218.win-amd64-py2.7.exe/download
 
 Step4 - Python BIN

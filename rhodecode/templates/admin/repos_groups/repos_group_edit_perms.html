@@ -40,7 +40,7 @@
         </tr>
     %endfor
 
-    ## USERS GROUPS
+    ## USER GROUPS
     %for g2p in c.repos_group.users_group_to_perm:
         <tr id="id${id(g2p.users_group.users_group_name)}">
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'group.none')}</td>
@@ -51,7 +51,7 @@
                 <img class="perm-gravatar" src="${h.url('/images/icons/group.png')}"/>${g2p.users_group.users_group_name}
             </td>
             <td>
-                <span class="delete_icon action_button" onclick="ajaxActionUsersGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionUserGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
                 ${_('revoke')}
                 </span>
             </td>
@@ -105,7 +105,7 @@ function ajaxActionUser(user_id, field_id) {
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 
-function ajaxActionUsersGroup(users_group_id,field_id){
+function ajaxActionUserGroup(users_group_id,field_id){
     var sUrl = "${h.url('delete_repos_group_users_group_perm',group_name=c.repos_group.group_name)}";
     var callback = {
         success:function(o){
@@ -113,7 +113,7 @@ function ajaxActionUsersGroup(users_group_id,field_id){
             tr.parentNode.removeChild(tr);
         },
         failure:function(o){
-            alert("${_('Failed to remove users group')}");
+            alert("${_('Failed to remove user group')}");
         },
     };
     var recursive = YUD.get('recursive').checked;

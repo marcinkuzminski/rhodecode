@@ -33,15 +33,15 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     <canvas id="graph_canvas"></canvas>
                 </div>
                 <div id="graph_content">
-                    <div class="info_box" style="clear: both;padding: 10px 6px;vertical-align: right;text-align: right;">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;text-align: right;">
                     <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
                     <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
 
                     %if c.rhodecode_db_repo.fork:
-                        <a title="${_('compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default')}" class="ui-btn small">${_('Compare fork with parent')}</a>
+                        <a title="${_('Compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default')}" class="ui-btn small">${_('Compare fork with parent')}</a>
                     %endif
                     %if h.is_hg(c.rhodecode_repo):
-                    <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('open new pull request')}</a>
+                    <a id="open_new_pr" href="${h.url('pullrequest_form',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
                     %endif
                     </div>
                     <div class="container_header">
@@ -72,7 +72,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                         </div>
                         <div class="mid">
                             <div class="message">${h.urlify_commit(cs.message, c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
-                            <div class="expand"><span class="expandtext">&darr; ${_('show more')} &darr;</span></div>
+                            <div class="expand"><span class="expandtext">&darr; ${_('Show more')} &darr;</span></div>
                         </div>
                         <div class="right">
                                     <div class="changes">
@@ -163,7 +163,6 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                           if(checked_checkboxes.length>0){
                             // modify open pull request to show we have selected cs
                             YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
-
                           }else{
                             YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
                           }
@@ -172,32 +171,13 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                         if(checked_checkboxes.length>0){
                             var rev_end = checked_checkboxes[0].name;
                             var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
-
-                            // now select all checkboxes in the middle.
-                            var checked = false;
-                            for (var i=0; i<checkboxes.length; i++){
-                                var cb = checkboxes[i];
-                                var rev = cb.name;
-
-                                if (rev == rev_end){
-                                    checked = true;
-                                }
-                                if (checked){
-                                    cb.checked = true;
-                                }
-                                else{
-                                    cb.checked = false;
-                                }
-                                if (rev == rev_start){
-                                    checked = false;
-                                }
-
-                            }
-
                             var url = url_tmpl.replace('__REVRANGE__',
                                     rev_start+'...'+rev_end);
 
-                            var link = _TM['Show selected changes __S -> __E'];
+                            var link = (rev_start == rev_end)
+                                ? _TM['Show selected change __S']
+                                : _TM['Show selected changes __S -> __E'];
+
                             link = link.replace('__S',rev_start.substr(0,6));
                             link = link.replace('__E',rev_end.substr(0,6));
                             YUD.get('rev_range_container').href = url;

@@ -75,13 +75,13 @@ class PullRequestModel(BaseModel):
         new.title = title
         new.description = description
         new.author = created_by_user
-        self.sa.add(new)
+        Session().add(new)
         Session().flush()
         #members
         for member in set(reviewers):
             _usr = self._get_user(member)
             reviewer = PullRequestReviewers(_usr, new)
-            self.sa.add(reviewer)
+            Session().add(reviewer)
 
         #reset state to under-review
         ChangesetStatusModel().set_status(
@@ -90,7 +90,8 @@ class PullRequestModel(BaseModel):
             user=created_by_user,
             pull_request=new
         )
-
+        revision_data = [(x.raw_id, x.message)
+                         for x in map(org_repo.get_changeset, revisions)]
         #notification to reviewers
         notif = NotificationModel()
 
@@ -114,7 +115,7 @@ class PullRequestModel(BaseModel):
             'pr_repo_url': h.url('summary_home', repo_name=other_repo.repo_name,
                                  qualified=True,),
             'pr_url': pr_url,
-            'pr_revisions': revisions
+            'pr_revisions': revision_data
         }
 
         notif.create(created_by=created_by_user, subject=subject, body=body,
@@ -140,7 +141,7 @@ class PullRequestModel(BaseModel):
         for uid in to_add:
             _usr = self._get_user(uid)
             reviewer = PullRequestReviewers(_usr, pull_request)
-            self.sa.add(reviewer)
+            Session().add(reviewer)
 
         for uid in to_remove:
             reviewer = PullRequestReviewers.query()\
@@ -148,7 +149,7 @@ class PullRequestModel(BaseModel):
                             PullRequestReviewers.pull_request==pull_request)\
                     .scalar()
             if reviewer:
-                self.sa.delete(reviewer)
+                Session().delete(reviewer)
 
     def delete(self, pull_request):
         pull_request = self.__get_pull_request(pull_request)
@@ -158,7 +159,7 @@ class PullRequestModel(BaseModel):
         pull_request = self.__get_pull_request(pull_request)
         pull_request.status = PullRequest.STATUS_CLOSED
         pull_request.updated_on = datetime.datetime.now()
-        self.sa.add(pull_request)
+        Session().add(pull_request)
 
     def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref):
         """
@@ -248,11 +249,7 @@ class PullRequestModel(BaseModel):
         if len(other_ref) != 2 or not isinstance(org_ref, (list, tuple)):
             raise Exception('other_ref must be a two element list/tuple')
 
-        org_repo_scm = org_repo.scm_instance
-        other_repo_scm = other_repo.scm_instance
-
-        alias = org_repo.scm_instance.alias
-        cs_ranges, ancestor = self._get_changesets(alias,
-                                                   org_repo_scm, org_ref,
-                                                   other_repo_scm, other_ref)
+        cs_ranges, ancestor = self._get_changesets(org_repo.scm_instance.alias,
+                                                   org_repo.scm_instance, org_ref,
+                                                   other_repo.scm_instance, other_ref)
         return cs_ranges, ancestor

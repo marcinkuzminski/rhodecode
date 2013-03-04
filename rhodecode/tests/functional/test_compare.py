@@ -120,7 +120,7 @@ class TestCompareController(TestController):
         ## files
         response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
         #swap
-        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
+        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
     def test_compare_forks_on_branch_extra_commits_origin_has_incomming_hg(self):
         self.log_user()
@@ -173,7 +173,7 @@ class TestCompareController(TestController):
         ## files
         response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
         #swap
-        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?as_form=None&amp;other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
+        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
     def test_compare_cherry_pick_changesets_from_bottom(self):
 

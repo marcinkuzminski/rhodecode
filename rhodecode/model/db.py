@@ -44,6 +44,7 @@ from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
     safe_unicode, remove_suffix, remove_prefix
@@ -341,7 +342,7 @@ class User(Base, BaseModel):
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
     repo_group_to_perm = relationship('UserRepoGroupToPerm', primaryjoin='UserRepoGroupToPerm.user_id==User.user_id', cascade='all')
 
-    group_member = relationship('UsersGroupMember', cascade='all')
+    group_member = relationship('UserGroupMember', cascade='all')
 
     notifications = relationship('UserNotification', cascade='all')
     # notifications assigned to this user
@@ -604,7 +605,7 @@ class UserLog(Base, BaseModel):
     repository = relationship('Repository', cascade='')
 
 
-class UsersGroup(Base, BaseModel):
+class UserGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = (
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
@@ -616,9 +617,9 @@ class UsersGroup(Base, BaseModel):
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
     inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
-    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
-    users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
-    users_group_repo_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
+    users_group_to_perm = relationship('UserGroupToPerm', cascade='all')
+    users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
 
     def __unicode__(self):
         return u'<userGroup(%s)>' % (self.users_group_name)
@@ -658,7 +659,7 @@ class UsersGroup(Base, BaseModel):
         return data
 
 
-class UsersGroupMember(Base, BaseModel):
+class UserGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = (
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
@@ -670,7 +671,7 @@ class UsersGroupMember(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User', lazy='joined')
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
 
     def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
@@ -747,7 +748,7 @@ class Repository(Base, BaseModel):
     fork = relationship('Repository', remote_side=repo_id)
     group = relationship('RepoGroup')
     repo_to_perm = relationship('UserRepoToPerm', cascade='all', order_by='UserRepoToPerm.repo_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
     followers = relationship('UserFollowing',
@@ -1053,15 +1054,18 @@ class Repository(Base, BaseModel):
         """
         from rhodecode.lib.vcs.backends.base import BaseChangeset
         if cs_cache is None:
-            cs_cache = self.get_changeset()
+            cs_cache = EmptyChangeset()
+            # use no-cache version here
+            scm_repo = self.scm_instance_no_cache
+            if scm_repo:
+                cs_cache = scm_repo.get_changeset()
+
         if isinstance(cs_cache, BaseChangeset):
             cs_cache = cs_cache.__json__()
 
-        if (cs_cache != self.changeset_cache
-            or not self.last_change
-            or not self.changeset_cache):
+        if (cs_cache != self.changeset_cache or not self.changeset_cache):
             _default = datetime.datetime.fromtimestamp(0)
-            last_change = cs_cache.get('date') or self.last_change or _default
+            last_change = cs_cache.get('date') or _default
             log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
             self.updated_on = last_change
             self.changeset_cache = cs_cache
@@ -1188,7 +1192,8 @@ class Repository(Base, BaseModel):
         repo_full_path = self.repo_full_path
         try:
             alias = get_scm(repo_full_path)[0]
-            log.debug('Creating instance of %s repository' % alias)
+            log.debug('Creating instance of %s repository from %s'
+                      % (alias, repo_full_path))
             backend = get_backend(alias)
         except VCSError:
             log.error(traceback.format_exc())
@@ -1227,7 +1232,7 @@ class RepoGroup(Base, BaseModel):
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
 
     parent_group = relationship('RepoGroup', remote_side=group_id)
 
@@ -1378,10 +1383,10 @@ class Permission(Base, BaseModel):
         ('repository.write', _('Repository write access')),
         ('repository.admin', _('Repository admin access')),
 
-        ('group.none', _('Repositories Group no access')),
-        ('group.read', _('Repositories Group read access')),
-        ('group.write', _('Repositories Group write access')),
-        ('group.admin', _('Repositories Group admin access')),
+        ('group.none', _('Repository group no access')),
+        ('group.read', _('Repository group read access')),
+        ('group.write', _('Repository group write access')),
+        ('group.admin', _('Repository group admin access')),
 
         ('hg.admin', _('RhodeCode Administrator')),
         ('hg.create.none', _('Repository creation disabled')),
@@ -1490,7 +1495,7 @@ class UserToPerm(Base, BaseModel):
     permission = relationship('Permission', lazy='joined')
 
 
-class UsersGroupRepoToPerm(Base, BaseModel):
+class UserGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
         UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
@@ -1502,7 +1507,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     repository = relationship('Repository')
 
@@ -1519,7 +1524,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
 
 
-class UsersGroupToPerm(Base, BaseModel):
+class UserGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
@@ -1530,7 +1535,7 @@ class UsersGroupToPerm(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
 
 
@@ -1552,7 +1557,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     permission = relationship('Permission')
 
 
-class UsersGroupRepoGroupToPerm(Base, BaseModel):
+class UserGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'group_id'),
@@ -1565,7 +1570,7 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     group = relationship('RepoGroup')
 

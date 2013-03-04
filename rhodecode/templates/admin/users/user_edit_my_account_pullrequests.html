@@ -1,4 +1,8 @@
-
+%if c.show_closed:
+  ${h.checkbox('show_closed',checked="checked", label=_('Show closed pull requests'))}
+%else:
+  ${h.checkbox('show_closed',label=_('Show closed pull requests'))}
+%endif
 <div class="pullrequests_section_head">${_('Opened by me')}</div>
 <ul>
     %if c.my_pull_requests:

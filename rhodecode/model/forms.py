@@ -94,14 +94,14 @@ def UserForm(edit=False, old_data={}):
     return _UserForm
 
 
-def UsersGroupForm(edit=False, old_data={}, available_members=[]):
-    class _UsersGroupForm(formencode.Schema):
+def UserGroupForm(edit=False, old_data={}, available_members=[]):
+    class _UserGroupForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
 
         users_group_name = All(
             v.UnicodeString(strip=True, min=1, not_empty=True),
-            v.ValidUsersGroup(edit, old_data)
+            v.ValidUserGroup(edit, old_data)
         )
 
         users_group_active = v.StringBoolean(if_missing=False)
@@ -112,7 +112,7 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
                 if_missing=None, not_empty=False
             )
 
-    return _UsersGroupForm
+    return _UserGroupForm
 
 
 def ReposGroupForm(edit=False, old_data={}, available_groups=[],

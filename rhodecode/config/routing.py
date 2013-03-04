@@ -48,7 +48,7 @@ def make_map(config):
 
     def check_group(environ, match_dict):
         """
-        check for valid repositories group for proper 404 handling
+        check for valid repository group for proper 404 handling
 
         :param environ:
         :param match_dict:
@@ -235,7 +235,7 @@ def make_map(config):
         m.connect("user_ips_delete", "/users_ips/{id}",
                   action="delete_ip", conditions=dict(method=["DELETE"]))
 
-    #ADMIN USERS GROUPS REST ROUTES
+    #ADMIN USER GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/users_groups') as m:
         m.connect("users_groups", "/users_groups",

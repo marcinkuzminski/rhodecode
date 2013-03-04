@@ -251,76 +251,10 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y, recurse_limit=100):
         log.info('LockHeld')
         return 'Task with key %s already running' % lockkey
 
-@task(ignore_result=True)
-@dbsession
-def send_password_link(user_email):
-    from rhodecode.model.notification import EmailNotificationModel
-
-    log = get_logger(send_password_link)
-    DBS = get_session()
-
-    try:
-        user = User.get_by_email(user_email)
-        if user:
-            log.debug('password reset user found %s' % user)
-            link = url('reset_password_confirmation', key=user.api_key,
-                       qualified=True)
-            reg_type = EmailNotificationModel.TYPE_PASSWORD_RESET
-            body = EmailNotificationModel().get_email_tmpl(reg_type,
-                                                **{'user':user.short_contact,
-                                                   'reset_url':link})
-            log.debug('sending email')
-            run_task(send_email, user_email,
-                     _("password reset link"), body)
-            log.info('send new password mail to %s' % user_email)
-        else:
-            log.debug("password reset email %s not found" % user_email)
-    except:
-        log.error(traceback.format_exc())
-        return False
-
-    return True
 
 @task(ignore_result=True)
 @dbsession
-def reset_user_password(user_email):
-    from rhodecode.lib import auth
-
-    log = get_logger(reset_user_password)
-    DBS = get_session()
-
-    try:
-        try:
-            user = User.get_by_email(user_email)
-            new_passwd = auth.PasswordGenerator().gen_password(8,
-                             auth.PasswordGenerator.ALPHABETS_BIG_SMALL)
-            if user:
-                user.password = auth.get_crypt_password(new_passwd)
-                user.api_key = auth.generate_api_key(user.username)
-                DBS.add(user)
-                DBS.commit()
-                log.info('change password for %s' % user_email)
-            if new_passwd is None:
-                raise Exception('unable to generate new password')
-        except:
-            log.error(traceback.format_exc())
-            DBS.rollback()
-
-        run_task(send_email, user_email,
-                 'Your new password',
-                 'Your new RhodeCode password:%s' % (new_passwd))
-        log.info('send new password mail to %s' % user_email)
-
-    except:
-        log.error('Failed to update user password')
-        log.error(traceback.format_exc())
-
-    return True
-
-
-@task(ignore_result=True)
-@dbsession
-def send_email(recipients, subject, body, html_body=''):
+def send_email(recipients, subject, body='', html_body=''):
     """
     Sends an email with defined parameters from the .ini files.
 
@@ -348,7 +282,7 @@ def send_email(recipients, subject, body, html_body=''):
     mail_port = email_config.get('smtp_port')
     tls = str2bool(email_config.get('smtp_use_tls'))
     ssl = str2bool(email_config.get('smtp_use_ssl'))
-    debug = str2bool(config.get('debug'))
+    debug = str2bool(email_config.get('debug'))
     smtp_auth = email_config.get('smtp_auth')
 
     if not mail_server:

@@ -291,9 +291,7 @@ class ScmModel(BaseModel):
         if all_groups is None:
             all_groups = RepoGroup.query()\
                 .filter(RepoGroup.group_parent_id == None).all()
-        group_iter = GroupList(all_groups)
-
-        return group_iter
+        return [x for x in GroupList(all_groups)]
 
     def mark_for_invalidation(self, repo_name):
         """

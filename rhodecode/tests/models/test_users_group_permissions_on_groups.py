@@ -10,7 +10,7 @@ from rhodecode.model.meta import Session
 from nose.tools import with_setup
 from rhodecode.tests.models.common import _create_project_tree, check_tree_perms, \
     _get_perms, _check_expected_count, expected_count, _destroy_project_tree
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.repo import RepoModel
 
 
@@ -40,10 +40,10 @@ def setup_module():
     Session().commit()
     test_u2_id = test_u2.user_id
 
-    gr1 = UsersGroupModel().create(name='perms_group_1')
+    gr1 = UserGroupModel().create(name='perms_group_1')
     Session().commit()
     test_u2_gr_id = gr1.users_group_id
-    UsersGroupModel().add_user_to_group(gr1, user=test_u2_id)
+    UserGroupModel().add_user_to_group(gr1, user=test_u2_id)
     Session().commit()
 
     _get_repo_perms = functools.partial(_get_perms, key='repositories',

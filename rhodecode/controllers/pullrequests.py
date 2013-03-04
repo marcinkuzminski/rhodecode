@@ -67,29 +67,33 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def _get_repo_refs(self, repo):
-        hist_l = []
-
-        branches_group = ([('branch:%s:%s' % (k, v), k) for
-                         k, v in repo.branches.iteritems()], _("Branches"))
-        bookmarks_group = ([('book:%s:%s' % (k, v), k) for
-                         k, v in repo.bookmarks.iteritems()], _("Bookmarks"))
-        tags_group = ([('tag:%s:%s' % (k, v), k) for
-                         k, v in repo.tags.iteritems()
-                         if k != 'tip'], _("Tags"))
+    def _get_repo_refs(self, repo, rev=None):
+        """return a structure with repo's interesting changesets, suitable for
+        the selectors in pullrequest.html"""
+        branches = [('branch:%s:%s' % (k, v), k)
+                    for k, v in repo.branches.iteritems()]
+        bookmarks = [('book:%s:%s' % (k, v), k)
+                     for k, v in repo.bookmarks.iteritems()]
+        tags = [('tag:%s:%s' % (k, v), k)
+                for k, v in repo.tags.iteritems()
+                if k != 'tip']
 
         tip = repo.tags['tip']
-        tipref = 'tag:tip:%s' % tip
         colontip = ':' + tip
-        tips = [x[1] for x in branches_group[0] + bookmarks_group[0] + tags_group[0]
+        tips = [x[1] for x in branches + bookmarks + tags
                 if x[0].endswith(colontip)]
-        tags_group[0].append((tipref, 'tip (%s)' % ', '.join(tips)))
+        selected = 'tag:tip:%s' % tip
+        special = [(selected, 'tip (%s)' % ', '.join(tips))]
 
-        hist_l.append(bookmarks_group)
-        hist_l.append(branches_group)
-        hist_l.append(tags_group)
+        if rev:
+            selected = 'rev:%s:%s' % (rev, rev)
+            special.append((selected, rev))
 
-        return hist_l, tipref
+        return [(special, _("Special")),
+                (bookmarks, _("Bookmarks")),
+                (branches, _("Branches")),
+                (tags, _("Tags")),
+                ], selected
 
     def _get_is_allowed_change_status(self, pull_request):
         owner = self.rhodecode_user.user_id == pull_request.user_id
@@ -291,8 +295,6 @@ class PullrequestsController(BaseRepoController):
                                   else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
-        # defines that we need hidden inputs with changesets
-        c.as_form = request.GET.get('as_form', False)
 
         c.org_ref = org_ref[1]
         c.org_ref_type = org_ref[0]
@@ -391,6 +393,7 @@ class PullrequestsController(BaseRepoController):
                                          )
         c.changeset_statuses = ChangesetStatus.STATUSES
 
+        c.as_form = False
         return render('/pullrequests/pullrequest_show.html')
 
     @NotAnonymous()
@@ -403,11 +406,15 @@ class PullrequestsController(BaseRepoController):
         status = request.POST.get('changeset_status')
         change_status = request.POST.get('change_changeset_status')
         text = request.POST.get('text')
+        close_pr = request.POST.get('save_close')
 
         allowed_to_change_status = self._get_is_allowed_change_status(pull_request)
         if status and change_status and allowed_to_change_status:
-            text = text or (_('Status change -> %s')
+            _def = (_('status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
+            if close_pr:
+                _def = _('Closing with') + ' ' + _def
+            text = text or _def
         comm = ChangesetCommentsModel().create(
             text=text,
             repo=c.rhodecode_db_repo.repo_id,
@@ -416,7 +423,9 @@ class PullrequestsController(BaseRepoController):
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
             status_change=(ChangesetStatus.get_status_lbl(status)
-            if status and change_status and allowed_to_change_status else None)
+                           if status and change_status
+                           and allowed_to_change_status else None),
+            closing_pr=close_pr
         )
 
         action_logger(self.rhodecode_user,
@@ -434,7 +443,7 @@ class PullrequestsController(BaseRepoController):
                     pull_request=pull_request_id
                 )
 
-            if request.POST.get('save_close'):
+            if close_pr:
                 if status in ['rejected', 'approved']:
                     PullRequestModel().close_pull_request(pull_request_id)
                     action_logger(self.rhodecode_user,

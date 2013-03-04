@@ -38,7 +38,7 @@ from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
+    Statistics, UserGroup, UserGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
     RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
@@ -54,8 +54,8 @@ class RepoModel(BaseModel):
     URL_SEPARATOR = Repository.url_sep()
 
     def __get_users_group(self, users_group):
-        return self._get_instance(UsersGroup, users_group,
-                                  callback=UsersGroup.get_by_group_name)
+        return self._get_instance(UserGroup, users_group,
+                                  callback=UserGroup.get_by_group_name)
 
     def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
@@ -120,8 +120,8 @@ class RepoModel(BaseModel):
         )
 
     def get_users_groups_js(self):
-        users_groups = self.sa.query(UsersGroup)\
-            .filter(UsersGroup.users_group_active == True).all()
+        users_groups = self.sa.query(UserGroup)\
+            .filter(UserGroup.users_group_active == True).all()
 
         return json.dumps([
             {
@@ -149,11 +149,7 @@ class RepoModel(BaseModel):
         if not repositories:
             repositories = Repository.getAll()
         for repo in repositories:
-            scm_repo = repo.scm_instance_no_cache
-            last_cs = EmptyChangeset()
-            if scm_repo:
-                last_cs = scm_repo.get_changeset()
-            repo.update_changeset_cache(last_cs)
+            repo.update_changeset_cache()
 
     def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
                           super_user_actions=False):
@@ -415,15 +411,15 @@ class RepoModel(BaseModel):
                     repo = fork_of
                     user_perms = UserRepoToPerm.query()\
                         .filter(UserRepoToPerm.repository == repo).all()
-                    group_perms = UsersGroupRepoToPerm.query()\
-                        .filter(UsersGroupRepoToPerm.repository == repo).all()
+                    group_perms = UserGroupRepoToPerm.query()\
+                        .filter(UserGroupRepoToPerm.repository == repo).all()
 
                     for perm in user_perms:
                         UserRepoToPerm.create(perm.user, new_repo,
                                               perm.permission)
 
                     for perm in group_perms:
-                        UsersGroupRepoToPerm.create(perm.users_group, new_repo,
+                        UserGroupRepoToPerm.create(perm.users_group, new_repo,
                                                     perm.permission)
                 else:
                     _create_default_perms()
@@ -549,12 +545,12 @@ class RepoModel(BaseModel):
 
     def grant_users_group_permission(self, repo, group_name, perm):
         """
-        Grant permission for users group on given repository, or update
+        Grant permission for user group on given repository, or update
         existing one if found
 
         :param repo: Instance of Repository, repository_id, or repository name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         :param perm: Instance of Permission, or permission_name
         """
         repo = self._get_repo(repo)
@@ -562,14 +558,14 @@ class RepoModel(BaseModel):
         permission = self._get_perm(perm)
 
         # check if we have that permission already
-        obj = self.sa.query(UsersGroupRepoToPerm)\
-            .filter(UsersGroupRepoToPerm.users_group == group_name)\
-            .filter(UsersGroupRepoToPerm.repository == repo)\
+        obj = self.sa.query(UserGroupRepoToPerm)\
+            .filter(UserGroupRepoToPerm.users_group == group_name)\
+            .filter(UserGroupRepoToPerm.repository == repo)\
             .scalar()
 
         if obj is None:
             # create new
-            obj = UsersGroupRepoToPerm()
+            obj = UserGroupRepoToPerm()
 
         obj.repository = repo
         obj.users_group = group_name
@@ -579,18 +575,18 @@ class RepoModel(BaseModel):
 
     def revoke_users_group_permission(self, repo, group_name):
         """
-        Revoke permission for users group on given repository
+        Revoke permission for user group on given repository
 
         :param repo: Instance of Repository, repository_id, or repository name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         """
         repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)
 
-        obj = self.sa.query(UsersGroupRepoToPerm)\
-            .filter(UsersGroupRepoToPerm.repository == repo)\
-            .filter(UsersGroupRepoToPerm.users_group == group_name)\
+        obj = self.sa.query(UserGroupRepoToPerm)\
+            .filter(UserGroupRepoToPerm.repository == repo)\
+            .filter(UserGroupRepoToPerm.users_group == group_name)\
             .scalar()
         if obj:
             self.sa.delete(obj)

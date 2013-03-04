@@ -75,7 +75,7 @@ RhodeCode Features
 - Supports http/https, LDAP, AD, proxy-pass authentication.
 - Full permissions (private/read/write/admin) together with IP restrictions for each repository,
   additional explicit forking and repository creation permissions.
-- Users groups for easier permission management
+- User groups for easier permission management
 - Repository groups let you group repos and manage them easier.
 - Users can fork other users repos, and compare them at any time.
 - Integrates easily with other systems, with custom created mappers you can connect it to almost

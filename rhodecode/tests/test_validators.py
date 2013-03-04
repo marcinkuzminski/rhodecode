@@ -5,7 +5,7 @@ import formencode
 from rhodecode.tests import *
 
 from rhodecode.model import validators as v
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
@@ -51,25 +51,25 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(TEST_USER_ADMIN_LOGIN,
                          validator.to_python(TEST_USER_ADMIN_LOGIN))
 
-    def test_ValidUsersGroup(self):
-        validator = v.ValidUsersGroup()
+    def test_ValidUserGroup(self):
+        validator = v.ValidUserGroup()
         self.assertRaises(formencode.Invalid, validator.to_python, 'default')
         self.assertRaises(formencode.Invalid, validator.to_python, '.,')
 
-        gr = UsersGroupModel().create('test')
-        gr2 = UsersGroupModel().create('tes2')
+        gr = UserGroupModel().create('test')
+        gr2 = UserGroupModel().create('tes2')
         Session.commit()
         self.assertRaises(formencode.Invalid, validator.to_python, 'test')
         assert gr.users_group_id != None
-        validator = v.ValidUsersGroup(edit=True,
+        validator = v.ValidUserGroup(edit=True,
                                     old_data={'users_group_id':
                                               gr2.users_group_id})
 
         self.assertRaises(formencode.Invalid, validator.to_python, 'test')
         self.assertRaises(formencode.Invalid, validator.to_python, 'TesT')
         self.assertRaises(formencode.Invalid, validator.to_python, 'TEST')
-        UsersGroupModel().delete(gr)
-        UsersGroupModel().delete(gr2)
+        UserGroupModel().delete(gr)
+        UserGroupModel().delete(gr2)
         Session.commit()
 
     def test_ValidReposGroup(self):

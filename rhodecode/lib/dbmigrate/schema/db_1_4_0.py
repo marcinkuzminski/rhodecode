@@ -322,7 +322,7 @@ class User(Base, BaseModel):
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
     repo_group_to_perm = relationship('UserRepoGroupToPerm', primaryjoin='UserRepoGroupToPerm.user_id==User.user_id', cascade='all')
 
-    group_member = relationship('UsersGroupMember', cascade='all')
+    group_member = relationship('UserGroupMember', cascade='all')
 
     notifications = relationship('UserNotification', cascade='all')
     # notifications assigned to this user
@@ -521,7 +521,7 @@ class UserLog(Base, BaseModel):
     repository = relationship('Repository', cascade='')
 
 
-class UsersGroup(Base, BaseModel):
+class UserGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = (
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
@@ -533,9 +533,9 @@ class UsersGroup(Base, BaseModel):
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
     inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
-    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
-    users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
-    users_group_repo_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
+    users_group_to_perm = relationship('UserGroupToPerm', cascade='all')
+    users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
 
     def __unicode__(self):
         return u'<userGroup(%s)>' % (self.users_group_name)
@@ -575,7 +575,7 @@ class UsersGroup(Base, BaseModel):
         return data
 
 
-class UsersGroupMember(Base, BaseModel):
+class UserGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = (
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
@@ -587,7 +587,7 @@ class UsersGroupMember(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User', lazy='joined')
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
 
     def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
@@ -625,7 +625,7 @@ class Repository(Base, BaseModel):
     fork = relationship('Repository', remote_side=repo_id)
     group = relationship('RepoGroup')
     repo_to_perm = relationship('UserRepoToPerm', cascade='all', order_by='UserRepoToPerm.repo_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
     followers = relationship('UserFollowing',
@@ -1013,7 +1013,7 @@ class RepoGroup(Base, BaseModel):
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
 
     parent_group = relationship('RepoGroup', remote_side=group_id)
 
@@ -1277,7 +1277,7 @@ class UserToPerm(Base, BaseModel):
     permission = relationship('Permission', lazy='joined')
 
 
-class UsersGroupRepoToPerm(Base, BaseModel):
+class UserGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
         UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
@@ -1289,7 +1289,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     repository = relationship('Repository')
 
@@ -1306,7 +1306,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
 
 
-class UsersGroupToPerm(Base, BaseModel):
+class UserGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
@@ -1317,7 +1317,7 @@ class UsersGroupToPerm(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
 
 
@@ -1339,7 +1339,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     permission = relationship('Permission')
 
 
-class UsersGroupRepoGroupToPerm(Base, BaseModel):
+class UserGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'group_id'),
@@ -1352,7 +1352,7 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     group = relationship('RepoGroup')
 

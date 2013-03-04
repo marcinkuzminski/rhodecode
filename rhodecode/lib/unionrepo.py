@@ -1,17 +1,20 @@
-# unionrepo.py - repository class for viewing union of repositories
+# unionrepo.py - repository class for viewing union of repository changesets
 #
-# Derived from Mercurial 2.5 bundlerepo.py
+# Derived from bundlerepo.py
 # Copyright 2006, 2007 Benoit Boissinot <bboissin@gmail.com>
 # Copyright 2013 Unity Technologies, Mads Kiilerich <madski@unity3d.com>
 #
 # This software may be used and distributed according to the terms of the
 # GNU General Public License version 2 or any later version.
 
-"""Repository class for in-memory pull of one local repository to another.
+"""Repository class for "in-memory pull" of one local repository to another,
+allowing operations like diff and log with revsets.
 """
 
+import os
 from mercurial.node import nullid
-from mercurial import util, mdiff
+from mercurial.i18n import _
+from mercurial import util, mdiff, cmdutil, scmutil
 from mercurial import localrepo, changelog, manifest, filelog, revlog
 
 class unionrevlog(revlog.revlog):
@@ -20,15 +23,14 @@ class unionrevlog(revlog.revlog):
         # To retrieve a revision, we just need to know the node id so we can
         # look it up in revlog2.
         #
-        # basemap is indexed with revisions coming from the second revlog.
-        #
         # To differentiate a rev in the second revlog from a rev in the revlog,
-        # we check revision against basemap.
+        # we check revision against repotiprev.
+        opener = scmutil.readonlyvfs(opener)
         revlog.revlog.__init__(self, opener, indexfile)
         self.revlog2 = revlog2
 
-        self.basemap = {} # mapping rev that is in revlog2 to ... nothing
         n = len(self)
+        self.repotiprev = n - 1
         self.bundlerevs = set() # used by 'bundle()' revset expression
         for rev2 in self.revlog2:
             rev = self.revlog2.index[rev2]
@@ -42,7 +44,7 @@ class unionrevlog(revlog.revlog):
                 link = linkmapper(linkrev)
 
             if node in self.nodemap:
-                # this happens for for the common revlog revisions
+                # this happens for the common revlog revisions
                 self.bundlerevs.add(self.nodemap[node])
                 continue
 
@@ -51,24 +53,23 @@ class unionrevlog(revlog.revlog):
 
             e = (None, None, None, None,
                  link, self.rev(p1node), self.rev(p2node), node)
-            self.basemap[n] = None
             self.index.insert(-1, e)
             self.nodemap[node] = n
             self.bundlerevs.add(n)
             n += 1
 
     def _chunk(self, rev):
-        if rev not in self.basemap:
+        if rev <= self.repotiprev:
             return revlog.revlog._chunk(self, rev)
         return self.revlog2._chunk(self.node(rev))
 
     def revdiff(self, rev1, rev2):
         """return or calculate a delta between two revisions"""
-        if rev1 in self.basemap and rev2 in self.basemap:
+        if rev1 > self.repotiprev and rev2 > self.repotiprev:
             return self.revlog2.revdiff(
                 self.revlog2.rev(self.node(rev1)),
                 self.revlog2.rev(self.node(rev2)))
-        elif rev1 not in self.basemap and rev2 not in self.basemap:
+        elif rev1 <= self.repotiprev and rev2 <= self.repotiprev:
             return revlog.revlog.revdiff(self, rev1, rev2)
 
         return mdiff.textdiff(self.revision(self.node(rev1)),
@@ -88,7 +89,7 @@ class unionrevlog(revlog.revlog):
         if node == nullid:
             return ""
 
-        if rev in self.basemap:
+        if rev > self.repotiprev:
             text = self.revlog2.revision(node)
             self._cache = (node, rev, text)
         else:
@@ -144,7 +145,7 @@ class unionrepository(localrepo.localrepository):
                                      util.expandpath(path2))
         self.repo2 = localrepo.localrepository(ui, path2)
 
-    @util.propertycache
+    @localrepo.unfilteredpropertycache
     def changelog(self):
         return unionchangelog(self.sopener, self.repo2.sopener)
 
@@ -153,7 +154,7 @@ class unionrepository(localrepo.localrepository):
         node = self.repo2.changelog.node(rev2)
         return self.changelog.rev(node)
 
-    @util.propertycache
+    @localrepo.unfilteredpropertycache
     def manifest(self):
         return unionmanifest(self.sopener, self.repo2.sopener,
                              self._clrev)
@@ -174,8 +175,34 @@ class unionrepository(localrepo.localrepository):
     def peer(self):
         return unionpeer(self)
 
+    def getcwd(self):
+        return os.getcwd() # always outside the repo
+
 def instance(ui, path, create):
-    u = util.url(path)
-    assert u.scheme == 'union'
-    repopath, repopath2 = u.path.split("+", 1)
+    if create:
+        raise util.Abort(_('cannot create new union repository'))
+    parentpath = ui.config("bundle", "mainreporoot", "")
+    if not parentpath:
+        # try to find the correct path to the working directory repo
+        parentpath = cmdutil.findrepo(os.getcwd())
+        if parentpath is None:
+            parentpath = ''
+    if parentpath:
+        # Try to make the full path relative so we get a nice, short URL.
+        # In particular, we don't want temp dir names in test outputs.
+        cwd = os.getcwd()
+        if parentpath == cwd:
+            parentpath = ''
+        else:
+            cwd = os.path.join(cwd,'')
+            if parentpath.startswith(cwd):
+                parentpath = parentpath[len(cwd):]
+    if path.startswith('union:'):
+        s = path.split(":", 1)[1].split("+", 1)
+        if len(s) == 1:
+            repopath, repopath2 = parentpath, s[0]
+        else:
+            repopath, repopath2 = s
+    else:
+        repopath, repopath2 = parentpath, path
     return unionrepository(ui, repopath, repopath2)

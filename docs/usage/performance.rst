@@ -46,19 +46,17 @@ Follow these few steps to improve performance of RhodeCode system.
     large traffic (large amount of users, CI servers etc). RhodeCode can be
     scaled horizontally on one (recommended) or multiple machines. In order
     to scale horizontally you need to do the following:
-    
+
     - each instance needs it's own .ini file and unique `instance_id` set in them
-    - each instance `data` storage needs to be configured to be stored on a 
+    - each instance `data` storage needs to be configured to be stored on a
       shared disk storage, preferably together with repositories. This `data`
       dir contains template caches, sessions, whoosh index and it's used for
       tasks locking (so it's safe across multiple instances). Set the
       `cache_dir`, `index_dir`, `beaker.cache.data_dir`, `beaker.cache.lock_dir`
-      variables in each .ini file to shared location across RhodeCode instances 
+      variables in each .ini file to shared location across RhodeCode instances
     - if celery is used each instance should run separate celery instance, but
       the message broken should be common to all of them (ex one rabbitmq
-      shared server)    
+      shared server)
     - load balance using round robin or ip hash, recommended is writing LB rules
       that will separate regular user traffic from automated processes like CI
       servers or build bots.
-
-

@@ -6,7 +6,7 @@ class TestReposGroupsController(TestController):
     def test_index(self):
         self.log_user()
         response = self.app.get(url('repos_groups'))
-        response.mustcontain('There are no repositories groups yet')
+        response.mustcontain('There are no repository groups yet')
 
 #    def test_index_as_xml(self):
 #        response = self.app.get(url('formatted_repos_groups', format='xml'))

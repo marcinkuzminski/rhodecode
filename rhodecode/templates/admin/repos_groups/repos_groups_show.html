@@ -2,14 +2,14 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repositories groups administration')} - ${c.rhodecode_name}
+    ${_('Repository groups administration')} - ${c.rhodecode_name}
 </%def>
 
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${_('repositories groups')}
+    ${_('repository groups')}
 </%def>
 <%def name="page_nav()">
     ${self.menu('admin')}
@@ -48,7 +48,7 @@
                   <tr>
                       <td>
                           <div style="white-space: nowrap">
-                          <img class="icon" alt="${_('Repositories group')}" src="${h.url('/images/icons/database_link.png')}"/>
+                          <img class="icon" alt="${_('Repository group')}" src="${h.url('/images/icons/database_link.png')}"/>
                           ${h.link_to(h.literal(' &raquo; '.join(map(h.safe_unicode,[g.name for g in gr.parents+[gr]]))), url('repos_group_home',group_name=gr.group_name))}
                           </div>
                       </td>
@@ -69,7 +69,7 @@
 
             </table>
             % else:
-                ${_('There are no repositories groups yet')}
+                ${_('There are no repository groups yet')}
             % endif
 
     </div>

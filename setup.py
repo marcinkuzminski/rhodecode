@@ -35,11 +35,12 @@ is_windows = __platform__ in _get_meta_var('PLATFORM_WIN', _metadata)
 requirements = [
     "waitress==0.8.2",
     "webob==1.0.8",
+    "webtest==1.4.3",
     "Pylons==1.0.0",
     "Beaker==1.6.4",
     "WebHelpers==1.3",
     "formencode==1.2.4",
-    "SQLAlchemy==0.7.9",
+    "SQLAlchemy==0.7.10",
     "Mako==0.7.3",
     "pygments>=1.5",
     "whoosh>=2.4.0,<2.5",

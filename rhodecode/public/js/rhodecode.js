@@ -302,12 +302,25 @@ var pyroutes = (function() {
             }
             if (matchlist.hasOwnProperty(route_name)) {
                 var route = matchlist[route_name];
+                // param substitution
                 for(var i=0; i < route[1].length; i++) {
 
                    if (!params.hasOwnProperty(route[1][i]))
                         throw new Error(route[1][i] + ' missing in "' + route_name + '" route generation');
                 }
                 result = sprintf(route[0], params);
+                
+                var ret = [];
+                //extra params => GET
+                for(param in params){
+                	if (route[1].indexOf(param) == -1){
+                		ret.push(encodeURIComponent(param) + "=" + encodeURIComponent(params[param]));	
+                	}
+                }
+                var _parts = ret.join("&");
+                if(_parts){
+                	result = result +'?'+ _parts
+                }
             }
 
             return result;
@@ -1289,7 +1302,7 @@ var MembersAutoComplete = function (divid, cont, users_list, groups_list) {
             return matches;
         };
 
-    // Define a custom search function for the DataSource of usersGroups
+    // Define a custom search function for the DataSource of userGroups
     var matchGroups = function (sQuery) {
             // Case insensitive matching
             var query = sQuery.toLowerCase();
@@ -1707,7 +1720,7 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
             return matches;
         };
 
-    // Define a custom search function for the DataSource of usersGroups
+    // Define a custom search function for the DataSource of userGroups
     var matchGroups = function (sQuery) {
             // Case insensitive matching
             var query = sQuery.toLowerCase();
@@ -2149,3 +2162,26 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 		});
 	}
 }
+
+
+// global hooks after DOM is loaded
+
+YUE.onDOMReady(function(){
+	YUE.on(YUQ('.diff-collapse-button'), 'click', function(e){
+		var button = e.currentTarget;
+		var t = YUD.get(button).getAttribute('target');
+	    console.log(t);
+		if(YUD.hasClass(t, 'hidden')){
+			YUD.removeClass(t, 'hidden');
+			YUD.get(button).innerHTML = "&uarr; {0} &uarr;".format(_TM['collapse diff']);
+		}
+		else if(!YUD.hasClass(t, 'hidden')){
+			YUD.addClass(t, 'hidden');
+			YUD.get(button).innerHTML = "&darr; {0} &darr;".format(_TM['expand diff']);
+		}
+	});
+	
+	
+	
+});
+
