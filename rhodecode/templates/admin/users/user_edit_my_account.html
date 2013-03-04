@@ -148,7 +148,7 @@ var show_pullrequests = function(e){
 
     var url = pyroutes.url('admin_settings_my_pullrequests');
     if(YUD.get('show_closed') && YUD.get('show_closed').checked) {
-    	var url = pyroutes.url('admin_settings_my_pullrequests', {'pr_show_closed': '1'});
+        var url = pyroutes.url('admin_settings_my_pullrequests', {'pr_show_closed': '1'});
     }
     ypjax(url, 'pullrequests_container', function(){
         YUE.on('show_closed','change',function (e) {

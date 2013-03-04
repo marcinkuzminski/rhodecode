@@ -9,10 +9,10 @@ ${body}
 <div>${_('View this comment here')}: ${pr_comment_url}</div>
 
 %if status_change:
-	%if closing_pr:
-	   <span>${_('Closing pull request with status')} -&gt; ${status_change}</span>
-	%else:
-	   <span>${_('New status')} -&gt; ${status_change}</span>
-	%endif
+    %if closing_pr:
+       <span>${_('Closing pull request with status')} -&gt; ${status_change}</span>
+    %else:
+       <span>${_('New status')} -&gt; ${status_change}</span>
+    %endif
 %endif
 </p>

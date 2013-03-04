@@ -155,7 +155,7 @@
       }; // gather the org/other ref and repo here
 
       for (k in rev_data){
-    	  url = url.replace('__'+k+'__',rev_data[k]);
+          url = url.replace('__'+k+'__',rev_data[k]);
       }
 
       YUD.get('pull_request_overview').innerHTML = "${_('Loading ...')}";
@@ -172,8 +172,8 @@
           // reset && add the reviewer based on selected repo
           YUD.get('review_members').innerHTML = '';
           addReviewMember(_data.user.user_id, _data.user.firstname,
-        		          _data.user.lastname, _data.user.username,
-        		          _data.user.gravatar_link);
+                          _data.user.lastname, _data.user.username,
+                          _data.user.gravatar_link);
       })
   }
 
