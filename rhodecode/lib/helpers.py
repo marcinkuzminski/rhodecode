@@ -905,13 +905,13 @@ def repo_link(groups_and_repos, last_url=None):
 
     if not groups:
         if last_url:
-            return last_link
-        return repo_name
+            return literal('<span>%s</span>' % last_link)
+        return literal('<span>%s</span>' % repo_name)
     else:
         def make_link(group):
             return link_to(group.name,
                            url('repos_group_home', group_name=group.group_name))
-        return literal(' &raquo; '.join(map(make_link, groups) + [last_link]))
+        return literal(' &raquo; '.join(map(make_link, groups) + ['<span>' + last_link + '</span>']))
 
 
 def fancy_file_stats(stats):

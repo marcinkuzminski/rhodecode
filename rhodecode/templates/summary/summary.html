@@ -22,6 +22,7 @@
 </%def>
 
 <%def name="main()">
+    ${self.context_bar('summary')}
     <%
     summary = lambda n:{False:'summary-short'}.get(n)
     %>
@@ -96,7 +97,7 @@
 
                   ##FORK
                   %if c.dbrepo.fork:
-                    <div style="margin-top:5px;clear:both"">
+                    <div style="margin-top:5px;clear:both">
                     <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}"><img class="icon" alt="${_('public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
                         ${_('Fork of')} ${c.dbrepo.fork.repo_name}
                     </a>

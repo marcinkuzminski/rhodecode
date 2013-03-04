@@ -3501,7 +3501,7 @@ div.gravatar img {
 
 #content {
     clear: both;
-    overflow: hidden;
+    /*overflow: hidden;*/
     padding: 10px 10px 14px 10px;
 }
 
