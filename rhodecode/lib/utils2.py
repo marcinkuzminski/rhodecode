@@ -561,11 +561,15 @@ def fix_PATH(os_=None):
 
 
 def obfuscate_url_pw(engine):
-    from sqlalchemy.engine import url
-    url = url.make_url(engine)
-    if url.password:
-        url.password = 'XXXXX'
-    return str(url)
+    _url = engine or ''
+    from sqlalchemy.engine import url as sa_url
+    try:
+        _url = sa_url.make_url(engine)
+        if _url.password:
+            _url.password = 'XXXXX'
+    except:
+        pass
+    return str(_url)
 
 
 def get_server_url(environ):
