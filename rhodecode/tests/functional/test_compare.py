@@ -215,20 +215,15 @@ class TestCompareController(TestController):
         cs5 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\nline6\n',
                              message='commit6', vcs_type='hg', parent=cs4)
 
-        rev1 = 'tip'
-        rev2 = 'tip'
-
         response = self.app.get(url(controller='compare', action='index',
                                     repo_name=repo2.repo_name,
-                                    org_ref_type="tag",
-                                    org_ref=rev1,
+                                    org_ref_type="rev",
+                                    org_ref=cs1.short_id, # parent of cs2, in repo2
                                     other_repo=repo1.repo_name,
-                                    other_ref_type="tag",
-                                    other_ref=rev2,
-                                    rev_start=cs2.raw_id,
-                                    rev_end=cs4.raw_id,
+                                    other_ref_type="rev",
+                                    other_ref=cs4.short_id,
                                     ))
-        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, cs2.short_id, repo1.repo_name, cs4.short_id))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, cs1.short_id, repo1.repo_name, cs4.short_id))
         response.mustcontain("""Showing 3 commits""")
         response.mustcontain("""1 file changed with 3 insertions and 0 deletions""")
 
@@ -280,21 +275,15 @@ class TestCompareController(TestController):
                              message='commit5', vcs_type='hg', parent=cs3)
         cs5 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\nline4\nline5\nline6\n',
                              message='commit6', vcs_type='hg', parent=cs4)
-        rev1 = 'tip'
-        rev2 = 'tip'
-
         response = self.app.get(url(controller='compare', action='index',
-                                    repo_name=repo2.repo_name,
-                                    org_ref_type="tag",
-                                    org_ref=rev1,
-                                    other_repo=repo1.repo_name,
-                                    other_ref_type="tag",
-                                    other_ref=rev2,
-                                    rev_start=cs3.raw_id,
-                                    rev_end=cs5.raw_id,
+                                    repo_name=repo1.repo_name,
+                                    org_ref_type="rev",
+                                    org_ref=cs2.short_id, # parent of cs3, not in repo2
+                                    other_ref_type="rev",
+                                    other_ref=cs5.short_id,
                                     ))
 
-        response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, cs3.short_id, repo1.repo_name, cs5.short_id))
+        response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, cs2.short_id, repo1.repo_name, cs5.short_id))
         response.mustcontain("""Showing 3 commits""")
         response.mustcontain("""1 file changed with 3 insertions and 0 deletions""")
 

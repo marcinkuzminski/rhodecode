@@ -265,9 +265,6 @@ class PullrequestsController(BaseRepoController):
         :param pull_request:
         :type pull_request:
         """
-        rev_start = request.GET.get('rev_start')
-        rev_end = request.GET.get('rev_end')
-
         org_repo = pull_request.org_repo
         (org_ref_type,
          org_ref_name,
@@ -279,7 +276,7 @@ class PullrequestsController(BaseRepoController):
          other_ref_rev) = pull_request.other_ref.split(':')
 
         # despite opening revisions for bookmarks/branches/tags, we always
-        # convert this to rev to prevent changes after book or branch change
+        # convert this to rev to prevent changes after bookmark or branch change
         org_ref = ('rev', org_ref_rev)
         other_ref = ('rev', other_ref_rev)
 

@@ -21,9 +21,6 @@
     </div>
     ${h.form(url('pullrequest', repo_name=c.repo_name), method='post', id='pull_request_form')}
     <div style="float:left;padding:0px 30px 30px 30px">
-        <input type="hidden" name="rev_start" value="${request.GET.get('rev_start')}" />
-        <input type="hidden" name="rev_end" value="${request.GET.get('rev_end')}" />
-
         ##ORG
         <div style="float:left">
             <div>
@@ -136,8 +133,7 @@
                          other_ref_type='__org_ref_type__',
                          other_ref='__org_ref__',
                          as_form=True,
-                         rev_start=request.GET.get('rev_start',''),
-                         rev_end=request.GET.get('rev_end',''))}";
+                         )}";
       var org_repo = YUQ('#pull_request_form #org_repo')[0].value;
       var org_ref = YUQ('#pull_request_form #org_ref')[0].value.split(':');
 

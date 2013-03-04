@@ -91,9 +91,6 @@ class CompareController(BaseRepoController):
         other_repo = request.GET.get('other_repo', org_repo)
         # fulldiff disables cut_off_limit
         c.fulldiff = request.GET.get('fulldiff')
-        # only consider this range of changesets
-        rev_start = request.GET.get('rev_start')
-        rev_end = request.GET.get('rev_end')
         # partial uses compare_cs.html template directly
         partial = request.environ.get('HTTP_X_PARTIAL_XHR')
         # as_form puts hidden input field with changeset revisions
@@ -132,21 +129,6 @@ class CompareController(BaseRepoController):
         c.other_ref = other_ref[1]
         c.org_ref_type = org_ref[0]
         c.other_ref_type = other_ref[0]
-
-        if rev_start and rev_end:
-            # swap revs with cherry picked ones, save them for display
-            #org_ref = ('rev', rev_start)
-            #other_ref = ('rev', rev_end)
-            c.org_ref = rev_start[:12]
-            c.other_ref = rev_end[:12]
-            # get parent of
-            # rev start to include it in the diff
-            _cs = other_repo.scm_instance.get_changeset(rev_start)
-            rev_start = _cs.parents[0].raw_id if _cs.parents else EmptyChangeset().raw_id
-            org_ref = ('rev', rev_start)
-            other_ref = ('rev', rev_end)
-            #if we cherry pick it's not remote, make the other_repo org_repo
-            org_repo = other_repo
 
         c.cs_ranges, ancestor = PullRequestModel().get_compare_data(
             org_repo, org_ref, other_repo, other_ref)
