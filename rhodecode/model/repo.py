@@ -32,7 +32,7 @@ from datetime import datetime
 from rhodecode.lib.vcs.backends import get_backend
 from rhodecode.lib.compat import json
 from rhodecode.lib.utils2 import LazyProperty, safe_str, safe_unicode,\
-    remove_prefix
+    remove_prefix, obfuscate_url_pw
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 
@@ -42,7 +42,6 @@ from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     RhodeCodeSetting
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
-
 
 log = logging.getLogger(__name__)
 
@@ -624,7 +623,8 @@ class RepoModel(BaseModel):
             raise Exception('This path %s is a valid group' % repo_path)
 
         log.info('creating repo %s in %s @ %s' % (
-                     repo_name, safe_unicode(repo_path), clone_uri
+                     repo_name, safe_unicode(repo_path),
+                     obfuscate_url_pw(clone_uri)
                 )
         )
         backend = get_backend(alias)
