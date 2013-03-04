@@ -150,7 +150,8 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     var checkboxes = YUD.getElementsByClassName('changeset_range');
                     var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
                     var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
-                    YUE.on(checkboxes,'click',function(e){
+
+                    var checkbox_checker = function(e){
                         var clicked_cb = e.currentTarget;
                         var checked_checkboxes = [];
                         for (pos in checkboxes){
@@ -191,7 +192,10 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             YUD.setStyle('rev_range_container','display','none');
                             YUD.setStyle('rev_range_clear','display','none');
                         }
-                    });
+                    };
+                    YUE.onDOMReady(checkbox_checker);
+                    YUE.on(checkboxes,'click', checkbox_checker);
+
                     YUE.on('rev_range_clear','click',function(e){
                         for (var i=0; i<checkboxes.length; i++){
                             var cb = checkboxes[i];
