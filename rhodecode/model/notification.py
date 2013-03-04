@@ -109,9 +109,10 @@ class NotificationModel(BaseModel):
         # send email with notification to all other participants
         for rec in rec_objs:
             if not email_subject:
-                email_subject = NotificationModel().make_description(notif, show_age=False)
+                email_subject = NotificationModel()\
+                                    .make_description(notif, show_age=False)
             type_ = type_
-            email_body = body
+            email_body = None  # we set body to none, we just send HTML emails
             ## this is passed into template
             kwargs = {'subject': subject, 'body': h.rst_w_mentions(body)}
             kwargs.update(email_kwargs)

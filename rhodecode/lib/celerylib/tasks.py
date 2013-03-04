@@ -254,7 +254,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y, recurse_limit=100):
 
 @task(ignore_result=True)
 @dbsession
-def send_email(recipients, subject, body, html_body=''):
+def send_email(recipients, subject, body='', html_body=''):
     """
     Sends an email with defined parameters from the .ini files.
 
@@ -282,7 +282,7 @@ def send_email(recipients, subject, body, html_body=''):
     mail_port = email_config.get('smtp_port')
     tls = str2bool(email_config.get('smtp_use_tls'))
     ssl = str2bool(email_config.get('smtp_use_ssl'))
-    debug = str2bool(config.get('debug'))
+    debug = str2bool(email_config.get('debug'))
     smtp_auth = email_config.get('smtp_auth')
 
     if not mail_server:
