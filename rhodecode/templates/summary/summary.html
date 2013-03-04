@@ -44,30 +44,6 @@
                   <label>${_('Name')}:</label>
               </div>
               <div class="input ${summary(c.show_stats)}">
-                  <div style="float:right;padding:5px 0px 0px 5px">
-                     %if c.rhodecode_user.username != 'default':
-                      ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='atom_icon')}
-                     %else:
-                      ${h.link_to(_('ATOM'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='atom_icon')}
-                     %endif
-                  </div>
-                  %if c.rhodecode_user.username != 'default':
-                      %if c.following:
-                      <span id="follow_toggle" class="following tooltip" title="${_('Stop following this repository')}"
-                            onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
-                      </span>
-                      %else:
-                      <span id="follow_toggle" class="follow tooltip" title="${_('Start following this repository')}"
-                            onclick="javascript:toggleFollowingRepo(this,${c.dbrepo.repo_id},'${str(h.get_token())}')">
-                      </span>
-                      %endif
-                      <div style="float:right;padding:0px 0px 0px 0px">
-                         <span class="reposize tooltip" title="${_('Click to show size of repository')}"
-                            onclick="javascript:showRepoSize('repo_size','${c.dbrepo.repo_name}','${str(h.get_token())}')">
-                         </span>
-                         <span id="repo_size"></span>
-                      </div>
-                  %endif:
 
                    ## locking icon
                     %if c.rhodecode_db_repo.enable_locking:
@@ -189,7 +165,45 @@
                 %endif
               </div>
              </div>
-      </div>
+        </div>
+        <div id="summary-menu-stats">
+          <ul>
+            <li>
+               <a class="followers" title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
+                <span id="current_followers_count">${c.repository_followers}</span>
+                ${_('Followes')}
+              </a>
+            </li>
+            <li>
+              <a class="forks" title="${_('Forks')}" href="${h.url('repo_forks_home',repo_name=c.repo_name)}">
+                <span>${c.repository_forks}</span>
+                ${_('Forks')}
+              </a>
+            </li>
+            <li>
+              %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
+               %if h.HasPermissionAll('hg.admin')('access settings on repository'):
+                   ${h.link_to(_('Settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}
+               %else:
+                   ${h.link_to(_('Settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}
+               %endif
+             %endif
+            </li>
+            <li>
+              %if c.rhodecode_user.username != 'default':
+                ${h.link_to(_('Feed'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key),class_='feed')}
+              %else:
+                ${h.link_to(_('Feed'),h.url('atom_feed_home',repo_name=c.dbrepo.repo_name),class_='feed')}
+              %endif
+            </li>
+            %if c.rhodecode_user.username != 'default':
+            <li>
+              <a href="#" class="repo-size" onclick="javascript:showRepoSize('repo_size_2','${c.dbrepo.repo_name}','${str(h.get_token())}')">Repository Size</a>
+              <span id="repo_size_2"></span>
+            </li>
+            %endif
+          </ul>
+        </div>
     </div>
 </div>
 

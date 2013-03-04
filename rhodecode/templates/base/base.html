@@ -67,6 +67,26 @@
    %endif
 </%def>
 
+<%def name="admin_menu()">
+  <ul class="admin_menu">
+      <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal')}</li>
+      <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
+      <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+      <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
+      <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
+      <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
+      <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
+      <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
+      <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
+  </ul>
+</%def>
+
+<%def name="admin_menu_simple()">
+  <ul>
+      <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+  </ul>
+</%def>
+
 <%def name="repo_context_bar(current=None)">
   <%
       def follow_class():
@@ -113,12 +133,11 @@
         <span class="branch-name">graphics/shader-move</span>
         <span class="revision">@73318:8d3d6ee94072</span>
       </button-->
-      &nbsp;
       <ul id="context-pages" class="horizontal-list">
         <li ${is_current('summary')}><a href="${h.url('summary_home', repo_name=c.repo_name)}" class="summary">${_('Summary')}</a></li>
         <li ${is_current('changelog')}><a href="${h.url('changelog_home', repo_name=c.repo_name)}" class="changelogs">${_('Changelogs')}</a></li>
         <li ${is_current('files')}><a href="${h.url('files_home', repo_name=c.repo_name)}" class="files"></span>${_('Files')}</a></li>
-        <li>
+        <li ${is_current('switch-to')}>
           <a href="#" id="branch_tag_switcher_2" class="dropdown switch-to"></span>${_('Switch To')}</a>
           <ul id="switch_to_list_2" class="switch_to submenu">
             <li><a href="#">${_('loading...')}</a></li>
@@ -151,19 +170,6 @@
               % if h.HasPermissionAll('hg.admin')('access admin main page'):
                  <li>
                    ${h.link_to(_('admin'),h.url('admin_home'),class_='admin childs')}
-                    <%def name="admin_menu()">
-                    <ul class="admin_menu">
-                        <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal')}</li>
-                        <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
-                        <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
-                        <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
-                        <li>${h.link_to(_('users groups'),h.url('users_groups'),class_='groups')}</li>
-                        <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
-                        <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
-                        <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
-                        <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
-                    </ul>
-                    </%def>
                     ## ADMIN MENU
                     ${admin_menu()}
                  </li>
@@ -171,11 +177,7 @@
               % elif c.rhodecode_user.groups_admin:
                  <li>
                    ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}
-                    <%def name="admin_menu_simple()">
-                    <ul>
-                        <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
-                    </ul>
-                    </%def>
+                    
                     ## ADMIN MENU
                     ${admin_menu_simple()}
                  </li>
@@ -302,91 +304,56 @@
                   </li>
               </ul>
           </li>
-        ## we render this menu only not for those pages
-        %if current not in ['home','admin', 'search', 'journal']:
-            ##REGULAR MENU
-            <li>
-                <a class="menu_link" title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
-                <span class="icon_short">
-                    <img src="${h.url('/images/icons/heart.png')}" alt="${_('Followers')}" />
-                </span>
-                <span id="current_followers_count" class="short">${c.repository_followers}</span>
-                </a>
+          ##ROOT MENU
+          %if c.rhodecode_user.username != 'default':
+            <li ${is_current('journal')}>
+              <a class="menu_link" title="${_('Show recent activity')}"  href="${h.url('journal')}">
+              <span class="icon">
+                  <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
+              </span>
+              <span>${_('Journal')}</span>
+              </a>
             </li>
-            <li>
-                <a class="menu_link" title="${_('Forks')}" href="${h.url('repo_forks_home',repo_name=c.repo_name)}">
-                <span class="icon_short">
-                    <img src="${h.url('/images/icons/arrow_divide.png')}" alt="${_('Forks')}" />
-                </span>
-                <span class="short">${c.repository_forks}</span>
-                </a>
+          %else:
+            <li ${is_current('journal')}>
+              <a class="menu_link" title="${_('Public journal')}"  href="${h.url('public_journal')}">
+              <span class="icon">
+                  <img src="${h.url('/images/icons/book.png')}" alt="${_('Public journal')}" />
+              </span>
+              <span>${_('Public journal')}</span>
+              </a>
             </li>
-            ${usermenu()}
-            <script type="text/javascript">
-                YUE.on('branch_tag_switcher','mouseover',function(){
-                   var loaded = YUD.hasClass('branch_tag_switcher','loaded');
-                   if(!loaded){
-                       YUD.addClass('branch_tag_switcher','loaded');
-                       ypjax("${h.url('branch_tag_switcher',repo_name=c.repo_name)}",'switch_to_list',
-                           function(o){},
-                           function(o){YUD.removeClass('branch_tag_switcher','loaded');}
-                           ,null);
-                   }
-                   return false;
-                });
-            </script>
-        %else:
-            ##ROOT MENU
-            %if c.rhodecode_user.username != 'default':
-             <li ${is_current('journal')}>
-                <a class="menu_link" title="${_('Show recent activity')}"  href="${h.url('journal')}">
-                <span class="icon">
-                    <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
-                </span>
-                <span>${_('Journal')}</span>
-                </a>
-             </li>
-            %else:
-             <li ${is_current('journal')}>
-                <a class="menu_link" title="${_('Public journal')}"  href="${h.url('public_journal')}">
-                <span class="icon">
-                    <img src="${h.url('/images/icons/book.png')}" alt="${_('Public journal')}" />
-                </span>
-                <span>${_('Public journal')}</span>
-                </a>
-             </li>
-            %endif
-            <li ${is_current('search')}>
-                <a class="menu_link" title="${_('Search in repositories')}"  href="${h.url('search')}">
-                <span class="icon">
-                    <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
-                </span>
-                <span>${_('Search')}</span>
-                </a>
-            </li>
-            % if h.HasPermissionAll('hg.admin')('access admin main page'):
+          %endif
+          <li ${is_current('search')}>
+              <a class="menu_link" title="${_('Search in repositories')}"  href="${h.url('search')}">
+              <span class="icon">
+                  <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
+              </span>
+              <span>${_('Search')}</span>
+              </a>
+          </li>
+          % if h.HasPermissionAll('hg.admin')('access admin main page'):
             <li ${is_current('admin')}>
-               <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
-               <span class="icon">
-                   <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
-               </span>
-               <span>${_('Admin')}</span>
-               </a>
-                ${admin_menu()}
+              <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
+              <span class="icon">
+                    <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
+                </span>
+                <span>${_('Admin')}</span>
+              </a>
+              ${admin_menu()}
             </li>
-            % elif c.rhodecode_user.groups_admin:
-            <li ${is_current('admin')}>
-               <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
-               <span class="icon">
-                   <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
-               </span>
-               <span>${_('Admin')}</span>
-               </a>
-                ${admin_menu_simple()}
-            </li>
-            % endif
-            ${usermenu()}
-        %endif
+          % elif c.rhodecode_user.groups_admin:
+          <li ${is_current('admin')}>
+              <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
+                <span class="icon">
+                    <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
+                </span>
+                <span>${_('Admin')}</span>
+              </a>
+              ${admin_menu_simple()}
+          </li>
+          % endif
+          ${usermenu()}
 <script type="text/javascript">
     YUE.on('repo_switcher','mouseover',function(){
       var target = 'q_filter_rs';

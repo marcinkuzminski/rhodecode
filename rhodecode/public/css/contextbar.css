@@ -59,9 +59,9 @@ ul.horizontal-list {
 	display: block;
 /*	overflow: hidden;*/
 }
+
 ul.horizontal-list > li {
 	float: left;
-	padding-right: 5px;
 	position: relative;
 }
 
@@ -69,6 +69,7 @@ ul.horizontal-list > li ul {
 	position: absolute;
 	display: none;
 	right: 0;
+	z-index: 999;
 }
 
 ul.horizontal-list li:hover > ul {
@@ -270,7 +271,7 @@ ul#context-actions {
 #context-pages a, 
 #context-pages .admin_menu a{
 	display: block;
-	padding: 0px 10px;
+	padding: 0px 10px 1px 30px;
 	padding-left: 30px;
 	line-height: 35px;
 }

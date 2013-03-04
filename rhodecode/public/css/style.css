@@ -1090,7 +1090,7 @@ tbody .yui-dt-editable { cursor: pointer }
 
 #content div.box {
     clear: both;
-    overflow: hidden;
+/*    overflow: hidden;*/
     background: #fff;
     margin: 0 0 10px;
     padding: 0 0 10px;
@@ -1861,6 +1861,65 @@ div.form div.fields div.field div.button {
 }
 
 #summary {
+    float: left;
+    width: 80%;
+}
+
+#summary-menu-stats{
+    float: left;
+    width: 20%;
+}
+
+#summary-menu-stats ul {
+    margin: 0 10px;
+    display: block;
+    background-color: #f9f9f9;
+    border: 1px solid #d1d1d1;
+    border-radius: 4px;
+}
+
+#content #summary-menu-stats li {
+    border-top: 1px solid #d1d1d1;
+    line-height: 32px;
+    padding: 0;
+}
+
+#content #summary-menu-stats li:hover {
+    background: #f0f0f0;
+}
+
+#content #summary-menu-stats li:first-child {
+    border-top: none;
+}
+
+#summary-menu-stats a.followers { background-image: url('../images/icons/heart.png')}
+#summary-menu-stats a.forks     { background-image: url('../images/icons/arrow_divide.png')}
+#summary-menu-stats a.settings  { background-image: url('../images/icons/cog_edit.png')}
+#summary-menu-stats a.feed      { background-image: url('../images/icons/rss_16.png')}
+#summary-menu-stats a.repo-size { background-image: url('../images/icons/server.png')}
+
+#summary-menu-stats a {
+    display: block;
+    color: #000000;
+    padding: 0 30px;
+    background-repeat: no-repeat;
+    background-position: 10px 50%;
+}
+
+#repo_size_2 {
+    margin-left: 25px;
+}
+
+#summary-menu-stats a:hover {
+    text-decoration: none;
+}
+
+#summary-menu-stats a span{
+    background-color: #FFF;
+    border: 1px inset #f0f0f0;
+    border-radius:7px;
+    padding: 1px;
+    font-size: 10px;
 }
 
 #summary .metatag {
