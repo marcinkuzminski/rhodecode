@@ -311,7 +311,7 @@ div:hover > a.permalink {
     border-radius: 0px 0px 4px 4px;
 }
 
-#header-dd:hover{
+#header-dd:hover {
     opacity: 0.2;
     -webkit-transition: opacity 0.5s ease-in-out;
     -moz-transition: opacity 0.5s ease-in-out;
@@ -4597,11 +4597,11 @@ PULL REQUESTS
 /*****************************************************************************
                                   DIFFS CSS
 ******************************************************************************/
-.diff-collapse{
+.diff-collapse {
     text-align: center;
     margin-bottom: -15px;
 }
-.diff-collapse-button{
+.diff-collapse-button {
     cursor: pointer;
     color: #666;
     font-size: 16px;
@@ -4610,7 +4610,7 @@ PULL REQUESTS
 
 }
 
-.diff-container.hidden{
+.diff-container.hidden {
     display: none;
     overflow: hidden;
 }
