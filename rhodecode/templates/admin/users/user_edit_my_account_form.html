@@ -20,6 +20,11 @@
                     <label>${_('API key')}</label> ${c.user.api_key}
                 </div>
             </div>
+            <div class="field">
+	            <div class="label">
+	                <label>${_('Current IP')}:</label> ${c.perm_user.ip_addr or "?"}
+	            </div>
+            </div>
             <div class="fields">
                  <div class="field">
                     <div class="label">
