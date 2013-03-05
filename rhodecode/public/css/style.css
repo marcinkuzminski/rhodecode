@@ -1876,11 +1876,11 @@ div.form div.fields div.field div.button {
     border-top: none;
 }
 
-#summary-menu-stats a.followers { background-image: url('../images/icons/heart.png')}
-#summary-menu-stats a.forks     { background-image: url('../images/icons/arrow_divide.png')}
-#summary-menu-stats a.settings  { background-image: url('../images/icons/cog_edit.png')}
-#summary-menu-stats a.feed      { background-image: url('../images/icons/rss_16.png')}
-#summary-menu-stats a.repo-size { background-image: url('../images/icons/server.png')}
+#summary-menu-stats a.followers         { background-image: url('../images/icons/heart.png')}
+#summary-menu-stats a.forks             { background-image: url('../images/icons/arrow_divide.png')}
+#summary-menu-stats a.settings          { background-image: url('../images/icons/cog_edit.png')}
+#summary-menu-stats a.feed              { background-image: url('../images/icons/rss_16.png')}
+#summary-menu-stats a.repo-size         { background-image: url('../images/icons/server.png')}
 
 #summary-menu-stats a {
     display: block;

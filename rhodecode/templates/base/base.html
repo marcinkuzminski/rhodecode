@@ -104,7 +104,7 @@
   <!--- CONTEXT BAR -->
   <div id="context-bar" class="box">
     <div id="context-top">
-      <div id= "breadcrumbs">
+      <div id="breadcrumbs">
         ${h.link_to(_(u'Repositories'),h.url('home'))}
         »
         ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
@@ -143,7 +143,7 @@
             <li><a href="#">${_('loading...')}</a></li>
           </ul>
         </li>
-        <li ${is_current('options')}>
+        <li ${is_current('options')}> 
           <a href="#" class="dropdown options"></span>Options</a>
           <ul>
              %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):

@@ -28,6 +28,9 @@
 #context-bar a.ldap 			{ background-image: url("../images/icons/server_key.png"); }
 #context-bar a.defaults			{ background-image: url("../images/icons/wrench.png"); }
 #context-bar a.settings			{ background-image: url("../images/icons/cog_edit.png"); }
+#context-bar a.compare_request  { background-image: url('../images/icons/arrow_inout.png')}
+#context-bar a.locking_del   	{ background-image: url('../images/icons/lock_delete.png')}
+#context-bar a.locking_add   	{ background-image: url('../images/icons/lock_add.png')}
 
 #content #context-bar {
 	position: relative;

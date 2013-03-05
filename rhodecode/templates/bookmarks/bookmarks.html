@@ -8,11 +8,7 @@
 
 <%def name="breadcrumbs_links()">
     <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
-    &raquo;
-    ${_('bookmarks')}
+    ${_('Bookmarks')}
 </%def>
 
 <%def name="page_nav()">
