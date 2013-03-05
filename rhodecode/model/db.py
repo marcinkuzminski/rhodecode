@@ -1345,15 +1345,13 @@ class RepoGroup(Base, BaseModel):
 
         return cnt + children_count(self)
 
-    def recursive_groups_and_repos(self):
-        """
-        Recursive return all groups, with repositories in those groups
-        """
+    def _recursive_objects(self, include_repos=True):
         all_ = []
 
         def _get_members(root_gr):
-            for r in root_gr.repositories:
-                all_.append(r)
+            if include_repos:
+                for r in root_gr.repositories:
+                    all_.append(r)
             childs = root_gr.children.all()
             if childs:
                 for gr in childs:
@@ -1362,6 +1360,18 @@ class RepoGroup(Base, BaseModel):
 
         _get_members(self)
         return [self] + all_
+
+    def recursive_groups_and_repos(self):
+        """
+        Recursive return all groups, with repositories in those groups
+        """
+        return self._recursive_objects()
+
+    def recursive_groups(self):
+        """
+        Returns all children groups for this group including children of children 
+        """
+        return self._recursive_objects(include_repos=False)
 
     def get_new_name(self, group_name):
         """
