@@ -213,7 +213,7 @@ div.options a {
 }
 
 .empty_data {
-    color:#B9B9B9;
+    color: #B9B9B9;
 }
 
 a.permalink {
@@ -771,7 +771,7 @@ td.quick_repo_menu.active {
 
 td.quick_repo_menu .menu_items {
     margin-top: 10px;
-    margin-left:-6px;
+    margin-left: -6px;
     width: 150px;
     position: absolute;
     background-color: #FFF;
@@ -1241,18 +1241,18 @@ tbody .yui-dt-editable { cursor: pointer }
 }
 #content div.box div.expand {
     width: 110%;
-    height:14px;
-    font-size:10px;
-    text-align:center;
+    height: 14px;
+    font-size: 10px;
+    text-align: center;
     cursor: pointer;
-    color:#666;
+    color: #666;
 
-    background:-webkit-gradient(linear,0% 50%,100% 50%,color-stop(0%,rgba(255,255,255,0)),color-stop(100%,rgba(64,96,128,0.1)));
-    background:-webkit-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
-    background:-moz-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
-    background:-o-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
-    background:-ms-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
-    background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(64,96,128,0.1));
+    background: -webkit-gradient(linear,0% 50%,100% 50%,color-stop(0%,rgba(255,255,255,0)),color-stop(100%,rgba(64,96,128,0.1)));
+    background: -webkit-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+    background: -moz-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+    background: -o-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+    background: -ms-linear-gradient(top,rgba(255,255,255,0),rgba(64,96,128,0.1));
+    background: linear-gradient(to bottom,rgba(255,255,255,0),rgba(64,96,128,0.1));
 
     display: none;
 }
@@ -1590,7 +1590,7 @@ input.disabled {
 }
 
 .reviewer_ac {
-    padding:10px
+    padding: 10px
 }
 
 div.form div.fields div.field div.button {
@@ -1944,15 +1944,15 @@ a.metatag[tag="license"]:hover {
 
 #footer div#footer-inner {
     background-color: #003B76;
-    background-repeat : repeat-x;
-    background-image : -khtml-gradient( linear, left top, left bottom, from(#003B76), to(#00376E));
-    background-image : -moz-linear-gradient(top, #003b76, #00376e);
-    background-image : -ms-linear-gradient( top, #003b76, #00376e);
-    background-image : -webkit-gradient( linear, left top, left bottom, color-stop( 0%, #003b76), color-stop( 100%, #00376e));
-    background-image : -webkit-linear-gradient( top, #003b76, #00376e));
-    background-image : -o-linear-gradient( top, #003b76, #00376e));
-    background-image : linear-gradient(to bottom, #003b76, #00376e);
-    filter :progid : DXImageTransform.Microsoft.gradient ( startColorstr = '#003b76', endColorstr = '#00376e', GradientType = 0);
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient( linear, left top, left bottom, from(#003B76), to(#00376E));
+    background-image: -moz-linear-gradient(top, #003b76, #00376e);
+    background-image: -ms-linear-gradient( top, #003b76, #00376e);
+    background-image: -webkit-gradient( linear, left top, left bottom, color-stop( 0%, #003b76), color-stop( 100%, #00376e));
+    background-image: -webkit-linear-gradient( top, #003b76, #00376e));
+    background-image: -o-linear-gradient( top, #003b76, #00376e));
+    background-image: linear-gradient(to bottom, #003b76, #00376e);
+    filter: progid : DXImageTransform.Microsoft.gradient ( startColorstr = '#003b76', endColorstr = '#00376e', GradientType = 0);
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
     -webkit-border-radius: 4px 4px 4px 4px;
     -khtml-border-radius: 4px 4px 4px 4px;
@@ -1979,15 +1979,15 @@ a.metatag[tag="license"]:hover {
     overflow: hidden;
     position: relative;
     background-color: #003B76;
-    background-repeat : repeat-x;
-    background-image : -khtml-gradient( linear, left top, left bottom, from(#003B76), to(#00376E));
-    background-image : -moz-linear-gradient( top, #003b76, #00376e);
-    background-image : -ms-linear-gradient( top, #003b76, #00376e);
-    background-image : -webkit-gradient( linear, left top, left bottom, color-stop( 0%, #003b76), color-stop( 100%, #00376e));
-    background-image : -webkit-linear-gradient( top, #003b76, #00376e));
-    background-image : -o-linear-gradient( top, #003b76, #00376e));
-    background-image : linear-gradient(to bottom, #003b76, #00376e);
-    filter : progid : DXImageTransform.Microsoft.gradient ( startColorstr = '#003b76', endColorstr = '#00376e', GradientType = 0);
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient( linear, left top, left bottom, from(#003B76), to(#00376E));
+    background-image: -moz-linear-gradient( top, #003b76, #00376e);
+    background-image: -ms-linear-gradient( top, #003b76, #00376e);
+    background-image: -webkit-gradient( linear, left top, left bottom, color-stop( 0%, #003b76), color-stop( 100%, #00376e));
+    background-image: -webkit-linear-gradient( top, #003b76, #00376e));
+    background-image: -o-linear-gradient( top, #003b76, #00376e));
+    background-image: linear-gradient(to bottom, #003b76, #00376e);
+    filter: progid : DXImageTransform.Microsoft.gradient ( startColorstr = '#003b76', endColorstr = '#00376e', GradientType = 0);
     margin: 0 auto;
     padding: 0;
 }
@@ -2042,7 +2042,7 @@ a.metatag[tag="license"]:hover {
 }
 
 .user-menu .container {
-    padding:0px 4px 0px 4px;
+    padding: 0px 4px 0px 4px;
     margin: 0px 0px 0px 0px;
 }
 
@@ -2124,10 +2124,10 @@ a.metatag[tag="license"]:hover {
     padding: 3px 3px 3px 6px;
 }
 #quick_login .big_gravatar {
-    padding:4px 0px 0px 6px;
+    padding: 4px 0px 0px 6px;
 }
 #quick_login .notifications {
-    padding:4px 0px 0px 6px;
+    padding: 4px 0px 0px 6px;
     color: #FFFFFF;
     font-weight: bold;
 }
@@ -2202,7 +2202,7 @@ a.metatag[tag="license"]:hover {
     padding: 0;
     color: #fff;
     display: block;
-    float:none !important;
+    float: none !important;
 }
 
 #quick_login ol.links li a {
@@ -2400,16 +2400,16 @@ h3.files_location {
 }
 
 .file_history {
-    padding-top:10px;
-    font-size:16px;
+    padding-top: 10px;
+    font-size: 16px;
 }
 .file_author {
     float: left;
 }
 
 .file_author .item {
-    float:left;
-    padding:5px;
+    float: left;
+    padding: 5px;
     color: #888;
 }
 
@@ -2479,7 +2479,7 @@ h3.files_location {
 
 .cs_files .changes {
     float: right;
-    color:#003367;
+    color: #003367;
 }
 
 .cs_files .changes .added {
@@ -2642,24 +2642,24 @@ h3.files_location {
 }
 
 .revision-link {
-    color:#3F6F9F;
+    color: #3F6F9F;
     font-weight: bold !important;
 }
 
 .issue-tracker-link {
-    color:#3F6F9F;
+    color: #3F6F9F;
     font-weight: bold !important;
 }
 
 .changeset-status-container {
     padding-right: 5px;
-    margin-top:1px;
-    float:right;
-    height:14px;
+    margin-top: 1px;
+    float: right;
+    height: 14px;
 }
 .code-header .changeset-status-container {
-    float:left;
-    padding:2px 0px 0px 2px;
+    float: left;
+    padding: 2px 0px 0px 2px;
 }
 .changeset-status-container .changeset-status-lbl {
     color: rgb(136, 136, 136);
@@ -2678,9 +2678,9 @@ h3.files_location {
 }
 .right .comments-container {
     padding-right: 5px;
-    margin-top:1px;
-    float:right;
-    height:14px;
+    margin-top: 1px;
+    float: right;
+    height: 14px;
 }
 
 .right .comments-cnt {
@@ -2742,7 +2742,7 @@ h3.files_location {
 
 .right .parent {
     color: #666666;
-    clear:both;
+    clear: both;
 }
 .right .logtags {
     padding: 2px 2px 2px 2px;
@@ -2917,8 +2917,8 @@ table.code-browser .browser-file {
     border-style: solid solid solid;
     border-width: 1px;
     box-shadow: 2px 8px 4px rgba(0, 0, 0, 0.2);
-    margin-top:5px;
-    margin-left:1px;
+    margin-top: 5px;
+    margin-left: 1px;
 
 }
 .diffblock .diff-actions {
@@ -3171,7 +3171,7 @@ table.code-browser .submodule-dir {
     display: block;
     margin-top: 4px;
     color: #666;
-    float:right;
+    float: right;
 }
 
 .locking_locked {
@@ -3328,7 +3328,7 @@ table.code-browser .submodule-dir {
 }
 
 .error_red {
-    color:red;
+    color: red;
 }
 
 .error_msg {
@@ -3419,7 +3419,7 @@ table.code-browser .submodule-dir {
     width: 16px;
 }
 div#legend_data {
-    padding-left:10px;
+    padding-left: 10px;
 }
 div#legend_container table {
     border: none !important;
@@ -3450,7 +3450,7 @@ div.gravatar {
     float: left;
     margin-right: 0.7em;
     padding: 1px 1px 1px 1px;
-    line-height:0;
+    line-height: 0;
     -webkit-border-radius: 3px;
     -khtml-border-radius: 3px;
     border-radius: 3px;
@@ -3555,7 +3555,7 @@ div.gravatar img {
 }
 
 .ui-btn.red {
-    color:#fff;
+    color: #fff;
     background-color: #c43c35;
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#ee5f5b), to(#c43c35));
@@ -3572,7 +3572,7 @@ div.gravatar img {
 
 
 .ui-btn.blue {
-    color:#fff;
+    color: #fff;
     background-color: #339bb9;
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#5bc0de), to(#339bb9));
@@ -3969,12 +3969,12 @@ div#legend_container table td, div#legend_choices table td {
 
 .group_members .group_member {
     height: 30px;
-    padding:0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
 }
 
 .reviewers_member {
     height: 15px;
-    padding:0px 0px 0px 10px;
+    padding: 0px 0px 0px 10px;
 }
 
 .emails_wrap {
@@ -3983,7 +3983,7 @@ div#legend_container table td, div#legend_choices table td {
 
 .emails_wrap .email_entry {
     height: 30px;
-    padding:0px 0px 0px 10px;
+    padding: 0px 0px 0px 10px;
 }
 .emails_wrap .email_entry .email {
     float: left
@@ -3998,7 +3998,7 @@ div#legend_container table td, div#legend_choices table td {
 
 .ips_wrap .ip_entry {
     height: 30px;
-    padding:0px 0px 0px 10px;
+    padding: 0px 0px 0px 10px;
 }
 .ips_wrap .ip_entry .ip {
     float: left
@@ -4011,7 +4011,7 @@ div#legend_container table td, div#legend_choices table td {
 /*README STYLE*/
 
 div.readme {
-    padding:0px;
+    padding: 0px;
 }
 
 div.readme h2 {
@@ -4023,10 +4023,10 @@ div.readme .readme_box {
 }
 
 div.readme .readme_box {
-    clear:both;
-    overflow:hidden;
-    margin:0;
-    padding:0 20px 10px;
+    clear: both;
+    overflow: hidden;
+    margin: 0;
+    padding: 0 20px 10px;
 }
 
 div.readme .readme_box h1, div.readme .readme_box h2, div.readme .readme_box h3, div.readme .readme_box h4, div.readme .readme_box h5, div.readme .readme_box h6 {
@@ -4112,7 +4112,7 @@ div.readme .readme_box table {
 
 
 div.rst-block {
-    padding:0px;
+    padding: 0px;
 }
 
 div.rst-block h2 {
@@ -4124,10 +4124,10 @@ div.rst-block  {
 }
 
 div.rst-block  {
-    clear:both;
-    overflow:hidden;
-    margin:0;
-    padding:0 20px 10px;
+    clear: both;
+    overflow: hidden;
+    margin: 0;
+    padding: 0 20px 10px;
 }
 
 div.rst-block  h1, div.rst-block  h2, div.rst-block  h3, div.rst-block  h4, div.rst-block  h5, div.rst-block  h6 {
@@ -4203,7 +4203,7 @@ div.rst-block  pre {
 
 /** comment main **/
 .comments {
-    padding:10px 20px;
+    padding: 10px 20px;
 }
 
 .comments .comment {
@@ -4232,7 +4232,7 @@ div.rst-block  pre {
 
 .comments .comment .meta .date {
     float: left;
-    padding:4px 4px 0px 4px;
+    padding: 4px 4px 0px 4px;
 }
 
 .comments .comment .text {
@@ -4243,7 +4243,7 @@ div.rst-block  pre {
 }
 
 .comments .comments-number {
-    padding:0px 0px 10px 0px;
+    padding: 0px 0px 10px 0px;
     font-weight: bold;
     color: #666;
     font-size: 16px;
@@ -4252,8 +4252,8 @@ div.rst-block  pre {
 /** comment form **/
 
 .status-block {
-    min-height:80px;
-    clear:both
+    min-height: 80px;
+    clear: both
 }
 
 .comment-form .clearfix {
@@ -4302,7 +4302,7 @@ form.comment-form {
 }
 
 .comment-form .comment-button {
-    padding-top:5px;
+    padding-top: 5px;
 }
 
 .add-another-button {
@@ -4313,13 +4313,13 @@ form.comment-form {
 
 .comment .buttons {
     float: right;
-    padding:2px 2px 0px 0px;
+    padding: 2px 2px 0px 0px;
 }
 
 
 .show-inline-comments {
     position: relative;
-    top:1px
+    top: 1px
 }
 
 /** comment inline form **/
@@ -4327,7 +4327,7 @@ form.comment-form {
     display: none;
 }
 .comment-inline-form .overlay.submitting {
-    display:block;
+    display: block;
     background: none repeat scroll 0 0 white;
     font-size: 16px;
     opacity: 0.5;
@@ -4337,8 +4337,8 @@ form.comment-form {
 
 }
 .comment-inline-form .overlay.submitting .overlay-text {
-    width:100%;
-    margin-top:5%;
+    width: 100%;
+    margin-top: 5%;
 }
 
 .comment-inline-form .clearfix {
@@ -4349,7 +4349,7 @@ form.comment-form {
 }
 
 div.comment-inline-form {
-    padding:4px 0px 6px 0px;
+    padding: 4px 0px 6px 0px;
 }
 
 
@@ -4403,19 +4403,19 @@ form.comment-inline-form {
 }
 
 .comment-inline-form .comment-button {
-    padding-top:5px;
+    padding-top: 5px;
 }
 
 /** comment inline **/
 .inline-comments {
-    padding:10px 20px;
+    padding: 10px 20px;
 }
 
 .inline-comments div.rst-block  {
-    clear:both;
-    overflow:hidden;
-    margin:0;
-    padding:0 20px 0px;
+    clear: both;
+    overflow: hidden;
+    margin: 0;
+    padding: 0 20px 0px;
 }
 .inline-comments .comment {
     border: 1px solid #ddd;
@@ -4429,7 +4429,7 @@ form.comment-inline-form {
 }
 
 .inline-comments .comment-wrapp {
-    padding:1px;
+    padding: 1px;
 }
 .inline-comments .comment .meta {
     background: #f8f8f8;
@@ -4444,12 +4444,12 @@ form.comment-inline-form {
 
 .inline-comments .comment .meta .user {
     font-weight: bold;
-    float:left;
+    float: left;
     padding: 3px;
 }
 
 .inline-comments .comment .meta .date {
-    float:left;
+    float: left;
     padding: 3px;
 }
 
@@ -4458,13 +4458,13 @@ form.comment-inline-form {
 }
 
 .inline-comments .comments-number {
-    padding:0px 0px 10px 0px;
+    padding: 0px 0px 10px 0px;
     font-weight: bold;
     color: #666;
     font-size: 16px;
 }
 .inline-comments-button .add-comment {
-    margin:2px 0px 8px 5px !important
+    margin: 2px 0px 8px 5px !important
 }
 
 
@@ -4481,7 +4481,7 @@ form.comment-inline-form {
     padding: 4px 4px !important;
     margin: 7px 4px 0px 0px !important;
     text-align: center;
-    color:#888 !important;
+    color: #888 !important;
     font-size: 10px;
     background-color: #DEDEDE !important;
     border-radius: 4px !important;
@@ -4489,7 +4489,7 @@ form.comment-inline-form {
 }
 
 .notification-header {
-    padding-top:6px;
+    padding-top: 6px;
 }
 .notification-header .desc {
     font-size: 16px;
@@ -4525,13 +4525,13 @@ form.comment-inline-form {
     cursor: pointer;
 }
 .notification-subject {
-    clear:both;
+    clear: both;
     border-bottom: 1px solid #eee;
-    padding:5px 0px 5px 38px;
+    padding: 5px 0px 5px 38px;
 }
 
 .notification-body {
-    clear:both;
+    clear: both;
     margin: 34px 2px 2px 8px
 }
 
@@ -4539,8 +4539,8 @@ form.comment-inline-form {
 PULL REQUESTS
 *****/
 .pullrequests_section_head {
-    padding:10px 10px 10px 0px;
-    font-size:16px;
+    padding: 10px 10px 10px 0px;
+    font-size: 16px;
     font-weight: bold;
 }
 
@@ -4548,8 +4548,8 @@ PULL REQUESTS
   PERMS
 *****/
 #perms .perms_section_head {
-    padding:10px 10px 10px 0px;
-    font-size:16px;
+    padding: 10px 10px 10px 0px;
+    font-size: 16px;
     font-weight: bold;
 }
 
@@ -4584,12 +4584,12 @@ PULL REQUESTS
 }
 
 .perm-gravatar {
-    vertical-align:middle;
-    padding:2px;
+    vertical-align: middle;
+    padding: 2px;
 }
 .perm-gravatar-ac {
-    vertical-align:middle;
-    padding:2px;
+    vertical-align: middle;
+    padding: 2px;
     width: 14px;
     height: 14px;
 }
@@ -4634,7 +4634,7 @@ div.diffblock.margined {
 div.diffblock .code-header {
     border-bottom: 1px solid #CCCCCC;
     background: #EEEEEE;
-    padding:10px 0 10px 0;
+    padding: 10px 0 10px 0;
     height: 14px;
 }
 
@@ -4658,12 +4658,12 @@ div.diffblock .code-header .hash {
     padding: 2px 0 0 2px;
 }
 div.diffblock .code-header .date {
-    float:left;
+    float: left;
     text-transform: uppercase;
     padding: 2px 0px 0px 2px;
 }
 div.diffblock .code-header div {
-    margin-left:4px;
+    margin-left: 4px;
     font-weight: bold;
     font-size: 14px;
 }
@@ -4671,25 +4671,25 @@ div.diffblock .code-header div {
 div.diffblock .parents {
     float: left;
     height: 26px;
-    width:100px;
+    width: 100px;
     font-size: 10px;
     font-weight: 400;
     vertical-align: middle;
     padding: 0px 2px 2px 2px;
-    background-color:#eeeeee;
+    background-color: #eeeeee;
     border-bottom: 1px solid #CCCCCC;
 }
 
 div.diffblock .children {
     float: right;
     height: 26px;
-    width:100px;
+    width: 100px;
     font-size: 10px;
     font-weight: 400;
     vertical-align: middle;
     text-align: right;
     padding: 0px 2px 2px 2px;
-    background-color:#eeeeee;
+    background-color: #eeeeee;
     border-bottom: 1px solid #CCCCCC;
 }
 
@@ -4698,7 +4698,7 @@ div.diffblock .code-body {
 }
 div.diffblock pre.raw {
     background: #FFFFFF;
-    color:#000000;
+    color: #000000;
 }
 table.code-difftable {
     border-collapse: collapse;
@@ -4708,35 +4708,35 @@ table.code-difftable {
 table.code-difftable td {
     padding: 0 !important;
     background: none !important;
-    border:0 !important;
+    border: 0 !important;
     vertical-align: baseline !important
 }
 table.code-difftable .context {
-    background:none repeat scroll 0 0 #DDE7EF;
+    background: none repeat scroll 0 0 #DDE7EF;
 }
 table.code-difftable .add {
-    background:none repeat scroll 0 0 #DDFFDD;
+    background: none repeat scroll 0 0 #DDFFDD;
 }
 table.code-difftable .add ins {
-    background:none repeat scroll 0 0 #AAFFAA;
-    text-decoration:none;
+    background: none repeat scroll 0 0 #AAFFAA;
+    text-decoration: none;
 }
 table.code-difftable .del {
-    background:none repeat scroll 0 0 #FFDDDD;
+    background: none repeat scroll 0 0 #FFDDDD;
 }
 table.code-difftable .del del {
-    background:none repeat scroll 0 0 #FFAAAA;
-    text-decoration:none;
+    background: none repeat scroll 0 0 #FFAAAA;
+    text-decoration: none;
 }
 
 /** LINE NUMBERS **/
 table.code-difftable .lineno {
 
-    padding-left:2px;
-    padding-right:2px;
-    text-align:right;
-    width:32px;
-    -moz-user-select:none;
+    padding-left: 2px;
+    padding-right: 2px;
+    text-align: right;
+    width: 32px;
+    -moz-user-select: none;
     -webkit-user-select: none;
     border-right: 1px solid #CCC !important;
     border-left: 0px solid #CCC !important;
@@ -4750,10 +4750,10 @@ table.code-difftable .lineno.new {
 table.code-difftable .lineno.old {
 }
 table.code-difftable .lineno a {
-    color:#747474 !important;
-    font:11px "Bitstream Vera Sans Mono",Monaco,"Courier New",Courier,monospace !important;
-    letter-spacing:-1px;
-    text-align:right;
+    color: #747474 !important;
+    font: 11px "Bitstream Vera Sans Mono",Monaco,"Courier New",Courier,monospace !important;
+    letter-spacing: -1px;
+    text-align: right;
     padding-right: 2px;
     cursor: pointer;
     display: block;
@@ -4761,12 +4761,12 @@ table.code-difftable .lineno a {
 }
 
 table.code-difftable .lineno-inline {
-    background:none repeat scroll 0 0 #FFF !important;
-    padding-left:2px;
-    padding-right:2px;
-    text-align:right;
-    width:30px;
-    -moz-user-select:none;
+    background: none repeat scroll 0 0 #FFF !important;
+    padding-left: 2px;
+    padding-right: 2px;
+    text-align: right;
+    width: 30px;
+    -moz-user-select: none;
     -webkit-user-select: none;
 }
 
@@ -4776,22 +4776,22 @@ table.code-difftable .code {
     width: 100%;
 }
 table.code-difftable .code td {
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 }
 table.code-difftable .code pre {
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
     height: 17px;
     line-height: 17px;
 }
 
 
 .diffblock.margined.comm .line .code:hover {
-    background-color:#FFFFCC !important;
+    background-color: #FFFFCC !important;
     cursor: pointer !important;
-    background-image:url("../images/icons/comment_add.png") !important;
-    background-repeat:no-repeat !important;
+    background-image: url("../images/icons/comment_add.png") !important;
+    background-repeat: no-repeat !important;
     background-position: right !important;
     background-position: 0% 50% !important;
 }
