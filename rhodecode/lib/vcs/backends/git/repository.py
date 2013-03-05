@@ -306,6 +306,15 @@ class GitRepository(BaseRepository):
             url = ':///'.join(('file', url))
         return url
 
+    def get_hook_location(self):
+        """
+        returns absolute path to location where hooks are stored
+        """
+        loc = os.path.join(self.path, 'hooks')
+        if not self.bare:
+            loc = os.path.join(self.path, '.git', 'hooks')
+        return loc
+
     @LazyProperty
     def name(self):
         return os.path.basename(self.path)
