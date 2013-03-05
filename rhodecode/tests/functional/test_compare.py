@@ -106,6 +106,7 @@ class TestCompareController(TestController):
                                     other_repo=repo2.repo_name,
                                     other_ref_type="branch",
                                     other_ref=rev1,
+                                    merge='1',
                                     ))
 
         response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, rev2, repo2.repo_name, rev1))
@@ -118,9 +119,9 @@ class TestCompareController(TestController):
         response.mustcontain("""<a href="/%s/changeset/%s">r1:%s</a>""" % (repo2.repo_name, cs1.raw_id, cs1.short_id))
         response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
         ## files
-        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
+        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s&amp;merge=1#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
         #swap
-        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
+        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s&amp;merge=True">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
     def test_compare_forks_on_branch_extra_commits_origin_has_incomming_hg(self):
         self.log_user()
@@ -160,6 +161,7 @@ class TestCompareController(TestController):
                                     other_repo=repo2.repo_name,
                                     other_ref_type="branch",
                                     other_ref=rev1,
+                                    merge='x',
                                     ))
         response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, rev2, repo2.repo_name, rev1))
         response.mustcontain("""Showing 2 commits""")
@@ -171,9 +173,9 @@ class TestCompareController(TestController):
         response.mustcontain("""<a href="/%s/changeset/%s">r1:%s</a>""" % (repo2.repo_name, cs1.raw_id, cs1.short_id))
         response.mustcontain("""<a href="/%s/changeset/%s">r2:%s</a>""" % (repo2.repo_name, cs2.raw_id, cs2.short_id))
         ## files
-        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
+        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s&amp;merge=x#C--826e8142e6ba">file1</a>""" % (repo1.repo_name, rev2, rev1, repo2.repo_name))
         #swap
-        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
+        response.mustcontain("""<a href="/%s/compare/branch@%s...branch@%s?other_repo=%s&amp;merge=True">[swap]</a>""" % (repo2.repo_name, rev1, rev2, repo1.repo_name))
 
     def test_compare_cherry_pick_changesets_from_bottom(self):
 
@@ -222,6 +224,7 @@ class TestCompareController(TestController):
                                     other_repo=repo1.repo_name,
                                     other_ref_type="rev",
                                     other_ref=cs4.short_id,
+                                    merge='True',
                                     ))
         response.mustcontain('%s@%s -&gt; %s@%s' % (repo2.repo_name, cs1.short_id, repo1.repo_name, cs4.short_id))
         response.mustcontain("""Showing 3 commits""")
@@ -281,6 +284,7 @@ class TestCompareController(TestController):
                                     org_ref=cs2.short_id, # parent of cs3, not in repo2
                                     other_ref_type="rev",
                                     other_ref=cs5.short_id,
+                                    merge='1',
                                     ))
 
         response.mustcontain('%s@%s -&gt; %s@%s' % (repo1.repo_name, cs2.short_id, repo1.repo_name, cs5.short_id))
@@ -319,6 +323,7 @@ class TestCompareController(TestController):
                                     other_ref_type="rev",
                                     other_ref=rev2,
                                     other_repo=HG_FORK,
+                                    merge='1',
                                     ))
         response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, rev1, HG_FORK, rev2))
         ## outgoing changesets between those revisions
@@ -328,9 +333,9 @@ class TestCompareController(TestController):
         response.mustcontain("""<a href="/%s/changeset/7d4bc8ec6be56c0f10425afb40b6fc315a4c25e7">r6:%s</a>""" % (HG_FORK, rev2))
 
         ## files
-        response.mustcontain("""<a href="/%s/compare/rev@%s...rev@%s?other_repo=%s#C--9c390eb52cd6">vcs/backends/hg.py</a>""" % (HG_REPO, rev1, rev2, HG_FORK))
-        response.mustcontain("""<a href="/%s/compare/rev@%s...rev@%s?other_repo=%s#C--41b41c1f2796">vcs/backends/__init__.py</a>""" % (HG_REPO, rev1, rev2, HG_FORK))
-        response.mustcontain("""<a href="/%s/compare/rev@%s...rev@%s?other_repo=%s#C--2f574d260608">vcs/backends/base.py</a>""" % (HG_REPO, rev1, rev2, HG_FORK))
+        response.mustcontain("""<a href="/%s/compare/rev@%s...rev@%s?other_repo=%s&amp;merge=1#C--9c390eb52cd6">vcs/backends/hg.py</a>""" % (HG_REPO, rev1, rev2, HG_FORK))
+        response.mustcontain("""<a href="/%s/compare/rev@%s...rev@%s?other_repo=%s&amp;merge=1#C--41b41c1f2796">vcs/backends/__init__.py</a>""" % (HG_REPO, rev1, rev2, HG_FORK))
+        response.mustcontain("""<a href="/%s/compare/rev@%s...rev@%s?other_repo=%s&amp;merge=1#C--2f574d260608">vcs/backends/base.py</a>""" % (HG_REPO, rev1, rev2, HG_FORK))
 
     def test_org_repo_new_commits_after_forking_simple_diff(self):
         self.log_user()
@@ -401,6 +406,7 @@ class TestCompareController(TestController):
                                     other_ref_type="branch",
                                     other_ref=rev2,
                                     other_repo=r1_name,
+                                    merge='1',
                                     ))
         response.mustcontain('%s@%s -&gt; %s@%s' % (r2_name, rev1, r1_name, rev2))
         response.mustcontain('No files')
@@ -425,6 +431,7 @@ class TestCompareController(TestController):
                                     other_ref_type="branch",
                                     other_ref=rev2,
                                     other_repo=r1_name,
+                                    merge='1',
                                     ))
 
         response.mustcontain('%s@%s -&gt; %s@%s' % (r2_name, rev1, r1_name, rev2))

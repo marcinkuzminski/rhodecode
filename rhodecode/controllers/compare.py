@@ -89,6 +89,15 @@ class CompareController(BaseRepoController):
         # other_ref will be evaluated in other_repo
         other_ref = (other_ref_type, other_ref)
         other_repo = request.GET.get('other_repo', org_repo)
+        # If merge is True:
+        #   Show what org would get if merged with other:
+        #   List changesets that are ancestors of other but not of org.
+        #   New changesets in org is thus ignored.
+        #   Diff will be from common ancestor, and merges of org to other will thus be ignored.
+        # If merge is False:
+        #   Make a raw diff from org to other, no matter if related or not.
+        #   Changesets in one and not in the other will be ignored
+        merge = bool(request.GET.get('merge'))
         # fulldiff disables cut_off_limit
         c.fulldiff = request.GET.get('fulldiff')
         # partial uses compare_cs.html template directly
@@ -100,7 +109,8 @@ class CompareController(BaseRepoController):
             repo_name=other_repo,
             org_ref_type=other_ref[0], org_ref=other_ref[1],
             other_repo=org_repo,
-            other_ref_type=org_ref[0], other_ref=org_ref[1])
+            other_ref_type=org_ref[0], other_ref=org_ref[1],
+            merge=merge or '')
 
         org_repo = Repository.get_by_repo_name(org_repo)
         other_repo = Repository.get_by_repo_name(other_repo)
@@ -130,22 +140,23 @@ class CompareController(BaseRepoController):
         c.org_ref_type = org_ref[0]
         c.other_ref_type = other_ref[0]
 
-        c.cs_ranges, ancestor = PullRequestModel().get_compare_data(
-            org_repo, org_ref, other_repo, other_ref)
+        c.cs_ranges, c.ancestor = PullRequestModel().get_compare_data(
+            org_repo, org_ref, other_repo, other_ref, merge)
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
         if partial:
+            assert c.ancestor
             return render('compare/compare_cs.html')
 
-        if ancestor and org_repo != other_repo:
+        if c.ancestor:
+            assert merge
             # case we want a simple diff without incoming changesets,
             # previewing what will be merged.
-            # Make the diff on the forked repo, with
-            # revision that is common ancestor
+            # Make the diff on the other repo (which is known to have other_ref)
             log.debug('Using ancestor %s as org_ref instead of %s'
-                      % (ancestor, org_ref))
-            org_ref = ('rev', ancestor)
+                      % (c.ancestor, org_ref))
+            org_ref = ('rev', c.ancestor)
             org_repo = other_repo
 
         diff_limit = self.cut_off_limit if not c.fulldiff else None

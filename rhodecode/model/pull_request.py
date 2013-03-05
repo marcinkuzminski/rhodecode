@@ -161,7 +161,7 @@ class PullRequestModel(BaseModel):
         pull_request.updated_on = datetime.datetime.now()
         Session().add(pull_request)
 
-    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref):
+    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref, merge):
         """
         Returns a list of changesets that can be merged from org_repo@org_ref
         to other_repo@other_ref ... and the ancestor that would be used for merge
@@ -211,16 +211,21 @@ class PullRequestModel(BaseModel):
             else:
                 hgrepo = other_repo._repo
 
-            revs = ["ancestors(id('%s')) and not ancestors(id('%s'))" %
-                    (other_rev, org_rev)]
-            changesets = [other_repo.get_changeset(cs)
-                          for cs in scmutil.revrange(hgrepo, revs)]
+            if merge:
+                revs = ["ancestors(id('%s')) and not ancestors(id('%s')) and not id('%s')" %
+                        (other_rev, org_rev, org_rev)]
 
-            if org_repo != other_repo:
                 ancestors = scmutil.revrange(hgrepo,
                      ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
                 if len(ancestors) == 1:
                     ancestor = hgrepo[ancestors[0]].hex()
+            else:
+                # TODO: have both + and - changesets
+                revs = ["id('%s') :: id('%s') - id('%s')" %
+                        (org_rev, other_rev, org_rev)]
+
+            changesets = [other_repo.get_changeset(cs)
+                          for cs in scmutil.revrange(hgrepo, revs)]
 
         elif alias == 'git':
             assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
@@ -233,7 +238,7 @@ class PullRequestModel(BaseModel):
 
         return changesets, ancestor
 
-    def get_compare_data(self, org_repo, org_ref, other_repo, other_ref):
+    def get_compare_data(self, org_repo, org_ref, other_repo, other_ref, merge):
         """
         Returns incoming changesets for mercurial repositories
 
@@ -251,5 +256,6 @@ class PullRequestModel(BaseModel):
 
         cs_ranges, ancestor = self._get_changesets(org_repo.scm_instance.alias,
                                                    org_repo.scm_instance, org_ref,
-                                                   other_repo.scm_instance, other_ref)
+                                                   other_repo.scm_instance, other_ref,
+                                                   merge)
         return cs_ranges, ancestor

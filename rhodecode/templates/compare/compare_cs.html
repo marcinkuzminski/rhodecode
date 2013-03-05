@@ -1,9 +1,9 @@
 ## Changesets table !
 <div class="container">
-  <table class="compare_view_commits noborder">
   %if not c.cs_ranges:
     <span class="empty_data">${_('No changesets')}</span>
   %else:
+    <table class="compare_view_commits noborder">
     %for cnt, cs in enumerate(c.cs_ranges):
         <tr>
         <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),14)}"/></div></td>
@@ -22,7 +22,15 @@
         <td><div class="message tooltip" title="${h.tooltip(cs.message)}" style="white-space:normal">${h.urlify_commit(h.shorter(cs.message, 60),c.repo_name)}</div></td>
         </tr>
     %endfor
-
+    </table>
+    %if c.ancestor:
+    <span class="ancestor">${_('Ancestor')}:
+      ${h.link_to(c.ancestor,h.url('changeset_home',repo_name=c.repo_name,revision=c.ancestor))}
+    </span>
+    %endif
+    %if c.as_form:
+      ${h.hidden('ancestor_rev',c.ancestor)}
+      ${h.hidden('merge_rev',c.cs_ranges[-1].raw_id)}
+    %endif
   %endif
-  </table>
 </div>

@@ -196,9 +196,9 @@ class PullrequestsController(BaseRepoController):
             return redirect(url('pullrequest_home', repo_name=repo_name))
 
         org_repo = _form['org_repo']
-        org_ref = _form['org_ref']
+        org_ref = 'rev:merge:%s' % _form['merge_rev']
         other_repo = _form['other_repo']
-        other_ref = _form['other_ref']
+        other_ref = 'rev:ancestor:%s' % _form['ancestor_rev']
         revisions = _form['revisions']
         reviewers = _form['review_members']
 
@@ -280,10 +280,6 @@ class PullrequestsController(BaseRepoController):
         c.fulldiff = fulldiff = request.GET.get('fulldiff')
 
         c.cs_ranges = [org_repo.get_changeset(x) for x in pull_request.revisions]
-
-        other_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
-                                  if c.cs_ranges[0].parents
-                                  else EmptyChangeset(), 'raw_id'))
 
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
 
@@ -385,6 +381,7 @@ class PullrequestsController(BaseRepoController):
         c.changeset_statuses = ChangesetStatus.STATUSES
 
         c.as_form = False
+        c.ancestor = None # there is one - but right here we don't know which
         return render('/pullrequests/pullrequest_show.html')
 
     @NotAnonymous()
