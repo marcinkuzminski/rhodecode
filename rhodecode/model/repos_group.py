@@ -244,26 +244,36 @@ class ReposGroupModel(BaseModel):
 
             # change properties
             repos_group.group_description = form_data['group_description']
-            repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
             repos_group.group_parent_id = form_data['group_parent_id']
             repos_group.enable_locking = form_data['enable_locking']
+
+            repos_group.parent_group = RepoGroup.get(form_data['group_parent_id'])
             repos_group.group_name = repos_group.get_new_name(form_data['group_name'])
             new_path = repos_group.full_path
-
             self.sa.add(repos_group)
 
-            # iterate over all members of this groups and set the locking !
+            # iterate over all members of this groups and do fixes
+            # set locking if given
+            # if obj is a repoGroup also fix the name of the group according
+            # to the parent
+            # if obj is a Repo fix it's name
             # this can be potentially heavy operation
             for obj in repos_group.recursive_groups_and_repos():
                 #set the value from it's parent
                 obj.enable_locking = repos_group.enable_locking
+                if isinstance(obj, RepoGroup):
+                    new_name = obj.get_new_name(obj.name)
+                    log.debug('Fixing group %s to new name %s' \
+                                % (obj.group_name, new_name))
+                    obj.group_name = new_name
+                elif isinstance(obj, Repository):
+                    # we need to get all repositories from this new group and
+                    # rename them accordingly to new group path
+                    new_name = obj.get_new_name(obj.just_name)
+                    log.debug('Fixing repo %s to new name %s' \
+                                % (obj.repo_name, new_name))
+                    obj.repo_name = new_name
                 self.sa.add(obj)
-
-            # we need to get all repositories from this new group and
-            # rename them accordingly to new group path
-            for r in repos_group.repositories:
-                r.repo_name = r.get_new_name(r.just_name)
-                self.sa.add(r)
 
             self.__rename_group(old_path, new_path)
 

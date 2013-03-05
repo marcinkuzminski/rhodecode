@@ -21,6 +21,33 @@ def _make_group(path, desc='desc', parent_id=None,
     return gr
 
 
+def _update_group(id_, group_name, desc='desc', parent_id=None):
+    form_data = _get_group_create_params(group_name=group_name,
+                                         group_desc=desc,
+                                         group_parent_id=parent_id)
+    gr = ReposGroupModel().update(id_, form_data)
+    return gr
+
+
+def _make_repo(name, **kwargs):
+    form_data = _get_repo_create_params(repo_name=name, **kwargs)
+    cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
+    r = RepoModel().create(form_data, cur_user)
+    return r
+
+
+def _update_repo(name, **kwargs):
+    form_data = _get_repo_create_params(**kwargs)
+    if not 'repo_name' in kwargs:
+        form_data['repo_name'] = name
+    if not 'perms_new' in kwargs:
+        form_data['perms_new'] = []
+    if not 'perms_updates' in kwargs:
+        form_data['perms_updates'] = []
+    r = RepoModel().update(name, **form_data)
+    return r
+
+
 class TestReposGroups(unittest.TestCase):
 
     def setUp(self):
@@ -32,7 +59,7 @@ class TestReposGroups(unittest.TestCase):
         Session().commit()
 
     def tearDown(self):
-        print 'out'
+        Session.remove()
 
     def __check_path(self, *path):
         """
@@ -48,21 +75,9 @@ class TestReposGroups(unittest.TestCase):
     def __delete_group(self, id_):
         ReposGroupModel().delete(id_)
 
-    def __update_group(self, id_, path, desc='desc', parent_id=None):
-        form_data = dict(
-            group_name=path,
-            group_description=desc,
-            group_parent_id=parent_id,
-            perms_updates=[],
-            perms_new=[],
-            enable_locking=False,
-            recursive=False
-        )
-        gr = ReposGroupModel().update(id_, form_data)
-        return gr
-
     def test_create_group(self):
         g = _make_group('newGroup')
+        Session().commit()
         self.assertEqual(g.full_path, 'newGroup')
 
         self.assertTrue(self.__check_path('newGroup'))
@@ -73,23 +88,27 @@ class TestReposGroups(unittest.TestCase):
 
     def test_same_subgroup(self):
         sg1 = _make_group('sub1', parent_id=self.g1.group_id)
+        Session().commit()
         self.assertEqual(sg1.parent_group, self.g1)
         self.assertEqual(sg1.full_path, 'test1/sub1')
         self.assertTrue(self.__check_path('test1', 'sub1'))
 
         ssg1 = _make_group('subsub1', parent_id=sg1.group_id)
+        Session().commit()
         self.assertEqual(ssg1.parent_group, sg1)
         self.assertEqual(ssg1.full_path, 'test1/sub1/subsub1')
         self.assertTrue(self.__check_path('test1', 'sub1', 'subsub1'))
 
     def test_remove_group(self):
         sg1 = _make_group('deleteme')
+        Session().commit()
         self.__delete_group(sg1.group_id)
 
         self.assertEqual(RepoGroup.get(sg1.group_id), None)
         self.assertFalse(self.__check_path('deteteme'))
 
         sg1 = _make_group('deleteme', parent_id=self.g1.group_id)
+        Session().commit()
         self.__delete_group(sg1.group_id)
 
         self.assertEqual(RepoGroup.get(sg1.group_id), None)
@@ -97,24 +116,26 @@ class TestReposGroups(unittest.TestCase):
 
     def test_rename_single_group(self):
         sg1 = _make_group('initial')
+        Session().commit()
 
-        new_sg1 = self.__update_group(sg1.group_id, 'after')
+        new_sg1 = _update_group(sg1.group_id, 'after')
         self.assertTrue(self.__check_path('after'))
         self.assertEqual(RepoGroup.get_by_group_name('initial'), None)
 
     def test_update_group_parent(self):
 
         sg1 = _make_group('initial', parent_id=self.g1.group_id)
+        Session().commit()
 
-        new_sg1 = self.__update_group(sg1.group_id, 'after', parent_id=self.g1.group_id)
+        new_sg1 = _update_group(sg1.group_id, 'after', parent_id=self.g1.group_id)
         self.assertTrue(self.__check_path('test1', 'after'))
         self.assertEqual(RepoGroup.get_by_group_name('test1/initial'), None)
 
-        new_sg1 = self.__update_group(sg1.group_id, 'after', parent_id=self.g3.group_id)
+        new_sg1 = _update_group(sg1.group_id, 'after', parent_id=self.g3.group_id)
         self.assertTrue(self.__check_path('test3', 'after'))
         self.assertEqual(RepoGroup.get_by_group_name('test3/initial'), None)
 
-        new_sg1 = self.__update_group(sg1.group_id, 'hello')
+        new_sg1 = _update_group(sg1.group_id, 'hello')
         self.assertTrue(self.__check_path('hello'))
 
         self.assertEqual(RepoGroup.get_by_group_name('hello'), new_sg1)
@@ -123,23 +144,17 @@ class TestReposGroups(unittest.TestCase):
 
         g1 = _make_group('g1')
         g2 = _make_group('g2')
-
+        Session().commit()
         # create new repo
-        form_data = _get_repo_create_params(repo_name='john')
-        cur_user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
-        r = RepoModel().create(form_data, cur_user)
-
+        r = _make_repo('john')
+        Session().commit()
         self.assertEqual(r.repo_name, 'john')
-
         # put repo into group
-        form_data = form_data
-        form_data['repo_group'] = g1.group_id
-        form_data['perms_new'] = []
-        form_data['perms_updates'] = []
-        RepoModel().update(r.repo_name, **form_data)
+        r = _update_repo('john', repo_group=g1.group_id)
+        Session().commit()
         self.assertEqual(r.repo_name, 'g1/john')
 
-        self.__update_group(g1.group_id, 'g1', parent_id=g2.group_id)
+        _update_group(g1.group_id, 'g1', parent_id=g2.group_id)
         self.assertTrue(self.__check_path('g2', 'g1'))
 
         # test repo
@@ -155,7 +170,7 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(g2.full_path, 't11/t22')
         self.assertTrue(self.__check_path('t11', 't22'))
 
-        g2 = self.__update_group(g2.group_id, 'g22', parent_id=None)
+        g2 = _update_group(g2.group_id, 'g22', parent_id=None)
         Session().commit()
 
         self.assertEqual(g2.group_name, 'g22')
@@ -163,3 +178,65 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(g2.full_path, 'g22')
         self.assertFalse(self.__check_path('t11', 't22'))
         self.assertTrue(self.__check_path('g22'))
+
+    def test_rename_top_level_group_in_nested_setup(self):
+        g1 = _make_group('L1')
+        Session().commit()
+        g2 = _make_group('L2', parent_id=g1.group_id)
+        Session().commit()
+        g3 = _make_group('L3', parent_id=g2.group_id)
+        Session().commit()
+
+        r = _make_repo('L1/L2/L3/L3_REPO', repo_group=g3.group_id)
+        Session().commit()
+
+        ##rename L1 all groups should be now changed
+        _update_group(g1.group_id, 'L1_NEW')
+        Session().commit()
+        self.assertEqual(g1.full_path, 'L1_NEW')
+        self.assertEqual(g2.full_path, 'L1_NEW/L2')
+        self.assertEqual(g3.full_path, 'L1_NEW/L2/L3')
+        self.assertEqual(r.repo_name,  'L1_NEW/L2/L3/L3_REPO')
+
+    def test_change_parent_of_top_level_group_in_nested_setup(self):
+        g1 = _make_group('R1')
+        Session().commit()
+        g2 = _make_group('R2', parent_id=g1.group_id)
+        Session().commit()
+        g3 = _make_group('R3', parent_id=g2.group_id)
+        Session().commit()
+
+        g4 = _make_group('R1_NEW')
+        Session().commit()
+
+        r = _make_repo('R1/R2/R3/R3_REPO', repo_group=g3.group_id)
+        Session().commit()
+        ##rename L1 all groups should be now changed
+        _update_group(g1.group_id, 'R1', parent_id=g4.group_id)
+        Session().commit()
+        self.assertEqual(g1.full_path, 'R1_NEW/R1')
+        self.assertEqual(g2.full_path, 'R1_NEW/R1/R2')
+        self.assertEqual(g3.full_path, 'R1_NEW/R1/R2/R3')
+        self.assertEqual(r.repo_name,  'R1_NEW/R1/R2/R3/R3_REPO')
+
+    def test_change_parent_of_top_level_group_in_nested_setup_with_rename(self):
+        g1 = _make_group('X1')
+        Session().commit()
+        g2 = _make_group('X2', parent_id=g1.group_id)
+        Session().commit()
+        g3 = _make_group('X3', parent_id=g2.group_id)
+        Session().commit()
+
+        g4 = _make_group('X1_NEW')
+        Session().commit()
+
+        r = _make_repo('X1/X2/X3/X3_REPO', repo_group=g3.group_id)
+        Session().commit()
+
+        ##rename L1 all groups should be now changed
+        _update_group(g1.group_id, 'X1_PRIM', parent_id=g4.group_id)
+        Session().commit()
+        self.assertEqual(g1.full_path, 'X1_NEW/X1_PRIM')
+        self.assertEqual(g2.full_path, 'X1_NEW/X1_PRIM/X2')
+        self.assertEqual(g3.full_path, 'X1_NEW/X1_PRIM/X2/X3')
+        self.assertEqual(r.repo_name,  'X1_NEW/X1_PRIM/X2/X3/X3_REPO')
