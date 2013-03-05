@@ -56,6 +56,18 @@ def make_map(config):
         repos_group_name = match_dict.get('group_name')
         return is_valid_repos_group(repos_group_name, config['base_path'])
 
+    def check_group_skip_path(environ, match_dict):
+        """
+        check for valid repository group for proper 404 handling, but skips
+        verification of existing path
+
+        :param environ:
+        :param match_dict:
+        """
+        repos_group_name = match_dict.get('group_name')
+        return is_valid_repos_group(repos_group_name, config['base_path'],
+                                    skip_path_check=True)
+
     def check_int(environ, match_dict):
         return match_dict.get('id').isdigit()
 
@@ -171,9 +183,10 @@ def make_map(config):
                                                    function=check_group))
         m.connect("delete_repos_group", "/repos_groups/{group_name:.*?}",
                   action="delete", conditions=dict(method=["DELETE"],
-                                                   function=check_group))
+                                                   function=check_group_skip_path))
         m.connect("edit_repos_group", "/repos_groups/{group_name:.*?}/edit",
-                  action="edit", conditions=dict(method=["GET"],))
+                  action="edit", conditions=dict(method=["GET"],
+                                                 function=check_group))
         m.connect("formatted_edit_repos_group",
                   "/repos_groups/{group_name:.*?}.{format}/edit",
                   action="edit", conditions=dict(method=["GET"],

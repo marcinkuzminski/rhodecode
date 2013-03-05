@@ -240,7 +240,7 @@ def is_valid_repo(repo_name, base_path, scm=None):
         return False
 
 
-def is_valid_repos_group(repos_group_name, base_path):
+def is_valid_repos_group(repos_group_name, base_path, skip_path_check=False):
     """
     Returns True if given path is a repos group False otherwise
 
@@ -263,7 +263,7 @@ def is_valid_repos_group(repos_group_name, base_path):
         pass
 
     # check if it's a valid path
-    if os.path.isdir(full_path):
+    if skip_path_check or os.path.isdir(full_path):
         return True
 
     return False
@@ -495,7 +495,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                     #don't hold further removals on error
                     log.error(traceback.format_exc())
                     sa.rollback()
-
     return added, removed
 
 
