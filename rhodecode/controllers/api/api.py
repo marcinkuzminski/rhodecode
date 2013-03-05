@@ -27,14 +27,14 @@
 
 import traceback
 import logging
-from pylons.controllers.util import abort
 
 from rhodecode.controllers.api import JSONRPCController, JSONRPCError
 from rhodecode.lib.auth import PasswordGenerator, AuthUser, \
     HasPermissionAllDecorator, HasPermissionAnyDecorator, \
     HasPermissionAnyApi, HasRepoPermissionAnyApi
 from rhodecode.lib.utils import map_groups, repo2db_mapper
-from rhodecode.lib.utils2 import str2bool
+from rhodecode.lib.utils2 import str2bool, time_to_datetime
+from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
@@ -229,7 +229,8 @@ class ApiController(JSONRPCController):
                 'Error occurred during cache invalidation action'
             )
 
-    def lock(self, apiuser, repoid, locked, userid=Optional(OAttr('apiuser'))):
+    def lock(self, apiuser, repoid, locked=Optional(None),
+             userid=Optional(OAttr('apiuser'))):
         """
         Set locking state on particular repository by given user, if
         this command is runned by non-admin account userid is set to user
@@ -257,21 +258,39 @@ class ApiController(JSONRPCController):
 
         if isinstance(userid, Optional):
             userid = apiuser.user_id
-        user = get_user_or_error(userid)
-        locked = str2bool(locked)
-        try:
-            if locked:
-                Repository.lock(repo, user.user_id)
-            else:
-                Repository.unlock(repo)
 
-            return ('User `%s` set lock state for repo `%s` to `%s`'
-                    % (user.username, repo.repo_name, locked))
-        except Exception:
-            log.error(traceback.format_exc())
-            raise JSONRPCError(
-                'Error occurred locking repository `%s`' % repo.repo_name
-            )
+        user = get_user_or_error(userid)
+
+        if isinstance(locked, Optional):
+            lockobj = Repository.getlock(repo)
+
+            if lockobj[0] is None:
+                return ('Repo `%s` not locked. Locked=`False`.'
+                        % (repo.repo_name))
+            else:
+                userid, time_ = lockobj
+                user = get_user_or_error(userid)
+
+                return ('Repo `%s` locked by `%s`. Locked=`True`. '
+                        'Locked since: `%s`'
+                    % (repo.repo_name, user.username,
+                       h.fmt_date(time_to_datetime(time_))))
+
+        else:
+            locked = str2bool(locked)
+            try:
+                if locked:
+                    Repository.lock(repo, user.user_id)
+                else:
+                    Repository.unlock(repo)
+
+                return ('User `%s` set lock state for repo `%s` to `%s`'
+                        % (user.username, repo.repo_name, locked))
+            except Exception:
+                log.error(traceback.format_exc())
+                raise JSONRPCError(
+                    'Error occurred locking repository `%s`' % repo.repo_name
+                )
 
     @HasPermissionAllDecorator('hg.admin')
     def show_ip(self, apiuser, userid):

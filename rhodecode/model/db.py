@@ -1002,6 +1002,10 @@ class Repository(Base, BaseModel):
         Session().add(repo)
         Session().commit()
 
+    @classmethod
+    def getlock(cls, repo):
+        return repo.locked
+
     @property
     def last_db_change(self):
         return self.updated_on

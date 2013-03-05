@@ -370,6 +370,18 @@ class BaseTestApi(object):
                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
         self._compare_ok(id_, expected, given=response.body)
 
+    def test_api_lock_repo_lock_optional_locked(self):
+        from rhodecode.lib import helpers
+        from rhodecode.lib.utils2 import  time_to_datetime
+        _locked_since = helpers.fmt_date(time_to_datetime(Repository\
+                                    .get_by_repo_name(self.REPO).locked[1]))
+        id_, params = _build_data(self.apikey, 'lock',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+        expected = ('Repo `%s` locked by `%s`. Locked=`True`. Locked since: `%s`'
+                   % (self.REPO, TEST_USER_ADMIN_LOGIN, _locked_since))
+        self._compare_ok(id_, expected, given=response.body)
+
     @mock.patch.object(Repository, 'lock', crash)
     def test_api_lock_error(self):
         id_, params = _build_data(self.apikey, 'lock',
