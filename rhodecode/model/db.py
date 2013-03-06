@@ -1734,7 +1734,7 @@ class CacheInvalidation(Base, BaseModel):
             for inv_obj in inv_objs:
                 inv_obj.cache_active = False
                 log.debug('marking %s key for invalidation based on key=%s,repo_name=%s'
-                  % (inv_obj, key, repo_name))
+                  % (inv_obj, key, safe_str(repo_name)))
                 invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()

@@ -447,7 +447,8 @@ class FilesController(BaseRepoController):
                 yield data
 
         response.content_disposition = str('attachment; filename=%s-%s%s' \
-                                           % (repo_name, revision[:12], ext))
+                                           % (safe_str(repo_name),
+                                              safe_str(revision), ext))
         response.content_type = str(content_type)
         return get_chunked_archive(archive)
 
