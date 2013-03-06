@@ -135,7 +135,7 @@
       </button-->
       <ul id="context-pages" class="horizontal-list">
         <li ${is_current('summary')}><a href="${h.url('summary_home', repo_name=c.repo_name)}" class="summary">${_('Summary')}</a></li>
-        <li ${is_current('changelog')}><a href="${h.url('changelog_home', repo_name=c.repo_name)}" class="changelogs">${_('Changelogs')}</a></li>
+        <li ${is_current('changelog')}><a href="${h.url('changelog_home', repo_name=c.repo_name)}" class="changelogs">${_('Changelog')}</a></li>
         <li ${is_current('files')}><a href="${h.url('files_home', repo_name=c.repo_name)}" class="files"></span>${_('Files')}</a></li>
         <li ${is_current('switch-to')}>
           <a href="#" id="branch_tag_switcher_2" class="dropdown switch-to"></span>${_('Switch To')}</a>
