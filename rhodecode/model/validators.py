@@ -416,6 +416,8 @@ def ValidCloneUri():
                 svnremoterepo(ui, url).capabilities
             elif url.startswith('git+http'):
                 raise NotImplementedError()
+            else:
+                raise Exception('clone from URI %s not allowed' % (url))
 
         elif repo_type == 'git':
             from rhodecode.lib.vcs.backends.git.repository import GitRepository
@@ -427,6 +429,8 @@ def ValidCloneUri():
                 raise NotImplementedError()
             elif url.startswith('hg+http'):
                 raise NotImplementedError()
+            else:
+                raise Exception('clone from URI %s not allowed' % (url))
 
     class _validator(formencode.validators.FancyValidator):
         messages = {
