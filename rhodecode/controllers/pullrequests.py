@@ -52,6 +52,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
+from mercurial import scmutil
 
 log = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def _get_repo_refs(self, repo, rev=None):
+    def _get_repo_refs(self, repo, rev=None, branch_rev=None):
         """return a structure with repo's interesting changesets, suitable for
         the selectors in pullrequest.html"""
         branches = [('branch:%s:%s' % (k, v), k)
@@ -83,11 +84,25 @@ class PullrequestsController(BaseRepoController):
         tips = [x[1] for x in branches + bookmarks + tags
                 if x[0].endswith(colontip)]
         selected = 'tag:tip:%s' % tip
-        special = [(selected, 'tip (%s)' % ', '.join(tips))]
+        special = [(selected, 'tip: %s' % ', '.join(tips))]
 
         if rev:
             selected = 'rev:%s:%s' % (rev, rev)
-            special.append((selected, rev))
+            special.append((selected, '%s: %s' % (_("Selected"), rev[:12])))
+
+        # list named branches that has been merged to this named branch - it should probably merge back
+        if branch_rev:
+            # not restricting to merge() would also get branch point and be better
+            # (especially because it would get the branch point) ... but is currently too expensive
+            revs = ["sort(parents(branch(id('%s')) and merge()) - branch(id('%s')))" %
+                    (branch_rev, branch_rev)]
+            otherbranches = {}
+            for i in scmutil.revrange(repo._repo, revs):
+                cs = repo.get_changeset(i)
+                otherbranches[cs.branch] = cs.raw_id
+            for branch, node in otherbranches.iteritems():
+                selected = 'branch:%s:%s' % (branch, node)
+                special.append((selected, '%s: %s' % (_('Peer'), branch)))
 
         return [(special, _("Special")),
                 (bookmarks, _("Bookmarks")),
@@ -137,7 +152,7 @@ class PullrequestsController(BaseRepoController):
         # add org repo to other so we can open pull request against itself
         c.other_repos.extend(c.org_repos)
         c.default_other_repo = org_repo.repo_name
-        c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.scm_instance)
+        c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.scm_instance, branch_rev=org_rev)
         usr_data = lambda usr: dict(user_id=usr.user_id,
                                     username=usr.username,
                                     firstname=usr.firstname,
