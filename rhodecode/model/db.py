@@ -938,15 +938,7 @@ class Repository(Base, BaseModel):
 
     @classmethod
     def inject_ui(cls, repo, extras={}):
-        from rhodecode.lib.vcs.backends.hg import MercurialRepository
-        from rhodecode.lib.vcs.backends.git import GitRepository
-        required = (MercurialRepository, GitRepository)
-        if not isinstance(repo, required):
-            raise Exception('repo must be instance of %s' % required)
-
-        # inject ui extra param to log this action via push logger
-        for k, v in extras.items():
-            repo._repo.ui.setconfig('rhodecode_extras', k, v)
+        repo.inject_ui(extras)
 
     @classmethod
     def is_valid(cls, repo_name):
