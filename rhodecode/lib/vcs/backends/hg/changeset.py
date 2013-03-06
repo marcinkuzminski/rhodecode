@@ -45,7 +45,7 @@ class MercurialChangeset(BaseChangeset):
 
     @LazyProperty
     def commiter(self):
-        return safe_unicode(self.auhtor)
+        return safe_unicode(self.author)
 
     @LazyProperty
     def author(self):
