@@ -139,8 +139,8 @@ fixes
   When this is used together with mercurial internal translation system
   it can lead to UnicodeDecodeErrors
 - fixes #645 Fix git handler when doing delete remote branch
-- implements #649 added two seperate method for author and commiter to VCS
-  changeset class switch author for git backed to be the real author not commiter
+- implements #649 added two seperate method for author and committer to VCS
+  changeset class switch author for git backed to be the real author not committer
 - fix issue #504 RhodeCode is showing different versions of README on
   different summary page loads
 - implemented #658 Changing username in LDAP-Mode should not be allowed.

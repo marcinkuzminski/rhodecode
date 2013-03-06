@@ -3836,7 +3836,7 @@ msgid "Last modified"
 msgstr "Ostatnio modyfikowany"
 
 #: rhodecode/templates/files/files_browser.html:52
-msgid "Last commiter"
+msgid "Last committer"
 msgstr "Autor"
 
 #: rhodecode/templates/files/files_edit.html:19
