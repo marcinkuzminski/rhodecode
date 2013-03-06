@@ -27,6 +27,7 @@ import os
 import logging
 import traceback
 import tempfile
+import shutil
 
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
@@ -429,11 +430,40 @@ class FilesController(BaseRepoController):
             return _('Empty repository')
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
+        # archive cache
+        from rhodecode import CONFIG
+        rev_name = cs.raw_id[:12]
+        archive_name = '%s-%s%s' % (safe_str(repo_name.replace('/', '_')),
+                                    safe_str(rev_name), ext)
 
-        fd, archive = tempfile.mkstemp()
-        t = open(archive, 'wb')
-        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
-        t.close()
+        use_cached_archive = False  # defines if we use cached version of archive
+        archive_cache_enabled = CONFIG.get('archive_cache_dir')
+        if not subrepos and archive_cache_enabled:
+            #check if we it's ok to write
+            if not os.path.isdir(CONFIG['archive_cache_dir']):
+                os.makedirs(CONFIG['archive_cache_dir'])
+            cached_archive_path = os.path.join(CONFIG['archive_cache_dir'], archive_name)
+            if os.path.isfile(cached_archive_path):
+                log.debug('Found cached archive in %s' % cached_archive_path)
+                fd, archive = None, cached_archive_path
+                use_cached_archive = True
+            else:
+                log.debug('Archive %s is not yet cached' % (archive_name))
+
+        if not use_cached_archive:
+            #generate new archive
+            try:
+                fd, archive = tempfile.mkstemp()
+                t = open(archive, 'wb')
+                log.debug('Creating new temp archive in %s' % archive)
+                cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
+                if archive_cache_enabled:
+                    #if we generated the archive and use cache rename that
+                    log.debug('Storing new archive in %s' % cached_archive_path)
+                    shutil.move(archive, cached_archive_path)
+                    archive = cached_archive_path
+            finally:
+                t.close()
 
         def get_chunked_archive(archive):
             stream = open(archive, 'rb')
@@ -441,14 +471,15 @@ class FilesController(BaseRepoController):
                 data = stream.read(16 * 1024)
                 if not data:
                     stream.close()
-                    os.close(fd)
-                    os.remove(archive)
+                    if fd:  # fd means we used temporary file
+                        os.close(fd)
+                    if not archive_cache_enabled:
+                        log.debug('Destroing temp archive %s' % archive)
+                        os.remove(archive)
                     break
                 yield data
 
-        response.content_disposition = str('attachment; filename=%s-%s%s' \
-                                           % (safe_str(repo_name),
-                                              safe_str(revision), ext))
+        response.content_disposition = str('attachment; filename=%s' % (archive_name))
         response.content_type = str(content_type)
         return get_chunked_archive(archive)
 
