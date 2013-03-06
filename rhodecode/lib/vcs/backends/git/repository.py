@@ -67,14 +67,12 @@ class GitRepository(BaseRepository):
     @ThreadLocalLazyProperty
     def _repo(self):
         repo = Repo(self.path)
-        #temporary set that to now at later we will move it to constructor
-        baseui = None
-        if baseui is None:
-            from mercurial.ui import ui
-            baseui = ui()
         # patch the instance of GitRepo with an "FAKE" ui object to add
         # compatibility layer with Mercurial
-        setattr(repo, 'ui', baseui)
+        if not hasattr(repo, 'ui'):
+            from mercurial.ui import ui
+            baseui = ui()
+            setattr(repo, 'ui', baseui)
         return repo
 
     @property
