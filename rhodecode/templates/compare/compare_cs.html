@@ -25,7 +25,7 @@
     </table>
     %if c.ancestor:
     <span class="ancestor">${_('Ancestor')}:
-      ${h.link_to(c.ancestor,h.url('changeset_home',repo_name=c.repo_name,revision=c.ancestor))}
+      ${h.link_to(h.short_id(c.ancestor),h.url('changeset_home',repo_name=c.repo_name,revision=c.ancestor))}
     </span>
     %endif
     %if c.as_form:
