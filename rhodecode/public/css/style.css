@@ -4119,11 +4119,11 @@ div.rst-block h2 {
     font-weight: normal;
 }
 
-div.rst-block  {
+div.rst-block {
     background-color: #fafafa;
 }
 
-div.rst-block  {
+div.rst-block {
     clear: both;
     overflow: hidden;
     margin: 0;
@@ -4411,7 +4411,7 @@ form.comment-inline-form {
     padding: 10px 20px;
 }
 
-.inline-comments div.rst-block  {
+.inline-comments div.rst-block {
     clear: both;
     overflow: hidden;
     margin: 0;

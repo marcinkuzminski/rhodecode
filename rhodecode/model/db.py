@@ -1369,7 +1369,7 @@ class RepoGroup(Base, BaseModel):
 
     def recursive_groups(self):
         """
-        Returns all children groups for this group including children of children 
+        Returns all children groups for this group including children of children
         """
         return self._recursive_objects(include_repos=False)
 
