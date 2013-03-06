@@ -279,7 +279,6 @@ class BaseController(WSGIController):
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
-        start = time.time()
         try:
             self.ip_addr = _get_ip_addr(environ)
             # make sure that we update permissions each time we call controller
@@ -300,10 +299,6 @@ class BaseController(WSGIController):
             )
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.info('IP: %s Request to %s time: %.3fs' % (
-                _get_ip_addr(environ),
-                safe_unicode(_get_access_path(environ)), time.time() - start)
-            )
             meta.Session.remove()
 
 
