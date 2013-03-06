@@ -207,15 +207,17 @@ def log_push_action(ui, repo, **kwargs):
         repository = extras['repository']
         scm = extras['scm']
         make_lock = extras['make_lock']
+        action = extras['action']
     elif 'username' in rc_extras:
         username = rc_extras['username']
         repository = rc_extras['repository']
         scm = rc_extras['scm']
         make_lock = rc_extras['make_lock']
+        action = extras['action']
     else:
         raise Exception('Missing data in repo.ui and os.environ')
 
-    action = 'push' + ':%s'
+    action = action + ':%s'
 
     if scm == 'hg':
         node = kwargs['node']
