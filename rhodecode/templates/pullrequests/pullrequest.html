@@ -156,29 +156,32 @@
       }
 
       YUD.get('pull_request_overview').innerHTML = "${_('Loading ...')}";
+      ypjax(url,'pull_request_overview');
+
       YUD.get('pull_request_overview_url').href = url; // shouldn't have as_form ... but ...
       YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
-      ypjax(url,'pull_request_overview', function(data){
-          var sel_box = YUQ('#pull_request_form #other_repo')[0];
-          var repo_name = sel_box.options[sel_box.selectedIndex].value;
-          YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
-          // replace options of other_ref with the ones for the current other_repo
-          var other_ref_selector = YUD.get('other_ref');
-          var new_select = YUD.createElementFromMarkup(other_repos_info[repo_name]['revs']);
-          var new_selectedIndex = new_select.selectedIndex;
-          other_ref_selector.innerHTML = ""; // clear old options
-          while (new_select.length > 0){ // children will be popped when appened to other_ref_selector
-              other_ref_selector.appendChild(new_select.children[0]);
-          }
-          // browsers lost track of selected when appendChild was used
-          other_ref_selector.selectedIndex = new_selectedIndex;
-          // reset && add the reviewer based on selected repo
-          var _data = other_repos_info[repo_name];
-          YUD.get('review_members').innerHTML = '';
-          addReviewMember(_data.user.user_id, _data.user.firstname,
-                          _data.user.lastname, _data.user.username,
-                          _data.user.gravatar_link);
-      })
+
+      var sel_box = YUQ('#pull_request_form #other_repo')[0];
+      var repo_name = sel_box.options[sel_box.selectedIndex].value;
+
+      YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
+      // replace options of other_ref with the ones for the current other_repo
+      var other_ref_selector = YUD.get('other_ref');
+      var new_select = YUD.createElementFromMarkup(other_repos_info[repo_name]['revs']);
+      var new_selectedIndex = new_select.selectedIndex;
+      other_ref_selector.innerHTML = ""; // clear old options
+      while (new_select.length > 0){ // children will be popped when appened to other_ref_selector
+          other_ref_selector.appendChild(new_select.children[0]);
+      }
+      // browsers lost track of selected when appendChild was used
+      other_ref_selector.selectedIndex = new_selectedIndex;
+
+      // reset && add the reviewer based on selected repo
+      var _data = other_repos_info[repo_name];
+      YUD.get('review_members').innerHTML = '';
+      addReviewMember(_data.user.user_id, _data.user.firstname,
+                      _data.user.lastname, _data.user.username,
+                      _data.user.gravatar_link);
   }
 
   ## refresh automatically when something changes (org_repo can't change)
