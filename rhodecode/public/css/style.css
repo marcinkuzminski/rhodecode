@@ -1844,14 +1844,18 @@ div.form div.fields div.field div.button {
     padding: 0 3px 2px;
 }
 
-#summary {
-    float: left;
-    width: 80%;
+#content div.box #summary {
+    /*float: left;*/
+    /*width: 80%;*/
+    margin-right: 200px;
 }
 
 #summary-menu-stats{
     float: left;
-    width: 20%;
+    width: 200px;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 #summary-menu-stats ul {
@@ -2521,10 +2525,10 @@ h3.files_location {
     text-align: right;
 }
 
-#changeset_content .container .left .message {
+#changeset_content .container .message {
     white-space: pre-wrap;
 }
-#changeset_content .container .left .message a:hover {
+#changeset_content .container .message a:hover {
     text-decoration: none;
 }
 .cs_files .cur_cs {
@@ -2620,23 +2624,30 @@ h3.files_location {
     text-align: left;
 }
 
+.table {
+    position: relative;
+}
+
 #graph {
+    position: relative;
     overflow: hidden;
 }
 
 #graph_nodes {
-    float: left;
-    margin-right: 0px;
-    margin-top: 0px;
+    position: absolute;
+}
+
+#graph_content,
+#graph .info_box,
+#graph .container_header {
+    margin-left: 100px;
 }
 
 #graph_content {
-    width: 80%;
-    float: left;
+    position: relative;
 }
 
-#graph_content .container_header {
-    border-bottom: 1px solid #DDD;
+#graph .container_header {
     padding: 10px;
     height: 25px;
 }
@@ -2651,53 +2662,138 @@ h3.files_location {
     margin: 0px 0px 0px 3px;
 }
 
+#graph_content #changesets {
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-left: none;
+    border-right: none;
+    border-color: #cdcdcd;
+}
+
 #graph_content .container {
-    border-bottom: 1px solid #DDD;
-    height: 56px;
+    min-height: 5em;
+}
+
+#graph_content #changesets td {
     overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    height: 31px;
+    border-color: #cdcdcd;
 }
 
-#graph_content .container .right {
-    float: right;
-    width: 23%;
-    text-align: right;
+#graph_content .container .author {
+   width: 105px;
 }
 
-#graph_content .container .left {
-    float: left;
-    width: 25%;
-    padding-left: 5px;
+#graph_content .container .hash{
+    width: 90px;
+    font-size: 0.85em;
 }
 
-#graph_content .container .mid {
-    float: left;
-    width: 49%;
-}
-
-
-#graph_content .container .left .date {
+#graph_content #changesets .container .date{
+    width: 76px;
     color: #666;
-    padding-left: 22px;
     font-size: 10px;
 }
 
-#graph_content .container .left .author {
-    height: 22px;
+#graph_content .container .right {
+    width: 120px;
+    padding-right: 0px;
 }
 
-#graph_content .container .left .author .user {
-    color: #444444;
+/*
+#graph_content .container .column3 {
+    width: 12%
+}
+*/
+#graph_content .container .mid {
+    position: relative;
+}
+
+
+
+
+#graph_content #changesets td.checkbox{
+    width: 20px;
+}
+
+#graph_content .container .changeset_range {
     float: left;
-    margin-left: -4px;
-    margin-top: 4px;
+    margin: 6px 3px;
+}
+
+
+
+#graph_content .container .author img {
+    vertical-align: middle;
+}
+
+#graph_content .container .author .user {
+    color: #444444;
 }
 
 #graph_content .container .mid .message {
     white-space: pre-wrap;
+    padding: 0;
+    overflow: hidden;
+    height: 1.1em;
+}
+
+#graph_content .container .mid .logtags {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0 5px;
+    background: #FFFFFF;
+}
+
+#graph_content .right .comments-container,
+#graph_content .right .logtags {
+    display: block;
+    float: left;
+    overflow: hidden;
+    width: 50%;
+    padding: 0;
+    margin: 0;
+}
+
+#graph_content .right .comments-container{
+    width: 40px;
+}
+
+#graph_content .right .logtags {
+    width: 80px;
+    height: 2.5em;
+    position: absolute;
+    left: 40px;
+}
+
+#graph_content .right .logtags:hover {
+    position: absolute;
+    width: auto;
+}
+
+#graph_content .right .logtags .bookbook,
+#graph_content .right .logtags .tagtag {
+    float: left;
+    line-height: 1em;
+    margin-bottom: 1px;
 }
 
 #graph_content .container .mid .message a:hover {
     text-decoration: none;
+}
+
+/*
+ * Stuff we might want to remove from the changelog, or reposition in a tooltip
+ */
+#graph_content .container .changeset_id,
+#graph_content .container .changes,
+#graph_content .container .changed_total,
+#graph_content .container .parent {
+    display: none;
 }
 
 .revision-link {
@@ -2735,17 +2831,18 @@ h3.files_location {
 .code-header .changeset-status-container .changeset-status-ico, .container .changeset-status-ico {
     float: left;
 }
-.right .comments-container {
-    padding-right: 5px;
-    margin-top:1px;
-    float:right;
-    height:14px;
-}
 
 .right .comments-cnt {
-    float: left;
     color: rgb(136, 136, 136);
-    padding-right: 2px;
+    padding: 5px 0;
+}
+
+.right .comments-cnt a {
+    background-image: url('../images/icons/comments.png');
+    background-repeat: no-repeat;
+    background-position: 100% 50%;
+    padding: 5px 0;
+    padding-right: 20px;
 }
 
 .right .changes {
@@ -2790,7 +2887,6 @@ h3.files_location {
     padding: 1px 3px 1px 3px;
     background-color: #fca062;
     font-size: 10px;
-    font-weight: bold;
     color: #ffffff;
     text-transform: uppercase;
     white-space: nowrap;
@@ -2804,7 +2900,8 @@ h3.files_location {
     clear:both;
 }
 .right .logtags {
-    padding: 2px 2px 2px 2px;
+    /*padding: 2px 2px 2px 2px;*/
+    line-height: 2.2em;
 }
 .right .logtags .branchtag, .right .logtags .tagtag, .right .logtags .booktag {
     margin: 0px 2px;
@@ -2814,20 +2911,30 @@ h3.files_location {
 .logtags .branchtag,
 .spantag {
     padding: 1px 3px 1px 3px;
-    background-color: #bfbfbf;
     font-size: 10px;
-    font-weight: bold;
-    color: #ffffff;
+    color: #336699;
     white-space: nowrap;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    border: 1px solid #d9e8f8;
+    line-height: 1.5em;
+    margin: 1.1em 0;
 }
+
+.right .logtags .branchtag,
+.logtags .tagtag,
+.right .merge {
+    float: right;
+    /*height: 1em;*/
+    line-height: 1em;
+    /*padding: 0px 0px !important;*/
+    margin: 1px 1px !important;
+    display: block;
+}
+
 .right .logtags .branchtag a:hover, .logtags .branchtag a {
-    color: #ffffff;
-}
-.right .logtags .branchtag a:hover, .logtags .branchtag a:hover {
     text-decoration: none;
-    color: #ffffff;
+    color: #336699;
 }
 .right .logtags .tagtag, .logtags .tagtag {
     padding: 1px 3px 1px 3px;
@@ -2850,9 +2957,7 @@ h3.files_location {
     padding: 1px 3px 1px 3px;
     background-color: #46A546;
     font-size: 10px;
-    font-weight: bold;
     color: #ffffff;
-    text-transform: uppercase;
     white-space: nowrap;
     -webkit-border-radius: 3px;
     border-radius: 3px;
@@ -3728,6 +3833,7 @@ div#legend_data, div#legend_container, div#legend_choices {
 }
 
 #content div.box div.form, #content div.box div.table, #content div.box div.traffic {
+    position: relative;
     clear: both;
     overflow: hidden;
     margin: 0;
@@ -3985,13 +4091,7 @@ div.form div.fields div.field div.highlight, #content div.box div.form div.field
     width: 600px;
 }
 
-#changeset_content .container .left {
-    float: left;
-    width: 75%;
-    padding-left: 5px;
-}
-
-#changeset_content .container .left .date, .ac .match {
+#changeset_content .container .date, .ac .match {
     font-weight: 700;
     padding-top: 5px;
     padding-bottom: 5px;

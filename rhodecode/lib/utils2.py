@@ -349,11 +349,15 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     return engine
 
 
-def age(prevdate):
+def age(prevdate, show_short_version=False):
     """
     turns a datetime into an age string.
+    If show_short_version is True, then it will generate a not so accurate but shorter string,
+    example: 2days ago, instead of 2 days and 23 hours ago.
+
 
     :param prevdate: datetime object
+    :param show_short_version: if it should aproximate the date and return a shorter string
     :rtype: unicode
     :returns: unicode words describing age
     """
@@ -423,7 +427,7 @@ def age(prevdate):
         else:
             sub_value = 0
 
-        if sub_value == 0:
+        if sub_value == 0 or show_short_version:
             if future:
                 return _(u'in %s') % fmt_funcs[part](value)
             else:

@@ -363,7 +363,7 @@ from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
 from rhodecode.model.db import User, ChangesetStatus
 
-age = lambda  x: _age(x)
+age = lambda  x,y=False: _age(x,y)
 capitalize = lambda x: x.capitalize()
 email = author_email
 short_id = lambda x: x[:12]
