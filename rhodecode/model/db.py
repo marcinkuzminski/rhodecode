@@ -47,7 +47,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode, remove_suffix, remove_prefix
+    safe_unicode, remove_suffix, remove_prefix, time_to_datetime
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -972,7 +972,11 @@ class Repository(Base, BaseModel):
             enable_statistics=repo.enable_statistics,
             enable_locking=repo.enable_locking,
             enable_downloads=repo.enable_downloads,
-            last_changeset=repo.changeset_cache
+            last_changeset=repo.changeset_cache,
+            locked_by=User.get(self.locked[0]).get_api_data() \
+                if self.locked[0] else None,
+            locked_date=time_to_datetime(self.locked[1]) \
+                if self.locked[1] else None
         )
         rc_config = RhodeCodeSetting.get_app_settings()
         repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))

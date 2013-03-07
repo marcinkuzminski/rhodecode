@@ -371,9 +371,8 @@ class BaseTestApi(object):
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_optional_locked(self):
-        from rhodecode.lib import helpers
         from rhodecode.lib.utils2 import  time_to_datetime
-        _locked_since = helpers.fmt_date(time_to_datetime(Repository\
+        _locked_since = json.dumps(time_to_datetime(Repository\
                                     .get_by_repo_name(self.REPO).locked[1]))
         id_, params = _build_data(self.apikey, 'lock',
                                   repoid=self.REPO)
@@ -392,6 +391,32 @@ class BaseTestApi(object):
 
         expected = 'Error occurred locking repository `%s`' % self.REPO
         self._compare_error(id_, expected, given=response.body)
+
+    def test_api_get_locks_regular_user(self):
+        id_, params = _build_data(self.apikey_regular, 'get_locks')
+        response = api_call(self, params)
+        expected = []
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_locks_with_userid_regular_user(self):
+        id_, params = _build_data(self.apikey_regular, 'get_locks',
+                                  userid=TEST_USER_ADMIN_LOGIN)
+        response = api_call(self, params)
+        expected = 'userid is not the same as your user'
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_get_locks(self):
+        id_, params = _build_data(self.apikey, 'get_locks')
+        response = api_call(self, params)
+        expected = []
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_locks_with_userid(self):
+        id_, params = _build_data(self.apikey, 'get_locks',
+                                  userid=TEST_USER_REGULAR_LOGIN)
+        response = api_call(self, params)
+        expected = []
+        self._compare_ok(id_, expected, given=response.body)
 
     def test_api_create_existing_user(self):
         id_, params = _build_data(self.apikey, 'create_user',
