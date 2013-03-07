@@ -38,7 +38,7 @@ Compare view from changelog
 Checkboxes in compare view allow users to view combined compare view. You can
 only show the range between the first and last checkbox (no cherry pick).
 Clicking more than one checkbox will activate a link in top saying
-`Show selected changes <from-rev> -> <to-rev>` clicking this will bring
+`Show selected changesets <from-rev> -> <to-rev>` clicking this will bring
 compare view. In this view also it's possible to switch to combined compare.
 
 Compare view is also available from the journal on pushes having more than
