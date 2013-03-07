@@ -4,7 +4,7 @@
     <span class="empty_data">${_('No changesets')}</span>
   %else:
     <table class="compare_view_commits noborder">
-    %for cnt, cs in enumerate(c.cs_ranges):
+    %for cs in reversed(c.cs_ranges):
         <tr>
         <td><div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),14)}"/></div></td>
         <td>
