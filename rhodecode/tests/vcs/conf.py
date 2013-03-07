@@ -7,6 +7,7 @@ import time
 import hashlib
 import tempfile
 import datetime
+import shutil
 from rhodecode.tests import *
 from utils import get_normalized_path
 from os.path import join as jn
@@ -58,5 +59,6 @@ THIS = os.path.abspath(os.path.dirname(__file__))
 
 PACKAGE_DIR = os.path.abspath(os.path.join(
     os.path.dirname(__file__), '..'))
-
-TEST_USER_CONFIG_FILE = jn(THIS, 'aconfig')
+_dest = jn(TESTS_TMP_PATH,'aconfig')
+shutil.copy(jn(THIS, 'aconfig'), _dest)
+TEST_USER_CONFIG_FILE = _dest
