@@ -44,4 +44,3 @@ class RequestWrapper(object):
                 _get_ip_addr(environ),
                 safe_unicode(_get_access_path(environ)), time.time() - start)
             )
-
