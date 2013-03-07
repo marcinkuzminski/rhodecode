@@ -9,7 +9,7 @@
     :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
 """
 
-
+import datetime
 from itertools import chain
 from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -20,7 +20,6 @@ from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
     NodeAlreadyAddedError, NodeAlreadyChangedError, NodeAlreadyExistsError, \
     NodeAlreadyRemovedError, NodeDoesNotExistError, NodeNotChangedError, \
     RepositoryError
-import datetime
 
 
 class BaseRepository(object):
