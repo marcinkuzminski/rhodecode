@@ -219,19 +219,23 @@ class MercurialChangeset(BaseChangeset):
         """
         Returns last commit of the file at the given ``path``.
         """
-        node = self.get_node(path)
-        return node.history[0]
+        return self.get_file_history(path, limit=1)[0]
 
-    def get_file_history(self, path):
+    def get_file_history(self, path, limit=None):
         """
         Returns history of file as reversed list of ``Changeset`` objects for
         which file at given ``path`` has been modified.
         """
         fctx = self._get_filectx(path)
-        nodes = [fctx.filectx(x).node() for x in fctx.filelog()]
-        changesets = [self.repository.get_changeset(hex(node))
-            for node in reversed(nodes)]
-        return changesets
+        hist = []
+        cnt = 0
+        for cs in reversed([x for x in fctx.filelog()]):
+            cnt += 1
+            hist.append(hex(fctx.filectx(cs).node()))
+            if limit and cnt == limit:
+                break
+
+        return [self.repository.get_changeset(node) for node in hist]
 
     def get_file_annotate(self, path):
         """

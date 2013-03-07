@@ -20,6 +20,7 @@ from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
     NodeAlreadyAddedError, NodeAlreadyChangedError, NodeAlreadyExistsError, \
     NodeAlreadyRemovedError, NodeDoesNotExistError, NodeNotChangedError, \
     RepositoryError
+import datetime
 
 
 class BaseRepository(object):
@@ -980,12 +981,12 @@ class EmptyChangeset(BaseChangeset):
     """
 
     def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
-                 alias=None, revision=-1, message='', author='', date=''):
+                 alias=None, revision=-1, message='', author='', date=None):
         self._empty_cs = cs
         self.revision = revision
         self.message = message
         self.author = author
-        self.date = date
+        self.date = date or datetime.datetime.fromtimestamp(0)
         self.repository = repo
         self.requested_revision = requested_revision
         self.alias = alias
