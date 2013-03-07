@@ -396,7 +396,7 @@ div:hover > a.permalink {
     color: #bfe3ff;
 }
 
-#header #header-inner #quick, #header #header-inner #quick ul {
+#header #header-inner #quick {
     position: relative;
     float: right;
     list-style-type: none;
@@ -405,7 +405,7 @@ div:hover > a.permalink {
     padding: 0;
 }
 
-#header #header-inner #quick li {
+#header #header-inner #quick > li {
     position: relative;
     float: left;
     margin: 0 5px 0 0;
@@ -471,9 +471,9 @@ div:hover > a.permalink {
     margin: 0px -2px 0px 0px;
 }
 
-#header #header-inner #quick li.current a,
-#header #header-inner #quick li a:hover {
-    background: #4e4e4e no-repeat top left;
+#header #header-inner #quick > li.current > a,
+#header #header-inner #quick > li > a:hover {
+    background-color: #4e4e4e;
 }
 
 #header #header-inner #quick li.current a span,
@@ -489,20 +489,6 @@ div:hover > a.permalink {
     border-right: 1px solid #464646;
 }
 
-#header #header-inner #quick ul {
-    top: 29px;
-    right: 0;
-    min-width: 200px;
-    display: none;
-    position: absolute;
-    background: #FFF;
-    border: 1px solid #666;
-    border-top: 1px solid #003367;
-    z-index: 100;
-    margin: 0px 0px 0px 0px;
-    padding: 0;
-}
-
 #header #header-inner #quick ul.repo_switcher {
     max-height: 275px;
     overflow-x: hidden;
@@ -510,9 +496,14 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick ul.repo_switcher li.qfilter_rs {
-    float: none;
-    margin: 0;
-    border-bottom: 2px solid #003367;
+    padding: 2px 3px;
+    padding-right: 17px;
+}
+
+#header #header-inner #quick ul.repo_switcher li.qfilter_rs  input{
+    width: 100%;
+    border-radius: 10px;
+    padding: 2px 7px;
 }
 
 #header #header-inner #quick .repo_switcher_type {
@@ -521,205 +512,94 @@ div:hover > a.permalink {
     top: 9px;
 }
 
-#header #header-inner #quick li ul li {
-    border-bottom: 1px solid #ddd;
-}
-
-#header #header-inner #quick li ul li a {
-    width: 182px;
-    height: auto;
-    display: block;
-    float: left;
-    background: #FFF;
-    color: #003367;
-    font-weight: 400;
-    margin: 0;
-    padding: 7px 9px;
-}
-
-#header #header-inner #quick li ul li a:hover {
-    color: #000;
-    background: #FFF;
-}
-
-#header #header-inner #quick ul ul {
-    top: auto;
-}
-
-#header #header-inner #quick li ul ul {
-    right: 200px;
-    max-height: 290px;
-    overflow: auto;
-    overflow-x: hidden;
-    white-space: normal;
-}
-
 #header #header-inner #quick li ul li a.journal, #header #header-inner #quick li ul li a.journal:hover {
-    background: url("../images/icons/book.png") no-repeat scroll 4px 9px
-        #FFF;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/book.png");
 }
 
 #header #header-inner #quick li ul li a.private_repo, #header #header-inner #quick li ul li a.private_repo:hover {
-    background: url("../images/icons/lock.png") no-repeat scroll 4px 9px
-        #FFF;
-    min-width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock.png")
 }
 
 #header #header-inner #quick li ul li a.public_repo, #header #header-inner #quick li ul li a.public_repo:hover {
-    background: url("../images/icons/lock_open.png") no-repeat scroll 4px
-        9px #FFF;
-    min-width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock_open.png");
 }
 
 #header #header-inner #quick li ul li a.hg, #header #header-inner #quick li ul li a.hg:hover {
-    background: url("../images/icons/hgicon.png") no-repeat scroll 4px 9px
-        #FFF;
-    min-width: 167px;
-    margin: 0 0 0 14px;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/hgicon.png");
+    padding-left: 42px;
+    background-position:  20px 9px;
 }
 
 #header #header-inner #quick li ul li a.git, #header #header-inner #quick li ul li a.git:hover {
-    background: url("../images/icons/giticon.png") no-repeat scroll 4px 9px
-        #FFF;
-    min-width: 167px;
-    margin: 0 0 0 14px;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/giticon.png");
 }
 
 #header #header-inner #quick li ul li a.repos, #header #header-inner #quick li ul li a.repos:hover {
-    background: url("../images/icons/database_edit.png") no-repeat scroll
-        4px 9px #FFF;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/database_edit.png");
 }
 
 #header #header-inner #quick li ul li a.repos_groups, #header #header-inner #quick li ul li a.repos_groups:hover {
-    background: url("../images/icons/database_link.png") no-repeat scroll
-        4px 9px #FFF;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/database_link.png");
 }
 
 #header #header-inner #quick li ul li a.users, #header #header-inner #quick li ul li a.users:hover {
-    background: #FFF url("../images/icons/user_edit.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/user_edit.png");
 }
 
 #header #header-inner #quick li ul li a.groups, #header #header-inner #quick li ul li a.groups:hover {
-    background: #FFF url("../images/icons/group_edit.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/group_edit.png");
 }
 
 #header #header-inner #quick li ul li a.defaults, #header #header-inner #quick li ul li a.defaults:hover {
-    background: #FFF url("../images/icons/wrench.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/wrench.png");
 }
 
 #header #header-inner #quick li ul li a.settings, #header #header-inner #quick li ul li a.settings:hover {
-    background: #FFF url("../images/icons/cog.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/cog.png");
 }
 
 #header #header-inner #quick li ul li a.permissions, #header #header-inner #quick li ul li a.permissions:hover {
-    background: #FFF url("../images/icons/key.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/key.png");
 }
 
 #header #header-inner #quick li ul li a.ldap, #header #header-inner #quick li ul li a.ldap:hover {
-    background: #FFF url("../images/icons/server_key.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/server_key.png");
 }
 
 #header #header-inner #quick li ul li a.fork, #header #header-inner #quick li ul li a.fork:hover {
-    background: #FFF url("../images/icons/arrow_divide.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_divide.png");
 }
 
 #header #header-inner #quick li ul li a.locking_add, #header #header-inner #quick li ul li a.locking_add:hover {
-    background: #FFF url("../images/icons/lock_add.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock_add.png");
 }
 
 #header #header-inner #quick li ul li a.locking_del, #header #header-inner #quick li ul li a.locking_del:hover {
-    background: #FFF url("../images/icons/lock_delete.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock_delete.png");
 }
 
 #header #header-inner #quick li ul li a.pull_request, #header #header-inner #quick li ul li a.pull_request:hover {
-    background: #FFF url("../images/icons/arrow_join.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_join.png") ;
 }
 
 #header #header-inner #quick li ul li a.compare_request, #header #header-inner #quick li ul li a.compare_request:hover {
-    background: #FFF url("../images/icons/arrow_inout.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_inout.png");
 }
 
 #header #header-inner #quick li ul li a.search, #header #header-inner #quick li ul li a.search:hover {
-    background: #FFF url("../images/icons/search_16.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/search_16.png");
 }
 
 #header #header-inner #quick li ul li a.shortlog, #header #header-inner #quick li ul li a.shortlog:hover {
-    background: #FFF url("../images/icons/clock_16.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/clock_16.png");
 }
 
-
 #header #header-inner #quick li ul li a.delete, #header #header-inner #quick li ul li a.delete:hover {
-    background: #FFF url("../images/icons/delete.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/delete.png");
 }
 
 #header #header-inner #quick li ul li a.branches, #header #header-inner #quick li ul li a.branches:hover {
-    background: #FFF url("../images/icons/arrow_branch.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_branch.png");
 }
 
 #header #header-inner #quick li ul li a.tags,
@@ -1255,6 +1135,7 @@ tbody .yui-dt-editable { cursor: pointer }
     background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(64,96,128,0.1));
 
     display: none;
+    overflow: hidden;
 }
 #content div.box div.expand .expandtext {
     background-color: #ffffff;
@@ -2671,7 +2552,7 @@ h3.files_location {
 }
 
 #graph_content .container {
-    min-height: 5em;
+    
 }
 
 #graph_content #changesets td {
@@ -2697,9 +2578,11 @@ h3.files_location {
     font-size: 10px;
 }
 
-#graph_content .container .right {
+#graph_content #changesets .container .right {
     width: 120px;
     padding-right: 0px;
+    overflow: visible;
+    position: relative;
 }
 
 /*
@@ -2708,11 +2591,12 @@ h3.files_location {
 }
 */
 #graph_content .container .mid {
-    position: relative;
+    padding: 0;
 }
 
-
-
+#graph_content .log-container{
+    position: relative;
+}
 
 #graph_content #changesets td.checkbox{
     width: 20px;
@@ -2722,8 +2606,6 @@ h3.files_location {
     float: left;
     margin: 6px 3px;
 }
-
-
 
 #graph_content .container .author img {
     vertical-align: middle;
@@ -2740,46 +2622,69 @@ h3.files_location {
     height: 1.1em;
 }
 
-#graph_content .container .mid .logtags {
+#graph_content .container .extra-container {
     display: block;
     position: absolute;
-    top: 0;
+    top: -15px;
     right: 0;
-    padding: 0 5px;
+    padding-left:5px;
     background: #FFFFFF;
+    height: 41px;
 }
 
-#graph_content .right .comments-container,
-#graph_content .right .logtags {
+#graph_content .comments-container,
+#graph_content .logtags {
     display: block;
     float: left;
     overflow: hidden;
-    width: 50%;
     padding: 0;
     margin: 0;
 }
 
-#graph_content .right .comments-container{
-    width: 40px;
+#graph_content .comments-container {
+    /*width: 40px;*/
+    margin: 0.8em 0;
+    margin-left: 0.5em;
 }
 
-#graph_content .right .logtags {
+#graph_content  .tagcontainer {
     width: 80px;
-    height: 2.5em;
-    position: absolute;
-    left: 40px;
+    position: relative;
+    float:right;
+    height: 100%;
+    top: 7px;
+    margin-left: 0.5em;
 }
 
-#graph_content .right .logtags:hover {
+#graph_content .logtags {
+    min-width: 80px;
+    height: 1.1em;
+    position: absolute;
+    left: 0px;
+    width: auto;
+    top: 0px;
+}
+
+#graph_content .logtags.tags {
+    top: 14px;
+}
+
+#graph_content .logtags:hover {
+    overflow: visible;
     position: absolute;
     width: auto;
+    right: 0;
+    left: initial;
 }
 
-#graph_content .right .logtags .bookbook,
-#graph_content .right .logtags .tagtag {
+#graph_content .logtags .bookbook,
+#graph_content .logtags .tagtag {
     float: left;
     line-height: 1em;
     margin-bottom: 1px;
+    margin-right: 1px;
+    padding: 1px 3px;
+    font-size: 10px;
 }
 
 #graph_content .container .mid .message a:hover {
@@ -2832,12 +2737,12 @@ h3.files_location {
     float: left;
 }
 
-.right .comments-cnt {
+#graph_content .comments-cnt {
     color: rgb(136, 136, 136);
     padding: 5px 0;
 }
 
-.right .comments-cnt a {
+#graph_content .comments-cnt a {
     background-image: url('../images/icons/comments.png');
     background-repeat: no-repeat;
     background-position: 100% 50%;
@@ -2903,12 +2808,13 @@ h3.files_location {
     /*padding: 2px 2px 2px 2px;*/
     line-height: 2.2em;
 }
-.right .logtags .branchtag, .right .logtags .tagtag, .right .logtags .booktag {
+.branchtag, .logtags .tagtag, .logtags .booktag {
     margin: 0px 2px;
 }
 
-.right .logtags .branchtag,
-.logtags .branchtag,
+.branchtag,
+.tagtag,
+.bookbook,
 .spantag {
     padding: 1px 3px 1px 3px;
     font-size: 10px;
@@ -2918,7 +2824,19 @@ h3.files_location {
     border-radius: 4px;
     border: 1px solid #d9e8f8;
     line-height: 1.5em;
+}
+
+#graph_content .branchtag,
+#graph_content .tagtag,
+#graph_content .bookbook {
     margin: 1.1em 0;
+    margin-right: 0.5em;
+}
+
+.branchtag,
+.tagtag,
+.bookbook {
+    float: left;
 }
 
 .right .logtags .branchtag,
@@ -2932,28 +2850,41 @@ h3.files_location {
     display: block;
 }
 
-.right .logtags .branchtag a:hover, .logtags .branchtag a {
-    text-decoration: none;
-    color: #336699;
+.bookbook {
+    border-color: #46A546;
+    color: #46A546;
 }
-.right .logtags .tagtag, .logtags .tagtag {
+
+.tagtag {
+    border-color: #62cffc;
+    color: #62cffc;
+}
+
+.logtags .branchtag a:hover,
+.logtags .branchtag a,
+.branchtag a,
+.branchtag a:hover {
+    text-decoration: none;
+    color: inherit;
+}
+.logtags .tagtag {
     padding: 1px 3px 1px 3px;
     background-color: #62cffc;
     font-size: 10px;
-    font-weight: bold;
     color: #ffffff;
     white-space: nowrap;
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
-.right .logtags .tagtag a:hover, .logtags .tagtag a {
-    color: #ffffff;
-}
-.right .logtags .tagtag a:hover, .logtags .tagtag a:hover {
+
+.tagtag a,
+.tagtag a:hover,
+.logtags .tagtag a,
+.logtags .tagtag a:hover {
     text-decoration: none;
-    color: #ffffff;
+    color: inherit;
 }
-.right .logbooks .bookbook, .logbooks .bookbook, .right .logtags .bookbook, .logtags .bookbook {
+.logbooks .bookbook, .logbooks .bookbook, .logtags .bookbook, .logtags .bookbook {
     padding: 1px 3px 1px 3px;
     background-color: #46A546;
     font-size: 10px;
@@ -2962,12 +2893,16 @@ h3.files_location {
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
-.right .logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
+.logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
     color: #ffffff;
 }
-.right .logbooks .bookbook, .logbooks .bookbook a:hover, .right .logtags .bookbook, .logtags .bookbook a:hover {
+
+.logbooks .bookbook, .logbooks .bookbook a:hover, 
+.logtags .bookbook, .logtags .bookbook a:hover,
+.bookbook a,
+.bookbook a:hover {
     text-decoration: none;
-    color: #ffffff;
+    color: inherit;
 }
 div.browserblock {
     overflow: hidden;
@@ -3780,7 +3715,7 @@ ins, div.options a:hover {
 
 img,
 #header #header-inner #quick li a:hover span.normal,
-#header #header-inner #quick li ul li.last,
+/*#header #header-inner #quick li ul li.last,*/
 #content div.box div.form div.fields div.field div.textarea table td table td a,
 #clone_url,
 #clone_url_id
