@@ -152,7 +152,6 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
 
                     var checkbox_checker = function(e){
-                        var clicked_cb = e.currentTarget;
                         var checked_checkboxes = [];
                         for (pos in checkboxes){
                             if(checkboxes[pos].checked){
@@ -160,7 +159,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             }
                         }
                         if(YUD.get('open_new_pr')){
-                          if(checked_checkboxes.length>1){
+                            if(checked_checkboxes.length>1){
                               YUD.setStyle('open_new_pr','display','none');
                             } else {
                                YUD.setStyle('open_new_pr','display','');
@@ -207,8 +206,10 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                             var cb = checkboxes[i];
                             cb.checked = false;
                         }
+                        checkbox_checker();
                         YUE.preventDefault(e);
                     })
+
                     var msgs = YUQ('.message');
                     // get first element height
                     var el = YUQ('#graph_content .container')[0];
