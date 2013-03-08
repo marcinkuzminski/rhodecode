@@ -10,10 +10,9 @@ ${body}
 </p>
 
 <div>${_('revisions for reviewing')}</div>
-<pre>
+<p style="white-space: pre-wrap;">
 %for r,r_msg in pr_revisions:
-${h.short_id(r)}:
-    ${h.shorter(r_msg, 256)}
-
+<b>${h.short_id(r)}</b>:
+${h.shorter(r_msg, 256)}
 %endfor
-</pre>
+</p>
