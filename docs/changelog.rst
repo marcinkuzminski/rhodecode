@@ -16,6 +16,27 @@ news
 fixes
 +++++
 
+1.5.4 (**2013-03-13**)
+----------------------
+
+news
+++++
+
+
+fixes
++++++
+
+- fixed webtest dependency issues
+- fixed issues with celery tasks for password reset
+- fixed #763 gravatar helper function should fallback into default image
+  if email is empty
+- fixes #762 user global activation flag is also respected for LDAP created
+  accounts
+- use password obfuscate when clonning a remote repo with credentials inside	
+- fixed issue with renaming repos group together with changing parents
+- disallow cloning from file:/// URIs
+- handle all cases with multiple IP addresses in proxy headers
+
 1.5.3 (**2013-02-12**)
 ----------------------
 
