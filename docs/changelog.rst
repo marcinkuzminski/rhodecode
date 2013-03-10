@@ -32,7 +32,7 @@ fixes
   if email is empty
 - fixes #762 user global activation flag is also respected for LDAP created
   accounts
-- use password obfuscate when clonning a remote repo with credentials inside	
+- use password obfuscate when clonning a remote repo with credentials inside
 - fixed issue with renaming repos group together with changing parents
 - disallow cloning from file:/// URIs
 - handle all cases with multiple IP addresses in proxy headers
