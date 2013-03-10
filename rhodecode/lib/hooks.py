@@ -36,7 +36,7 @@ from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.compat import json
 from rhodecode.lib.exceptions import HTTPLockedRC
-from rhodecode.lib.utils2 import safe_str, datetime_to_time
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.model.db import Repository, User
 
 
@@ -113,7 +113,14 @@ def pre_push(ui, repo, **kwargs):
     usr = User.get_by_username(username)
     if locked_by[0] and usr.user_id != int(locked_by[0]):
         locked_by = User.get(locked_by[0]).username
-        raise HTTPLockedRC(repository, locked_by)
+        # this exception is interpreted in git/hg middlewares and based
+        # on that proper return code is server to client
+        _http_ret = HTTPLockedRC(repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
+        else:
+            raise _http_ret
 
 
 def pre_pull(ui, repo, **kwargs):
@@ -139,7 +146,14 @@ def pre_pull(ui, repo, **kwargs):
 
     if locked_by[0]:
         locked_by = User.get(locked_by[0]).username
-        raise HTTPLockedRC(repository, locked_by)
+        # this exception is interpreted in git/hg middlewares and based
+        # on that proper return code is server to client
+        _http_ret = HTTPLockedRC(repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
+        else:
+            raise _http_ret
 
 
 def log_pull_action(ui, repo, **kwargs):
@@ -159,12 +173,14 @@ def log_pull_action(ui, repo, **kwargs):
         repository = extras['repository']
         scm = extras['scm']
         make_lock = extras['make_lock']
+        locked_by = extras['locked_by']
         ip = extras['ip']
     elif 'username' in rc_extras:
         username = rc_extras['username']
         repository = rc_extras['repository']
         scm = rc_extras['scm']
         make_lock = rc_extras['make_lock']
+        locked_by = rc_extras['locked_by']
         ip = rc_extras['ip']
     else:
         raise Exception('Missing data in repo.ui and os.environ')
@@ -185,6 +201,12 @@ def log_pull_action(ui, repo, **kwargs):
         #msg = 'Made lock on repo `%s`' % repository
         #sys.stdout.write(msg)
 
+    if locked_by[0]:
+        locked_by = User.get(locked_by[0]).username
+        _http_ret = HTTPLockedRC(repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
     return 0
 
 
@@ -207,12 +229,14 @@ def log_push_action(ui, repo, **kwargs):
         repository = extras['repository']
         scm = extras['scm']
         make_lock = extras['make_lock']
+        locked_by = extras['locked_by']
         action = extras['action']
     elif 'username' in rc_extras:
         username = rc_extras['username']
         repository = rc_extras['repository']
         scm = rc_extras['scm']
         make_lock = rc_extras['make_lock']
+        locked_by = rc_extras['locked_by']
         action = extras['action']
     else:
         raise Exception('Missing data in repo.ui and os.environ')
@@ -256,6 +280,13 @@ def log_push_action(ui, repo, **kwargs):
         Repository.unlock(Repository.get_by_repo_name(repository))
         msg = 'Released lock on repo `%s`\n' % repository
         sys.stdout.write(msg)
+
+    if locked_by[0]:
+        locked_by = User.get(locked_by[0]).username
+        _http_ret = HTTPLockedRC(repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
 
     return 0
 
