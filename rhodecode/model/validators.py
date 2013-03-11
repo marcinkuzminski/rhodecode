@@ -16,6 +16,7 @@ from formencode.validators import (
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib import ipaddr
 from rhodecode.lib.utils import repo_name_slug
+from rhodecode.lib.utils2 import safe_int
 from rhodecode.model.db import RepoGroup, Repository, UserGroup, User,\
     ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
@@ -472,7 +473,7 @@ def ValidForkType(old_data={}):
     return _validator
 
 
-def CanWriteGroup():
+def CanWriteGroup(old_data=None):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'permission_denied': _(u"You don't have permissions "
@@ -493,18 +494,20 @@ def CanWriteGroup():
             val = HasReposGroupPermissionAny('group.write', 'group.admin')
             can_create_repos = HasPermissionAny('hg.admin', 'hg.create.repository')
             forbidden = not val(gr_name, 'can write into group validator')
-            #parent group need to be existing
-            if gr and forbidden:
-                msg = M(self, 'permission_denied', state)
-                raise formencode.Invalid(msg, value, state,
-                    error_dict=dict(repo_type=msg)
-                )
-            ## check if we can write to root location !
-            elif gr is None and can_create_repos() is False:
-                msg = M(self, 'permission_denied_root', state)
-                raise formencode.Invalid(msg, value, state,
-                    error_dict=dict(repo_type=msg)
-                )
+            value_changed = True  # old_data['repo_group'].get('group_id') != safe_int(value)
+            if value_changed:  # do check if we changed the value
+                #parent group need to be existing
+                if gr and forbidden:
+                    msg = M(self, 'permission_denied', state)
+                    raise formencode.Invalid(msg, value, state,
+                        error_dict=dict(repo_type=msg)
+                    )
+                ## check if we can write to root location !
+                elif gr is None and can_create_repos() is False:
+                    msg = M(self, 'permission_denied_root', state)
+                    raise formencode.Invalid(msg, value, state,
+                        error_dict=dict(repo_type=msg)
+                    )
 
     return _validator
 

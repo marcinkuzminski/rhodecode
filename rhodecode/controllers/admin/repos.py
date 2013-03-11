@@ -239,8 +239,10 @@ class ReposController(BaseRepoController):
         #override the choices with extracted revisions !
         choices, c.landing_revs = ScmModel().get_repo_landing_revs(repo_name)
         c.landing_revs_choices = choices
-
-        _form = RepoForm(edit=True, old_data={'repo_name': repo_name},
+        repo = Repository.get_by_repo_name(repo_name)
+        _form = RepoForm(edit=True, old_data={'repo_name': repo_name,
+                                              'repo_group': repo.group.get_dict() \
+                                              if repo.group else {}},
                          repo_groups=c.repo_groups_choices,
                          landing_revs=c.landing_revs_choices)()
         try:
