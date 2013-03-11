@@ -550,13 +550,18 @@ def action_parser(user_log, feed=False, parse_cs=False):
             return link_to(lbl, _url, raw_id=rev.raw_id, repo_name=repo_name,
                            class_='lazy-cs' if lazy_cs else '')
 
+        def _get_op(rev_txt):
+            _op = None
+            _name = rev_txt
+            if len(rev_txt.split('=>')) == 2:
+                _op, _name = rev_txt.split('=>')
+            return _op, _name
+
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
             repo = None
             for rev in revs_ids[:revs_top_limit]:
-                _op = _name = None
-                if len(rev.split('=>')) == 2:
-                    _op, _name = rev.split('=>')
+                _op, _name = _get_op(rev)
 
                 # we want parsed changesets, or new log store format is bad
                 if parse_cs:
@@ -583,6 +588,10 @@ def action_parser(user_log, feed=False, parse_cs=False):
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
             )
         )
+        _op1, _name1 = _get_op(revs_ids[0])
+        _op2, _name2 = _get_op(revs_ids[-1])
+
+        _rev = '%s...%s' % (_name1, _name2)
 
         compare_view = (
             ' <div class="compare_view tooltip" title="%s">'
@@ -591,7 +600,7 @@ def action_parser(user_log, feed=False, parse_cs=False):
                     revs_ids[0][:12], revs_ids[-1][:12]
                 ),
                 url('changeset_home', repo_name=repo_name,
-                    revision='%s...%s' % (revs_ids[0], revs_ids[-1])
+                    revision=_rev
                 ),
                 _('compare view')
             )

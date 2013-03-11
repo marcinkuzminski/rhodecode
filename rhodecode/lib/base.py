@@ -43,15 +43,17 @@ def _get_ip_addr(environ):
 
     ip = environ.get(proxy_key2)
     if ip:
-        # HTTP_X_FORWARDED_FOR can have mutliple ips inside
-        # the left-most being the original client, and each successive proxy
-        # that passed the request adding the IP address where it received the
-        # request from.
-        if ',' in ip:
-            ip = ip.split(',')[0].strip()
         return ip
 
     ip = environ.get(def_key, '0.0.0.0')
+
+    # HEADERS can have mutliple ips inside
+    # the left-most being the original client, and each successive proxy
+    # that passed the request adding the IP address where it received the
+    # request from.
+    if ',' in ip:
+        ip = ip.split(',')[0].strip()
+
     return ip
 
 
@@ -279,7 +281,6 @@ class BaseController(WSGIController):
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
-        start = time.time()
         try:
             self.ip_addr = _get_ip_addr(environ)
             # make sure that we update permissions each time we call controller
@@ -300,10 +301,6 @@ class BaseController(WSGIController):
             )
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.info('IP: %s Request to %s time: %.3fs' % (
-                _get_ip_addr(environ),
-                safe_unicode(_get_access_path(environ)), time.time() - start)
-            )
             meta.Session.remove()
 
 

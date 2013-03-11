@@ -9,7 +9,7 @@
     :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
 """
 
-
+import datetime
 from itertools import chain
 from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -311,6 +311,27 @@ class BaseRepository(object):
         """
         raise NotImplementedError
 
+    def inject_ui(self, **extras):
+        """
+        Injects extra parameters into UI object of this repo
+        """
+        required_extras = [
+            'ip',
+            'username',
+            'action',
+            'repository',
+            'scm',
+            'config',
+            'server_url',
+            'make_lock',
+            'locked_by',
+        ]
+        for req in required_extras:
+            if req not in extras:
+                raise AttributeError('Missing attribute %s in extras' % (req))
+        for k, v in extras.items():
+            self._repo.ui.setconfig('rhodecode_extras', k, v)
+
 
 class BaseChangeset(object):
     """
@@ -433,28 +454,28 @@ class BaseChangeset(object):
         raise NotImplementedError
 
     @LazyProperty
-    def commiter(self):
+    def committer(self):
         """
-        Returns Commiter for given commit
+        Returns Committer for given commit
         """
 
         raise NotImplementedError
 
     @LazyProperty
-    def commiter_name(self):
+    def committer_name(self):
         """
         Returns Author name for given commit
         """
 
-        return author_name(self.commiter)
+        return author_name(self.committer)
 
     @LazyProperty
-    def commiter_email(self):
+    def committer_email(self):
         """
         Returns Author email address for given commit
         """
 
-        return author_email(self.commiter)
+        return author_email(self.committer)
 
     @LazyProperty
     def author(self):
@@ -959,12 +980,12 @@ class EmptyChangeset(BaseChangeset):
     """
 
     def __init__(self, cs='0' * 40, repo=None, requested_revision=None,
-                 alias=None, revision=-1, message='', author='', date=''):
+                 alias=None, revision=-1, message='', author='', date=None):
         self._empty_cs = cs
         self.revision = revision
         self.message = message
         self.author = author
-        self.date = date
+        self.date = date or datetime.datetime.fromtimestamp(0)
         self.repository = repo
         self.requested_revision = requested_revision
         self.alias = alias

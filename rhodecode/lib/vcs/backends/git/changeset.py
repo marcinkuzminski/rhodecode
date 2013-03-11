@@ -17,6 +17,7 @@ from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.utils2 import safe_int
 
 
 class GitChangeset(BaseChangeset):
@@ -41,7 +42,7 @@ class GitChangeset(BaseChangeset):
         self._commit = commit
 
         self._tree_id = commit.tree
-        self._commiter_property = 'committer'
+        self._committer_property = 'committer'
         self._author_property = 'author'
         self._date_property = 'commit_time'
         self._date_tz_property = 'commit_timezone'
@@ -53,8 +54,8 @@ class GitChangeset(BaseChangeset):
         self._paths = {}
 
     @LazyProperty
-    def commiter(self):
-        return safe_unicode(getattr(self._commit, self._commiter_property))
+    def committer(self):
+        return safe_unicode(getattr(self._commit, self._committer_property))
 
     @LazyProperty
     def author(self):
@@ -275,10 +276,9 @@ class GitChangeset(BaseChangeset):
         """
         Returns last commit of the file at the given ``path``.
         """
-        node = self.get_node(path)
-        return node.history[0]
+        return self.get_file_history(path, limit=1)[0]
 
-    def get_file_history(self, path):
+    def get_file_history(self, path, limit=None):
         """
         Returns history of file as reversed list of ``Changeset`` objects for
         which file at given ``path`` has been modified.
@@ -287,11 +287,16 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
-        self._get_filectx(path)
 
-        cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
-                  self.id, path
-               )
+        self._get_filectx(path)
+        if limit:
+            cmd = 'log -n %s --pretty="format: %%H" -s -p %s -- "%s"' % (
+                      safe_int(limit, 0), self.id, path
+                   )
+        else:
+            cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
+                      self.id, path
+                   )
         so, se = self.repository.run_git_command(cmd)
         ids = re.findall(r'[0-9a-fA-F]{40}', so)
         return [self.repository.get_changeset(id) for id in ids]

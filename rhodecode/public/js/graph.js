@@ -26,7 +26,7 @@ function BranchRenderer() {
 	
 	this.canvas = document.getElementById("graph_canvas");
 	
-	if (!document.createElement("canvas").getContext) 
+	if (!document.createElement("canvas").getContext)
 		this.canvas = window.G_vmlCanvasManager.initElement(this.canvas);
 	this.ctx = this.canvas.getContext('2d');
 	this.ctx.strokeStyle = 'rgb(0, 0, 0)';

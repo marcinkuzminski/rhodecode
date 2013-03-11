@@ -234,7 +234,8 @@ class SimpleGit(BaseVCSController):
             app = self.__make_app(repo_name, repo_path, extras)
             return app(environ, start_response)
         except HTTPLockedRC, e:
-            log.debug('Repository LOCKED ret code 423!')
+            _code = CONFIG.get('lock_ret_code')
+            log.debug('Repository LOCKED ret code %s!' % (_code))
             return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())

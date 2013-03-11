@@ -14,7 +14,7 @@ div.codeblock {
 div.codeblock .code-header {
     border-bottom: 1px solid #CCCCCC;
     background: #EEEEEE;
-    padding:10px 0 10px 0;
+    padding: 10px 0 10px 0;
 }
 
 div.codeblock .code-header .stats {
@@ -26,38 +26,38 @@ div.codeblock .code-header .stats {
 }
 
 div.codeblock .code-header .stats .left {
-    float:left;
+    float: left;
 }
 div.codeblock .code-header .stats .left.img {
-    margin-top:-2px;
+    margin-top: -2px;
 }
 div.codeblock .code-header .stats .left.item {
-    float:left;
+    float: left;
     padding: 0 9px 0 9px;
-    border-right:1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 div.codeblock .code-header .stats .left.item pre {
 }
 div.codeblock .code-header .stats .left.item.last {
-    border-right:none;
+    border-right: none;
 }
 div.codeblock .code-header .stats .buttons {
-    float:right;
-    padding-right:4px;
+    float: right;
+    padding-right: 4px;
 }
 
 div.codeblock .code-header .author {
-    margin-left:25px;
+    margin-left: 25px;
     font-weight: bold;
     height: 25px;
 }
 div.codeblock .code-header .author .user {
-    padding-top:3px;
+    padding-top: 3px;
 }
 div.codeblock .code-header .commit {
-    margin-left:25px;
+    margin-left: 25px;
     font-weight: normal;
-    white-space:pre;
+    white-space: pre;
 }
 
 div.codeblock .code-body table {
@@ -90,8 +90,8 @@ div.search-code-body pre .break {
     display: block;
 }
 div.annotatediv {
-    margin-left:2px;
-    margin-right:4px;
+    margin-left: 2px;
+    margin-right: 4px;
 }
 .code-highlight {
     padding: 0px;

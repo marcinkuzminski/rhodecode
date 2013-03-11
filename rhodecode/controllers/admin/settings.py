@@ -38,7 +38,7 @@ from pylons.i18n.translation import _
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, NotAnonymous, HasPermissionAny,\
-    HasReposGroupPermissionAll, HasReposGroupPermissionAny
+    HasReposGroupPermissionAll, HasReposGroupPermissionAny, AuthUser
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
@@ -409,6 +409,8 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account')
 
         c.user = User.get(self.rhodecode_user.user_id)
+        c.perm_user = AuthUser(user_id=self.rhodecode_user.user_id,
+                               ip_addr=self.ip_addr)
         c.ldap_dn = c.user.ldap_dn
 
         if c.user.username == 'default':
@@ -440,6 +442,8 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account_update', id=ID)
         uid = self.rhodecode_user.user_id
         c.user = User.get(self.rhodecode_user.user_id)
+        c.perm_user = AuthUser(user_id=self.rhodecode_user.user_id,
+                               ip_addr=self.ip_addr)
         c.ldap_dn = c.user.ldap_dn
         email = self.rhodecode_user.email
         _form = UserForm(edit=True,

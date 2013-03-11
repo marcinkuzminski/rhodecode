@@ -178,7 +178,8 @@ lock
 ----
 
 Set locking state on given repository by given user. If userid param is skipped
-, then it is set to id of user whos calling this method.
+, then it is set to id of user whos calling this method. If locked param is skipped
+then function shows current lock state of given repo.
 This command can be executed only using api_key belonging to user with admin
 rights or regular user that have admin or write access to repository.
 
@@ -190,7 +191,7 @@ INPUT::
     args :    {
                 "repoid" : "<reponame or repo_id>"
                 "userid" : "<user_id or username = Optional(=apiuser)>",
-                "locked" : "<bool true|false>"
+                "locked" : "<bool true|false = Optional(=None)>"
               }
 
 OUTPUT::

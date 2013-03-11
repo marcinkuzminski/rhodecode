@@ -251,31 +251,25 @@ class ReposGroupsController(BaseController):
         repos = gr.repositories.all()
         if repos:
             h.flash(_('This group contains %s repositores and cannot be '
-                      'deleted') % len(repos),
-                    category='error')
+                      'deleted') % len(repos), category='warning')
+            return redirect(url('repos_groups'))
+
+        children = gr.children.all()
+        if children:
+            h.flash(_('This group contains %s subgroups and cannot be deleted'
+                      % (len(children))), category='warning')
             return redirect(url('repos_groups'))
 
         try:
             ReposGroupModel().delete(group_name)
             Session().commit()
-            h.flash(_('removed repos group %s') % gr.group_name,
+            h.flash(_('removed repos group %s') % group_name,
                     category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
-        except IntegrityError, e:
-            if str(e.message).find('groups_group_parent_id_fkey') != -1:
-                log.error(traceback.format_exc())
-                h.flash(_('Cannot delete this group it still contains '
-                          'subgroups'),
-                        category='warning')
-            else:
-                log.error(traceback.format_exc())
-                h.flash(_('error occurred during deletion of repos '
-                          'group %s') % gr.group_name, category='error')
-
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('error occurred during deletion of repos '
-                      'group %s') % gr.group_name, category='error')
+                      'group %s') % group_name, category='error')
 
         return redirect(url('repos_groups'))
 

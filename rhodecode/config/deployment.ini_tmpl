@@ -65,6 +65,8 @@ static_files = true
 lang = en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
+# set this path to use archive download cache
+#archive_cache_dir = /tmp/rhodecode_tarballcache
 app_instance_uuid = ${app_instance_uuid}
 cut_off_limit = 256000
 vcs_full_cache = True
@@ -153,6 +155,11 @@ instance_id =
 ## response is 401 HTTPUnauthorized. Currently HG clients have troubles with 
 ## handling that. Set this variable to 403 to return HTTPForbidden
 auth_ret_code =
+
+## locking return code. When repository is locked return this HTTP code. 2XX
+## codes don't break the transactions while 4XX codes do
+lock_ret_code = 423
+
 
 ####################################
 ###        CELERY CONFIG        ####

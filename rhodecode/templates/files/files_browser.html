@@ -49,7 +49,7 @@
                     <th>${_('Mimetype')}</th>
                     <th>${_('Last Revision')}</th>
                     <th>${_('Last modified')}</th>
-                    <th>${_('Last commiter')}</th>
+                    <th>${_('Last committer')}</th>
                 </tr>
             </thead>
 
@@ -89,8 +89,8 @@
                      <td>
                          %if node.is_file():
                              <div class="tooltip" title="${h.tooltip(node.last_changeset.message)}">
-                             <pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
-                            </div>
+                              <pre>${'r%s:%s' % (node.last_changeset.revision,node.last_changeset.short_id)}</pre>
+                             </div>
                          %endif
                      </td>
                      <td>

@@ -47,7 +47,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode, remove_suffix, remove_prefix
+    safe_unicode, remove_suffix, remove_prefix, time_to_datetime
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -938,15 +938,7 @@ class Repository(Base, BaseModel):
 
     @classmethod
     def inject_ui(cls, repo, extras={}):
-        from rhodecode.lib.vcs.backends.hg import MercurialRepository
-        from rhodecode.lib.vcs.backends.git import GitRepository
-        required = (MercurialRepository, GitRepository)
-        if not isinstance(repo, required):
-            raise Exception('repo must be instance of %s' % required)
-
-        # inject ui extra param to log this action via push logger
-        for k, v in extras.items():
-            repo._repo.ui.setconfig('rhodecode_extras', k, v)
+        repo.inject_ui(extras)
 
     @classmethod
     def is_valid(cls, repo_name):
@@ -980,7 +972,11 @@ class Repository(Base, BaseModel):
             enable_statistics=repo.enable_statistics,
             enable_locking=repo.enable_locking,
             enable_downloads=repo.enable_downloads,
-            last_changeset=repo.changeset_cache
+            last_changeset=repo.changeset_cache,
+            locked_by=User.get(self.locked[0]).get_api_data() \
+                if self.locked[0] else None,
+            locked_date=time_to_datetime(self.locked[1]) \
+                if self.locked[1] else None
         )
         rc_config = RhodeCodeSetting.get_app_settings()
         repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
@@ -1001,6 +997,10 @@ class Repository(Base, BaseModel):
         repo.locked = None
         Session().add(repo)
         Session().commit()
+
+    @classmethod
+    def getlock(cls, repo):
+        return repo.locked
 
     @property
     def last_db_change(self):
@@ -1341,15 +1341,13 @@ class RepoGroup(Base, BaseModel):
 
         return cnt + children_count(self)
 
-    def recursive_groups_and_repos(self):
-        """
-        Recursive return all groups, with repositories in those groups
-        """
+    def _recursive_objects(self, include_repos=True):
         all_ = []
 
         def _get_members(root_gr):
-            for r in root_gr.repositories:
-                all_.append(r)
+            if include_repos:
+                for r in root_gr.repositories:
+                    all_.append(r)
             childs = root_gr.children.all()
             if childs:
                 for gr in childs:
@@ -1358,6 +1356,18 @@ class RepoGroup(Base, BaseModel):
 
         _get_members(self)
         return [self] + all_
+
+    def recursive_groups_and_repos(self):
+        """
+        Recursive return all groups, with repositories in those groups
+        """
+        return self._recursive_objects()
+
+    def recursive_groups(self):
+        """
+        Returns all children groups for this group including children of children
+        """
+        return self._recursive_objects(include_repos=False)
 
     def get_new_name(self, group_name):
         """
@@ -1728,7 +1738,7 @@ class CacheInvalidation(Base, BaseModel):
             for inv_obj in inv_objs:
                 inv_obj.cache_active = False
                 log.debug('marking %s key for invalidation based on key=%s,repo_name=%s'
-                  % (inv_obj, key, repo_name))
+                  % (inv_obj, key, safe_str(repo_name)))
                 invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()

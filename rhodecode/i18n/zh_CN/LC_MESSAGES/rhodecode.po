@@ -3733,7 +3733,7 @@ msgid "Last modified"
 msgstr "最后修改于"
 
 #: rhodecode/templates/files/files_browser.html:52
-msgid "Last commiter"
+msgid "Last committer"
 msgstr "最后提交者"
 
 #: rhodecode/templates/files/files_edit.html:19

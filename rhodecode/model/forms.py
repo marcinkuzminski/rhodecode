@@ -395,4 +395,7 @@ def PullRequestForm(repo_id):
         pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)
         pullrequest_desc = v.UnicodeString(strip=True, required=False)
 
+        ancestor_rev = v.UnicodeString(strip=True, required=True)
+        merge_rev = v.UnicodeString(strip=True, required=True)
+
     return _PullRequestForm

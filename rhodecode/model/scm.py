@@ -44,13 +44,14 @@ from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
-from rhodecode.lib.utils2 import safe_str, safe_unicode
+from rhodecode.lib.utils2 import safe_str, safe_unicode, get_server_url
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_filesystem_repos, make_ui, \
     action_logger, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup, PullRequest
+from rhodecode.lib.hooks import log_push_action
 
 log = logging.getLogger(__name__)
 
@@ -402,6 +403,60 @@ class ScmModel(BaseModel):
         self.sa.add(repo)
         return repo
 
+    def _handle_push(self, repo, username, action, repo_name, revisions):
+        """
+        Triggers push action hooks
+
+        :param repo: SCM repo
+        :param username: username who pushes
+        :param action: push/push_loca/push_remote
+        :param repo_name: name of repo
+        :param revisions: list of revisions that we pushed
+        """
+        from rhodecode import CONFIG
+        from rhodecode.lib.base import _get_ip_addr
+        try:
+            from pylons import request
+            environ = request.environ
+        except TypeError:
+            # we might use this outside of request context, let's fake the
+            # environ data
+            from webob import Request
+            environ = Request.blank('').environ
+
+        #trigger push hook
+        extras = {
+            'ip': _get_ip_addr(environ),
+            'username': username,
+            'action': 'push_local',
+            'repository': repo_name,
+            'scm': repo.alias,
+            'config': CONFIG['__file__'],
+            'server_url': get_server_url(environ),
+            'make_lock': None,
+            'locked_by': [None, None]
+        }
+        _scm_repo = repo._repo
+        repo.inject_ui(**extras)
+        if repo.alias == 'hg':
+            log_push_action(_scm_repo.ui, _scm_repo, node=revisions[0])
+        elif repo.alias == 'git':
+            log_push_action(_scm_repo.ui, _scm_repo, _git_revs=revisions)
+
+    def _get_IMC_module(self, scm_type):
+        """
+        Returns InMemoryCommit class based on scm_type
+
+        :param scm_type:
+        """
+        if scm_type == 'hg':
+            from rhodecode.lib.vcs.backends.hg import \
+                MercurialInMemoryChangeset as IMC
+        elif scm_type == 'git':
+            from rhodecode.lib.vcs.backends.git import \
+                GitInMemoryChangeset as IMC
+        return IMC
+
     def pull_changes(self, repo, username):
         dbrepo = self.__get_repo(repo)
         clone_uri = dbrepo.clone_uri
@@ -409,26 +464,13 @@ class ScmModel(BaseModel):
             raise Exception("This repository doesn't have a clone uri")
 
         repo = dbrepo.scm_instance
-        from rhodecode import CONFIG
+        repo_name = dbrepo.repo_name
         try:
-            extras = {
-                'ip': '',
-                'username': username,
-                'action': 'push_remote',
-                'repository': dbrepo.repo_name,
-                'scm': repo.alias,
-                'config': CONFIG['__file__'],
-                'make_lock': None,
-                'locked_by': [None, None]
-            }
-
-            Repository.inject_ui(repo, extras=extras)
-
             if repo.alias == 'git':
                 repo.fetch(clone_uri)
             else:
                 repo.pull(clone_uri)
-            self.mark_for_invalidation(dbrepo.repo_name)
+            self.mark_for_invalidation(repo_name)
         except:
             log.error(traceback.format_exc())
             raise
@@ -441,13 +483,8 @@ class ScmModel(BaseModel):
         :param repo: SCM instance
 
         """
-
-        if repo.alias == 'hg':
-            from rhodecode.lib.vcs.backends.hg import \
-                MercurialInMemoryChangeset as IMC
-        elif repo.alias == 'git':
-            from rhodecode.lib.vcs.backends.git import \
-                GitInMemoryChangeset as IMC
+        user = self._get_user(user)
+        IMC = self._get_IMC_module(repo.alias)
 
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
@@ -463,20 +500,21 @@ class ScmModel(BaseModel):
                        author=author,
                        parents=[cs], branch=cs.branch)
 
-        action = 'push_local:%s' % tip.raw_id
-        action_logger(user, action, repo_name)
         self.mark_for_invalidation(repo_name)
+        self._handle_push(repo,
+                          username=user.username,
+                          action='push_local',
+                          repo_name=repo_name,
+                          revisions=[tip.raw_id])
         return tip
 
     def create_node(self, repo, repo_name, cs, user, author, message, content,
                       f_path):
-        if repo.alias == 'hg':
-            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset as IMC
-        elif repo.alias == 'git':
-            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset as IMC
+        user = self._get_user(user)
+        IMC = self._get_IMC_module(repo.alias)
+
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
-
         if isinstance(content, (basestring,)):
             content = safe_str(content)
         elif isinstance(content, (file, cStringIO.OutputType,)):
@@ -502,9 +540,12 @@ class ScmModel(BaseModel):
                        author=author,
                        parents=parents, branch=cs.branch)
 
-        action = 'push_local:%s' % tip.raw_id
-        action_logger(user, action, repo_name)
         self.mark_for_invalidation(repo_name)
+        self._handle_push(repo,
+                          username=user.username,
+                          action='push_local',
+                          repo_name=repo_name,
+                          revisions=[tip.raw_id])
         return tip
 
     def get_nodes(self, repo_name, revision, root_path='/', flat=True):

@@ -3680,7 +3680,7 @@ msgid "Last modified"
 msgstr ""
 
 #: rhodecode/templates/files/files_browser.html:52
-msgid "Last commiter"
+msgid "Last committer"
 msgstr ""
 
 #: rhodecode/templates/files/files_edit.html:19

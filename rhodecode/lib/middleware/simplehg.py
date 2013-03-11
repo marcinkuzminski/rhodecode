@@ -199,7 +199,8 @@ class SimpleHg(BaseVCSController):
             if str(e).find('not found') != -1:
                 return HTTPNotFound()(environ, start_response)
         except HTTPLockedRC, e:
-            log.debug('Repository LOCKED ret code 423!')
+            _code = CONFIG.get('lock_ret_code')
+            log.debug('Repository LOCKED ret code %s!' % (_code))
             return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())

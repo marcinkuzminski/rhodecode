@@ -1,3 +1,14 @@
+class _Missing(object):
+
+    def __repr__(self):
+        return 'no value'
+
+    def __reduce__(self):
+        return '_missing'
+
+_missing = _Missing()
+
+
 class LazyProperty(object):
     """
     Decorator for easier creation of ``property`` from potentially expensive to
@@ -24,8 +35,11 @@ class LazyProperty(object):
     def __get__(self, obj, klass=None):
         if obj is None:
             return self
-        result = obj.__dict__[self.__name__] = self._func(obj)
-        return result
+        value = obj.__dict__.get(self.__name__, _missing)
+        if value is _missing:
+            value = self._func(obj)
+            obj.__dict__[self.__name__] = value
+        return value
 
 import threading
 
@@ -41,5 +55,8 @@ class ThreadLocalLazyProperty(LazyProperty):
         if not hasattr(obj, '__tl_dict__'):
             obj.__tl_dict__ = threading.local().__dict__
 
-        result = obj.__tl_dict__[self.__name__] = self._func(obj)
-        return result
+        value = obj.__tl_dict__.get(self.__name__, _missing)
+        if value is _missing:
+            value = self._func(obj)
+            obj.__tl_dict__[self.__name__] = value
+        return value

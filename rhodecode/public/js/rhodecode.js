@@ -86,19 +86,6 @@ var prevElementSibling = function( el ) {
     }
 }
 
-var setSelectValue = function(select, val){
-	var selection =  YUD.get(select);
-	
-    // select element
-    for(var i=0;i<selection.options.length;i++){
-        if (selection.options[i].innerHTML == val) {
-            selection.selectedIndex = i;
-            break;
-        }
-    }	
-}
-
-
 /**
  * SmartColorGenerator
  *
@@ -577,7 +564,7 @@ var showRepoSize = function(target, repo_name, token){
     var args= 'auth_token='+token;
     
     if(!YUD.hasClass(target, 'loaded')){
-        YUD.get(target).innerHTML = _TM['loading...'];
+        YUD.get(target).innerHTML = _TM['Loading ...'];
         var url = pyroutes.url('repo_size', {"repo_name":repo_name});
         YUC.asyncRequest('POST',url,{
             success:function(o){
@@ -910,7 +897,7 @@ var deleteComment = function(comment_id){
 
 var createInlineAddButton = function(tr){
 
-	var label = TRANSLATION_MAP['add another comment'];
+	var label = TRANSLATION_MAP['Add another comment'];
 	
 	var html_el = document.createElement('div');
 	YUD.addClass(html_el, 'add-comment');
@@ -1106,7 +1093,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,new_url,n_hl));
 	                }
 	                if(match.length >= matches_max){
-	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['search truncated']));
+	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['Search truncated']));
 	                }
 	            }                       
 	        }
@@ -1115,7 +1102,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	            YUD.setStyle('tbody_filtered','display','');
 	            
 	            if (match.length==0){
-	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['no matching files']));
+	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['No matching files']));
 	            }                           
 	            
 	            YUD.get('tbody_filtered').innerHTML = match.join("");   
@@ -2173,11 +2160,11 @@ YUE.onDOMReady(function(){
 	    console.log(t);
 		if(YUD.hasClass(t, 'hidden')){
 			YUD.removeClass(t, 'hidden');
-			YUD.get(button).innerHTML = "&uarr; {0} &uarr;".format(_TM['collapse diff']);
+			YUD.get(button).innerHTML = "&uarr; {0} &uarr;".format(_TM['Collapse diff']);
 		}
 		else if(!YUD.hasClass(t, 'hidden')){
 			YUD.addClass(t, 'hidden');
-			YUD.get(button).innerHTML = "&darr; {0} &darr;".format(_TM['expand diff']);
+			YUD.get(button).innerHTML = "&darr; {0} &darr;".format(_TM['Expand diff']);
 		}
 	});
 	
