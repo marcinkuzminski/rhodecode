@@ -68,12 +68,21 @@ class Command(BasePasterCommand):
             repo_list = Repository.getAll()
         RepoModel.update_repoinfo(repositories=repo_list)
         Session().commit()
+
+        if self.options.invalidate_cache:
+            for r in repo_list:
+                r.invalidate
+        Session().commit()
         log.info('Updated cache for %s repositories' % (len(repo_list)))
 
     def update_parser(self):
         self.parser.add_option('--update-only',
-                          action='store',
-                          dest='repo_update_list',
-                          help="Specifies a comma separated list of repositores "
-                                "to update last commit info for. OPTIONAL",
-                          )
+                           action='store',
+                           dest='repo_update_list',
+                           help="Specifies a comma separated list of repositores "
+                                "to update last commit info for. OPTIONAL")
+        self.parser.add_option('--invalidate-cache',
+                           action='store_true',
+                           dest='invalidate_cache',
+                           help="Trigger cache invalidation event for repos. "
+                                "OPTIONAL")
