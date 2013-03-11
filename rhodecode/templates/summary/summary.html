@@ -166,14 +166,14 @@
           <ul>
             <li>
                <a class="followers" title="${_('Followers')}" href="${h.url('repo_followers_home',repo_name=c.repo_name)}">
+                ${_('Followers')}
                 <span id="current_followers_count">${c.repository_followers}</span>
-                ${_('Followes')}
               </a>
             </li>
             <li>
               <a class="forks" title="${_('Forks')}" href="${h.url('repo_forks_home',repo_name=c.repo_name)}">
-                <span>${c.repository_forks}</span>
                 ${_('Forks')}
+                <span>${c.repository_forks}</span>
               </a>
             </li>
             <li>
@@ -193,8 +193,8 @@
               %endif
             </li>
             %if c.rhodecode_user.username != 'default':
-            <li>
-              <a href="#" class="repo-size" onclick="javascript:showRepoSize('repo_size_2','${c.dbrepo.repo_name}','${str(h.get_token())}')">Repository Size</a>
+            <li class="repo_size">
+              <a href="#" class="repo-size" onclick="javascript:showRepoSize('repo_size_2','${c.dbrepo.repo_name}','${str(h.get_token())}')">Calculate Repository Size</a>
               <span id="repo_size_2"></span>
             </li>
             %endif

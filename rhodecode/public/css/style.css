@@ -401,10 +401,11 @@ div:hover > a.permalink {
     float: right;
     list-style-type: none;
     list-style-position: outside;
-    margin: 8px 8px 0 0;
+    margin: 4px 8px 0 0;
     padding: 0;
+    border-radius: 4px;
 }
-
+/*
 #header #header-inner #quick > li {
     position: relative;
     float: left;
@@ -428,20 +429,20 @@ div:hover > a.permalink {
     -khtml-border-radius: 4px 4px 4px 4px;
     border-radius: 4px 4px 4px 4px;
 }
-
+*/
 #header #header-inner #quick li span.short {
     padding: 9px 6px 8px 6px;
 }
 
 #header #header-inner #quick li span {
-    top: 0;
+    /*top: 0;
     right: 0;
-    height: 1%;
-    display: block;
-    float: left;
-    border-left: 1px solid #3f6f9f;
+    height: 1%;*/
+    display: inline;
+    /*float: left;*/
+    /*border-left: 1px solid #3f6f9f;*/
     margin: 0;
-    padding: 10px 12px 8px 10px;
+    /*padding: 10px 12px 8px 10px;*/
 }
 
 #header #header-inner #quick li span.normal {
@@ -450,13 +451,9 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li span.icon {
-    top: 0;
-    left: 0;
+
     border-left: none;
-    border-right: 1px solid #2e5c89;
-    padding: 8px 6px 4px;
-    min-width: 16px;
-    min-height: 16px;
+    padding-left: 10px ;
 }
 
 #header #header-inner #quick li span.icon_short {
@@ -468,19 +465,21 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li span.icon img, #header #header-inner #quick li span.icon_short img {
-    margin: 0px -2px 0px 0px;
+    vertical-align: middle;
+    margin-bottom: 2px;
 }
 
-#header #header-inner #quick > li.current > a,
-#header #header-inner #quick > li > a:hover {
+/*#header #header-inner #quick > li.current > a,
+#header #header-inner #quick > li > a:hover*/ {
     background-color: #4e4e4e;
 }
-
+/*
 #header #header-inner #quick li.current a span,
 #header #header-inner #quick li a:hover span {
     border-left: 1px solid #545454;
 }
-
+*/
+/*
 #header #header-inner #quick li.current a span.icon,
 #header #header-inner #quick li.current a span.icon_short,
 #header #header-inner #quick li a:hover span.icon,
@@ -488,7 +487,7 @@ div:hover > a.permalink {
     border-left: none;
     border-right: 1px solid #464646;
 }
-
+*/
 #header #header-inner #quick ul.repo_switcher {
     max-height: 275px;
     overflow-x: hidden;
@@ -995,6 +994,7 @@ tbody .yui-dt-editable { cursor: pointer }
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76', endColorstr='#00376e', GradientType=0 );
     margin: 0 0 20px;
     padding: 0;
+    border-radius: 4px 4px 0 0;
 }
 
 #content div.box div.title h5 {
@@ -1733,7 +1733,7 @@ div.form div.fields div.field div.button {
 
 #summary-menu-stats{
     float: left;
-    width: 200px;
+    width: 180px;
     position: absolute;
     top: 0;
     right: 0;
@@ -1749,7 +1749,6 @@ div.form div.fields div.field div.button {
 
 #content #summary-menu-stats li {
     border-top: 1px solid #d1d1d1;
-    line-height: 32px;
     padding: 0;
 }
 
@@ -1769,14 +1768,19 @@ div.form div.fields div.field div.button {
 
 #summary-menu-stats a {
     display: block;
-    color: #000000;
-    padding: 0 30px;
+    /*color: #000000;*/
+    padding: 12px 30px;
     background-repeat: no-repeat;
     background-position: 10px 50%;
+    padding-right: 10px;
 }
 
+
 #repo_size_2 {
-    margin-left: 25px;
+    margin-left: 30px;
+    display: block;
+    padding-right: 10px;
+    padding-bottom: 7px;
 }
 
 #summary-menu-stats a:hover {
@@ -2561,6 +2565,7 @@ h3.files_location {
     white-space: nowrap;
     height: 31px;
     border-color: #cdcdcd;
+    text-align: left;
 }
 
 #graph_content .container .author {
@@ -2568,7 +2573,7 @@ h3.files_location {
 }
 
 #graph_content .container .hash{
-    width: 90px;
+    width: 85px;
     font-size: 0.85em;
 }
 
@@ -2644,7 +2649,7 @@ h3.files_location {
 #graph_content .comments-container {
     /*width: 40px;*/
     margin: 0.8em 0;
-    margin-left: 0.5em;
+    margin-right: 0.5em;
 }
 
 #graph_content  .tagcontainer {
@@ -4561,22 +4566,22 @@ form.comment-inline-form {
     margin:2px 0px 8px 5px !important
 }
 
-
 .notification-paginator {
     padding: 0px 0px 4px 16px;
     float: left;
 }
 
 .menu_link_user {
-    padding: 10px 8px 8px 8px !important;
+    /*padding: 10px 8px 8px 8px !important;*/
 }
 
+#context-pages .pull-request span,
 .menu_link_notifications {
     padding: 4px 4px !important;
-    margin: 7px 4px 0px 0px !important;
+    /*margin: 7px 4px 0px 0px !important;*/
     text-align: center;
     color:#888 !important;
-    font-size: 10px;
+    /*font-size: 10px;*/
     background-color: #DEDEDE !important;
     border-radius: 4px !important;
     -webkit-border-radius: 4px !important;

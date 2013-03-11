@@ -2,6 +2,11 @@
  * Stylesheets for the context bar
  */
 
+#quick .repo_switcher { background-image: url("../images/icons/database.png"); }
+#quick .journal { background-image: url("../images/icons/book.png"); }
+#quick .search { background-image: url("../images/icons/search_16.png"); }
+#quick .admin { background-image: url("../images/icons/cog_edit.png"); }
+
 #context-bar button.follow 		{ background-image: url("../images/icons/heart.png"); }
 #context-bar button.following	{ background-image: url("../images/icons/heart_delete.png"); }
 #context-bar a.fork 			{ background-image: url("../images/icons/arrow_divide.png"); }
@@ -39,16 +44,18 @@
 	overflow: visible;
 }
 
+#header #header-inner #quick a,
 #content #context-bar,
 #content #context-bar a,
 #content #context-bar button {
  	color: #FFFFFF;
 }
 
+#header #header-inner #quick a:hover,
 #content #context-bar a:hover,
 #content #context-bar button:hover {
  	text-decoration: none;
- 	color: #bfe3ff;
+/* 	color: #bfe3ff;*/
 }
 
 #content #context-bar .icon {
@@ -68,6 +75,7 @@ ul.horizontal-list > li {
 	position: relative;
 }
 
+#header #header-inner #quick ul,
 ul.horizontal-list > li ul {
 	position: absolute;
 	display: none;
@@ -75,10 +83,12 @@ ul.horizontal-list > li ul {
 	z-index: 999;
 }
 
+#header #header-inner #quick li:hover > ul,
 ul.horizontal-list li:hover > ul {
 	display: block;
 }
 
+#header #header-inner #quick li ul li,
 ul.horizontal-list ul li {
 	position: relative;
 	border-bottom: 1px solid rgba(0,0,0,0.1);
@@ -95,14 +105,17 @@ ul.horizontal-list > li ul ul {
 	overflow-y:auto;
 }
 
-ul.horizontal-list > li a {
+#header #header-inner #quick ul a,
+ul.horizontal-list li a {
 	white-space: nowrap;
 }
 
 #breadcrumbs {
 	float:left;
-	padding: 12px 0;
+	padding: 5px 0;
+	padding-left: 5px;
 	font-weight: bold;
+	font-size: 14px;
 }
 
 #breadcrumbs span{
@@ -114,13 +127,15 @@ ul.horizontal-list > li a {
 	position: relative;
 	overflow: hidden;
 	border-bottom: 1px solid #003162;
-	padding: 10px;
+	padding: 5px;
 }
 
+/*#quick,*/
+#header #header-inner #quick ul,
 #revision-changer,
 #context-pages,
-#context-pages ul,
-ul#context-actions {
+#context-pages ul /*,
+ul#context-actions */{
 	background: #3b6998; /* Old browsers */
 	background: -moz-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* FF3.6+ */
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4574a2), color-stop(100%,#2f5d8b)); /* Chrome,Safari4+ */
@@ -128,9 +143,10 @@ ul#context-actions {
 	background: -o-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* Opera 11.10+ */
 	background: -ms-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* IE10+ */
 	background: linear-gradient(to bottom, #4574a2 0%, #2f5d8b 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4574a2', endColorstr='#2f5d8b',GradientType=0 ); /* IE6-9 */
+	/*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4574a2', endColorstr='#2f5d8b',GradientType=0 ); /* IE6-9 */*/
 }
 
+#header #header-inner #quick a,
 #context-actions a,
 #context-pages a {
 	background-repeat: no-repeat;
@@ -138,6 +154,7 @@ ul#context-actions {
 	padding-left: 30px;
 }
 
+#quick a,
 #context-pages ul ul a{
 	padding-left: 10px;
 }
@@ -146,11 +163,10 @@ ul#context-actions {
 	display: inline-block;
 	float: right;
 	border-radius: 4px;
-	background-color:#3b6998;
+	/*background-color:#3b6998;*/
 	background-image: linear-gradient(top, #4574a2 0%, #2f5d8b 100%);
-	padding: 5px;
+/*	padding: 5px;*/
 }
-
 #content ul#context-actions li {
 	padding: 0px;
 	border-right: 1px solid rgba(0,0,0,0.1);
@@ -164,31 +180,38 @@ ul#context-actions {
 	background: none;
 	border: none;
 	margin: 0px;
-	height: 13px;
-	padding: 3px 7px;
+	height: auto;
+	padding: 10px 10px 10px 30px;
 	background-repeat: no-repeat;
-	background-position: 50% 3px;
-	padding-top: 24px;
+	background-position: 10px 50%;
+	font-size: 1em;
+	/*padding-top: 24px;*/
 }
 
-#context-actions button{
+#context-actions a {
+	padding: 11px 10px 12px 30px;
+}
+
+/*#context-actions button{
 	padding-top: 22px;
 	height: 40px;
-}
-
+}*/
+#header #header-inner #quick li:hover,
 #revision-changer:hover,
 #context-pages li:hover,
 #context-actions li:hover,
-#content #context-actions li:hover {
+#content #context-actions li:hover,
+#header #header-inner #quick li.current,
+#context-pages li.current {
 	/*background: rgba(255,255,255,0.2);*/
 	background: #6388ad; /* Old browsers */
-	background: -moz-linear-gradient(top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%); /* IE10+ */
-	background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#88bfe8', endColorstr='#70b0e0',GradientType=0 ); /* IE6-9 */
+	background: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* W3C */
+	/*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#88bfe8', endColorstr='#70b0e0',GradientType=0 ); /* IE6-9 */*/
 
 	background-image: -webkit-gradient(linear, left top, left bottom, rgb(255,255,255) 0%, rgb(255,255,255) 100%);
 	
@@ -246,7 +269,7 @@ ul#context-actions {
 /*	overflow: hidden;*/
 }
 
-#context-pages li.current{
+#context-pages li.curreasdnt{
 	background: #535353; /* Old browsers */
 	background: -moz-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* FF3.6+ */
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5d5d5d), color-stop(100%,#484848)); /* Chrome,Safari4+ */
@@ -254,23 +277,32 @@ ul#context-actions {
 	background: -o-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* Opera 11.10+ */
 	background: -ms-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* IE10+ */
 	background: linear-gradient(to bottom, #5d5d5d 0%, #484848 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5d5d5d', endColorstr='#484848',GradientType=0 ); /* IE6-9 */
 }
 
 #content #context-pages .icon {
 	margin-right:5px;
 }
 
+#header #header-inner #quick li,
 #content #context-pages li {
 	border-right: 1px solid rgba(0,0,0,0.1);
 	border-left: 1px solid rgba(255,255,255,0.1);
 	padding: 0;
 }
-
+#header #header-inner #quick li:last-child,
 #content #context-pages li:last-child {
 	border-right:none;
 }
 
+#header #header-inner #quick li:first-child{
+	border-left:none;
+}
+
+#header #header-inner #quick > li:first-child > a{
+	border-radius: 4px 0 0 4px;
+}
+
+#header #header-inner #quick a,
 #context-pages a, 
 #context-pages .admin_menu a{
 	display: block;
@@ -279,14 +311,27 @@ ul#context-actions {
 	line-height: 35px;
 }
 
+#header #header-inner #quick a#quick_login_link {
+	padding-left: 0px;
+}
+
+#header #header-inner #quick a {
+	overflow: hidden;
+}
+#quick a.childs:after,
 #revision-changer:before,
 #context-pages a.childs:after,
 #context-pages a.dropdown:after {
 	content: ' \25BE';
 }
+#context-pages a.childs {
+	padding-right: 20px;
+}
 #context-pages a.childs:after{
+	position: absolute;
 	float: right;
 	padding-left: 5px;
+	padding-right: 5px;
 }
 
 #revision-changer:before {

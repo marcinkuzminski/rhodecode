@@ -123,7 +123,7 @@
           </li>
           <li><a href="${h.url('repo_fork_home',repo_name=c.repo_name)}" class="fork">${_('Fork')}</a></li>
           %if h.is_hg(c.rhodecode_repo):
-          <li><a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="pull-request">${_('Pull Request')}</a></li>
+          <li><a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="pull-request">${_('Create Pull Request')}</a></li>
           %endif
         </ul>
       %endif
@@ -148,43 +148,33 @@
           <ul>
              %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
                %if h.HasPermissionAll('hg.admin')('access settings on repository'):
-                   <li>${h.link_to(_('repository settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}</li>
+                   <li>${h.link_to(_('Settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}</li>
                %else:
-                   <li>${h.link_to(_('repository settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
+                   <li>${h.link_to(_('Settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
                %endif
              %endif
               %if c.rhodecode_db_repo.fork:
-               <li>${h.link_to(_('compare fork'),h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default'),class_='compare_request')}</li>
+               <li>${h.link_to(_('Compare fork'),h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default'),class_='compare_request')}</li>
               %endif
-              <li>${h.link_to(_('lightweight changelog'),h.url('shortlog_home',repo_name=c.repo_name),class_='shortlog')}</li>
-              <li>${h.link_to(_('search'),h.url('search_repo',repo_name=c.repo_name),class_='search')}</li>
+              <li>${h.link_to(_('Lightweight changelog'),h.url('shortlog_home',repo_name=c.repo_name),class_='shortlog')}</li>
+              <li>${h.link_to(_('Search'),h.url('search_repo',repo_name=c.repo_name),class_='search')}</li>
 
               %if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name) and c.rhodecode_db_repo.enable_locking:
                 %if c.rhodecode_db_repo.locked[0]:
-                  <li>${h.link_to(_('unlock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_del')}</li>
+                  <li>${h.link_to(_('Unlock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_del')}</li>
                 %else:
-                  <li>${h.link_to(_('lock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_add')}</li>
+                  <li>${h.link_to(_('Lock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_add')}</li>
                 %endif
               %endif
-
-              % if h.HasPermissionAll('hg.admin')('access admin main page'):
-                 <li>
-                   ${h.link_to(_('admin'),h.url('admin_home'),class_='admin childs')}
-                    ## ADMIN MENU
-                    ${admin_menu()}
-                 </li>
-              ## if you're a admin of any groups, show admin menu for it
-              % elif c.rhodecode_user.groups_admin:
-                 <li>
-                   ${h.link_to(_('admin'),h.url('admin_home'),class_='admin')}
-                    
-                    ## ADMIN MENU
-                    ${admin_menu_simple()}
-                 </li>
-              % endif
              </ul>
         </li>
-        <li ${is_current('showpullrequest')}><a href="${h.url('pullrequest_show_all',repo_name=c.repo_name)}" title="${_('Show Pull Requests')}" class="pull-request">1</a></li>
+        <li ${is_current('showpullrequest')}>
+          <a href="${h.url('pullrequest_show_all',repo_name=c.repo_name)}" title="${_('Show Pull Requests')}" class="pull-request">Pull Requests 
+            %if c.repository_pull_requests:
+              <span>${c.repository_pull_requests}</span>
+            %endif
+          </a>
+        </li>
       </ul>
     </div>
   </div>
@@ -207,8 +197,8 @@
 <%def name="usermenu()">
     ## USER MENU
     <li>
-      <a class="menu_link" id="quick_login_link">
-          <span class="icon" style="padding:5px 5px 0px 5px">
+      <a class="menu_link childs" id="quick_login_link">
+          <span class="icon">
              <img src="${h.gravatar_url(c.rhodecode_user.email,20)}" alt="avatar">
           </span>
           %if c.rhodecode_user.username != 'default':
@@ -289,14 +279,11 @@
             if selected == current:
                 return h.literal('class="current"')
         %>
-        <ul id="quick">
+        <ul id="quick" class="horizontal-list">
           <!-- repo switcher -->
           <li ${is_current('home')}>
-              <a class="menu_link" id="repo_switcher" title="${_('Switch repository')}" href="${h.url('home')}">
-              <span class="icon">
-                  <img src="${h.url('/images/icons/database.png')}" alt="${_('Products')}" />
-              </span>
-              <span>${_('Repositories')}</span>
+              <a class="menu_link repo_switcher childs" id="repo_switcher" title="${_('Switch repository')}" href="${h.url('home')}">
+              ${_('Repositories')}
               </a>
               <ul id="repo_switcher_list" class="repo_switcher">
                   <li>
@@ -307,48 +294,33 @@
           ##ROOT MENU
           %if c.rhodecode_user.username != 'default':
             <li ${is_current('journal')}>
-              <a class="menu_link" title="${_('Show recent activity')}"  href="${h.url('journal')}">
-              <span class="icon">
-                  <img src="${h.url('/images/icons/book.png')}" alt="${_('Journal')}" />
-              </span>
-              <span>${_('Journal')}</span>
+              <a class="menu_link journal" title="${_('Show recent activity')}"  href="${h.url('journal')}">
+              ${_('Journal')}
               </a>
             </li>
           %else:
             <li ${is_current('journal')}>
-              <a class="menu_link" title="${_('Public journal')}"  href="${h.url('public_journal')}">
-              <span class="icon">
-                  <img src="${h.url('/images/icons/book.png')}" alt="${_('Public journal')}" />
-              </span>
-              <span>${_('Public journal')}</span>
+              <a class="menu_link journal" title="${_('Public journal')}"  href="${h.url('public_journal')}">
+              ${_('Public journal')}
               </a>
             </li>
           %endif
           <li ${is_current('search')}>
-              <a class="menu_link" title="${_('Search in repositories')}"  href="${h.url('search')}">
-              <span class="icon">
-                  <img src="${h.url('/images/icons/search_16.png')}" alt="${_('Search')}" />
-              </span>
-              <span>${_('Search')}</span>
+              <a class="menu_link search" title="${_('Search in repositories')}"  href="${h.url('search')}">
+              ${_('Search')}
               </a>
           </li>
           % if h.HasPermissionAll('hg.admin')('access admin main page'):
             <li ${is_current('admin')}>
-              <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
-              <span class="icon">
-                    <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
-                </span>
-                <span>${_('Admin')}</span>
+              <a class="menu_link admin childs" title="${_('Admin')}" href="${h.url('admin_home')}">
+                ${_('Admin')}
               </a>
               ${admin_menu()}
             </li>
           % elif c.rhodecode_user.groups_admin:
           <li ${is_current('admin')}>
-              <a class="menu_link" title="${_('Admin')}" href="${h.url('admin_home')}">
-                <span class="icon">
-                    <img src="${h.url('/images/icons/cog_edit.png')}" alt="${_('Admin')}" />
-                </span>
-                <span>${_('Admin')}</span>
+              <a class="menu_link admin childs" title="${_('Admin')}" href="${h.url('admin_home')}">
+                ${_('Admin')}
               </a>
               ${admin_menu_simple()}
           </li>
