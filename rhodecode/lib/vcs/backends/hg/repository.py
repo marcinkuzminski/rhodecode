@@ -457,11 +457,11 @@ class MercurialRepository(BaseRepository):
         end_pos = self.revisions.index(end_raw_id) if end else None
 
         if None not in [start, end] and start_pos > end_pos:
-            raise RepositoryError("start revision '%s' cannot be "
+            raise RepositoryError("Start revision '%s' cannot be "
                                   "after end revision '%s'" % (start, end))
 
         if branch_name and branch_name not in self.branches.keys():
-            raise BranchDoesNotExistError('Such branch %s does not exists for'
+            raise BranchDoesNotExistError('Branch %s not found in'
                                   ' this repository' % branch_name)
         if end_pos is not None:
             end_pos += 1
