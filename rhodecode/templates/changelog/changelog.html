@@ -85,11 +85,11 @@ ${self.context_bar('changelog')}
                                         </div>
                                     %endif
                                     %if h.is_hg(c.rhodecode_repo):
-	                                    %for book in cs.bookmarks:
-	                                        <div class="bookbook" title="${'%s %s' % (_('bookmark'),book)}">
-	                                            ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
-	                                        </div>
-	                                    %endfor
+                                        %for book in cs.bookmarks:
+                                            <div class="bookbook" title="${'%s %s' % (_('bookmark'),book)}">
+                                                ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+                                            </div>
+                                        %endfor
                                     %endif
                                     %for tag in cs.tags:
                                         <div class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
