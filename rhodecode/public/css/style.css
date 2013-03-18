@@ -460,6 +460,7 @@ div:hover > a.permalink {
     position: absolute;
     left: 0;
     top: 9px;
+    margin: 0px 2px 0px 2px;
 }
 
 #header #header-inner #quick li ul li a.journal, #header #header-inner #quick li ul li a.journal:hover {
@@ -482,6 +483,8 @@ div:hover > a.permalink {
 
 #header #header-inner #quick li ul li a.git, #header #header-inner #quick li ul li a.git:hover {
     background-image: url("../images/icons/giticon.png");
+    padding-left: 42px;
+    background-position: 20px 9px;
 }
 
 #header #header-inner #quick li ul li a.repos, #header #header-inner #quick li ul li a.repos:hover {
@@ -1708,11 +1711,11 @@ div.form div.fields div.field div.button {
     border-top: none;
 }
 
-#summary-menu-stats a.followers         { background-image: url('../images/icons/heart.png')}
-#summary-menu-stats a.forks             { background-image: url('../images/icons/arrow_divide.png')}
-#summary-menu-stats a.settings          { background-image: url('../images/icons/cog_edit.png')}
-#summary-menu-stats a.feed              { background-image: url('../images/icons/rss_16.png')}
-#summary-menu-stats a.repo-size         { background-image: url('../images/icons/server.png')}
+#summary-menu-stats a.followers { background-image: url('../images/icons/heart.png')}
+#summary-menu-stats a.forks { background-image: url('../images/icons/arrow_divide.png')}
+#summary-menu-stats a.settings { background-image: url('../images/icons/cog_edit.png')}
+#summary-menu-stats a.feed { background-image: url('../images/icons/rss_16.png')}
+#summary-menu-stats a.repo-size { background-image: url('../images/icons/server.png')}
 
 #summary-menu-stats a {
     display: block;
@@ -1980,7 +1983,7 @@ a.metatag[tag="license"]:hover {
 }
 
 #quick_login .password_forgoten {
-    padding-right: 10px;
+    padding-right: 0px;
     padding-top: 0px;
     text-align: left;
 }
@@ -1988,6 +1991,8 @@ a.metatag[tag="license"]:hover {
 #quick_login .password_forgoten a {
     font-size: 10px;
     color: #fff;
+    padding: 0px !important;
+    line-height: 20px !important;
 }
 
 #quick_login .register {
@@ -1999,6 +2004,8 @@ a.metatag[tag="license"]:hover {
 #quick_login .register a {
     font-size: 10px;
     color: #fff;
+    padding: 0px !important;
+    line-height: 20px !important;    
 }
 
 #quick_login .submit {
@@ -2022,15 +2029,16 @@ a.metatag[tag="license"]:hover {
     padding: 4px 0px 0px 6px;
 }
 #quick_login .notifications {
-    padding: 4px 0px 0px 6px;
+    padding: 2px 0px 0px 6px;
     color: #FFFFFF;
     font-weight: bold;
+    line-height: 10px !important;
 }
 #quick_login .notifications a,
 #quick_login .unread a {
     color: #FFFFFF;
     display: block;
-    padding: 2px;
+    padding: 0px !important;
 }
 #quick_login .notifications a:hover,
 #quick_login .unread a:hover {
@@ -3690,8 +3698,17 @@ div#legend_data, div#legend_container, div#legend_choices {
     padding: 0 10px 10px;
 }
 
-#content div.box div.title ul.links li a:hover, #content div.box div.title ul.links li.ui-tabs-selected a {
-    color: #bfe3ff;
+#content div.box div.title ul.links li a:hover,
+#content div.box div.title ul.links li.ui-tabs-selected a {
+
+    background: #6388ad; /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* W3C */
+    /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#88bfe8', endColorstr='#70b0e0',GradientType=0 ); /* IE6-9 */*/
 }
 
 #content div.box ol.lower-roman, #content div.box ol.upper-roman, #content div.box ol.lower-alpha, #content div.box ol.upper-alpha, #content div.box ol.decimal {

@@ -7,35 +7,35 @@
 #quick .search { background-image: url("../images/icons/search_16.png"); }
 #quick .admin { background-image: url("../images/icons/cog_edit.png"); }
 
-#context-bar button.follow         { background-image: url("../images/icons/heart.png"); }
-#context-bar button.following    { background-image: url("../images/icons/heart_delete.png"); }
-#context-bar a.fork             { background-image: url("../images/icons/arrow_divide.png"); }
-#context-bar a.summary             { background-image: url("../images/icons/clipboard_16.png"); }
-#context-bar a.changelogs         { background-image: url("../images/icons/time.png"); }
-#context-bar a.files             { background-image: url("../images/icons/file.png"); }
-#context-bar a.switch-to         { background-image: url("../images/icons/arrow_switch.png"); }
-#context-bar a.options             { background-image: url("../images/icons/table_gear.png"); }
-#context-bar a.pull-request     { background-image: url("../images/icons/arrow_join.png"); }
-#context-bar a.branches         { background-image: url("../images/icons/arrow_branch.png"); }
-#context-bar a.tags             { background-image: url("../images/icons/tag_blue.png"); }
-#context-bar a.bookmarks        { background-image: url("../images/icons/tag_green.png"); }
-#context-bar a.settings         { background-image: url("../images/icons/cog.png"); }
-#context-bar a.shortlog         { background-image: url("../images/icons/time.png"); }
-#context-bar a.search             { background-image: url("../images/icons/search_16.png"); }
-#context-bar a.admin             { background-image: url("../images/icons/cog_edit.png"); }
+#context-bar button.follow { background-image: url("../images/icons/heart.png"); }
+#context-bar button.following { background-image: url("../images/icons/heart_delete.png"); }
+#context-bar a.fork { background-image: url("../images/icons/arrow_divide.png"); }
+#context-bar a.summary { background-image: url("../images/icons/clipboard_16.png"); }
+#context-bar a.changelogs { background-image: url("../images/icons/time.png"); }
+#context-bar a.files { background-image: url("../images/icons/file.png"); }
+#context-bar a.switch-to { background-image: url("../images/icons/arrow_switch.png"); }
+#context-bar a.options { background-image: url("../images/icons/table_gear.png"); }
+#context-bar a.pull-request { background-image: url("../images/icons/arrow_join.png"); }
+#context-bar a.branches { background-image: url("../images/icons/arrow_branch.png"); }
+#context-bar a.tags { background-image: url("../images/icons/tag_blue.png"); }
+#context-bar a.bookmarks { background-image: url("../images/icons/tag_green.png"); }
+#context-bar a.settings { background-image: url("../images/icons/cog.png"); }
+#context-bar a.shortlog { background-image: url("../images/icons/time.png"); }
+#context-bar a.search { background-image: url("../images/icons/search_16.png"); }
+#context-bar a.admin { background-image: url("../images/icons/cog_edit.png"); }
 
-#context-bar a.journal            { background-image: url("../images/icons/book.png"); }
-#context-bar a.repos             { background-image: url("../images/icons/database_edit.png"); }
-#context-bar a.repos_groups        { background-image: url("../images/icons/database_link.png"); }
-#context-bar a.users            { background-image: url("../images/icons/user_edit.png"); }
-#context-bar a.groups             { background-image: url("../images/icons/group_edit.png"); }
-#context-bar a.permissions      { background-image: url("../images/icons/key.png"); }
-#context-bar a.ldap             { background-image: url("../images/icons/server_key.png"); }
-#context-bar a.defaults            { background-image: url("../images/icons/wrench.png"); }
-#context-bar a.settings            { background-image: url("../images/icons/cog_edit.png"); }
-#context-bar a.compare_request  { background-image: url('../images/icons/arrow_inout.png')}
-#context-bar a.locking_del       { background-image: url('../images/icons/lock_delete.png')}
-#context-bar a.locking_add       { background-image: url('../images/icons/lock_add.png')}
+#context-bar a.journal { background-image: url("../images/icons/book.png"); }
+#context-bar a.repos { background-image: url("../images/icons/database_edit.png"); }
+#context-bar a.repos_groups { background-image: url("../images/icons/database_link.png"); }
+#context-bar a.users { background-image: url("../images/icons/user_edit.png"); }
+#context-bar a.groups { background-image: url("../images/icons/group_edit.png"); }
+#context-bar a.permissions { background-image: url("../images/icons/key.png"); }
+#context-bar a.ldap { background-image: url("../images/icons/server_key.png"); }
+#context-bar a.defaults { background-image: url("../images/icons/wrench.png"); }
+#context-bar a.settings { background-image: url("../images/icons/cog_edit.png"); }
+#context-bar a.compare_request { background-image: url('../images/icons/arrow_inout.png')}
+#context-bar a.locking_del { background-image: url('../images/icons/lock_delete.png')}
+#context-bar a.locking_add { background-image: url('../images/icons/lock_add.png')}
 
 #content #context-bar {
     position: relative;
@@ -99,8 +99,8 @@ ul.horizontal-list > li ul ul {
     top: -1px;
     min-width: 200px;
     max-height: 400px;
-    overflow-x:hidden;
-    overflow-y:auto;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #header #header-inner #quick ul a,
@@ -109,7 +109,7 @@ ul.horizontal-list li a {
 }
 
 #breadcrumbs {
-    float:left;
+    float: left;
     padding: 5px 0;
     padding-left: 5px;
     font-weight: bold;
@@ -206,12 +206,12 @@ ul#context-actions {
 
 #content #context-actions li:first-child {
     border-left: none;
-    border-radius:4px 0 0px 4px;
+    border-radius: 4px 0 0px 4px;
 }
 
 #content #context-actions li:last-child {
     border-right: none;
-    border-radius:0 4px 4px 0;
+    border-radius: 0 4px 4px 0;
 }
 
 #content  #context-actions .icon {
@@ -263,7 +263,7 @@ ul#context-actions {
 }
 
 #content #context-pages .icon {
-    margin-right:5px;
+    margin-right: 5px;
 }
 
 #header #header-inner #quick li,
@@ -274,11 +274,11 @@ ul#context-actions {
 }
 #header #header-inner #quick li:last-child,
 #content #context-pages li:last-child {
-    border-right:none;
+    border-right: none;
 }
 
 #header #header-inner #quick li:first-child {
-    border-left:none;
+    border-left: none;
 }
 
 #header #header-inner #quick > li:first-child > a {
@@ -292,6 +292,12 @@ ul#context-actions {
     padding: 0px 10px 1px 30px;
     padding-left: 30px;
     line-height: 35px;
+}
+
+#header #header-inner #quick a.thin,
+#context-pages a.thin,
+#context-pages .admin_menu a.thin {
+    line-height: 28px !important;
 }
 
 #header #header-inner #quick a#quick_login_link {
@@ -359,5 +365,3 @@ ul#context-actions {
 #revision-changer .revision {
     text-transform: uppercase;
 }
-
-

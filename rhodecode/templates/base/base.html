@@ -69,7 +69,7 @@
 
 <%def name="admin_menu()">
   <ul class="admin_menu">
-      <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal')}</li>
+      <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal ')}</li>
       <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
       <li>${h.link_to(_('repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
       <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
@@ -255,12 +255,12 @@
                 <div class="full_name">${c.rhodecode_user.full_name_or_username}</div>
                 <div class="email">${c.rhodecode_user.email}</div>
                 <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
-                <div class="notifications"><a href="${h.url('notifications')}">${_('Notifications')}</a></div>
-                <div class="unread"><a href="${h.url('notifications')}">${_('Unread')}: ${c.unread_notifications}</a></div>
+                ##<div class="notifications"><a href="${h.url('notifications')}">${_('Notifications')}</a></div>
+                <div class="unread"><a href="${h.url('notifications')}">${_('Unread notifications')}: ${c.unread_notifications}</a></div>
             </div>
             <div class="links_right">
             <ol class="links">
-              <li>${h.link_to(_(u'Home'),h.url('home'))}</li>
+              ##<li>${h.link_to(_(u'Home'),h.url('home'))}</li>
               <li>${h.link_to(_(u'Journal'),h.url('journal'))}</li>
               <li>${h.link_to(_(u'My account'),h.url('admin_settings_my_account'))}</li>
               <li class="logout">${h.link_to(_(u'Log Out'),h.url('logout_home'))}</li>
