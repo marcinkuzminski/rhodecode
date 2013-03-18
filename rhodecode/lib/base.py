@@ -313,6 +313,8 @@ class BaseRepoController(BaseController):
     c.rhodecode_db_repo: instance of db
     c.repository_followers: number of followers
     c.repository_forks: number of forks
+    c.repository_following: weather the current user is following the current repo
+
     """
 
     def __before__(self):
@@ -333,3 +335,5 @@ class BaseRepoController(BaseController):
             c.repository_followers = self.scm_model.get_followers(dbr)
             c.repository_forks = self.scm_model.get_forks(dbr)
             c.repository_pull_requests = self.scm_model.get_pull_requests(dbr)
+            c.repository_following = self.scm_model.is_following_repo(c.repo_name,
+                                                self.rhodecode_user.user_id)

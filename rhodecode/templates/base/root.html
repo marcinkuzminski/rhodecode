@@ -11,6 +11,8 @@
         <%def name="css()">
             <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css', ver=c.rhodecode_version)}" media="screen"/>
             <link rel="stylesheet" type="text/css" href="${h.url('/css/pygments.css', ver=c.rhodecode_version)}"/>
+
+            <link rel="stylesheet" type="text/css" href="${h.url('/css/contextbar.css', ver=c.rhodecode_version)}"/>
             ## EXTRA FOR CSS
             ${self.css_extra()}
         </%def>

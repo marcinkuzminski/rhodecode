@@ -7,10 +7,6 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
-    &raquo;
     ${_('changeset')} - <span class='hash'>r${c.changeset.revision}:${h.short_id(c.changeset.raw_id)}</span>
 </%def>
 
@@ -19,6 +15,7 @@
 </%def>
 
 <%def name="main()">
+${self.context_bar('changelog')}
 <div class="box">
     <!-- box / title -->
     <div class="title">

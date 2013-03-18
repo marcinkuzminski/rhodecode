@@ -8,17 +8,14 @@
 
 <%def name="breadcrumbs_links()">
     <input class="q_filter_box" id="q_filter_tags" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
-    &raquo;
-    ${_('tags')}
+    ${_('Tags')}
 </%def>
 
 <%def name="page_nav()">
     ${self.menu('tags')}
 </%def>
 <%def name="main()">
+${self.context_bar('switch-to')}
 <div class="box">
     <!-- box / title -->
     <div class="title">

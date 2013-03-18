@@ -6,17 +6,14 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
-    &raquo;
-    ${_('forks')}
+    ${_('Forks')}
 </%def>
 
 <%def name="page_nav()">
     ${self.menu('forks')}
 </%def>
 <%def name="main()">
+${self.context_bar('forks')}
 <div class="box">
     <!-- box / title -->
     <div class="title">

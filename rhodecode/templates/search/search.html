@@ -11,13 +11,9 @@
 
 <%def name="breadcrumbs_links()">
   %if c.repo_name:
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
-    &raquo;
-    ${_('search')}
+    ${_('Search')}
   %else:
-    ${_('search in all repositories')}
+    ${_('Search in all repositories')}
   %endif
   %if c.cur_query:
     &raquo;
@@ -33,7 +29,7 @@
     %endif
 </%def>
 <%def name="main()">
-
+ ${self.context_bar('options')}
 <div class="box">
     <!-- box / title -->
     <div class="title">

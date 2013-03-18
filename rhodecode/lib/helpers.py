@@ -363,7 +363,7 @@ from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
 from rhodecode.model.db import User, ChangesetStatus
 
-age = lambda  x: _age(x)
+age = lambda  x,y=False: _age(x,y)
 capitalize = lambda x: x.capitalize()
 email = author_email
 short_id = lambda x: x[:12]
@@ -914,13 +914,13 @@ def repo_link(groups_and_repos, last_url=None):
 
     if not groups:
         if last_url:
-            return last_link
-        return repo_name
+            return literal('<span>%s</span>' % last_link)
+        return literal('<span>%s</span>' % repo_name)
     else:
         def make_link(group):
             return link_to(group.name,
                            url('repos_group_home', group_name=group.group_name))
-        return literal(' &raquo; '.join(map(make_link, groups) + [last_link]))
+        return literal(' &raquo; '.join(map(make_link, groups) + ['<span>' + last_link + '</span>']))
 
 
 def fancy_file_stats(stats):

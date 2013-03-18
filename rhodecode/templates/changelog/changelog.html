@@ -7,12 +7,8 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
-    &raquo;
     <% size = c.size if c.size <= c.total_cs else c.total_cs %>
-    ${_('changelog')} - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
+    ${_('Changelog')} - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
 </%def>
 
 <%def name="page_nav()">
@@ -20,6 +16,7 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
 </%def>
 
 <%def name="main()">
+${self.context_bar('changelog')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -28,10 +25,6 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
     <div class="table">
         % if c.pagination:
             <div id="graph">
-                <div id="graph_nodes">
-                    <canvas id="graph_canvas"></canvas>
-                </div>
-                <div id="graph_content">
                     <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
                     <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
                     <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
@@ -42,123 +35,105 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     %if h.is_hg(c.rhodecode_repo):
                     <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
                     %endif
+                </div>
+                <div class="container_header">
+                    ${h.form(h.url.current(),method='get')}
+                    <div style="float:left">
+                        ${h.submit('set',_('Show'),class_="ui-btn")}
+                        ${h.text('size',size=1,value=c.size)}
+                        ${_('revisions')}
                     </div>
-                    <div class="container_header">
-                        ${h.form(h.url.current(),method='get')}
-                        <div class="info_box" style="float:left">
-                          ${h.submit('set',_('Show'),class_="ui-btn")}
-                          ${h.text('size',size=1,value=c.size)}
-                          ${_('revisions')}
-                        </div>
-                        ${h.end_form()}
+                    ${h.end_form()}
                     <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
-                    </div>
+                </div>
+                <div id="graph_nodes">
+                    <canvas id="graph_canvas"></canvas>
+                </div>
+                <div id="graph_content">
 
+                <table id="changesets">
+                <tbody>
                 %for cnt,cs in enumerate(c.pagination):
-                    <div id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
-                        <div class="left">
-                            <div>
+                    <tr id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
+                        <td class="checkbox">
                             ${h.checkbox(cs.raw_id,class_="changeset_range")}
-                            <span class="tooltip" title="${h.tooltip(h.age(cs.date))}"><a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}"><span class="changeset_id">${cs.revision}:<span class="changeset_hash">${h.short_id(cs.raw_id)}</span></span></a></span>
-                            </div>
-                            <div class="author">
-                                <div class="gravatar">
-                                    <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),16)}"/>
-                                </div>
-                                <div title="${cs.author}" class="user">${h.shorter(h.person(cs.author),22)}</div>
-                            </div>
-                            <div class="date">${h.fmt_date(cs.date)}</div>
-                        </div>
-                        <div class="mid">
-                            <div class="message">${h.urlify_commit(cs.message, c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
-                            <div class="expand"><span class="expandtext">&darr; ${_('Show more')} &darr;</span></div>
-                        </div>
-                        <div class="right">
-                                    <div class="changes">
-                                        <div id="changed_total_${cs.raw_id}" style="float:right;" class="changed_total tooltip" title="${h.tooltip(_('Affected number of files, click to show more details'))}">${len(cs.affected_files)}</div>
+                        </td>
+                        <td class="author">
+                            <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),16)}"/>
+                            <span title="${cs.author}" class="user">${h.shorter(h.person(cs.author),22)}</span>
+                        </td>
+                        <td class="hash">
+                            <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}">
+                                <span class="changeset_hash">${h.short_id(cs.raw_id)}</span>
+                            </a>
+                        </td>
+                        <td class="date">
+                            <div class="date">${h.age(cs.date,True)}</div>
+                        </td>
+                        <td class="mid">
+                            <div class="log-container">
+                                <div class="message">${h.urlify_commit(cs.message, c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
+                                <div class="expand"><span class="expandtext">&darr; ${_('Show more')} &darr;</span></div>
+                                <div class="extra-container">
+                                    %if c.comments.get(cs.raw_id,[]):
                                         <div class="comments-container">
-                                        %if len(c.comments.get(cs.raw_id,[])) > 0:
                                             <div class="comments-cnt" title="${('comments')}">
-                                              <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
-                                               <div class="comments-cnt">${len(c.comments[cs.raw_id])}</div>
-                                               <img src="${h.url('/images/icons/comments.png')}">
-                                              </a>
+                                                <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
+                                                    ${len(c.comments[cs.raw_id])}
+                                                </a>
                                             </div>
-                                        %endif
                                         </div>
-                                        <div class="changeset-status-container">
-                                            %if c.statuses.get(cs.raw_id):
-                                              <div title="${_('Changeset status')}" class="changeset-status-lbl">${c.statuses.get(cs.raw_id)[1]}</div>
-                                              <div class="changeset-status-ico">
-                                              %if c.statuses.get(cs.raw_id)[2]:
-                                                <a class="tooltip" title="${_('Click to open associated pull request #%s' % c.statuses.get(cs.raw_id)[2])}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" /></a>
-                                              %else:
-                                                <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
-                                              %endif
-                                              </div>
-                                            %endif
-                                        </div>
-                                    </div>
-                                   %if cs.parents:
-                                    %for p_cs in reversed(cs.parents):
-                                        <div class="parent">${_('Parent')}
-                                            <span class="changeset_id">${p_cs.revision}:<span class="changeset_hash">${h.link_to(h.short_id(p_cs.raw_id),
-                                            h.url('changeset_home',repo_name=c.repo_name,revision=p_cs.raw_id),title=p_cs.message)}</span></span>
-                                        </div>
-                                    %endfor
-                                   %else:
-                                        <div class="parent">${_('No parents')}</div>
-                                   %endif
-
-                                <span class="logtags">
-                                    %if len(cs.parents)>1:
-                                    <span class="merge">${_('merge')}</span>
-                                    %endif
-                                    %if cs.branch:
-                                    <span class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
-                                       ${h.link_to(h.shorter(cs.branch),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
-                                    </span>
                                     %endif
                                     %if h.is_hg(c.rhodecode_repo):
-                                      %for book in cs.bookmarks:
-                                      <span class="bookbook" title="${'%s %s' % (_('bookmark'),book)}">
-                                         ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
-                                      </span>
-                                      %endfor
+	                                    %for book in cs.bookmarks:
+	                                        <div class="bookbook" title="${'%s %s' % (_('bookmark'),book)}">
+	                                            ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+	                                        </div>
+	                                    %endfor
                                     %endif
                                     %for tag in cs.tags:
-                                        <span class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
-                                        ${h.link_to(h.shorter(tag),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}</span>
+                                        <div class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
+                                            ${h.link_to(h.shorter(tag),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+                                        </div>
                                     %endfor
-                                </span>
-                        </div>
-                    </div>
-
+                                    %if (not c.branch_name) and cs.branch:
+                                        <div class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
+                                            ${h.link_to(h.shorter(cs.branch),h.url('changelog_home',repo_name=c.repo_name,branch=cs.branch))}
+                                        </div>
+                                    %endif
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 %endfor
+                </tbody>
+                </table>
+
+
                 <div class="pagination-wh pagination-left">
                     ${c.pagination.pager('$link_previous ~2~ $link_next')}
                 </div>
-                </div>
             </div>
+        </div>
 
-            <script type="text/javascript" src="${h.url('/js/graph.js')}"></script>
-            <script type="text/javascript">
-                YAHOO.util.Event.onDOMReady(function(){
+        <script type="text/javascript" src="${h.url('/js/graph.js')}"></script>
+        <script type="text/javascript">
+            YAHOO.util.Event.onDOMReady(function(){
 
-                    //Monitor range checkboxes and build a link to changesets
-                    //ranges
-                    var checkboxes = YUD.getElementsByClassName('changeset_range');
-                    var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
-                    var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
+                //Monitor range checkboxes and build a link to changesets
+                //ranges
+                var checkboxes = YUD.getElementsByClassName('changeset_range');
+                var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
+                var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
 
                     var checkbox_checker = function(e){
-                        var checked_checkboxes = [];
-                        for (pos in checkboxes){
-                            if(checkboxes[pos].checked){
-                                checked_checkboxes.push(checkboxes[pos]);
-                            }
+                    var checked_checkboxes = [];
+                    for (pos in checkboxes){
+                        if(checkboxes[pos].checked){
+                            checked_checkboxes.push(checkboxes[pos]);
                         }
-                        if(YUD.get('open_new_pr')){
+                    }
+                    if(YUD.get('open_new_pr')){
                             if(checked_checkboxes.length>1){
                               YUD.setStyle('open_new_pr','display','none');
                             } else {
@@ -171,29 +146,28 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                           }
                         }
 
-                        if(checked_checkboxes.length>0){
-                            var rev_end = checked_checkboxes[0].name;
-                            var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
-                            var url = url_tmpl.replace('__REVRANGE__',
-                                    rev_start+'...'+rev_end);
+                    if(checked_checkboxes.length>0){
+                        var rev_end = checked_checkboxes[0].name;
+                        var rev_start = checked_checkboxes[checked_checkboxes.length-1].name;
+                        var url = url_tmpl.replace('__REVRANGE__',
+                                rev_start+'...'+rev_end);
 
-                            var link = (rev_start == rev_end)
-                                ? _TM['Show selected change __S']
-                                : _TM['Show selected changes __S -> __E'];
+                        var link = (rev_start == rev_end)
+                            ? _TM['Show selected change __S']
+                            : _TM['Show selected changes __S -> __E'];
 
-                            link = link.replace('__S',rev_start.substr(0,6));
-                            link = link.replace('__E',rev_end.substr(0,6));
-                            YUD.get('rev_range_container').href = url;
-                            YUD.get('rev_range_container').innerHTML = link;
-                            YUD.setStyle('rev_range_container','display','');
-                            YUD.setStyle('rev_range_clear','display','');
+                        link = link.replace('__S',rev_start.substr(0,6));
+                        link = link.replace('__E',rev_end.substr(0,6));
+                        YUD.get('rev_range_container').href = url;
+                        YUD.get('rev_range_container').innerHTML = link;
+                        YUD.setStyle('rev_range_container','display','');
+                        YUD.setStyle('rev_range_clear','display','');
 
-                            YUD.get('open_new_pr').href = pr_tmpl + '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
+                        YUD.get('open_new_pr').href = pr_tmpl + '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
                             YUD.setStyle('compare_fork','display','none');
-                        }
-                        else{
-                            YUD.setStyle('rev_range_container','display','none');
-                            YUD.setStyle('rev_range_clear','display','none');
+                    } else{
+                        YUD.setStyle('rev_range_container','display','none');
+                        YUD.setStyle('rev_range_clear','display','none');
                             if (checkboxes){
                                 YUD.get('open_new_pr').href = pr_tmpl + '?rev_end={0}'.format(checkboxes[0].name);
                             }
@@ -203,94 +177,86 @@ ${_('%s Changelog') % c.repo_name} - ${c.rhodecode_name}
                     YUE.onDOMReady(checkbox_checker);
                     YUE.on(checkboxes,'click', checkbox_checker);
 
-                    YUE.on('rev_range_clear','click',function(e){
-                        for (var i=0; i<checkboxes.length; i++){
-                            var cb = checkboxes[i];
-                            cb.checked = false;
-                        }
+                YUE.on('rev_range_clear','click',function(e){
+                    for (var i=0; i<checkboxes.length; i++){
+                        var cb = checkboxes[i];
+                        cb.checked = false;
+                    }
                         checkbox_checker();
-                        YUE.preventDefault(e);
-                    })
+                    YUE.preventDefault(e);
+                });
 
-                    var msgs = YUQ('.message');
-                    // get first element height
-                    var el = YUQ('#graph_content .container')[0];
-                    var row_h = el.clientHeight;
-                    for(var i=0;i<msgs.length;i++){
-                        var m = msgs[i];
+                var msgs = YUQ('.message');
+                // get first element height
+                var el = YUQ('#graph_content .container')[0];
+                var row_h = el.clientHeight;
+                for(var i=0;i<msgs.length;i++){
+                    var m = msgs[i];
 
-                        var h = m.clientHeight;
-                        var pad = YUD.getStyle(m,'padding');
-                        if(h > row_h){
-                            var offset = row_h - (h+12);
-                            YUD.setStyle(m.nextElementSibling,'display','block');
-                            YUD.setStyle(m.nextElementSibling,'margin-top',offset+'px');
-                        };
-                    }
-                    YUE.on(YUQ('.expand'),'click',function(e){
-                        var elem = e.currentTarget.parentNode.parentNode;
-                        YUD.setStyle(e.currentTarget,'display','none');
-                        YUD.setStyle(elem,'height','auto');
-
-                        //redraw the graph, line_count and jsdata are global vars
-                        set_canvas(100);
-
-                        var r = new BranchRenderer();
-                        r.render(jsdata,100,line_count);
-
-                    })
-
-                    // Fetch changeset details
-                    YUE.on(YUD.getElementsByClassName('changed_total'),'click',function(e){
-                        var id = e.currentTarget.id;
-                        var url = "${h.url('changelog_details',repo_name=c.repo_name,cs='__CS__')}";
-                        var url = url.replace('__CS__',id.replace('changed_total_',''));
-                        ypjax(url,id,function(){tooltip_activate()});
-                    });
-
-                    // change branch filter
-                    YUE.on(YUD.get('branch_filter'),'change',function(e){
-                        var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
-                        var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
-                        var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
-                        var url = url.replace('__BRANCH__',selected_branch);
-                        if(selected_branch != ''){
-                            window.location = url;
-                        }else{
-                            window.location = url_main;
-                        }
-
-                    });
-
-                    function set_canvas(width) {
-                        var c = document.getElementById('graph_nodes');
-                        var t = document.getElementById('graph_content');
-                        canvas = document.getElementById('graph_canvas');
-                        var div_h = t.clientHeight;
-                        c.style.height=div_h+'px';
-                        canvas.setAttribute('height',div_h);
-                        c.style.height=width+'px';
-                        canvas.setAttribute('width',width);
+                    var h = m.clientHeight;
+                    var pad = YUD.getStyle(m,'padding');
+                    if(h > row_h){
+                        var offset = row_h - (h+12);
+                        YUD.setStyle(m.nextElementSibling,'display','block');
+                        YUD.setStyle(m.nextElementSibling,'margin-top',offset+'px');
                     };
-                    var heads = 1;
-                    var line_count = 0;
-                    var jsdata = ${c.jsdata|n};
+                }
+                YUE.on(YUQ('.expand'),'click',function(e){
+                    var elem = e.currentTarget.parentNode.parentNode;
+                    YUD.setStyle(e.currentTarget,'display','none');
+                    YUD.setStyle(elem,'height','auto');
 
-                    for (var i=0;i<jsdata.length;i++) {
-                        var in_l = jsdata[i][2];
-                        for (var j in in_l) {
-                            var m = in_l[j][1];
-                            if (m > line_count)
-                                line_count = m;
-                        }
-                    }
+                    //redraw the graph, line_count and jsdata are global vars
                     set_canvas(100);
 
                     var r = new BranchRenderer();
                     r.render(jsdata,100,line_count);
 
                 });
-            </script>
+
+                // change branch filter
+                YUE.on(YUD.get('branch_filter'),'change',function(e){
+                    var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
+                    var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
+                    var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
+                    var url = url.replace('__BRANCH__',selected_branch);
+                    if(selected_branch != ''){
+                        window.location = url;
+                    }else{
+                        window.location = url_main;
+                    }
+
+                });
+
+                function set_canvas(width) {
+                    var c = document.getElementById('graph_nodes');
+                    var t = document.getElementById('graph_content');
+                    canvas = document.getElementById('graph_canvas');
+                    var div_h = t.clientHeight;
+                    //c.style.height=div_h+'px';
+                    canvas.setAttribute('height',div_h);
+                    //c.style.height=width+'px';
+                    canvas.setAttribute('width',width);
+                };
+                var heads = 1;
+                var line_count = 0;
+                var jsdata = ${c.jsdata|n};
+
+                for (var i=0;i<jsdata.length;i++) {
+                    var in_l = jsdata[i][2];
+                    for (var j in in_l) {
+                        var m = in_l[j][1];
+                        if (m > line_count)
+                            line_count = m;
+                    }
+                }
+                set_canvas(100);
+
+                var r = new BranchRenderer();
+                r.render(jsdata,100,line_count);
+
+            });
+        </script>
         %else:
             ${_('There are no changes yet')}
         %endif

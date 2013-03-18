@@ -509,7 +509,7 @@ var show_changeset_tooltip = function(){
 };
 
 var onSuccessFollow = function(target){
-    var f = YUD.get(target.id);
+    var f = YUD.get(target);
     var f_cnt = YUD.get('current_followers_count');
 
     if(YUD.hasClass(f, 'follow')){
@@ -575,6 +575,7 @@ var showRepoSize = function(target, repo_name, token){
     }
     return false;	
 }
+
 
 /**
  * TOOLTIP IMPL.

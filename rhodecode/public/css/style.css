@@ -396,37 +396,14 @@ div:hover > a.permalink {
     color: #bfe3ff;
 }
 
-#header #header-inner #quick, #header #header-inner #quick ul {
+#header #header-inner #quick {
     position: relative;
     float: right;
     list-style-type: none;
     list-style-position: outside;
-    margin: 8px 8px 0 0;
+    margin: 4px 8px 0 0;
     padding: 0;
-}
-
-#header #header-inner #quick li {
-    position: relative;
-    float: left;
-    margin: 0 5px 0 0;
-    padding: 0;
-}
-
-#header #header-inner #quick li a.menu_link {
-    top: 0;
-    left: 0;
-    height: 1%;
-    display: block;
-    clear: both;
-    overflow: hidden;
-    color: #FFF;
-    font-weight: 700;
-    text-decoration: none;
-    background: #369;
-    padding: 0;
-    -webkit-border-radius: 4px 4px 4px 4px;
-    -khtml-border-radius: 4px 4px 4px 4px;
-    border-radius: 4px 4px 4px 4px;
+    border-radius: 4px;
 }
 
 #header #header-inner #quick li span.short {
@@ -434,14 +411,8 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li span {
-    top: 0;
-    right: 0;
-    height: 1%;
-    display: block;
-    float: left;
-    border-left: 1px solid #3f6f9f;
+    display: inline;
     margin: 0;
-    padding: 10px 12px 8px 10px;
 }
 
 #header #header-inner #quick li span.normal {
@@ -450,13 +421,9 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li span.icon {
-    top: 0;
-    left: 0;
+
     border-left: none;
-    border-right: 1px solid #2e5c89;
-    padding: 8px 6px 4px;
-    min-width: 16px;
-    min-height: 16px;
+    padding-left: 10px ;
 }
 
 #header #header-inner #quick li span.icon_short {
@@ -468,39 +435,8 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li span.icon img, #header #header-inner #quick li span.icon_short img {
-    margin: 0px -2px 0px 0px;
-}
-
-#header #header-inner #quick li.current a,
-#header #header-inner #quick li a:hover {
-    background: #4e4e4e no-repeat top left;
-}
-
-#header #header-inner #quick li.current a span,
-#header #header-inner #quick li a:hover span {
-    border-left: 1px solid #545454;
-}
-
-#header #header-inner #quick li.current a span.icon,
-#header #header-inner #quick li.current a span.icon_short,
-#header #header-inner #quick li a:hover span.icon,
-#header #header-inner #quick li a:hover span.icon_short {
-    border-left: none;
-    border-right: 1px solid #464646;
-}
-
-#header #header-inner #quick ul {
-    top: 29px;
-    right: 0;
-    min-width: 200px;
-    display: none;
-    position: absolute;
-    background: #FFF;
-    border: 1px solid #666;
-    border-top: 1px solid #003367;
-    z-index: 100;
-    margin: 0px 0px 0px 0px;
-    padding: 0;
+    vertical-align: middle;
+    margin-bottom: 2px;
 }
 
 #header #header-inner #quick ul.repo_switcher {
@@ -510,216 +446,113 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick ul.repo_switcher li.qfilter_rs {
-    float: none;
-    margin: 0;
-    border-bottom: 2px solid #003367;
+    padding: 2px 3px;
+    padding-right: 17px;
+}
+
+#header #header-inner #quick ul.repo_switcher li.qfilter_rs  input {
+    width: 100%;
+    border-radius: 10px;
+    padding: 2px 7px;
 }
 
 #header #header-inner #quick .repo_switcher_type {
     position: absolute;
     left: 0;
     top: 9px;
-}
-
-#header #header-inner #quick li ul li {
-    border-bottom: 1px solid #ddd;
-}
-
-#header #header-inner #quick li ul li a {
-    width: 182px;
-    height: auto;
-    display: block;
-    float: left;
-    background: #FFF;
-    color: #003367;
-    font-weight: 400;
-    margin: 0;
-    padding: 7px 9px;
-}
-
-#header #header-inner #quick li ul li a:hover {
-    color: #000;
-    background: #FFF;
-}
-
-#header #header-inner #quick ul ul {
-    top: auto;
-}
-
-#header #header-inner #quick li ul ul {
-    right: 200px;
-    max-height: 290px;
-    overflow: auto;
-    overflow-x: hidden;
-    white-space: normal;
+    margin: 0px 2px 0px 2px;
 }
 
 #header #header-inner #quick li ul li a.journal, #header #header-inner #quick li ul li a.journal:hover {
-    background: url("../images/icons/book.png") no-repeat scroll 4px 9px
-        #FFF;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/book.png");
 }
 
 #header #header-inner #quick li ul li a.private_repo, #header #header-inner #quick li ul li a.private_repo:hover {
-    background: url("../images/icons/lock.png") no-repeat scroll 4px 9px
-        #FFF;
-    min-width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock.png")
 }
 
 #header #header-inner #quick li ul li a.public_repo, #header #header-inner #quick li ul li a.public_repo:hover {
-    background: url("../images/icons/lock_open.png") no-repeat scroll 4px
-        9px #FFF;
-    min-width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock_open.png");
 }
 
 #header #header-inner #quick li ul li a.hg, #header #header-inner #quick li ul li a.hg:hover {
-    background: url("../images/icons/hgicon.png") no-repeat scroll 4px 9px
-        #FFF;
-    min-width: 167px;
-    margin: 0 0 0 14px;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/hgicon.png");
+    padding-left: 42px;
+    background-position: 20px 9px;
 }
 
 #header #header-inner #quick li ul li a.git, #header #header-inner #quick li ul li a.git:hover {
-    background: url("../images/icons/giticon.png") no-repeat scroll 4px 9px
-        #FFF;
-    min-width: 167px;
-    margin: 0 0 0 14px;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/giticon.png");
+    padding-left: 42px;
+    background-position: 20px 9px;
 }
 
 #header #header-inner #quick li ul li a.repos, #header #header-inner #quick li ul li a.repos:hover {
-    background: url("../images/icons/database_edit.png") no-repeat scroll
-        4px 9px #FFF;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/database_edit.png");
 }
 
 #header #header-inner #quick li ul li a.repos_groups, #header #header-inner #quick li ul li a.repos_groups:hover {
-    background: url("../images/icons/database_link.png") no-repeat scroll
-        4px 9px #FFF;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/database_link.png");
 }
 
 #header #header-inner #quick li ul li a.users, #header #header-inner #quick li ul li a.users:hover {
-    background: #FFF url("../images/icons/user_edit.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/user_edit.png");
 }
 
 #header #header-inner #quick li ul li a.groups, #header #header-inner #quick li ul li a.groups:hover {
-    background: #FFF url("../images/icons/group_edit.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/group_edit.png");
 }
 
 #header #header-inner #quick li ul li a.defaults, #header #header-inner #quick li ul li a.defaults:hover {
-    background: #FFF url("../images/icons/wrench.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/wrench.png");
 }
 
 #header #header-inner #quick li ul li a.settings, #header #header-inner #quick li ul li a.settings:hover {
-    background: #FFF url("../images/icons/cog.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/cog.png");
 }
 
 #header #header-inner #quick li ul li a.permissions, #header #header-inner #quick li ul li a.permissions:hover {
-    background: #FFF url("../images/icons/key.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/key.png");
 }
 
 #header #header-inner #quick li ul li a.ldap, #header #header-inner #quick li ul li a.ldap:hover {
-    background: #FFF url("../images/icons/server_key.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/server_key.png");
 }
 
 #header #header-inner #quick li ul li a.fork, #header #header-inner #quick li ul li a.fork:hover {
-    background: #FFF url("../images/icons/arrow_divide.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_divide.png");
 }
 
 #header #header-inner #quick li ul li a.locking_add, #header #header-inner #quick li ul li a.locking_add:hover {
-    background: #FFF url("../images/icons/lock_add.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock_add.png");
 }
 
 #header #header-inner #quick li ul li a.locking_del, #header #header-inner #quick li ul li a.locking_del:hover {
-    background: #FFF url("../images/icons/lock_delete.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/lock_delete.png");
 }
 
 #header #header-inner #quick li ul li a.pull_request, #header #header-inner #quick li ul li a.pull_request:hover {
-    background: #FFF url("../images/icons/arrow_join.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_join.png") ;
 }
 
 #header #header-inner #quick li ul li a.compare_request, #header #header-inner #quick li ul li a.compare_request:hover {
-    background: #FFF url("../images/icons/arrow_inout.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_inout.png");
 }
 
 #header #header-inner #quick li ul li a.search, #header #header-inner #quick li ul li a.search:hover {
-    background: #FFF url("../images/icons/search_16.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/search_16.png");
 }
 
 #header #header-inner #quick li ul li a.shortlog, #header #header-inner #quick li ul li a.shortlog:hover {
-    background: #FFF url("../images/icons/clock_16.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/clock_16.png");
 }
 
-
 #header #header-inner #quick li ul li a.delete, #header #header-inner #quick li ul li a.delete:hover {
-    background: #FFF url("../images/icons/delete.png") no-repeat 4px 9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/delete.png");
 }
 
 #header #header-inner #quick li ul li a.branches, #header #header-inner #quick li ul li a.branches:hover {
-    background: #FFF url("../images/icons/arrow_branch.png") no-repeat 4px
-        9px;
-    width: 167px;
-    margin: 0;
-    padding: 12px 9px 7px 24px;
+    background-image: url("../images/icons/arrow_branch.png");
 }
 
 #header #header-inner #quick li ul li a.tags,
@@ -1076,7 +909,6 @@ tbody .yui-dt-editable { cursor: pointer }
 
 #content div.box {
     clear: both;
-    overflow: hidden;
     background: #fff;
     margin: 0 0 10px;
     padding: 0 0 10px;
@@ -1115,6 +947,7 @@ tbody .yui-dt-editable { cursor: pointer }
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#003b76', endColorstr='#00376e', GradientType=0 );
     margin: 0 0 20px;
     padding: 0;
+    border-radius: 4px 4px 0 0;
 }
 
 #content div.box div.title h5 {
@@ -1255,6 +1088,7 @@ tbody .yui-dt-editable { cursor: pointer }
     background: linear-gradient(to bottom,rgba(255,255,255,0),rgba(64,96,128,0.1));
 
     display: none;
+    overflow: hidden;
 }
 #content div.box div.expand .expandtext {
     background-color: #ffffff;
@@ -1844,7 +1678,71 @@ div.form div.fields div.field div.button {
     padding: 0 3px 2px;
 }
 
-#summary {
+#content div.box #summary {
+    margin-right: 200px;
+}
+
+#summary-menu-stats {
+    float: left;
+    width: 180px;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+#summary-menu-stats ul {
+    margin: 0 10px;
+    display: block;
+    background-color: #f9f9f9;
+    border: 1px solid #d1d1d1;
+    border-radius: 4px;
+}
+
+#content #summary-menu-stats li {
+    border-top: 1px solid #d1d1d1;
+    padding: 0;
+}
+
+#content #summary-menu-stats li:hover {
+    background: #f0f0f0;
+}
+
+#content #summary-menu-stats li:first-child {
+    border-top: none;
+}
+
+#summary-menu-stats a.followers { background-image: url('../images/icons/heart.png')}
+#summary-menu-stats a.forks { background-image: url('../images/icons/arrow_divide.png')}
+#summary-menu-stats a.settings { background-image: url('../images/icons/cog_edit.png')}
+#summary-menu-stats a.feed { background-image: url('../images/icons/rss_16.png')}
+#summary-menu-stats a.repo-size { background-image: url('../images/icons/server.png')}
+
+#summary-menu-stats a {
+    display: block;
+    padding: 12px 30px;
+    background-repeat: no-repeat;
+    background-position: 10px 50%;
+    padding-right: 10px;
+}
+
+
+#repo_size_2 {
+    margin-left: 30px;
+    display: block;
+    padding-right: 10px;
+    padding-bottom: 7px;
+}
+
+#summary-menu-stats a:hover {
+    text-decoration: none;
+}
+
+#summary-menu-stats a span {
+    background-color: #FFF;
+    border: 1px inset #f0f0f0;
+    border-radius: 7px;
+    padding: 1px;
+    font-size: 10px;
 }
 
 #summary .metatag {
@@ -2085,7 +1983,7 @@ a.metatag[tag="license"]:hover {
 }
 
 #quick_login .password_forgoten {
-    padding-right: 10px;
+    padding-right: 0px;
     padding-top: 0px;
     text-align: left;
 }
@@ -2093,6 +1991,8 @@ a.metatag[tag="license"]:hover {
 #quick_login .password_forgoten a {
     font-size: 10px;
     color: #fff;
+    padding: 0px !important;
+    line-height: 20px !important;
 }
 
 #quick_login .register {
@@ -2104,6 +2004,8 @@ a.metatag[tag="license"]:hover {
 #quick_login .register a {
     font-size: 10px;
     color: #fff;
+    padding: 0px !important;
+    line-height: 20px !important;    
 }
 
 #quick_login .submit {
@@ -2127,15 +2029,16 @@ a.metatag[tag="license"]:hover {
     padding: 4px 0px 0px 6px;
 }
 #quick_login .notifications {
-    padding: 4px 0px 0px 6px;
+    padding: 2px 0px 0px 6px;
     color: #FFFFFF;
     font-weight: bold;
+    line-height: 10px !important;
 }
 #quick_login .notifications a,
 #quick_login .unread a {
     color: #FFFFFF;
     display: block;
-    padding: 2px;
+    padding: 0px !important;
 }
 #quick_login .notifications a:hover,
 #quick_login .unread a:hover {
@@ -2462,10 +2365,10 @@ h3.files_location {
     text-align: right;
 }
 
-#changeset_content .container .left .message {
+#changeset_content .container .message {
     white-space: pre-wrap;
 }
-#changeset_content .container .left .message a:hover {
+#changeset_content .container .message a:hover {
     text-decoration: none;
 }
 .cs_files .cur_cs {
@@ -2561,23 +2464,30 @@ h3.files_location {
     text-align: left;
 }
 
+.table {
+    position: relative;
+}
+
 #graph {
+    position: relative;
     overflow: hidden;
 }
 
 #graph_nodes {
-    float: left;
-    margin-right: 0px;
-    margin-top: 0px;
+    position: absolute;
+}
+
+#graph_content,
+#graph .info_box,
+#graph .container_header {
+    margin-left: 100px;
 }
 
 #graph_content {
-    width: 80%;
-    float: left;
+    position: relative;
 }
 
-#graph_content .container_header {
-    border-bottom: 1px solid #DDD;
+#graph .container_header {
     padding: 10px;
     height: 25px;
 }
@@ -2592,49 +2502,143 @@ h3.files_location {
     margin: 0px 0px 0px 3px;
 }
 
+#graph_content #changesets {
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-left: none;
+    border-right: none;
+    border-color: #cdcdcd;
+}
+
 #graph_content .container {
-    border-bottom: 1px solid #DDD;
-    height: 56px;
+
+}
+
+#graph_content #changesets td {
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    height: 31px;
+    border-color: #cdcdcd;
+    text-align: left;
 }
 
-#graph_content .container .right {
-    float: right;
-    width: 23%;
-    text-align: right;
+#graph_content .container .author {
+   width: 105px;
 }
 
-#graph_content .container .left {
-    float: left;
-    width: 25%;
-    padding-left: 5px;
+#graph_content .container .hash {
+    width: 85px;
+    font-size: 0.85em;
 }
 
-#graph_content .container .mid {
-    float: left;
-    width: 49%;
-}
-
-
-#graph_content .container .left .date {
+#graph_content #changesets .container .date {
+    width: 76px;
     color: #666;
-    padding-left: 22px;
     font-size: 10px;
 }
 
-#graph_content .container .left .author {
-    height: 22px;
+#graph_content #changesets .container .right {
+    width: 120px;
+    padding-right: 0px;
+    overflow: visible;
+    position: relative;
 }
 
-#graph_content .container .left .author .user {
-    color: #444444;
+#graph_content .container .mid {
+    padding: 0;
+}
+
+#graph_content .log-container {
+    position: relative;
+}
+
+#graph_content #changesets td.checkbox {
+    width: 20px;
+}
+
+#graph_content .container .changeset_range {
     float: left;
-    margin-left: -4px;
-    margin-top: 4px;
+    margin: 6px 3px;
+}
+
+#graph_content .container .author img {
+    vertical-align: middle;
+}
+
+#graph_content .container .author .user {
+    color: #444444;
 }
 
 #graph_content .container .mid .message {
     white-space: pre-wrap;
+    padding: 0;
+    overflow: hidden;
+    height: 1.1em;
+}
+
+#graph_content .container .extra-container {
+    display: block;
+    position: absolute;
+    top: -15px;
+    right: 0;
+    padding-left: 5px;
+    background: #FFFFFF;
+    height: 41px;
+}
+
+#graph_content .comments-container,
+#graph_content .logtags {
+    display: block;
+    float: left;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+#graph_content .comments-container {
+    margin: 0.8em 0;
+    margin-right: 0.5em;
+}
+
+#graph_content  .tagcontainer {
+    width: 80px;
+    position: relative;
+    float: right;
+    height: 100%;
+    top: 7px;
+    margin-left: 0.5em;
+}
+
+#graph_content .logtags {
+    min-width: 80px;
+    height: 1.1em;
+    position: absolute;
+    left: 0px;
+    width: auto;
+    top: 0px;
+}
+
+#graph_content .logtags.tags {
+    top: 14px;
+}
+
+#graph_content .logtags:hover {
+    overflow: visible;
+    position: absolute;
+    width: auto;
+    right: 0;
+    left: initial;
+}
+
+#graph_content .logtags .bookbook,
+#graph_content .logtags .tagtag {
+    float: left;
+    line-height: 1em;
+    margin-bottom: 1px;
+    margin-right: 1px;
+    padding: 1px 3px;
+    font-size: 10px;
 }
 
 #graph_content .container .mid .message a:hover {
@@ -2676,17 +2680,18 @@ h3.files_location {
 .code-header .changeset-status-container .changeset-status-ico, .container .changeset-status-ico {
     float: left;
 }
-.right .comments-container {
-    padding-right: 5px;
-    margin-top: 1px;
-    float: right;
-    height: 14px;
+
+#graph_content .comments-cnt {
+    color: rgb(136, 136, 136);
+    padding: 5px 0;
 }
 
-.right .comments-cnt {
-    float: left;
-    color: rgb(136, 136, 136);
-    padding-right: 2px;
+#graph_content .comments-cnt a {
+    background-image: url('../images/icons/comments.png');
+    background-repeat: no-repeat;
+    background-position: 100% 50%;
+    padding: 5px 0;
+    padding-right: 20px;
 }
 
 .right .changes {
@@ -2731,7 +2736,6 @@ h3.files_location {
     padding: 1px 3px 1px 3px;
     background-color: #fca062;
     font-size: 10px;
-    font-weight: bold;
     color: #ffffff;
     text-transform: uppercase;
     white-space: nowrap;
@@ -2745,65 +2749,101 @@ h3.files_location {
     clear: both;
 }
 .right .logtags {
-    padding: 2px 2px 2px 2px;
+    line-height: 2.2em;
 }
-.right .logtags .branchtag, .right .logtags .tagtag, .right .logtags .booktag {
+.branchtag, .logtags .tagtag, .logtags .booktag {
     margin: 0px 2px;
 }
 
-.right .logtags .branchtag,
-.logtags .branchtag,
+.branchtag,
+.tagtag,
+.bookbook,
 .spantag {
     padding: 1px 3px 1px 3px;
-    background-color: #bfbfbf;
     font-size: 10px;
-    font-weight: bold;
-    color: #ffffff;
+    color: #336699;
     white-space: nowrap;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    border: 1px solid #d9e8f8;
+    line-height: 1.5em;
 }
-.right .logtags .branchtag a:hover, .logtags .branchtag a {
-    color: #ffffff;
+
+#graph_content .branchtag,
+#graph_content .tagtag,
+#graph_content .bookbook {
+    margin: 1.1em 0;
+    margin-right: 0.5em;
 }
-.right .logtags .branchtag a:hover, .logtags .branchtag a:hover {
+
+.branchtag,
+.tagtag,
+.bookbook {
+    float: left;
+}
+
+.right .logtags .branchtag,
+.logtags .tagtag,
+.right .merge {
+    float: right;
+    line-height: 1em;
+    margin: 1px 1px !important;
+    display: block;
+}
+
+.bookbook {
+    border-color: #46A546;
+    color: #46A546;
+}
+
+.tagtag {
+    border-color: #62cffc;
+    color: #62cffc;
+}
+
+.logtags .branchtag a:hover,
+.logtags .branchtag a,
+.branchtag a,
+.branchtag a:hover {
     text-decoration: none;
-    color: #ffffff;
+    color: inherit;
 }
-.right .logtags .tagtag, .logtags .tagtag {
+.logtags .tagtag {
     padding: 1px 3px 1px 3px;
     background-color: #62cffc;
     font-size: 10px;
-    font-weight: bold;
     color: #ffffff;
     white-space: nowrap;
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
-.right .logtags .tagtag a:hover, .logtags .tagtag a {
-    color: #ffffff;
-}
-.right .logtags .tagtag a:hover, .logtags .tagtag a:hover {
+
+.tagtag a,
+.tagtag a:hover,
+.logtags .tagtag a,
+.logtags .tagtag a:hover {
     text-decoration: none;
-    color: #ffffff;
+    color: inherit;
 }
-.right .logbooks .bookbook, .logbooks .bookbook, .right .logtags .bookbook, .logtags .bookbook {
+.logbooks .bookbook, .logbooks .bookbook, .logtags .bookbook, .logtags .bookbook {
     padding: 1px 3px 1px 3px;
     background-color: #46A546;
     font-size: 10px;
-    font-weight: bold;
     color: #ffffff;
-    text-transform: uppercase;
     white-space: nowrap;
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
-.right .logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
+.logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
     color: #ffffff;
 }
-.right .logbooks .bookbook, .logbooks .bookbook a:hover, .right .logtags .bookbook, .logtags .bookbook a:hover {
+
+.logbooks .bookbook, .logbooks .bookbook a:hover,
+.logtags .bookbook, .logtags .bookbook a:hover,
+.bookbook a,
+.bookbook a:hover {
     text-decoration: none;
-    color: #ffffff;
+    color: inherit;
 }
 div.browserblock {
     overflow: hidden;
@@ -3468,7 +3508,6 @@ div.gravatar img {
 
 #content {
     clear: both;
-    overflow: hidden;
     padding: 10px 10px 14px 10px;
 }
 
@@ -3616,7 +3655,6 @@ ins, div.options a:hover {
 
 img,
 #header #header-inner #quick li a:hover span.normal,
-#header #header-inner #quick li ul li.last,
 #content div.box div.form div.fields div.field div.textarea table td table td a,
 #clone_url,
 #clone_url_id
@@ -3660,8 +3698,17 @@ div#legend_data, div#legend_container, div#legend_choices {
     padding: 0 10px 10px;
 }
 
-#content div.box div.title ul.links li a:hover, #content div.box div.title ul.links li.ui-tabs-selected a {
-    color: #bfe3ff;
+#content div.box div.title ul.links li a:hover,
+#content div.box div.title ul.links li.ui-tabs-selected a {
+
+    background: #6388ad; /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* W3C */
+    /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#88bfe8', endColorstr='#70b0e0',GradientType=0 ); /* IE6-9 */*/
 }
 
 #content div.box ol.lower-roman, #content div.box ol.upper-roman, #content div.box ol.lower-alpha, #content div.box ol.upper-alpha, #content div.box ol.decimal {
@@ -3669,6 +3716,7 @@ div#legend_data, div#legend_container, div#legend_choices {
 }
 
 #content div.box div.form, #content div.box div.table, #content div.box div.traffic {
+    position: relative;
     clear: both;
     overflow: hidden;
     margin: 0;
@@ -3752,7 +3800,6 @@ div.form div.fields div.field div.button input,
 #content div.box div.form div.fields div.buttons input
 div.form div.fields div.buttons input,
 #content div.box div.action div.button input {
-    /*color: #000;*/
     font-size: 11px;
     font-weight: 700;
     margin: 0;
@@ -3926,13 +3973,7 @@ div.form div.fields div.field div.highlight, #content div.box div.form div.field
     width: 600px;
 }
 
-#changeset_content .container .left {
-    float: left;
-    width: 75%;
-    padding-left: 5px;
-}
-
-#changeset_content .container .left .date, .ac .match {
+#changeset_content .container .date, .ac .match {
     font-weight: 700;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -4352,21 +4393,6 @@ div.comment-inline-form {
     padding: 4px 0px 6px 0px;
 }
 
-
-tr.hl-comment {
-/*
-    background-color: #FFFFCC !important;
-*/
-}
-
-/*
-tr.hl-comment pre {
-    border-top: 2px solid #FFEE33;
-    border-left: 2px solid #FFEE33;
-    border-right: 2px solid #FFEE33;
-}
-*/
-
 .comment-inline-form strong {
     display: block;
     margin-bottom: 15px;
@@ -4467,22 +4493,16 @@ form.comment-inline-form {
     margin: 2px 0px 8px 5px !important
 }
 
-
 .notification-paginator {
     padding: 0px 0px 4px 16px;
     float: left;
 }
 
-.menu_link_user {
-    padding: 10px 8px 8px 8px !important;
-}
-
+#context-pages .pull-request span,
 .menu_link_notifications {
     padding: 4px 4px !important;
-    margin: 7px 4px 0px 0px !important;
     text-align: center;
     color: #888 !important;
-    font-size: 10px;
     background-color: #DEDEDE !important;
     border-radius: 4px !important;
     -webkit-border-radius: 4px !important;
