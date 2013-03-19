@@ -79,6 +79,13 @@ class MercurialRepository(BaseRepository):
     def branches(self):
         return self._get_branches()
 
+    @LazyProperty
+    def allbranches(self):
+        """
+        List all branches, including closed branches.
+        """
+        return self._get_branches(closed=True)
+
     def _get_branches(self, closed=False):
         """
         Get's branches for this repository
@@ -460,7 +467,7 @@ class MercurialRepository(BaseRepository):
             raise RepositoryError("Start revision '%s' cannot be "
                                   "after end revision '%s'" % (start, end))
 
-        if branch_name and branch_name not in self.branches.keys():
+        if branch_name and branch_name not in self.allbranches.keys():
             raise BranchDoesNotExistError('Branch %s not found in'
                                   ' this repository' % branch_name)
         if end_pos is not None:
