@@ -3385,6 +3385,10 @@ table.code-browser .submodule-dir {
     border-color: #c43c35 #c43c35 #882a25;
 }
 
+.error_msg a {
+	text-decoration: underline;
+}
+
 .warning_msg {
     color: #404040 !important;
     background-color: #eedc94;
@@ -3398,6 +3402,10 @@ table.code-browser .submodule-dir {
     background-image: linear-gradient(to bottom, #fceec1, #eedc94);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fceec1', endColorstr='#eedc94', GradientType=0 );
     border-color: #eedc94 #eedc94 #e4c652;
+}
+
+.warning_msg a {
+	text-decoration: underline;
 }
 
 .success_msg {
@@ -3414,6 +3422,11 @@ table.code-browser .submodule-dir {
     border-color: #57a957 #57a957 #3d773d;
 }
 
+.success_msg a {
+	text-decoration: underline;
+	color: #FFF !important;
+}
+
 .notice_msg {
     background-color: #339bb9;
     background-repeat: repeat-x;
@@ -3426,6 +3439,10 @@ table.code-browser .submodule-dir {
     background-image: linear-gradient(to bottom, #5bc0de, #339bb9);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5bc0de', endColorstr='#339bb9', GradientType=0 );
     border-color: #339bb9 #339bb9 #22697d;
+}
+
+.notice_msg a {
+    text-decoration: underline;
 }
 
 .success_msg, .error_msg, .notice_msg, .warning_msg {

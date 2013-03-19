@@ -168,8 +168,10 @@ class ReposController(BaseRepoController):
                     % (form_result['repo_name'], form_result['clone_uri']),
                     category='success')
             else:
-                h.flash(_('created repository %s') % form_result['repo_name'],
-                    category='success')
+                repo_url = h.link_to(form_result['repo_name'],
+                    h.url('summary_home', repo_name=form_result['repo_name']))
+                h.flash(h.literal(_('created repository %s') % repo_url),
+                        category='success')
 
             if request.POST.get('user_created'):
                 # created by regular non admin user

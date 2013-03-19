@@ -162,8 +162,11 @@ class ForksController(BaseRepoController):
             # create fork is done sometimes async on celery, db transaction
             # management is handled there.
             RepoModel().create_fork(form_result, self.rhodecode_user.user_id)
-            h.flash(_('forked %s repository as %s') \
-                      % (repo_name, form_result['repo_name']),
+            fork_url = h.link_to(form_result['repo_name'],
+                    h.url('summary_home', repo_name=form_result['repo_name_full']))
+
+            h.flash(h.literal(_('forked repository %s as %s') \
+                      % (repo_name, fork_url)),
                     category='success')
         except formencode.Invalid, errors:
             c.new_repo = errors.value['repo_name']
