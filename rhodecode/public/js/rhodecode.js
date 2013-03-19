@@ -576,7 +576,6 @@ var showRepoSize = function(target, repo_name, token){
     return false;	
 }
 
-
 /**
  * TOOLTIP IMPL.
  */

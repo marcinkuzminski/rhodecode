@@ -355,7 +355,6 @@ def age(prevdate, show_short_version=False):
     If show_short_version is True, then it will generate a not so accurate but shorter string,
     example: 2days ago, instead of 2 days and 23 hours ago.
 
-
     :param prevdate: datetime object
     :param show_short_version: if it should aproximate the date and return a shorter string
     :rtype: unicode

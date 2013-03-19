@@ -48,13 +48,13 @@
 #content #context-bar,
 #content #context-bar a,
 #content #context-bar button {
-     color: #FFFFFF;
+    color: #FFFFFF;
 }
 
 #header #header-inner #quick a:hover,
 #content #context-bar a:hover,
 #content #context-bar button:hover {
-     text-decoration: none;
+    text-decoration: none;
 }
 
 #content #context-bar .icon {
@@ -162,6 +162,7 @@ ul#context-actions {
     border-radius: 4px;
     background-image: linear-gradient(top, #4574a2 0%, #2f5d8b 100%);
 }
+
 #content ul#context-actions li {
     padding: 0px;
     border-right: 1px solid rgba(0,0,0,0.1);
@@ -252,7 +253,7 @@ ul#context-actions {
     border-left: 1px solid rgba(0,0,0,0.1);
 }
 
-#context-pages li.curreasdnt {
+#context-pages li.current {
     background: #535353; /* Old browsers */
     background: -moz-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5d5d5d), color-stop(100%,#484848)); /* Chrome,Safari4+ */

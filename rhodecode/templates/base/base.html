@@ -83,7 +83,7 @@
 
 <%def name="admin_menu_simple()">
   <ul>
-      <li>${h.link_to(_('repositories groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+      <li>${h.link_to(_('repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
   </ul>
 </%def>
 
@@ -129,10 +129,6 @@
       %endif
     </div>
     <div id="context-state">
-      <!--button id="revision-changer">
-        <span class="branch-name">graphics/shader-move</span>
-        <span class="revision">@73318:8d3d6ee94072</span>
-      </button-->
       <ul id="context-pages" class="horizontal-list">
         <li ${is_current('summary')}><a href="${h.url('summary_home', repo_name=c.repo_name)}" class="summary">${_('Summary')}</a></li>
         <li ${is_current('changelog')}><a href="${h.url('changelog_home', repo_name=c.repo_name)}" class="changelogs">${_('Changelog')}</a></li>

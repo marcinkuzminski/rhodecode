@@ -421,9 +421,8 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li span.icon {
-
     border-left: none;
-    padding-left: 10px ;
+    padding-left: 10px;
 }
 
 #header #header-inner #quick li span.icon_short {
@@ -1725,7 +1724,6 @@ div.form div.fields div.field div.button {
     padding-right: 10px;
 }
 
-
 #repo_size_2 {
     margin-left: 30px;
     display: block;
@@ -2512,10 +2510,6 @@ h3.files_location {
     border-left: none;
     border-right: none;
     border-color: #cdcdcd;
-}
-
-#graph_content .container {
-
 }
 
 #graph_content #changesets td {

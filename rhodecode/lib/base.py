@@ -314,7 +314,6 @@ class BaseRepoController(BaseController):
     c.repository_followers: number of followers
     c.repository_forks: number of forks
     c.repository_following: weather the current user is following the current repo
-
     """
 
     def __before__(self):

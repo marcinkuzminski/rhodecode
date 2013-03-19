@@ -25,7 +25,7 @@ ${self.context_bar('changelog')}
     <div class="table">
         % if c.pagination:
             <div id="graph">
-                    <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
+                <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
                     <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
                     <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
 
@@ -110,7 +110,6 @@ ${self.context_bar('changelog')}
                 </tbody>
                 </table>
 
-
                 <div class="pagination-wh pagination-left">
                     ${c.pagination.pager('$link_previous ~2~ $link_next')}
                 </div>
@@ -127,7 +126,7 @@ ${self.context_bar('changelog')}
                 var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
                 var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
 
-                    var checkbox_checker = function(e){
+                var checkbox_checker = function(e){
                     var checked_checkboxes = [];
                     for (pos in checkboxes){
                         if(checkboxes[pos].checked){
@@ -135,17 +134,17 @@ ${self.context_bar('changelog')}
                         }
                     }
                     if(YUD.get('open_new_pr')){
-                            if(checked_checkboxes.length>1){
-                              YUD.setStyle('open_new_pr','display','none');
-                            } else {
-                               YUD.setStyle('open_new_pr','display','');
+                        if(checked_checkboxes.length>1){
+                            YUD.setStyle('open_new_pr','display','none');
+                        } else {
+                            YUD.setStyle('open_new_pr','display','');
                             if(checked_checkboxes.length>0){
-                              YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
+                                YUD.get('open_new_pr').innerHTML = _TM['Open new pull request for selected changesets'];
                             }else{
-                              YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
+                                YUD.get('open_new_pr').innerHTML = _TM['Open new pull request'];
                             }
-                          }
                         }
+                    }
 
                     if(checked_checkboxes.length>0){
                         var rev_end = checked_checkboxes[0].name;
@@ -165,25 +164,25 @@ ${self.context_bar('changelog')}
                         YUD.setStyle('rev_range_clear','display','');
 
                         YUD.get('open_new_pr').href = pr_tmpl + '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
-                            YUD.setStyle('compare_fork','display','none');
-                    } else{
+                        YUD.setStyle('compare_fork','display','none');
+                    }else{
                         YUD.setStyle('rev_range_container','display','none');
                         YUD.setStyle('rev_range_clear','display','none');
-                            if (checkboxes){
-                                YUD.get('open_new_pr').href = pr_tmpl + '?rev_end={0}'.format(checkboxes[0].name);
-                            }
-                            YUD.setStyle('compare_fork','display','');
+                        if (checkboxes){
+                            YUD.get('open_new_pr').href = pr_tmpl + '?rev_end={0}'.format(checkboxes[0].name);
                         }
-                    };
-                    YUE.onDOMReady(checkbox_checker);
-                    YUE.on(checkboxes,'click', checkbox_checker);
+                        YUD.setStyle('compare_fork','display','');
+                    }
+                };
+                YUE.onDOMReady(checkbox_checker);
+                YUE.on(checkboxes,'click', checkbox_checker);
 
                 YUE.on('rev_range_clear','click',function(e){
                     for (var i=0; i<checkboxes.length; i++){
                         var cb = checkboxes[i];
                         cb.checked = false;
                     }
-                        checkbox_checker();
+                    checkbox_checker();
                     YUE.preventDefault(e);
                 });
 
@@ -234,9 +233,7 @@ ${self.context_bar('changelog')}
                     var t = document.getElementById('graph_content');
                     canvas = document.getElementById('graph_canvas');
                     var div_h = t.clientHeight;
-                    //c.style.height=div_h+'px';
                     canvas.setAttribute('height',div_h);
-                    //c.style.height=width+'px';
                     canvas.setAttribute('width',width);
                 };
                 var heads = 1;
