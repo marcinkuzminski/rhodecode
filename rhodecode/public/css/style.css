@@ -1738,10 +1738,10 @@ div.form div.fields div.field div.button {
 }
 
 #summary-menu-stats a span {
-    background-color: #FFF;
-    border: 1px inset #f0f0f0;
-    border-radius: 7px;
-    padding: 1px;
+    background-color: #DEDEDE;
+    color: 888 !important;
+    border-radius: 4px;
+    padding: 2px 4px;
     font-size: 10px;
 }
 

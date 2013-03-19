@@ -118,7 +118,7 @@ ul.horizontal-list li a {
 
 #breadcrumbs span {
     font-weight: bold;
-    font-size: 2em;
+    font-size: 1.8em;
 }
 
 #context-top {
@@ -314,7 +314,7 @@ ul#context-actions {
     content: ' \25BE';
 }
 #context-pages a.childs {
-    padding-right: 20px;
+    padding-right: 30px;
 }
 #context-pages a.childs:after {
     position: absolute;
