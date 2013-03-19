@@ -277,7 +277,7 @@ ul#context-actions {
     border-right: none;
 }
 
-#header #header-inner #quick li:first-child {
+#header #header-inner #quick > li:first-child {
     border-left: none;
 }
 

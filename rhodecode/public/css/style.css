@@ -1959,7 +1959,6 @@ a.metatag[tag="license"]:hover {
     padding: 4px;
     position: absolute;
     right: 0;
-    width: 278px;
     background-color: #003B76;
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#003B76), to(#00376E) );
@@ -1976,6 +1975,8 @@ a.metatag[tag="license"]:hover {
     -khtml-border-radius: 0px 0px 4px 4px;
     border-radius: 0px 0px 4px 4px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+
+    overflow: hidden;
 }
 #quick_login h4 {
     color: #fff;
@@ -2016,9 +2017,12 @@ a.metatag[tag="license"]:hover {
 
 #quick_login .links_left {
     float: left;
+    margin-right: 120px;
 }
 #quick_login .links_right {
-    float: right;
+    width: 120px;
+    position: absolute;
+    right: 0;
 }
 #quick_login .full_name {
     color: #FFFFFF;
