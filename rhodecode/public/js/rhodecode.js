@@ -425,7 +425,9 @@ var ajaxGET = function(url,success) {
     var callback = {
         success: success,
         failure: function (o) {
-            alert("error");
+            if (o.status != 0) {
+                alert("error: " + o.statusText);
+            };
         },
     };
 
