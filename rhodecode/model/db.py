@@ -1056,7 +1056,7 @@ class Repository(Base, BaseModel):
         if cs_cache is None:
             cs_cache = EmptyChangeset()
             # use no-cache version here
-            scm_repo = self.scm_instance_no_cache
+            scm_repo = self.scm_instance_no_cache()
             if scm_repo:
                 cs_cache = scm_repo.get_changeset()
 
@@ -1153,7 +1153,6 @@ class Repository(Base, BaseModel):
         """
         CacheInvalidation.set_invalidate(repo_name=self.repo_name)
 
-    @LazyProperty
     def scm_instance_no_cache(self):
         return self.__get_instance()
 
