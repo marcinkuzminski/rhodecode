@@ -192,7 +192,7 @@ class SummaryController(BaseRepoController):
     @jsonify
     def repo_size(self, repo_name):
         if request.is_xhr:
-            return _('repository size: %s') % c.rhodecode_db_repo._repo_size()
+            return c.rhodecode_db_repo._repo_size()
         else:
             raise HTTPBadRequest()
 

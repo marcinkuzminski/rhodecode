@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-from rhodecode.lib import vcs
+import urllib
 
+from rhodecode.lib import vcs
 from rhodecode.model.db import Repository, RepoGroup
 from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
@@ -31,7 +32,8 @@ class TestAdminReposController(TestController):
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
+                               'created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
 
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -64,8 +66,8 @@ class TestAdminReposController(TestController):
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name_unicode))
-
+                               u'created repository <a href="/%s">%s</a>'
+                               % (urllib.quote(repo_name), repo_name_unicode))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_unicode).one()
@@ -104,8 +106,8 @@ class TestAdminReposController(TestController):
                                                 repo_group=gr.group_id,))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
-
+                               'created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_full).one()
@@ -141,7 +143,8 @@ class TestAdminReposController(TestController):
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
+                               'created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
 
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -176,7 +179,8 @@ class TestAdminReposController(TestController):
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name_unicode))
+                               u'created repository <a href="/%s">%s</a>'
+                               % (urllib.quote(repo_name), repo_name_unicode))
 
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -221,8 +225,8 @@ class TestAdminReposController(TestController):
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
-
+                               'created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
@@ -269,8 +273,8 @@ class TestAdminReposController(TestController):
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
-
+                               'created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()

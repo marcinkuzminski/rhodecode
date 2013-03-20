@@ -64,6 +64,7 @@ ${self.context_bar('changelog')}
                         </td>
                         <td class="hash">
                             <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}">
+                                <span class="changeset_id">${cs.revision}:</span>
                                 <span class="changeset_hash">${h.short_id(cs.raw_id)}</span>
                             </a>
                         </td>

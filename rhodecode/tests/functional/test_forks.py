@@ -109,7 +109,7 @@ class TestForksController(TestController):
         org_repo = Repository.get_by_repo_name(repo_name)
         response = self.app.post(url(controller='forks', action='fork_create',
                                     repo_name=repo_name),
-                                    {'repo_name':fork_name,
+                                    {'repo_name': fork_name,
                                      'repo_group':'',
                                      'fork_parent_id':org_repo.repo_id,
                                      'repo_type':'hg',
@@ -119,7 +119,8 @@ class TestForksController(TestController):
 
         #test if we have a message that fork is ok
         self.checkSessionFlash(response,
-                'forked %s repository as %s' % (repo_name, fork_name))
+                'forked repository %s as <a href="/%s">%s</a>'
+                % (repo_name, fork_name, fork_name))
 
         #test if the fork was created in the database
         fork_repo = Session().query(Repository)\

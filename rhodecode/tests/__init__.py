@@ -30,6 +30,7 @@ from rhodecode.model.db import User
 from rhodecode.tests.nose_parametrized import parameterized
 
 import pylons.test
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 
 
 os.environ['TZ'] = 'UTC'
@@ -159,12 +160,12 @@ class TestController(TestCase):
 
     def checkSessionFlash(self, response, msg):
         self.assertTrue('flash' in response.session,
-                        msg='Response session:%r have no flash' % response.session)
+                        msg='Response session:%r have no flash'
+                        % response.session)
         if not msg in response.session['flash'][0][1]:
-            self.fail(
-                'msg `%s` not found in session flash: got `%s` instead' % (
-                      msg, response.session['flash'])
-            )
+            msg = u'msg `%s` not found in session flash: got `%s` instead' % (
+                      msg, response.session['flash'][0][1])
+            self.fail(safe_str(msg))
 
 
 ## HELPERS ##
