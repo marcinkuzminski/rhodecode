@@ -203,8 +203,8 @@ class ChangesetController(BaseRepoController):
 
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='warning')
-            return redirect(url('home'))
+            h.flash(str(e), category='error')
+            return redirect(url('changeset_home', repo_name=c.repo_name))
 
         c.changes = OrderedDict()
 

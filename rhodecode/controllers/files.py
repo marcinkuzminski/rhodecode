@@ -89,8 +89,8 @@ class FilesController(BaseRepoController):
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
-        except RepositoryError, e:
-            h.flash(str(e), category='warning')
+        except RepositoryError, e: # including ChangesetDoesNotExistError
+            h.flash(str(e), category='error')
             redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
 
     def __get_filenode_or_redirect(self, repo_name, cs, path):
@@ -108,7 +108,7 @@ class FilesController(BaseRepoController):
             if file_node.is_dir():
                 raise RepositoryError('given path is a directory')
         except RepositoryError, e:
-            h.flash(str(e), category='warning')
+            h.flash(str(e), category='error')
             redirect(h.url('files_home', repo_name=repo_name,
                            revision=cs.raw_id))
 
