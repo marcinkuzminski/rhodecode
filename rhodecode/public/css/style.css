@@ -3690,7 +3690,7 @@ img.icon, .right .merge img {
 
 #header #header-inner #home, #header #header-inner #logo,
 #content div.box ul.left, #content div.box ol.left,
-#content div.box div.pagination-left, div#commit_history,
+div#commit_history,
 div#legend_data, div#legend_container, div#legend_choices {
     float: left;
 }
@@ -3732,7 +3732,6 @@ div#legend_data, div#legend_container, div#legend_choices {
 #content div.box div.form, #content div.box div.table, #content div.box div.traffic {
     position: relative;
     clear: both;
-    overflow: hidden;
     margin: 0;
     padding: 0 20px 10px;
 }
