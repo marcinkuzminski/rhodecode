@@ -236,9 +236,6 @@ class SettingsController(BaseController):
                 )
 
             try:
-                # fix namespaces for hooks and extensions
-                _f = lambda s: s.replace('.', '_')
-
                 sett = RhodeCodeUi.get_by_key('push_ssl')
                 sett.ui_value = form_result['web_push_ssl']
                 Session().add(sett)
@@ -249,23 +246,19 @@ class SettingsController(BaseController):
 
                 #HOOKS
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                RhodeCodeUi.HOOK_UPDATE)]
+                sett.ui_active = form_result['hooks_changegroup_update']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_REPO_SIZE)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                RhodeCodeUi.HOOK_REPO_SIZE)]
+                sett.ui_active = form_result['hooks_changegroup_repo_size']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_PUSH)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                RhodeCodeUi.HOOK_PUSH)]
+                sett.ui_active = form_result['hooks_changegroup_push_logger']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_PULL)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                 RhodeCodeUi.HOOK_PULL)]
+                sett.ui_active = form_result['hooks_outgoing_pull_logger']
 
                 Session().add(sett)
 
@@ -276,7 +269,7 @@ class SettingsController(BaseController):
                     sett = RhodeCodeUi()
                     sett.ui_key = 'largefiles'
                     sett.ui_section = 'extensions'
-                sett.ui_active = form_result[_f('extensions_largefiles')]
+                sett.ui_active = form_result['extensions_largefiles']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key('hgsubversion')
@@ -286,7 +279,7 @@ class SettingsController(BaseController):
                     sett.ui_key = 'hgsubversion'
                     sett.ui_section = 'extensions'
 
-                sett.ui_active = form_result[_f('extensions_hgsubversion')]
+                sett.ui_active = form_result['extensions_hgsubversion']
                 Session().add(sett)
 
 #                sett = RhodeCodeUi.get_by_key('hggit')
@@ -296,7 +289,7 @@ class SettingsController(BaseController):
 #                    sett.ui_key = 'hggit'
 #                    sett.ui_section = 'extensions'
 #
-#                sett.ui_active = form_result[_f('extensions_hggit')]
+#                sett.ui_active = form_result['extensions_hggit']
 #                Session().add(sett)
 
                 Session().commit()
