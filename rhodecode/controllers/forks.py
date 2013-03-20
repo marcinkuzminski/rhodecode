@@ -165,7 +165,7 @@ class ForksController(BaseRepoController):
             fork_url = h.link_to(form_result['repo_name'],
                     h.url('summary_home', repo_name=form_result['repo_name_full']))
 
-            h.flash(h.literal(_('forked repository %s as %s') \
+            h.flash(h.literal(_('Forked repository %s as %s') \
                       % (repo_name, fork_url)),
                     category='success')
         except formencode.Invalid, errors:

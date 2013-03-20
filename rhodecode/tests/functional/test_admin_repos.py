@@ -32,7 +32,7 @@ class TestAdminReposController(TestController):
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository <a href="/%s">%s</a>'
+                               'Created repository <a href="/%s">%s</a>'
                                % (repo_name, repo_name))
 
         #test if the repo was created in the database
@@ -66,7 +66,7 @@ class TestAdminReposController(TestController):
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               u'created repository <a href="/%s">%s</a>'
+                               u'Created repository <a href="/%s">%s</a>'
                                % (urllib.quote(repo_name), repo_name_unicode))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -106,7 +106,7 @@ class TestAdminReposController(TestController):
                                                 repo_group=gr.group_id,))
 
         self.checkSessionFlash(response,
-                               'created repository <a href="/%s">%s</a>'
+                               'Created repository <a href="/%s">%s</a>'
                                % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -143,7 +143,7 @@ class TestAdminReposController(TestController):
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository <a href="/%s">%s</a>'
+                               'Created repository <a href="/%s">%s</a>'
                                % (repo_name, repo_name))
 
         #test if the repo was created in the database
@@ -179,7 +179,7 @@ class TestAdminReposController(TestController):
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               u'created repository <a href="/%s">%s</a>'
+                               u'Created repository <a href="/%s">%s</a>'
                                % (urllib.quote(repo_name), repo_name_unicode))
 
         #test if the repo was created in the database
@@ -225,7 +225,7 @@ class TestAdminReposController(TestController):
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository <a href="/%s">%s</a>'
+                               'Created repository <a href="/%s">%s</a>'
                                % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -247,7 +247,7 @@ class TestAdminReposController(TestController):
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        self.assertTrue('''deleted repository %s''' % (repo_name) in
+        self.assertTrue('''Deleted repository %s''' % (repo_name) in
                         response.session['flash'][0])
 
         response.follow()
@@ -273,7 +273,7 @@ class TestAdminReposController(TestController):
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository <a href="/%s">%s</a>'
+                               'Created repository <a href="/%s">%s</a>'
                                % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -295,7 +295,7 @@ class TestAdminReposController(TestController):
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        self.assertTrue('''deleted repository %s''' % (repo_name) in
+        self.assertTrue('''Deleted repository %s''' % (repo_name) in
                         response.session['flash'][0])
 
         response.follow()

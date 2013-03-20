@@ -83,7 +83,7 @@ class UsersGroupsController(BaseController):
             action_logger(self.rhodecode_user,
                           'admin_created_users_group:%s' % gr,
                           None, self.ip_addr, self.sa)
-            h.flash(_('created user group %s') % gr, category='success')
+            h.flash(_('Created user group %s') % gr, category='success')
             Session().commit()
         except formencode.Invalid, errors:
             return htmlfill.render(
@@ -94,7 +94,7 @@ class UsersGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during creation of user group %s') \
+            h.flash(_('Error occurred during creation of user group %s') \
                     % request.POST.get('users_group_name'), category='error')
 
         return redirect(url('users_groups'))
@@ -161,7 +161,7 @@ class UsersGroupsController(BaseController):
             action_logger(self.rhodecode_user,
                           'admin_updated_users_group:%s' % gr,
                           None, self.ip_addr, self.sa)
-            h.flash(_('updated user group %s') % gr, category='success')
+            h.flash(_('Updated user group %s') % gr, category='success')
             Session().commit()
         except formencode.Invalid, errors:
             ug_model = UserGroupModel()
@@ -183,7 +183,7 @@ class UsersGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of user group %s') \
+            h.flash(_('Error occurred during update of user group %s') \
                     % request.POST.get('users_group_name'), category='error')
 
         return redirect(url('edit_users_group', id=id))
@@ -200,7 +200,7 @@ class UsersGroupsController(BaseController):
         try:
             UserGroupModel().delete(usr_gr)
             Session().commit()
-            h.flash(_('successfully deleted user group'), category='success')
+            h.flash(_('Successfully deleted user group'), category='success')
         except UserGroupsAssignedException, e:
             h.flash(e, category='error')
         except Exception:

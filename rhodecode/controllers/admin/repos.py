@@ -164,13 +164,13 @@ class ReposController(BaseRepoController):
             new_repo = RepoModel().create(form_result,
                                           self.rhodecode_user.user_id)
             if form_result['clone_uri']:
-                h.flash(_('created repository %s from %s') \
+                h.flash(_('Created repository %s from %s') \
                     % (form_result['repo_name'], form_result['clone_uri']),
                     category='success')
             else:
                 repo_url = h.link_to(form_result['repo_name'],
                     h.url('summary_home', repo_name=form_result['repo_name']))
-                h.flash(h.literal(_('created repository %s') % repo_url),
+                h.flash(h.literal(_('Created repository %s') % repo_url),
                         category='success')
 
             if request.POST.get('user_created'):
@@ -269,7 +269,7 @@ class ReposController(BaseRepoController):
 
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of repository %s') \
+            h.flash(_('Error occurred during update of repository %s') \
                     % repo_name, category='error')
         return redirect(url('edit_repo', repo_name=changed_name))
 
@@ -298,17 +298,17 @@ class ReposController(BaseRepoController):
                         log.debug('Detaching fork %s from repo %s' % (r, repo))
                         r.fork = None
                         Session().add(r)
-                    h.flash(_('detached %s forks') % _forks, category='success')
+                    h.flash(_('Detached %s forks') % _forks, category='success')
                 elif do == 'delete_forks':
                     for r in repo.forks:
                         log.debug('Deleting fork %s of repo %s' % (r, repo))
                         repo_model.delete(r)
-                    h.flash(_('deleted %s forks') % _forks, category='success')
+                    h.flash(_('Deleted %s forks') % _forks, category='success')
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
                               repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
-            h.flash(_('deleted repository %s') % repo_name, category='success')
+            h.flash(_('Deleted repository %s') % repo_name, category='success')
             Session().commit()
         except IntegrityError, e:
             if e.message.find('repositories_fork_id_fkey') != -1:

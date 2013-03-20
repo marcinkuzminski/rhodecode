@@ -167,7 +167,7 @@ class SettingsController(BaseController):
 
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during updating '
+                h.flash(_('Error occurred during updating '
                           'application settings'),
                           category='error')
 
@@ -218,7 +218,7 @@ class SettingsController(BaseController):
 
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during updating '
+                h.flash(_('Error occurred during updating '
                           'visualisation settings'),
                         category='error')
 
@@ -305,7 +305,7 @@ class SettingsController(BaseController):
 
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during updating '
+                h.flash(_('Error occurred during updating '
                           'application settings'), category='error')
 
         if setting_id == 'hooks':
@@ -331,7 +331,7 @@ class SettingsController(BaseController):
                 Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during hook creation'),
+                h.flash(_('Error occurred during hook creation'),
                         category='error')
 
             return redirect(url('admin_edit_setting', setting_id='hooks'))
@@ -471,7 +471,7 @@ class SettingsController(BaseController):
             return render('admin/users/user_edit_my_account.html')
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of user %s') \
+            h.flash(_('Error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
 
         return redirect(url('my_account'))

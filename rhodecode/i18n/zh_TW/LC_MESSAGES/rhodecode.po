@@ -376,7 +376,7 @@ msgid "START_TLS on LDAP connection"
 msgstr ""
 
 #: rhodecode/controllers/admin/ldap_settings.py:126
-msgid "Ldap settings updated successfully"
+msgid "LDAP settings updated successfully"
 msgstr "LDAP設定更新完成"
 
 #: rhodecode/controllers/admin/ldap_settings.py:130

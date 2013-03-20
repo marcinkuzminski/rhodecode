@@ -138,7 +138,7 @@ class SettingsController(BaseRepoController):
 
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of repository %s') \
+            h.flash(_('Error occurred during update of repository %s') \
                     % repo_name, category='error')
 
         return redirect(url('repo_settings_home', repo_name=changed_name))
@@ -163,7 +163,7 @@ class SettingsController(BaseRepoController):
                               repo_name, self.ip_addr, self.sa)
             repo_model.delete(repo)
             invalidate_cache('get_repo_cached_%s' % repo_name)
-            h.flash(_('deleted repository %s') % repo_name, category='success')
+            h.flash(_('Deleted repository %s') % repo_name, category='success')
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())

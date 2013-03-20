@@ -47,7 +47,7 @@ class TestLdapSettingsController(TestController):
                          'fail db write compare')
 
         self.checkSessionFlash(response,
-                               'Ldap settings updated successfully')
+                               'LDAP settings updated successfully')
 
     def test_ldap_error_form(self):
         self.log_user()

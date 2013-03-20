@@ -139,7 +139,7 @@ class PermissionsController(BaseController):
                     encoding="UTF-8")
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during update of permissions'),
+                h.flash(_('Error occurred during update of permissions'),
                         category='error')
 
         return redirect(url('edit_permission', id=id))

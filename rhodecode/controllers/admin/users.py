@@ -127,7 +127,7 @@ class UsersController(BaseController):
             usr = form_result['username']
             action_logger(self.rhodecode_user, 'admin_created_user:%s' % usr,
                           None, self.ip_addr, self.sa)
-            h.flash(_('created user %s') % usr,
+            h.flash(_('Created user %s') % usr,
                     category='success')
             Session().commit()
         except formencode.Invalid, errors:
@@ -139,7 +139,7 @@ class UsersController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during creation of user %s') \
+            h.flash(_('Error occurred during creation of user %s') \
                     % request.POST.get('username'), category='error')
         return redirect(url('users'))
 
@@ -195,7 +195,7 @@ class UsersController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of user %s') \
+            h.flash(_('Error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
         return redirect(url('edit_user', id=id))
 
@@ -211,7 +211,7 @@ class UsersController(BaseController):
         try:
             UserModel().delete(usr)
             Session().commit()
-            h.flash(_('successfully deleted user'), category='success')
+            h.flash(_('Successfully deleted user'), category='success')
         except (UserOwnsReposException, DefaultUserException), e:
             h.flash(e, category='warning')
         except Exception:

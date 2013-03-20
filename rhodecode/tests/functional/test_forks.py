@@ -119,7 +119,7 @@ class TestForksController(TestController):
 
         #test if we have a message that fork is ok
         self.checkSessionFlash(response,
-                'forked repository %s as <a href="/%s">%s</a>'
+                'Forked repository %s as <a href="/%s">%s</a>'
                 % (repo_name, fork_name, fork_name))
 
         #test if the fork was created in the database
