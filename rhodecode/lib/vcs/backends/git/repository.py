@@ -267,7 +267,7 @@ class GitRepository(BaseRepository):
             try:
                 revision = self.revisions[int(revision)]
             except:
-                raise ChangesetDoesNotExistError("Revision %r does not exist "
+                raise ChangesetDoesNotExistError("Revision %s does not exist "
                     "for this repository" % (revision))
 
         elif is_bstr(revision):
@@ -282,12 +282,12 @@ class GitRepository(BaseRepository):
                 return _tags_shas[_tags_shas.index(revision)]
 
             elif not pattern.match(revision) or revision not in self.revisions:
-                raise ChangesetDoesNotExistError("Revision %r does not exist "
+                raise ChangesetDoesNotExistError("Revision %s does not exist "
                     "for this repository" % (revision))
 
         # Ensure we return full id
         if not pattern.match(str(revision)):
-            raise ChangesetDoesNotExistError("Given revision %r not recognized"
+            raise ChangesetDoesNotExistError("Given revision %s not recognized"
                 % revision)
         return revision
 

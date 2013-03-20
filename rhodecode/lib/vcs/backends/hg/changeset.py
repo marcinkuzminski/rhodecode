@@ -174,14 +174,14 @@ class MercurialChangeset(BaseChangeset):
         elif path in self._dir_paths:
             return NodeKind.DIR
         else:
-            raise ChangesetError("Node does not exist at the given path %r"
+            raise ChangesetError("Node does not exist at the given path '%s'"
                 % (path))
 
     def _get_filectx(self, path):
         path = self._fix_path(path)
         if self._get_kind(path) != NodeKind.FILE:
-            raise ChangesetError("File does not exist for revision %r at "
-                " %r" % (self.raw_id, path))
+            raise ChangesetError("File does not exist for revision %s at "
+                " '%s'" % (self.raw_id, path))
         return self._ctx.filectx(path)
 
     def _extract_submodules(self):
@@ -300,8 +300,8 @@ class MercurialChangeset(BaseChangeset):
         """
 
         if self._get_kind(path) != NodeKind.DIR:
-            raise ChangesetError("Directory does not exist for revision %r at "
-                " %r" % (self.revision, path))
+            raise ChangesetError("Directory does not exist for revision %s at "
+                " '%s'" % (self.revision, path))
         path = self._fix_path(path)
 
         filenodes = [FileNode(f, changeset=self) for f in self._file_paths
@@ -344,7 +344,7 @@ class MercurialChangeset(BaseChangeset):
                     node = DirNode(path, changeset=self)
             else:
                 raise NodeDoesNotExistError("There is no file nor directory "
-                    "at the given path: %r at revision %r"
+                    "at the given path: '%s' at revision %s"
                     % (path, self.short_id))
             # cache node
             self.nodes[path] = node

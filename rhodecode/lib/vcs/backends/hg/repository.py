@@ -404,7 +404,7 @@ class MercurialRepository(BaseRepository):
         try:
             revision = hex(self._repo.lookup(revision))
         except (IndexError, ValueError, RepoLookupError, TypeError):
-            raise ChangesetDoesNotExistError("Revision %r does not "
+            raise ChangesetDoesNotExistError("Revision %s does not "
                                     "exist for this repository"
                                     % (revision))
         return revision

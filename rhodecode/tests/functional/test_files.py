@@ -291,7 +291,7 @@ removed extra unicode conversion in diff.</div>
                                     revision=rev,
                                     f_path=f_path))
 
-        msg = """Revision %r does not exist for this repository""" % (rev)
+        msg = """Revision %s does not exist for this repository""" % (rev)
         self.checkSessionFlash(response, msg)
 
         self.assertEqual('http://localhost/%s/files/tip/' % HG_REPO, response.headers['location'])
@@ -305,7 +305,7 @@ removed extra unicode conversion in diff.</div>
                                     revision=rev,
                                     f_path=f_path))
 
-        msg = "There is no file nor directory at the given path: %r at revision %r" % (f_path, rev[:12])
+        msg = "There is no file nor directory at the given path: '%s' at revision %s" % (f_path, rev[:12])
         self.checkSessionFlash(response, msg)
 
     #==========================================================================
@@ -329,7 +329,7 @@ removed extra unicode conversion in diff.</div>
                                     repo_name=HG_REPO,
                                     revision=rev,
                                     f_path=f_path))
-        msg = """Revision %r does not exist for this repository""" % (rev)
+        msg = """Revision %s does not exist for this repository""" % (rev)
         self.checkSessionFlash(response, msg)
 
         self.assertEqual('http://localhost/%s/files/tip/' % HG_REPO, response.headers['location'])
@@ -342,7 +342,7 @@ removed extra unicode conversion in diff.</div>
                                     repo_name=HG_REPO,
                                     revision=rev,
                                     f_path=f_path))
-        msg = "There is no file nor directory at the given path: %r at revision %r" % (f_path, rev[:12])
+        msg = "There is no file nor directory at the given path: '%s' at revision %s" % (f_path, rev[:12])
         self.checkSessionFlash(response, msg)
 
     def test_ajaxed_files_list(self):

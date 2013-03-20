@@ -768,7 +768,7 @@ def check_git_version():
     if 'git' in BACKENDS:
         log.debug('GIT version detected: %s' % stdout)
         if stderr:
-            log.warning('Unable to detect git version org error was:%r' % stderr)
+            log.warning('Unable to detect git version, org error was: %r' % stderr)
         elif to_old_git:
             log.warning('RhodeCode detected git version %s, which is too old '
                         'for the system to function properly. Make sure '
