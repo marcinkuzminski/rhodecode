@@ -38,7 +38,8 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator, \
     NotAnonymous, HasRepoPermissionAny, HasPermissionAllDecorator,\
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User
+from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User,\
+    RhodeCodeUi
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.forms import RepoForkForm
 from rhodecode.model.scm import ScmModel, GroupList
@@ -94,6 +95,8 @@ class ForksController(BaseRepoController):
         else:
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
+
+        c.can_update = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE).ui_active
 
         defaults = RepoModel()._get_defaults(repo_name)
         # alter the description to indicate a fork
@@ -158,6 +161,10 @@ class ForksController(BaseRepoController):
         form_result = {}
         try:
             form_result = _form.to_python(dict(request.POST))
+
+            # an approximation that is better than nothing
+            if not RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE).ui_active:
+                form_result['update_after_clone'] = False
 
             # create fork is done sometimes async on celery, db transaction
             # management is handled there.

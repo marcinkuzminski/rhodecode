@@ -80,7 +80,8 @@
                     ${h.checkbox('copy_permissions',value="True", checked="checked")}
                     <span class="help-block">${_('Copy permissions from forked repository')}</span>
                 </div>
-             </div>
+            </div>
+            %if c.can_update:
             <div class="field">
                 <div class="label label-checkbox">
                     <label for="private">${_('Update after clone')}:</label>
@@ -90,6 +91,7 @@
                     <span class="help-block">${_('Checkout source after making a clone')}</span>
                 </div>
             </div>
+            %endif
             <div class="buttons">
                 ${h.submit('',_('Fork this repository'),class_="ui-btn large")}
             </div>
