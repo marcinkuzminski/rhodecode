@@ -3390,7 +3390,7 @@ table.code-browser .submodule-dir {
 }
 
 .error_msg a {
-	text-decoration: underline;
+    text-decoration: underline;
 }
 
 .warning_msg {
@@ -3409,7 +3409,7 @@ table.code-browser .submodule-dir {
 }
 
 .warning_msg a {
-	text-decoration: underline;
+    text-decoration: underline;
 }
 
 .success_msg {
@@ -3427,8 +3427,8 @@ table.code-browser .submodule-dir {
 }
 
 .success_msg a {
-	text-decoration: underline;
-	color: #FFF !important;
+    text-decoration: underline;
+    color: #FFF !important;
 }
 
 .notice_msg {
