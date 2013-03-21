@@ -231,7 +231,9 @@ class GitRepository(BaseRepository):
             self._repo.head()
         except KeyError:
             return []
-        cmd = 'rev-list --all --reverse --date-order'
+        rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
+                                                      '--all').strip()
+        cmd = 'rev-list %s --reverse --date-order' % (rev_filter)
         try:
             so, se = self.run_git_command(cmd)
         except RepositoryError:
@@ -505,7 +507,9 @@ class GitRepository(BaseRepository):
             cmd_template += ' $branch_name'
             cmd_params['branch_name'] = branch_name
         else:
-            cmd_template += ' --all'
+            rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
+                                                          '--all').strip()
+            cmd_template += ' %s' % (rev_filter)
 
         cmd = Template(cmd_template).safe_substitute(**cmd_params)
         revs = self.run_git_command(cmd)[0].splitlines()

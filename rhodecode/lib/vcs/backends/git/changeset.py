@@ -187,8 +187,10 @@ class GitChangeset(BaseChangeset):
         """
         Returns list of children changesets.
         """
+        rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
+                                              '--all').strip()
         so, se = self.repository.run_git_command(
-            "rev-list --all --children | grep '^%s'" % self.raw_id
+            "rev-list %s --children | grep '^%s'" % (rev_filter, self.raw_id)
         )
 
         children = []
