@@ -356,16 +356,13 @@ class FilesController(BaseRepoController):
             content = convert_line_endings(r_post.get('content'), unix_mode)
 
             message = r_post.get('message') or c.default_message
-            location = r_post.get('location')
             filename = r_post.get('filename')
+            location = r_post.get('location')
             file_obj = r_post.get('upload_file', None)
 
             if file_obj is not None and hasattr(file_obj, 'filename'):
                 filename = file_obj.filename
                 content = file_obj.file
-
-            node_path = os.path.join(location, filename)
-            author = self.rhodecode_user.full_contact
 
             if not content:
                 h.flash(_('No content'), category='warning')
@@ -375,6 +372,15 @@ class FilesController(BaseRepoController):
                 h.flash(_('No filename'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
+            if location.startswith('/') or location.startswith('.') or '../' in location:
+                h.flash(_('location must be relative path and must not '
+                          'contain .. in path'), category='warning')
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))
+            location = os.path.normpath(location)
+            filename = os.path.basename(filename)
+            node_path = os.path.join(location, filename)
+            author = self.rhodecode_user.full_contact
 
             try:
                 self.scm_model.create_node(repo=c.rhodecode_repo,
@@ -384,7 +390,7 @@ class FilesController(BaseRepoController):
                                            content=content, f_path=node_path)
                 h.flash(_('Successfully committed to %s') % node_path,
                         category='success')
-            except NodeAlreadyExistsError, e:
+            except (NodeError, NodeAlreadyExistsError), e:
                 h.flash(_(e), category='error')
             except Exception:
                 log.error(traceback.format_exc())
