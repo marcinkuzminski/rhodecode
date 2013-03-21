@@ -583,6 +583,10 @@ def make_map(config):
                 controller='files', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('files_home_nopath', '/{repo_name:.*?}/files/{revision}',
+                controller='files', revision='tip', f_path='',
+                conditions=dict(function=check_repo))
+
     rmap.connect('files_history_home',
                  '/{repo_name:.*?}/history/{revision}/{f_path:.*}',
                  controller='files', action='history', revision='tip', f_path='',
