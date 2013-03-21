@@ -1724,7 +1724,7 @@ div.form div.fields div.field div.button {
     padding-right: 10px;
 }
 
-#repo_size_2 {
+#repo_size_2.loaded {
     margin-left: 30px;
     display: block;
     padding-right: 10px;
