@@ -43,7 +43,8 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
 from rhodecode.lib.annotate import annotate_highlight
 from rhodecode.lib.utils import repo_name_slug, get_custom_lexer
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
-    get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict
+    get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict,\
+    safe_int
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
@@ -363,11 +364,29 @@ from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
 from rhodecode.model.db import User, ChangesetStatus
 
-age = lambda  x,y=False: _age(x,y)
+age = lambda  x, y=False: _age(x, y)
 capitalize = lambda x: x.capitalize()
 email = author_email
 short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
+
+
+def show_id(cs):
+    """
+    Configurable function that shows ID
+    by default it's r123:fffeeefffeee
+
+    :param cs: changeset instance
+    """
+    from rhodecode import CONFIG
+    def_len = safe_int(CONFIG['sha_len'])
+    show_rev = str2bool(CONFIG['sha_rev'])
+
+    raw_id = cs.raw_id[:def_len]
+    if show_rev:
+        return 'r%s:%s' % (cs.revision, raw_id)
+    else:
+        return '%s' % (raw_id)
 
 
 def fmt_date(date):
