@@ -294,8 +294,7 @@ removed extra unicode conversion in diff.</div>
         msg = """Revision %r does not exist for this repository""" % (rev)
         self.checkSessionFlash(response, msg)
 
-        msg = """%s""" % (HG_REPO)
-        self.checkSessionFlash(response, msg)
+        self.assertEqual('http://localhost/%s/files/tip/' % HG_REPO, response.headers['location'])
 
     def test_raw_file_wrong_f_path(self):
         self.log_user()
@@ -333,8 +332,7 @@ removed extra unicode conversion in diff.</div>
         msg = """Revision %r does not exist for this repository""" % (rev)
         self.checkSessionFlash(response, msg)
 
-        msg = """%s""" % (HG_REPO)
-        self.checkSessionFlash(response, msg)
+        self.assertEqual('http://localhost/%s/files/tip/' % HG_REPO, response.headers['location'])
 
     def test_raw_wrong_f_path(self):
         self.log_user()

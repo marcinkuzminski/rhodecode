@@ -405,8 +405,8 @@ class MercurialRepository(BaseRepository):
             revision = hex(self._repo.lookup(revision))
         except (IndexError, ValueError, RepoLookupError, TypeError):
             raise ChangesetDoesNotExistError("Revision %r does not "
-                                    "exist for this repository %s" \
-                                    % (revision, self))
+                                    "exist for this repository"
+                                    % (revision))
         return revision
 
     def _get_archives(self, archive_name='tip'):

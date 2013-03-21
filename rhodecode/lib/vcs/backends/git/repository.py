@@ -268,7 +268,7 @@ class GitRepository(BaseRepository):
                 revision = self.revisions[int(revision)]
             except:
                 raise ChangesetDoesNotExistError("Revision %r does not exist "
-                    "for this repository %s" % (revision, self))
+                    "for this repository" % (revision))
 
         elif is_bstr(revision):
             # get by branch/tag name
@@ -283,7 +283,7 @@ class GitRepository(BaseRepository):
 
             elif not pattern.match(revision) or revision not in self.revisions:
                 raise ChangesetDoesNotExistError("Revision %r does not exist "
-                    "for this repository %s" % (revision, self))
+                    "for this repository" % (revision))
 
         # Ensure we return full id
         if not pattern.match(str(revision)):
