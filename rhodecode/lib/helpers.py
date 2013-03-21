@@ -379,8 +379,8 @@ def show_id(cs):
     :param cs: changeset instance
     """
     from rhodecode import CONFIG
-    def_len = safe_int(CONFIG['sha_len'])
-    show_rev = str2bool(CONFIG['sha_rev'])
+    def_len = safe_int(CONFIG.get('sha_len', 12))
+    show_rev = str2bool(CONFIG.get('sha_rev', True))
 
     raw_id = cs.raw_id[:def_len]
     if show_rev:
