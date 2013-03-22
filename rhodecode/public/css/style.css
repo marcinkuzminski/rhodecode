@@ -953,7 +953,6 @@ tbody .yui-dt-editable { cursor: pointer }
     float: left;
     border: none;
     color: #fff;
-    text-transform: uppercase;
     margin: 0;
     padding: 11px 0 11px 10px;
 }
