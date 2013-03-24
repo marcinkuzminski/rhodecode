@@ -17,6 +17,7 @@ from mercurial.i18n import _
 from mercurial import util, mdiff, cmdutil, scmutil
 from mercurial import localrepo, changelog, manifest, filelog, revlog
 
+
 class unionrevlog(revlog.revlog):
     def __init__(self, opener, indexfile, revlog2, linkmapper):
         # How it works:
@@ -31,16 +32,16 @@ class unionrevlog(revlog.revlog):
 
         n = len(self)
         self.repotiprev = n - 1
-        self.bundlerevs = set() # used by 'bundle()' revset expression
+        self.bundlerevs = set()  # used by 'bundle()' revset expression
         for rev2 in self.revlog2:
             rev = self.revlog2.index[rev2]
             # rev numbers - in revlog2, very different from self.rev
             _start, _csize, _rsize, _base, linkrev, p1rev, p2rev, node = rev
 
-            if linkmapper is None: # link is to same revlog
-                assert linkrev == rev2 # we never link back
+            if linkmapper is None:  # link is to same revlog
+                assert linkrev == rev2  # we never link back
                 link = n
-            else: # rev must be mapped from repo2 cl to unified cl by linkmapper
+            else:  # rev must be mapped from repo2 cl to unified cl by linkmapper
                 link = linkmapper(linkrev)
 
             if node in self.nodemap:
@@ -99,12 +100,16 @@ class unionrevlog(revlog.revlog):
 
     def addrevision(self, text, transaction, link, p1=None, p2=None, d=None):
         raise NotImplementedError
+
     def addgroup(self, revs, linkmapper, transaction):
         raise NotImplementedError
+
     def strip(self, rev, minlink):
         raise NotImplementedError
+
     def checksize(self):
         raise NotImplementedError
+
 
 class unionchangelog(unionrevlog, changelog.changelog):
     def __init__(self, opener, opener2):
@@ -114,12 +119,14 @@ class unionchangelog(unionrevlog, changelog.changelog):
         unionrevlog.__init__(self, opener, self.indexfile, changelog2,
                              linkmapper)
 
+
 class unionmanifest(unionrevlog, manifest.manifest):
     def __init__(self, opener, opener2, linkmapper):
         manifest.manifest.__init__(self, opener)
         manifest2 = manifest.manifest(opener2)
         unionrevlog.__init__(self, opener, self.indexfile, manifest2,
                              linkmapper)
+
 
 class unionfilelog(unionrevlog, filelog.filelog):
     def __init__(self, opener, path, opener2, linkmapper, repo):
@@ -132,9 +139,11 @@ class unionfilelog(unionrevlog, filelog.filelog):
     def _file(self, f):
         self._repo.file(f)
 
+
 class unionpeer(localrepo.localpeer):
     def canpush(self):
         return False
+
 
 class unionrepository(localrepo.localrepository):
     def __init__(self, ui, path, path2):
@@ -176,7 +185,8 @@ class unionrepository(localrepo.localrepository):
         return unionpeer(self)
 
     def getcwd(self):
-        return os.getcwd() # always outside the repo
+        return os.getcwd()  # always outside the repo
+
 
 def instance(ui, path, create):
     if create:
@@ -194,7 +204,7 @@ def instance(ui, path, create):
         if parentpath == cwd:
             parentpath = ''
         else:
-            cwd = os.path.join(cwd,'')
+            cwd = os.path.join(cwd, '')
             if parentpath.startswith(cwd):
                 parentpath = parentpath[len(cwd):]
     if path.startswith('union:'):
