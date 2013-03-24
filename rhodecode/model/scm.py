@@ -393,7 +393,8 @@ class ScmModel(BaseModel):
     def get_pull_requests(self, repo):
         repo = self._get_repo(repo)
         return self.sa.query(PullRequest)\
-                .filter(PullRequest.other_repo == repo).count()
+                .filter(PullRequest.other_repo == repo)\
+                .filter(PullRequest.status != PullRequest.STATUS_CLOSED).count()
 
     def mark_as_fork(self, repo, fork, user):
         repo = self.__get_repo(repo)

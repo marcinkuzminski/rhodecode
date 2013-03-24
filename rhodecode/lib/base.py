@@ -266,8 +266,7 @@ class BaseController(WSGIController):
         c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
         c.visual.lightweight_dashboard_items = safe_int(config.get('dashboard_items', 100))
         c.visual.repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
-
-        c.repo_name = get_repo_slug(request)
+        c.repo_name = get_repo_slug(request)  # can be empty
         c.backends = BACKENDS.keys()
         c.unread_notifications = NotificationModel()\
                         .get_unread_cnt_for_user(c.rhodecode_user.user_id)
