@@ -2,17 +2,17 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Shortlog') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Lightweight Changelog') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 
 <%def name="breadcrumbs_links()">
     %if c.file_history:
-        ${h.link_to(_('Shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}
+        ${h.link_to(_('Lightweight Changelog'),h.url('shortlog_home',repo_name=c.repo_name))}
         &raquo;
         ${c.file_history}
     %else:
-        ${_('Shortlog')}
+        ${_('Lightweight Changelog')}
     %endif
 </%def>
 

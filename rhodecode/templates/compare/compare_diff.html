@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Compare')} ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
+    ${_('%s Compare') % c.repo_name} - ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">

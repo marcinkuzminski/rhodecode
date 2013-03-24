@@ -3,7 +3,7 @@
 
 <%def name="title()">
   %if c.repo_name:
-    ${_('Search repository')} ${c.repo_name} - ${c.rhodecode_name}
+    ${_('Search repository')} ${c.repo_name} &middot; ${c.rhodecode_name}
   %else:
     ${_('Search in all repositories')}
   %endif

@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Pull request #%s') % c.pull_request.pull_request_id}
+    ${_('%s Pull Request #%s') % (c.repo_name, c.pull_request.pull_request_id)} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
