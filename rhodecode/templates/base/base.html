@@ -164,13 +164,6 @@
               %endif
              </ul>
         </li>
-        <li ${is_current('showforks')}>
-          <a href="${h.url('repo_forks_home',repo_name=c.repo_name)}"  title="${_('Show Forks')}" class="forks">${_('Forks')}
-            %if c.repository_forks:
-              <span>${c.repository_forks}</span>
-            %endif
-          </a>
-        </li>
         <li ${is_current('showpullrequest')}>
           <a href="${h.url('pullrequest_show_all',repo_name=c.repo_name)}" title="${_('Show Pull Requests')}" class="pull-request">${_('Pull Requests')}
             %if c.repository_pull_requests:
