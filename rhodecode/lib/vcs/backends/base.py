@@ -311,27 +311,6 @@ class BaseRepository(object):
         """
         raise NotImplementedError
 
-    def inject_ui(self, **extras):
-        """
-        Injects extra parameters into UI object of this repo
-        """
-        required_extras = [
-            'ip',
-            'username',
-            'action',
-            'repository',
-            'scm',
-            'config',
-            'server_url',
-            'make_lock',
-            'locked_by',
-        ]
-        for req in required_extras:
-            if req not in extras:
-                raise AttributeError('Missing attribute %s in extras' % (req))
-        for k, v in extras.items():
-            self._repo.ui.setconfig('rhodecode_extras', k, v)
-
 
 class BaseChangeset(object):
     """

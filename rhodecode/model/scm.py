@@ -44,7 +44,8 @@ from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
-from rhodecode.lib.utils2 import safe_str, safe_unicode, get_server_url
+from rhodecode.lib.utils2 import safe_str, safe_unicode, get_server_url,\
+    _set_extras
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_filesystem_repos, make_ui, \
     action_logger, REMOVED_REPO_PAT
@@ -437,7 +438,7 @@ class ScmModel(BaseModel):
             'locked_by': [None, None]
         }
         _scm_repo = repo._repo
-        repo.inject_ui(**extras)
+        _set_extras(extras)
         if repo.alias == 'hg':
             log_push_action(_scm_repo.ui, _scm_repo, node=revisions[0])
         elif repo.alias == 'git':

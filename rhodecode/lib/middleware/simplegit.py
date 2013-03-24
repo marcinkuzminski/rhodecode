@@ -79,7 +79,8 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
     HTTPBadRequest, HTTPNotAcceptable
 
-from rhodecode.lib.utils2 import safe_str, fix_PATH, get_server_url
+from rhodecode.lib.utils2 import safe_str, fix_PATH, get_server_url,\
+    _set_extras
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
@@ -333,10 +334,4 @@ class SimpleGit(BaseVCSController):
         :param extras: dict with extra params to put into baseui
         """
 
-        # make our hgweb quiet so it doesn't print output
-        baseui.setconfig('ui', 'quiet', 'true')
-
-        #inject some additional parameters that will be available in ui
-        #for hooks
-        for k, v in extras.items():
-            baseui.setconfig('rhodecode_extras', k, v)
+        _set_extras(extras)

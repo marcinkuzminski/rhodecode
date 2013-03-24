@@ -47,7 +47,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode, remove_suffix, remove_prefix, time_to_datetime
+    safe_unicode, remove_suffix, remove_prefix, time_to_datetime, _set_extras
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -935,10 +935,6 @@ class Repository(Base, BaseModel):
         """
         from rhodecode.lib.utils import make_ui
         return make_ui('db', clear_session=False)
-
-    @classmethod
-    def inject_ui(cls, repo, extras={}):
-        repo.inject_ui(extras)
 
     @classmethod
     def is_valid(cls, repo_name):

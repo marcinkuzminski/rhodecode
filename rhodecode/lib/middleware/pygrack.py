@@ -121,8 +121,6 @@ class GitRepository(object):
 
         try:
             gitenv = os.environ
-            from rhodecode.lib.compat import json
-            gitenv['RHODECODE_EXTRAS'] = json.dumps(self.extras)
             # forget all configs
             gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
             opts = dict(

@@ -23,13 +23,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import re
+import sys
 import time
 import datetime
+import traceback
 import webob
 
 from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.compat import json
 
 
 def __get_lem():
@@ -552,7 +556,6 @@ def fix_PATH(os_=None):
     Get current active python path, and append it to PATH variable to fix issues
     of subprocess calls and different python versions
     """
-    import sys
     if os_ is None:
         import os
     else:
@@ -578,3 +581,29 @@ def obfuscate_url_pw(engine):
 def get_server_url(environ):
     req = webob.Request(environ)
     return req.host_url + req.script_name
+
+
+def _extract_extras():
+    """
+    Extracts the rc extras data from os.environ, and wraps it into named
+    AttributeDict object
+    """
+    try:
+        rc_extras = json.loads(os.environ['RC_SCM_DATA'])
+    except:
+        print os.environ
+        print >> sys.stderr, traceback.format_exc()
+        rc_extras = {}
+
+    try:
+        for k in ['username', 'repository', 'locked_by', 'scm', 'make_lock',
+                  'action', 'ip']:
+            rc_extras[k]
+    except KeyError, e:
+        raise Exception('Missing key %s in os.environ %s' % (e, rc_extras))
+
+    return AttributeDict(rc_extras)
+
+
+def _set_extras(extras):
+    os.environ['RC_SCM_DATA'] = json.dumps(extras)
