@@ -26,7 +26,7 @@
                 </div>
               %endif
             </div>
-            <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">r${cs.revision}:${h.short_id(cs.raw_id)}</a></pre>
+            <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id)}">${h.show_id(cs)}</a></pre>
          </div>
         </td>
         <td>
