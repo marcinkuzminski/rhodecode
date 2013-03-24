@@ -317,7 +317,6 @@ class SimpleGit(BaseVCSController):
         from rhodecode.model.db import Repository
         _repo = Repository.get_by_repo_name(repo_name)
         _repo = _repo.scm_instance
-        _repo._repo.ui = baseui
 
         _hooks = dict(baseui.configitems('hooks')) or {}
         if action == 'pull':

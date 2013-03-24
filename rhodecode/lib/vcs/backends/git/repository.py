@@ -64,7 +64,7 @@ class GitRepository(BaseRepository):
             abspath(get_user_home(), '.gitconfig'),
         ]
 
-    @ThreadLocalLazyProperty
+    @property
     def _repo(self):
         return Repo(self.path)
 
@@ -419,7 +419,9 @@ class GitRepository(BaseRepository):
         return self._get_parsed_refs()
 
     def _get_parsed_refs(self):
-        refs = self._repo.get_refs()
+        # cache the property
+        _repo = self._repo
+        refs = _repo.get_refs()
         keys = [('refs/heads/', 'H'),
                 ('refs/remotes/origin/', 'RH'),
                 ('refs/tags/', 'T')]
@@ -429,9 +431,9 @@ class GitRepository(BaseRepository):
                 if ref.startswith(k):
                     _key = ref[len(k):]
                     if type_ == 'T':
-                        obj = self._repo.get_object(sha)
+                        obj = _repo.get_object(sha)
                         if isinstance(obj, Tag):
-                            sha = self._repo.get_object(sha).object[1]
+                            sha = _repo.get_object(sha).object[1]
                     _refs[_key] = [sha, type_]
                     break
         return _refs
