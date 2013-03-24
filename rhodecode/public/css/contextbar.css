@@ -15,6 +15,7 @@
 #context-bar a.files { background-image: url("../images/icons/file.png"); }
 #context-bar a.switch-to { background-image: url("../images/icons/arrow_switch.png"); }
 #context-bar a.options { background-image: url("../images/icons/table_gear.png"); }
+#context-bar a.forks { background-image: url("../images/icons/arrow_divide.png"); }
 #context-bar a.pull-request { background-image: url("../images/icons/arrow_join.png"); }
 #context-bar a.branches { background-image: url("../images/icons/arrow_branch.png"); }
 #context-bar a.tags { background-image: url("../images/icons/tag_blue.png"); }

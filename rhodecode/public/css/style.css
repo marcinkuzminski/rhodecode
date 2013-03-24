@@ -4521,6 +4521,17 @@ form.comment-inline-form {
     -webkit-border-radius: 4px !important;
 }
 
+#context-pages .forks span,
+.menu_link_notifications {
+    padding: 4px 4px !important;
+    text-align: center;
+    color: #888 !important;
+    background-color: #DEDEDE !important;
+    border-radius: 4px !important;
+    -webkit-border-radius: 4px !important;
+}
+
+
 .notification-header {
     padding-top: 6px;
 }
