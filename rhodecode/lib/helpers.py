@@ -380,7 +380,7 @@ def show_id(cs):
     """
     from rhodecode import CONFIG
     def_len = safe_int(CONFIG.get('sha_len', 12))
-    show_rev = str2bool(CONFIG.get('sha_rev', True))
+    show_rev = str2bool(CONFIG.get('sha_show_numeric_rev', True))
 
     raw_id = cs.raw_id[:def_len]
     if show_rev:
