@@ -583,13 +583,16 @@ def get_server_url(environ):
     return req.host_url + req.script_name
 
 
-def _extract_extras():
+def _extract_extras(env=None):
     """
     Extracts the rc extras data from os.environ, and wraps it into named
     AttributeDict object
     """
+    if not env:
+        env = os.environ
+
     try:
-        rc_extras = json.loads(os.environ['RC_SCM_DATA'])
+        rc_extras = json.loads(env['RC_SCM_DATA'])
     except:
         print os.environ
         print >> sys.stderr, traceback.format_exc()
