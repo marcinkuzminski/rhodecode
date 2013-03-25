@@ -109,7 +109,7 @@ class Command(BasePasterCommand):
                     to_remove_filtered.append([name, date_])
 
             to_remove = to_remove_filtered
-            print >> sys.stdout, 'removing [%s] deleted repos older than %s[%s]' \
+            print >> sys.stdout, 'removing %s deleted repos older than %s (%s)' \
                 % (len(to_remove), older_than, older_than_date)
         else:
             print >> sys.stdout, 'removing all [%s] deleted repos' \
@@ -118,7 +118,8 @@ class Command(BasePasterCommand):
             # don't ask just remove !
             remove = True
         else:
-            remove = ask_ok('are you sure to remove listed repos \n%s [y/n]?'
+            remove = ask_ok('the following repositories will be deleted completely:\n%s\n'
+                            'are you sure you want to remove them [y/n]?'
                             % ', \n'.join(['%s removed on %s'
                     % (safe_str(x[0]), safe_str(x[1])) for x in to_remove]))
 
@@ -136,15 +137,17 @@ class Command(BasePasterCommand):
             action='store',
             dest='older_than',
             help=("only remove repos that have been removed "
-                 "at least given time ago "
-                 "ex. --older-than=30d deletes repositores "
-                 "removed more than 30days ago. Possible options "
-                 "d[ays]/h[ours]/m[inutes]/s[seconds]. OPTIONAL")
+                 "at least given time ago. "
+                 "The default is to remove all removed repositories. "
+                 "Possible suffixes: "
+                 "d (days), h (hours), m (minutes), s (seconds). "
+                 "For example --older-than=30d deletes repositories "
+                 "removed more than 30 days ago.")
             )
 
         self.parser.add_option(
             '--dont-ask',
             action="store_true",
             dest="dont_ask",
-            help="Don't ask to remove repos"
+            help="remove repositories without asking for confirmation."
         )
