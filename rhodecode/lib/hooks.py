@@ -347,8 +347,6 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
         #post push shouldn't use the cached instance never
         repo = repo.scm_instance_no_cache()
 
-    repo.ui = baseui
-
     if hook_type == 'pre':
         pre_push(baseui, repo)
 

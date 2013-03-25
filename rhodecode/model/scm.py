@@ -443,7 +443,7 @@ class ScmModel(BaseModel):
         if repo.alias == 'hg':
             log_push_action(_scm_repo.ui, _scm_repo, node=revisions[0])
         elif repo.alias == 'git':
-            log_push_action(_scm_repo.ui, _scm_repo, _git_revs=revisions)
+            log_push_action(None, _scm_repo, _git_revs=revisions)
 
     def _get_IMC_module(self, scm_type):
         """
