@@ -62,7 +62,7 @@ ${self.context_bar('changelog')}
                             <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(cs.author),16)}"/>
                             <span title="${cs.author}" class="user">${h.shorter(h.person(cs.author),22)}</span>
                         </td>
-                        <td class="hash">
+                        <td class="hash" style="width:${len(h.show_id(cs))*6.5}px">
                             <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id)}">
                                 <span class="changeset_hash">${h.show_id(cs)}</span>
                             </a>
