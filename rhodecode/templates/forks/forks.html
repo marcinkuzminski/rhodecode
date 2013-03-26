@@ -9,6 +9,10 @@
     ${_('Forks')}
 </%def>
 
+<%def name="page_nav()">
+    ${self.menu('repositories')}
+</%def>
+
 <%def name="main()">
 ${self.context_bar('showforks')}
 <div class="box">

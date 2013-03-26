@@ -29,7 +29,9 @@
     %endif
 </%def>
 <%def name="main()">
+%if c.repo_name:
 ${self.context_bar('options')}
+%endif
 <div class="box">
     <!-- box / title -->
     <div class="title">

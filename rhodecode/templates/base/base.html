@@ -51,20 +51,14 @@
 <!-- END FOOTER -->
 
 ### MAKO DEFS ###
-<%def name="page_nav()">
-    ${self.menu()}
-</%def>
-
 <%def name="breadcrumbs()">
     <div class="breadcrumbs">
     ${self.breadcrumbs_links()}
     </div>
 </%def>
 
-<%def name="context_bar(current=None)">
-  %if c.repo_name:
+<%def name="context_bar(current)">
     ${repo_context_bar(current)}
-  %endif
 </%def>
 
 <%def name="admin_menu()">

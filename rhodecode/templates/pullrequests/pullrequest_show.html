@@ -8,6 +8,10 @@
     ${_('Pull request #%s') % c.pull_request.pull_request_id}
 </%def>
 
+<%def name="page_nav()">
+    ${self.menu('repositories')}
+</%def>
+
 <%def name="main()">
 ${self.context_bar('showpullrequest')}
 <div class="box">
