@@ -39,7 +39,7 @@ ${self.context_bar('showpullrequest')}
         <div style="float:left">
             <div>
                 <span style="font-size: 20px">
-                ${h.select('other_repo',c.default_other_repo,c.other_repos,class_='refs')}:${h.select('other_ref',c.default_other_ref,c.default_other_refs,class_='refs')}
+                ${h.select('other_repo',c.default_other_repo,c.other_repos,class_='refs')}:${c.default_other_repo_info['revs']}
                 </span>
                  <div id="other_repo_desc" style="padding:5px 3px 3px 20px;"></div>
             </div>

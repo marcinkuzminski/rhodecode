@@ -152,7 +152,7 @@ class PullrequestsController(BaseRepoController):
         # add org repo to other so we can open pull request against itself
         c.other_repos.extend(c.org_repos)
         c.default_other_repo = org_repo.repo_name
-        c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.scm_instance, branch_rev=org_rev)
+        other_refs, other_ref = self._get_repo_refs(org_repo.scm_instance, branch_rev=org_rev)
         usr_data = lambda usr: dict(user_id=usr.user_id,
                                     username=usr.username,
                                     firstname=usr.firstname,
@@ -161,8 +161,7 @@ class PullrequestsController(BaseRepoController):
         other_repos_info[org_repo.repo_name] = {
             'user': usr_data(org_repo.user),
             'description': org_repo.description,
-            'revs': h.select('other_ref', c.default_other_ref,
-                             c.default_other_refs, class_='refs')
+            'revs': h.select('other_ref', other_ref, other_refs, class_='refs')
         }
 
         # gather forks and add to this list ... even though it is rare to
@@ -179,13 +178,12 @@ class PullrequestsController(BaseRepoController):
         # add parents of this fork also, but only if it's not empty
         if org_repo.parent and org_repo.parent.scm_instance.revisions:
             c.default_other_repo = org_repo.parent.repo_name
-            c.default_other_refs, c.default_other_ref = self._get_repo_refs(org_repo.parent.scm_instance)
+            other_refs, other_ref = self._get_repo_refs(org_repo.parent.scm_instance)
             c.other_repos.append((org_repo.parent.repo_name, org_repo.parent.repo_name))
             other_repos_info[org_repo.parent.repo_name] = {
                 'user': usr_data(org_repo.parent.user),
                 'description': org_repo.parent.description,
-                'revs': h.select('other_ref', c.default_other_ref,
-                                 c.default_other_refs, class_='refs')
+                'revs': h.select('other_ref', other_ref, other_refs, class_='refs')
             }
 
         c.default_other_repo_info = other_repos_info[c.default_other_repo]
