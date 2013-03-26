@@ -97,14 +97,11 @@
 
   <!--- CONTEXT BAR -->
   <div id="context-bar" class="box">
-    <div id="context-top">
       <div id="breadcrumbs">
         ${h.link_to(_(u'Repositories'),h.url('home'))}
         &raquo;
         ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
       </div>
-    </div>
-    <div id="context-state">
       <ul id="context-pages" class="horizontal-list">
         <li ${is_current('summary')}><a href="${h.url('summary_home', repo_name=c.repo_name)}" class="summary">${_('Summary')}</a></li>
         <li ${is_current('changelog')}><a href="${h.url('changelog_home', repo_name=c.repo_name)}" class="changelogs">${_('Changelog')}</a></li>
@@ -162,7 +159,6 @@
           </a>
         </li>
       </ul>
-    </div>
   </div>
   <script type="text/javascript">
       YUE.on('branch_tag_switcher_2','mouseover',function(){

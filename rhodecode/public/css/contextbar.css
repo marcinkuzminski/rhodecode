@@ -40,9 +40,12 @@
 
 #content #context-bar {
     position: relative;
-    background-color: #003B76 !important;
-    padding: 0px;
     overflow: visible;
+    background-color: #336699;
+    border-top: 1px solid #517da8;
+    border-bottom: 1px solid #003162;
+    padding: 0 5px;
+    min-height: 36px;
 }
 
 #header #header-inner #quick a,
@@ -109,7 +112,7 @@ ul.horizontal-list li a {
 
 #breadcrumbs {
     float: left;
-    padding: 5px 0;
+    padding: 3px 0 5px 0;
     padding-left: 5px;
     font-weight: bold;
     font-size: 14px;
@@ -118,13 +121,6 @@ ul.horizontal-list li a {
 #breadcrumbs span {
     font-weight: bold;
     font-size: 1.8em;
-}
-
-#context-top {
-    position: relative;
-    overflow: hidden;
-    border-bottom: 1px solid #003162;
-    padding: 5px;
 }
 
 #header #header-inner #quick ul,
@@ -224,12 +220,6 @@ ul#context-actions {
 #content #context-pages .follow .show-following,
 #content #context-pages .following .show-follow {
     display: none;
-}
-
-#context-state {
-    background-color: #336699;
-    border-top: 1px solid #517da8;
-    min-height: 36px;
 }
 
 #context-pages {
