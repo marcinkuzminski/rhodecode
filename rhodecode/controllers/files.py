@@ -377,7 +377,8 @@ class FilesController(BaseRepoController):
                           'contain .. in path'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
-            location = os.path.normpath(location)
+            if location:
+                location = os.path.normpath(location)
             filename = os.path.basename(filename)
             node_path = os.path.join(location, filename)
             author = self.rhodecode_user.full_contact
