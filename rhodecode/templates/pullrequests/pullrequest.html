@@ -58,13 +58,13 @@ ${self.context_bar('showpullrequest')}
           ## members goes here !
           <div class="group_members_wrap">
             <ul id="review_members" class="group_members">
-            %for member in c.review_members:
-              <li id="reviewer_${member.user_id}">
+            %for member in [c.default_other_repo_info['user']]:
+              <li id="reviewer_${member['user_id']}">
                 <div class="reviewers_member">
-                  <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
-                  <div style="float:left">${member.full_name} (${_('owner')})</div>
-                  <input type="hidden" value="${member.user_id}" name="review_members" />
-                  <span class="delete_icon action_button" onclick="removeReviewMember(${member.user_id})"></span>
+                  <div class="gravatar"><img alt="gravatar" src="${member['gravatar_link']}"/> </div>
+                  <div style="float:left">${member['firstname']} ${member['lastname']} (${_('owner')})</div>
+                  <input type="hidden" value="${member['user_id']}" name="review_members" />
+                  <span class="delete_icon action_button" onclick="removeReviewMember(${member['user_id']})"></span>
                 </div>
               </li>
             %endfor

@@ -166,7 +166,7 @@ class PullrequestsController(BaseRepoController):
         }
 
         # gather forks and add to this list ... even though it is rare to
-        # request forks to pull their parent
+        # request forks to pull from their parent
         for fork in org_repo.forks:
             c.other_repos.append((fork.repo_name, fork.repo_name))
             refs, default_ref = self._get_repo_refs(fork.scm_instance)
@@ -188,9 +188,8 @@ class PullrequestsController(BaseRepoController):
                                  c.default_other_refs, class_='refs')
             }
 
+        c.default_other_repo_info = other_repos_info[c.default_other_repo]
         c.other_repos_info = json.dumps(other_repos_info)
-        # other repo owner
-        c.review_members = []
         return render('/pullrequests/pullrequest.html')
 
     @NotAnonymous()
