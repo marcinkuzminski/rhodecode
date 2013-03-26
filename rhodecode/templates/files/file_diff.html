@@ -5,10 +5,6 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
     ${_('File diff')} r${c.changeset_1.revision}:${h.short_id(c.changeset_1.raw_id)} &rarr; r${c.changeset_2.revision}:${h.short_id(c.changeset_2.raw_id)}
 </%def>
 
