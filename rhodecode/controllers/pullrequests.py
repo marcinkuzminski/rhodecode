@@ -71,26 +71,9 @@ class PullrequestsController(BaseRepoController):
     def _get_repo_refs(self, repo, rev=None, branch_rev=None):
         """return a structure with repo's interesting changesets, suitable for
         the selectors in pullrequest.html"""
-        branches = [('branch:%s:%s' % (k, v), k)
-                    for k, v in repo.branches.iteritems()]
-        bookmarks = [('book:%s:%s' % (k, v), k)
-                     for k, v in repo.bookmarks.iteritems()]
-        tags = [('tag:%s:%s' % (k, v), k)
-                for k, v in repo.tags.iteritems()
-                if k != 'tip']
-
-        tip = repo.tags['tip']
-        colontip = ':' + tip
-        tips = [x[1] for x in branches + bookmarks + tags
-                if x[0].endswith(colontip)]
-        selected = 'tag:tip:%s' % tip
-        special = [(selected, 'tip: %s' % ', '.join(tips))]
-
-        if rev:
-            selected = 'rev:%s:%s' % (rev, rev)
-            special.append((selected, '%s: %s' % (_("Selected"), rev[:12])))
 
         # list named branches that has been merged to this named branch - it should probably merge back
+        peers = []
         if branch_rev:
             # not restricting to merge() would also get branch point and be better
             # (especially because it would get the branch point) ... but is currently too expensive
@@ -102,13 +85,51 @@ class PullrequestsController(BaseRepoController):
                 otherbranches[cs.branch] = cs.raw_id
             for branch, node in otherbranches.iteritems():
                 selected = 'branch:%s:%s' % (branch, node)
-                special.append((selected, '%s: %s' % (_('Peer'), branch)))
+                peers.append((selected, branch))
 
-        return [(special, _("Special")),
-                (bookmarks, _("Bookmarks")),
-                (branches, _("Branches")),
-                (tags, _("Tags")),
-                ], selected
+        selected = None
+        branches = []
+        for branch, branchrev in repo.branches.iteritems():
+            n = 'branch:%s:%s' % (branch, branchrev)
+            branches.append((n, branch))
+            if rev == branchrev:
+                selected = n
+        bookmarks = []
+        for bookmark, bookmarkrev in repo.bookmarks.iteritems():
+            n = 'book:%s:%s' % (bookmark, bookmarkrev)
+            bookmarks.append((n, bookmark))
+            if rev == bookmarkrev:
+                selected = n
+        tags = []
+        for tag, tagrev in repo.tags.iteritems():
+            n = 'tag:%s:%s' % (tag, tagrev)
+            tags.append((n, tag))
+            if rev == tagrev and tag != 'tip': # tip is not a real tag - and its branch is better
+                selected = n
+
+        # prio 1: rev was selected as existing entry above
+
+        # prio 2: create special entry for rev; rev _must_ be used
+        specials = []
+        if rev and selected is None:
+            selected = 'rev:%s:%s' % (rev, rev)
+            specials = [(selected, '%s: %s' % (_("Changeset"), rev[:12]))]
+
+        # prio 3: most recent peer branch
+        if peers and not selected:
+            selected = peers[0][0][0]
+
+        # prio 4: tip revision
+        if not selected:
+            selected = 'tag:tip:%s' % repo.tags['tip']
+
+        groups = [(specials, _("Special")),
+                  (peers, _("Peer branches")),
+                  (bookmarks, _("Bookmarks")),
+                  (branches, _("Branches")),
+                  (tags, _("Tags")),
+                  ]
+        return [g for g in groups if g[0]], selected
 
     def _get_is_allowed_change_status(self, pull_request):
         owner = self.rhodecode_user.user_id == pull_request.user_id
