@@ -887,7 +887,7 @@ class Repository(Base, BaseModel):
 
     @property
     def groups_and_repo(self):
-        return self.groups_with_parents, self.just_name
+        return self.groups_with_parents, self.just_name, self.repo_name
 
     @LazyProperty
     def repo_path(self):

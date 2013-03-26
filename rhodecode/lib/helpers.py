@@ -917,7 +917,7 @@ def changed_tooltip(nodes):
         return ': ' + _('No Files')
 
 
-def repo_link(groups_and_repos, last_url=None):
+def repo_link(groups_and_repos):
     """
     Makes a breadcrumbs link to repo within a group
     joins &raquo; on each group to create a fancy link
@@ -928,18 +928,14 @@ def repo_link(groups_and_repos, last_url=None):
     :param groups_and_repos:
     :param last_url:
     """
-    groups, repo_name = groups_and_repos
-    last_link = link_to(repo_name, last_url) if last_url else repo_name
+    groups, just_name, repo_name = groups_and_repos
+    last_url = url('summary_home', repo_name=repo_name)
+    last_link = link_to(just_name, last_url)
 
-    if not groups:
-        if last_url:
-            return literal('<span>%s</span>' % last_link)
-        return literal('<span>%s</span>' % repo_name)
-    else:
-        def make_link(group):
-            return link_to(group.name,
-                           url('repos_group_home', group_name=group.group_name))
-        return literal(' &raquo; '.join(map(make_link, groups) + ['<span>' + last_link + '</span>']))
+    def make_link(group):
+        return link_to(group.name,
+                       url('repos_group_home', group_name=group.group_name))
+    return literal(' &raquo; '.join(map(make_link, groups) + ['<span>%s</span>' % last_link]))
 
 
 def fancy_file_stats(stats):
