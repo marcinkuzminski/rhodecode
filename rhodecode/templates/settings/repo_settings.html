@@ -1,4 +1,7 @@
 ## -*- coding: utf-8 -*-
+##
+## See also repo_edit.html
+##
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
@@ -30,10 +33,10 @@
                 <div class="label">
                     <label for="repo_name">${_('Name')}:</label>
                 </div>
-                <div class="input input-medium">
-                    ${h.text('repo_name',class_="small")}
+                <div class="input">
+                    ${h.text('repo_name',class_="medium")}
                 </div>
-             </div>
+           </div>
            <div class="field">
                <div class="label">
                    <label for="clone_uri">${_('Clone uri')}:</label>
@@ -81,25 +84,24 @@
                 </div>
             </div>
             %if c.visual.repository_fields:
-            ## EXTRA FIELDS
-            %for field in c.repo_fields:
-              <div class="field">
-                  <div class="label">
-                      <label for="${field.field_key_prefixed}">${field.field_label} (${field.field_key}):</label>
-                  </div>
-                  <div class="input input-medium">
-                      ${h.text(field.field_key_prefixed, field.field_value, class_='medium')}
-                      %if field.field_desc:
-                        <span class="help-block">${field.field_desc}</span>
-                      %endif
-                  </div>
-               </div>
-            %endfor
+              ## EXTRA FIELDS
+              %for field in c.repo_fields:
+                <div class="field">
+                    <div class="label">
+                        <label for="${field.field_key_prefixed}">${field.field_label} (${field.field_key}):</label>
+                    </div>
+                    <div class="input input-medium">
+                        ${h.text(field.field_key_prefixed, field.field_value, class_='medium')}
+                        %if field.field_desc:
+                          <span class="help-block">${field.field_desc}</span>
+                        %endif
+                    </div>
+                 </div>
+              %endfor
             %endif
-
-             <div class="field">
+            <div class="field">
                 <div class="label">
-                    <label for="">${_('Permissions')}:</label>
+                    <label for="input">${_('Permissions')}:</label>
                 </div>
                 <div class="input">
                     <%include file="../admin/repos/repo_edit_perms.html"/>
@@ -111,36 +113,28 @@
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
 
+        </div>
     </div>
-    ${h.end_form()}
-</div>
+        ${h.end_form()}
 
-<h3>${_('Delete repository')}</h3>
-<div class="form">
-    <!-- fields -->
-    <div class="fields">
-
-        <div class="field">
-            <div class="label">
-                <label for="">${_('Remove repo')}:</label>
-            </div>
-            <div class="checkboxes">
-              ${h.form(url('repo_settings_delete', repo_name=c.repo_info.repo_name),method='delete')}
-              <div class="">
-                 <div class="fields">
-                     ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
-                 </div>
-                 <div class="field" style="border:none;color:#888">
-                 <ul>
-                    <li>${_('This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems. If you need fully delete it from file system please do it manually')}</li>
-                 </ul>
-                 </div>
-              </div>
-              ${h.end_form()}
+    <h3>${_('Delete')}</h3>
+    ${h.form(url('repo_settings_delete', repo_name=c.repo_info.repo_name),method='delete')}
+    <div class="form">
+        <div class="fields">
+            <div class="field" style="border:none;color:#888">
+                <div class="label">
+                    <label for="">${_('Remove repository')}:</label>
+                </div>
+                <div class="checkboxes">
+                    ${h.submit('remove_%s' % c.repo_info.repo_name,_('Remove this repository'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this repository')+"');")}
+                    <ul>
+                        <li>${_('This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems. If you need to fully delete it from file system please do it manually')}</li>
+                    </ul>
+                </div>
             </div>
         </div>
-   </div>
-</div>
+    </div>
+    ${h.end_form()}
 
 </div>
 </%def>
