@@ -18,6 +18,7 @@
 </%def>
 
 <%def name="main()">
+${self.context_bar('changelog')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -25,8 +26,7 @@
     </div>
     <div class="table">
         <div id="body" class="diffblock">
-            <div class="code-header cv">
-                <h3 class="code-header-title">${_('Show changesets')}</h3>
+            <div class="code-header">
                 <div>
                 ${h.link_to('r%s:%s -> r%s:%s' % (c.cs_ranges[0].revision, h.short_id(c.cs_ranges[0].raw_id), c.cs_ranges[-1].revision, h.short_id(c.cs_ranges[-1].raw_id)),
                     h.url('compare_url',repo_name=c.repo_name,org_ref_type='rev',org_ref=getattr(c.cs_ranges[0].parents[0] if c.cs_ranges[0].parents else h.EmptyChangeset(),'raw_id'),other_ref_type='rev',other_ref=c.cs_ranges[-1].raw_id)

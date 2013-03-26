@@ -5,7 +5,6 @@
     ${_('%s Tags') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
-
 <%def name="breadcrumbs_links()">
     <input class="q_filter_box" id="q_filter_tags" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
     ${_('Tags')}
@@ -14,6 +13,7 @@
 <%def name="page_nav()">
     ${self.menu('tags')}
 </%def>
+
 <%def name="main()">
 ${self.context_bar('switch-to')}
 <div class="box">

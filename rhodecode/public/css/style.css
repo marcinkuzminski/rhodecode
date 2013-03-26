@@ -4690,9 +4690,6 @@ div.diffblock .code-header.banner {
     padding: 3px 3px 11px 3px;
 }
 
-div.diffblock .code-header.cv {
-    height: 34px;
-}
 div.diffblock .code-header-title {
     padding: 0px 0px 10px 5px !important;
     margin: 0 !important;

@@ -15,7 +15,9 @@
 <%def name="page_nav()">
     ${self.menu('files')}
 </%def>
+
 <%def name="main()">
+${self.context_bar('files')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -27,6 +29,7 @@
     ${diff_block.diff_block(c.changes)}
     </div>
 </div>
+
 <script>
 YUE.onDOMReady(function(){
 

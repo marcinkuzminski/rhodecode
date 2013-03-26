@@ -18,6 +18,7 @@
 </%def>
 
 <%def name="main()">
+${self.context_bar('changelog')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -25,8 +26,7 @@
     </div>
     <div class="table">
         <div id="body" class="diffblock">
-            <div class="code-header cv">
-                <h3 class="code-header-title">${_('Compare revisions')}</h3>
+            <div class="code-header">
                 <div>
                 ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}  <a href="${c.swap_url}">[swap]</a>
                 </div>

@@ -5,7 +5,6 @@
     ${_('%s Bookmarks') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
-
 <%def name="breadcrumbs_links()">
     <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
     ${_('Bookmarks')}
@@ -14,9 +13,10 @@
 <%def name="page_nav()">
     ${self.menu('bookmarks')}
 </%def>
+
 <%def name="main()">
-<div class="box">
 ${self.context_bar('switch-to')}
+<div class="box">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
@@ -26,6 +26,7 @@ ${self.context_bar('switch-to')}
         <%include file='bookmarks_data.html'/>
     </div>
 </div>
+
 <script type="text/javascript">
 
 // main table sorting
