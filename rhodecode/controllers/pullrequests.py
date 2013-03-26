@@ -141,50 +141,42 @@ class PullrequestsController(BaseRepoController):
         # as default for other and thus give a simple compare view
         #other_rev = request.POST.get('rev_start')
 
-        other_repos_info = {}
-
         c.org_repos = []
         c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
         c.default_org_repo = org_repo.repo_name
         c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, org_rev)
 
         c.other_repos = []
-        # add org repo to other so we can open pull request against itself
-        c.other_repos.extend(c.org_repos)
+        other_repos_info = {}
+
+        def add_other_repo(repo, branch_rev=None):
+            if repo.repo_name in other_repos_info: # shouldn't happen
+                return
+            c.other_repos.append((repo.repo_name, repo.repo_name))
+            other_refs, selected_other_ref = self._get_repo_refs(repo.scm_instance, branch_rev=branch_rev)
+            other_repos_info[repo.repo_name] = {
+                'user': dict(user_id=repo.user.user_id,
+                             username=repo.user.username,
+                             firstname=repo.user.firstname,
+                             lastname=repo.user.lastname,
+                             gravatar_link=h.gravatar_url(repo.user.email, 14)),
+                'description': repo.description,
+                'revs': h.select('other_ref', selected_other_ref, other_refs, class_='refs')
+            }
+
+        # add org repo to other so we can open pull request against peer branches on itself
+        add_other_repo(org_repo, branch_rev=org_rev)
         c.default_other_repo = org_repo.repo_name
-        other_refs, other_ref = self._get_repo_refs(org_repo.scm_instance, branch_rev=org_rev)
-        usr_data = lambda usr: dict(user_id=usr.user_id,
-                                    username=usr.username,
-                                    firstname=usr.firstname,
-                                    lastname=usr.lastname,
-                                    gravatar_link=h.gravatar_url(usr.email, 14))
-        other_repos_info[org_repo.repo_name] = {
-            'user': usr_data(org_repo.user),
-            'description': org_repo.description,
-            'revs': h.select('other_ref', other_ref, other_refs, class_='refs')
-        }
 
         # gather forks and add to this list ... even though it is rare to
         # request forks to pull from their parent
         for fork in org_repo.forks:
-            c.other_repos.append((fork.repo_name, fork.repo_name))
-            refs, default_ref = self._get_repo_refs(fork.scm_instance)
-            other_repos_info[fork.repo_name] = {
-                'user': usr_data(fork.user),
-                'description': fork.description,
-                'revs': h.select('other_ref', default_ref, refs, class_='refs')
-            }
+            add_other_repo(fork)
 
         # add parents of this fork also, but only if it's not empty
         if org_repo.parent and org_repo.parent.scm_instance.revisions:
+            add_other_repo(org_repo.parent)
             c.default_other_repo = org_repo.parent.repo_name
-            other_refs, other_ref = self._get_repo_refs(org_repo.parent.scm_instance)
-            c.other_repos.append((org_repo.parent.repo_name, org_repo.parent.repo_name))
-            other_repos_info[org_repo.parent.repo_name] = {
-                'user': usr_data(org_repo.parent.user),
-                'description': org_repo.parent.description,
-                'revs': h.select('other_ref', other_ref, other_refs, class_='refs')
-            }
 
         c.default_other_repo_info = other_repos_info[c.default_other_repo]
         c.other_repos_info = json.dumps(other_repos_info)
