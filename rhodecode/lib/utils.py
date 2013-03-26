@@ -185,6 +185,7 @@ def get_repos(path, recursive=False, skip_removed_repos=True):
 
     def _get_repos(p):
         if not os.access(p, os.W_OK):
+            log.warn('ignoring repo path without write access: %s', p)
             return
         for dirpath in os.listdir(p):
             if os.path.isfile(os.path.join(p, dirpath)):
