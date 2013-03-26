@@ -429,11 +429,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         raise Exception('Missing administrative account!')
     added = []
 
-#    # clear cache keys
-#    log.debug("Clearing cache keys now...")
-#    CacheInvalidation.clear_cache()
-#    sa.commit()
-
     ##creation defaults
     defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
     enable_statistics = defs.get('repo_enable_statistics')
@@ -474,10 +469,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 ScmModel().install_git_hook(db_repo.scm_instance)
         # during starting install all cache keys for all repositories in the
         # system, this will register all repos and multiple instances
-        key, _prefix, _org_key = CacheInvalidation._get_key(name)
+        cache_key = CacheInvalidation._get_cache_key(name)
+        log.debug("Creating invalidation cache key for %s: %s", name, cache_key)
         CacheInvalidation.invalidate(name)
-        log.debug("Creating a cache key for %s, instance_id %s"
-                  % (name, _prefix or 'unknown'))
 
     sa.commit()
     removed = []

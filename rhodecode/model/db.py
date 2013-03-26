@@ -1630,9 +1630,13 @@ class CacheInvalidation(Base, BaseModel):
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
+    # cache_id, not used
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    # cache_key as created by _get_cache_key
     cache_key = Column("cache_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    # cache_args is usually a repo_name, possibly with _README/_RSS/_ATOM suffix
     cache_args = Column("cache_args", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    # instance sets cache_active True when it is caching, other instances set cache_active to False to invalidate
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
     def __init__(self, cache_key, cache_args=''):
@@ -1644,43 +1648,27 @@ class CacheInvalidation(Base, BaseModel):
         return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
 
-    @property
-    def prefix(self):
+    def get_prefix(self):
+        """
+        Guess prefix that might have been used in _get_cache_key to generate self.cache_key .
+        Only used for informational purposes in repo_edit.html .
+        """
         _split = self.cache_key.split(self.cache_args, 1)
-        if _split and len(_split) == 2:
+        if len(_split) == 2:
             return _split[0]
         return ''
 
     @classmethod
-    def clear_cache(cls):
-        cls.query().delete()
-
-    @classmethod
-    def _get_key(cls, key):
+    def _get_cache_key(cls, key):
         """
-        Wrapper for generating a key, together with a prefix
-
-        :param key:
+        Wrapper for generating a unique cache key for this instance and "key".
         """
         import rhodecode
-        prefix = ''
-        org_key = key
-        iid = rhodecode.CONFIG.get('instance_id')
-        if iid:
-            prefix = iid
-
-        return "%s%s" % (prefix, key), prefix, org_key
+        prefix = rhodecode.CONFIG.get('instance_id', '')
+        return "%s%s" % (prefix, key)
 
     @classmethod
-    def get_by_key(cls, key):
-        return cls.query().filter(cls.cache_key == key).scalar()
-
-    @classmethod
-    def get_by_repo_name(cls, repo_name):
-        return cls.query().filter(cls.cache_args == repo_name).all()
-
-    @classmethod
-    def _get_or_create_key(cls, key, repo_name, commit=True):
+    def _get_or_create_inv_obj(cls, key, repo_name, commit=True):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
@@ -1707,9 +1695,8 @@ class CacheInvalidation(Base, BaseModel):
         repo_name = remove_suffix(repo_name, '_RSS')
         repo_name = remove_suffix(repo_name, '_ATOM')
 
-        # adds instance prefix
-        key, _prefix, _org_key = cls._get_key(key)
-        inv = cls._get_or_create_key(key, repo_name)
+        cache_key = cls._get_cache_key(key)
+        inv = cls._get_or_create_inv_obj(cache_key, repo_name)
 
         if inv and inv.cache_active is False:
             return inv
@@ -1724,9 +1711,11 @@ class CacheInvalidation(Base, BaseModel):
         """
         invalidated_keys = []
         if key:
-            key, _prefix, _org_key = cls._get_key(key)
-            inv_objs = Session().query(cls).filter(cls.cache_key == key).all()
-        elif repo_name:
+            assert not repo_name
+            cache_key = cls._get_cache_key(key)
+            inv_objs = Session().query(cls).filter(cls.cache_key == cache_key).all()
+        else:
+            assert repo_name
             inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
         try:
@@ -1749,7 +1738,7 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
-        inv_obj = cls.get_by_key(key)
+        inv_obj = cls.query().filter(cls.cache_key == key).scalar()
         inv_obj.cache_active = True
         Session().add(inv_obj)
         Session().commit()
@@ -1760,28 +1749,26 @@ class CacheInvalidation(Base, BaseModel):
         class cachemapdict(dict):
 
             def __init__(self, *args, **kwargs):
-                fixkey = kwargs.get('fixkey')
-                if fixkey:
-                    del kwargs['fixkey']
-                self.fixkey = fixkey
+                self.fixkey = kwargs.pop('fixkey', False)
                 super(cachemapdict, self).__init__(*args, **kwargs)
 
             def __getattr__(self, name):
-                key = name
+                cache_key = name
                 if self.fixkey:
-                    key, _prefix, _org_key = cls._get_key(key)
-                if key in self.__dict__:
-                    return self.__dict__[key]
+                    cache_key = cls._get_cache_key(name)
+                if cache_key in self.__dict__:
+                    return self.__dict__[cache_key]
                 else:
-                    return self[key]
+                    return self[cache_key]
 
-            def __getitem__(self, key):
+            def __getitem__(self, name):
+                cache_key = name
                 if self.fixkey:
-                    key, _prefix, _org_key = cls._get_key(key)
+                    cache_key = cls._get_cache_key(name)
                 try:
-                    return super(cachemapdict, self).__getitem__(key)
+                    return super(cachemapdict, self).__getitem__(cache_key)
                 except KeyError:
-                    return
+                    return None
 
         cache_map = cachemapdict(fixkey=True)
         for obj in cls.query().all():

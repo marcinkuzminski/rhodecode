@@ -219,7 +219,7 @@ ${self.context_bar('options')}
                 </tr>
               %for cache in c.repo_info.cache_keys:
                   <tr>
-                    <td>${cache.prefix or '-'}</td>
+                    <td>${cache.get_prefix() or '-'}</td>
                     <td>${cache.cache_key}</td>
                     <td>${h.bool2icon(cache.cache_active)}</td>
                   </tr>
