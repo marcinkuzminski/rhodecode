@@ -7,8 +7,8 @@
 #quick .search { background-image: url("../images/icons/search_16.png"); }
 #quick .admin { background-image: url("../images/icons/cog_edit.png"); }
 
-#context-bar button.follow { background-image: url("../images/icons/heart.png"); }
-#context-bar button.following { background-image: url("../images/icons/heart_delete.png"); }
+#context-bar a.follow { background-image: url("../images/icons/heart.png"); }
+#context-bar a.following { background-image: url("../images/icons/heart_delete.png"); }
 #context-bar a.fork { background-image: url("../images/icons/arrow_divide.png"); }
 #context-bar a.summary { background-image: url("../images/icons/clipboard_16.png"); }
 #context-bar a.changelogs { background-image: url("../images/icons/time.png"); }
@@ -47,14 +47,12 @@
 
 #header #header-inner #quick a,
 #content #context-bar,
-#content #context-bar a,
-#content #context-bar button {
+#content #context-bar a {
     color: #FFFFFF;
 }
 
 #header #header-inner #quick a:hover,
-#content #context-bar a:hover,
-#content #context-bar button:hover {
+#content #context-bar a:hover {
     text-decoration: none;
 }
 
@@ -170,7 +168,6 @@ ul#context-actions {
     border-left: 1px solid rgba(255,255,255,0.1);
 }
 
-#context-actions button,
 #context-actions a {
     display: block;
     cursor: pointer;
@@ -216,7 +213,7 @@ ul#context-actions {
     border-radius: 0 4px 4px 0;
 }
 
-#content  #context-actions .icon {
+#content #context-actions .icon {
     margin: auto;
     margin-bottom: 5px;
     display: block;
@@ -224,23 +221,9 @@ ul#context-actions {
     float: none;
 }
 
-#content  #context-actions button.follow,
-#content  #context-actions button.following {
-    width: auto;
-    float: none;
-}
-
-#content  #context-actions button .show-following,
-#content  #context-actions button .show-follow {
+#content #context-pages .follow .show-following,
+#content #context-pages .following .show-follow {
     display: none;
-}
-
-#content #context-bar #context-actions button.follow .show-follow {
-    display: block;
-}
-
-#content #context-bar #context-actions button.following .show-following {
-    display: block;
 }
 
 #context-state {

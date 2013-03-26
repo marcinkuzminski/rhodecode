@@ -87,7 +87,7 @@
           if c.repository_following:
               return h.literal('following')
           else:
-            return h.literal('follow')
+              return h.literal('follow')
   %>
   <%
     def is_current(selected):
@@ -103,24 +103,6 @@
         &raquo;
         ${h.repo_link(c.rhodecode_db_repo.groups_and_repo)}
       </div>
-      ## TODO: this check feels wrong, it would be better to have a check for permissions
-      ## also it feels like a job for the controller
-      %if c.rhodecode_user.username != 'default':
-        <ul id="context-actions" class="horizontal-list">
-          <li>
-           <button class="${follow_class()}" onclick="javascript:toggleFollowingRepo(this,${c.rhodecode_db_repo.repo_id},'${str(h.get_token())}');">
-            <!--span class="icon show-follow follow"></span>
-            <span class="icon show-following following"></span-->
-            <span class="show-follow">${_('Follow')}</span>
-            <span class="show-following">${_('Unfollow')}</span>
-          </button>
-          </li>
-          <li><a href="${h.url('repo_fork_home',repo_name=c.repo_name)}" class="fork">${_('Fork')}</a></li>
-          %if h.is_hg(c.rhodecode_repo):
-          <li><a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="pull-request">${_('Create Pull Request')}</a></li>
-          %endif
-        </ul>
-      %endif
     </div>
     <div id="context-state">
       <ul id="context-pages" class="horizontal-list">
@@ -156,6 +138,20 @@
                   <li>${h.link_to(_('Lock'), h.url('toggle_locking',repo_name=c.repo_name),class_='locking_add')}</li>
                 %endif
               %endif
+		      ## TODO: this check feels wrong, it would be better to have a check for permissions
+		      ## also it feels like a job for the controller
+		      %if c.rhodecode_user.username != 'default':
+		          <li>
+		           <a class="${follow_class()}" onclick="javascript:toggleFollowingRepo(this,${c.rhodecode_db_repo.repo_id},'${str(h.get_token())}');">
+		            <span class="show-follow">${_('Follow')}</span>
+		            <span class="show-following">${_('Unfollow')}</span>
+		          </a>
+		          </li>
+		          <li><a href="${h.url('repo_fork_home',repo_name=c.repo_name)}" class="fork">${_('Fork')}</a></li>
+		          %if h.is_hg(c.rhodecode_repo):
+		          <li><a href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="pull-request">${_('Create Pull Request')}</a></li>
+		          %endif
+		      %endif
              </ul>
         </li>
         <li ${is_current('showpullrequest')}>
