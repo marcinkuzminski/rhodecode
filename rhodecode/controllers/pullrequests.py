@@ -181,7 +181,7 @@ class PullrequestsController(BaseRepoController):
                              firstname=repo.user.firstname,
                              lastname=repo.user.lastname,
                              gravatar_link=h.gravatar_url(repo.user.email, 14)),
-                'description': repo.description,
+                'description': repo.description.split('\n', 1)[0],
                 'revs': h.select('other_ref', selected_other_ref, other_refs, class_='refs')
             }
 
