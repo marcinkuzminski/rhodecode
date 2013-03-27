@@ -289,12 +289,10 @@ removed extra unicode conversion in diff.</div>
         response = self.app.get(url(controller='files', action='rawfile',
                                     repo_name=HG_REPO,
                                     revision=rev,
-                                    f_path=f_path))
+                                    f_path=f_path), status=404)
 
         msg = """Revision %s does not exist for this repository""" % (rev)
-        self.checkSessionFlash(response, msg)
-
-        self.assertEqual('http://localhost/%s/files/tip/' % HG_REPO, response.headers['location'])
+        response.mustcontain(msg)
 
     def test_raw_file_wrong_f_path(self):
         self.log_user()
@@ -303,10 +301,10 @@ removed extra unicode conversion in diff.</div>
         response = self.app.get(url(controller='files', action='rawfile',
                                     repo_name=HG_REPO,
                                     revision=rev,
-                                    f_path=f_path))
+                                    f_path=f_path), status=404)
 
-        msg = "There is no file nor directory at the given path: '%s' at revision %s" % (f_path, rev[:12])
-        self.checkSessionFlash(response, msg)
+        msg = "There is no file nor directory at the given path: &#39;%s&#39; at revision %s" % (f_path, rev[:12])
+        response.mustcontain(msg)
 
     #==========================================================================
     # RAW RESPONSE - PLAIN
@@ -328,11 +326,10 @@ removed extra unicode conversion in diff.</div>
         response = self.app.get(url(controller='files', action='raw',
                                     repo_name=HG_REPO,
                                     revision=rev,
-                                    f_path=f_path))
-        msg = """Revision %s does not exist for this repository""" % (rev)
-        self.checkSessionFlash(response, msg)
+                                    f_path=f_path), status=404)
 
-        self.assertEqual('http://localhost/%s/files/tip/' % HG_REPO, response.headers['location'])
+        msg = """Revision %s does not exist for this repository""" % (rev)
+        response.mustcontain(msg)
 
     def test_raw_wrong_f_path(self):
         self.log_user()
@@ -341,15 +338,40 @@ removed extra unicode conversion in diff.</div>
         response = self.app.get(url(controller='files', action='raw',
                                     repo_name=HG_REPO,
                                     revision=rev,
-                                    f_path=f_path))
-        msg = "There is no file nor directory at the given path: '%s' at revision %s" % (f_path, rev[:12])
-        self.checkSessionFlash(response, msg)
+                                    f_path=f_path), status=404)
+        msg = "There is no file nor directory at the given path: &#39;%s&#39; at revision %s" % (f_path, rev[:12])
+        response.mustcontain(msg)
 
     def test_ajaxed_files_list(self):
         self.log_user()
         rev = '27cd5cce30c96924232dffcd24178a07ffeb5dfc'
         response = self.app.get(
-            url('files_nodelist_home', repo_name=HG_REPO,f_path='/',revision=rev),
+            url('files_nodelist_home', repo_name=HG_REPO, f_path='/',
+                revision=rev),
             extra_environ={'HTTP_X_PARTIAL_XHR': '1'},
         )
         response.mustcontain("vcs/web/simplevcs/views/repository.py")
+
+    def test_add_file_view_hg(self):
+        self.log_user()
+        response = self.app.get(url('files_add_home',
+                                      repo_name=HG_REPO,
+                                      revision='tip', f_path='/'))
+
+    def test_add_file_view_git(self):
+        self.log_user()
+        response = self.app.get(url('files_add_home',
+                                      repo_name=GIT_REPO,
+                                      revision='tip', f_path='/'))
+
+    def test_edit_file_view_hg(self):
+        self.log_user()
+        response = self.app.get(url('files_edit_home',
+                                      repo_name=HG_REPO,
+                                      revision='tip', f_path='vcs/nodes.py'))
+
+    def test_edit_file_view_git(self):
+        self.log_user()
+        response = self.app.get(url('files_edit_home',
+                                      repo_name=GIT_REPO,
+                                      revision='tip', f_path='vcs/nodes.py'))

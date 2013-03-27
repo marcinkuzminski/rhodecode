@@ -56,6 +56,7 @@ from rhodecode.model.db import Repository
 
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
+from webob.exc import HTTPNotFound
 
 
 log = logging.getLogger(__name__)
@@ -89,9 +90,9 @@ class FilesController(BaseRepoController):
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
-        except RepositoryError, e: # including ChangesetDoesNotExistError
+        except RepositoryError, e:  # including ChangesetDoesNotExistError
             h.flash(str(e), category='error')
-            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
+            raise HTTPNotFound()
 
     def __get_filenode_or_redirect(self, repo_name, cs, path):
         """
@@ -109,8 +110,7 @@ class FilesController(BaseRepoController):
                 raise RepositoryError('given path is a directory')
         except RepositoryError, e:
             h.flash(str(e), category='error')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision=cs.raw_id))
+            raise HTTPNotFound()
 
         return file_node
 
@@ -122,8 +122,6 @@ class FilesController(BaseRepoController):
         post_revision = request.POST.get('at_rev', None)
         if post_revision:
             cs = self.__get_cs_or_redirect(post_revision, repo_name)
-            redirect(url('files_home', repo_name=c.repo_name,
-                         revision=cs.raw_id, f_path=f_path))
 
         c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         c.branch = request.GET.get('branch', None)
@@ -176,9 +174,8 @@ class FilesController(BaseRepoController):
             else:
                 c.authors = c.file_history = []
         except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision='tip'))
+            h.flash(str(e), category='error')
+            raise HTTPNotFound()
 
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return render('files/files_ypjax.html')
@@ -309,8 +306,7 @@ class FilesController(BaseRepoController):
             author = self.rhodecode_user.full_contact
 
             if content == old_content:
-                h.flash(_('No changes'),
-                    category='warning')
+                h.flash(_('No changes'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
             try:
