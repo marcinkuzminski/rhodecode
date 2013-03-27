@@ -26,7 +26,7 @@
 import logging
 import traceback
 from collections import defaultdict
-from webob.exc import HTTPForbidden, HTTPBadRequest
+from webob.exc import HTTPForbidden, HTTPBadRequest, HTTPNotFound
 
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
@@ -204,7 +204,7 @@ class ChangesetController(BaseRepoController):
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='error')
-            return redirect(url('changeset_home', repo_name=c.repo_name))
+            raise HTTPNotFound()
 
         c.changes = OrderedDict()
 

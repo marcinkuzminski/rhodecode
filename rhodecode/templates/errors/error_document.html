@@ -33,16 +33,16 @@
 
     </head>
     <body>
-	    <div class="flash_msg">
-	        <% messages = h.flash.pop_messages() %>
-	        % if messages:
-	        <ul id="flash-messages">
-	            % for message in messages:
-	            <li class="${message.category}_msg">${message}</li>
-	            % endfor
-	        </ul>
-	        % endif
-	    </div>
+        <div class="flash_msg">
+            <% messages = h.flash.pop_messages() %>
+            % if messages:
+            <ul id="flash-messages">
+                % for message in messages:
+                <li class="${message.category}_msg">${message}</li>
+                % endfor
+            </ul>
+            % endif
+        </div>
         <div id="login">
             <div class="table">
                 <div id="main_div">
