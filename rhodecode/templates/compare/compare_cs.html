@@ -19,7 +19,11 @@
           ${h.hidden('revisions',cs.raw_id)}
         %endif
         </td>
-        <td><span class="branchtag">${cs.branch}</span></td>
+        <td>
+        %if cs.branch:
+        <span class="branchtag">${cs.branch}</span>
+        %endif
+        </td>
         <td><div class="message tooltip" title="${h.tooltip(cs.message)}" style="white-space:normal">${h.urlify_commit(h.shorter(cs.message, 60),c.repo_name)}</div></td>
         </tr>
     %endfor
