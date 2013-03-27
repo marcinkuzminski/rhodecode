@@ -38,7 +38,8 @@ from tempfile import _RandomNameSequence
 from subprocess import Popen, PIPE
 
 from rhodecode.tests import *
-from rhodecode.model.db import User, Repository, UserLog, UserIpMap
+from rhodecode.model.db import User, Repository, UserLog, UserIpMap,\
+    CacheInvalidation
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
@@ -105,7 +106,7 @@ def _add_files_and_push(vcs, DEST, **kwargs):
     Command(cwd).execute('touch %s' % added_file)
     Command(cwd).execute('%s add %s' % (vcs, added_file))
 
-    for i in xrange(3):
+    for i in xrange(kwargs.get('files_no', 3)):
         cmd = """echo 'added_line%s' >> %s""" % (i, added_file)
         Command(cwd).execute(cmd)
         author_str = 'Marcin Kuźminski <me@email.com>'
@@ -239,6 +240,40 @@ class TestVCSOperations(unittest.TestCase):
 
         #WTF git stderr ?!
         assert 'master -> master' in stderr
+
+    def test_push_invalidates_cache_hg(self):
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==HG_REPO).one()
+        key.cache_active = True
+        Session().add(key)
+        Session().commit()
+
+        DEST = _get_tmp_dir()
+        clone_url = _construct_url(HG_REPO, dest=DEST)
+        stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
+
+        stdout, stderr = _add_files_and_push('hg', DEST, files_no=1)
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==HG_REPO).one()
+        self.assertEqual(key.cache_active, False)
+
+    def test_push_invalidates_cache_git(self):
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==GIT_REPO).one()
+        key.cache_active = True
+        Session().add(key)
+        Session().commit()
+
+        DEST = _get_tmp_dir()
+        clone_url = _construct_url(GIT_REPO, dest=DEST)
+        stdout, stderr = Command('/tmp').execute('git clone', clone_url)
+
+        # commit some stuff into this repo
+        stdout, stderr = _add_files_and_push('git', DEST, files_no=1)
+
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==GIT_REPO).one()
+        self.assertEqual(key.cache_active, False)
 
     def test_push_wrong_credentials_hg(self):
         DEST = _get_tmp_dir()
