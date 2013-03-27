@@ -1147,7 +1147,7 @@ class Repository(Base, BaseModel):
 
     def set_invalidate(self):
         """
-        set a cache for invalidation for this instance
+        Mark caches of this repo as invalid.
         """
         CacheInvalidation.set_invalidate(repo_name=self.repo_name)
 
@@ -1636,14 +1636,15 @@ class CacheInvalidation(Base, BaseModel):
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     # cache_key as created by _get_cache_key
     cache_key = Column("cache_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    # cache_args is usually a repo_name, possibly with _README/_RSS/_ATOM suffix
+    # cache_args is a repo_name
     cache_args = Column("cache_args", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    # instance sets cache_active True when it is caching, other instances set cache_active to False to invalidate
+    # instance sets cache_active True when it is caching,
+    # other instances set cache_active to False to indicate that this cache is invalid
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
-    def __init__(self, cache_key, cache_args=''):
+    def __init__(self, cache_key, repo_name=''):
         self.cache_key = cache_key
-        self.cache_args = cache_args
+        self.cache_args = repo_name
         self.cache_active = False
 
     def __unicode__(self):
@@ -1664,20 +1665,20 @@ class CacheInvalidation(Base, BaseModel):
     def _get_cache_key(cls, key):
         """
         Wrapper for generating a unique cache key for this instance and "key".
+        key must / will start with a repo_name which will be stored in .cache_args .
         """
         import rhodecode
         prefix = rhodecode.CONFIG.get('instance_id', '')
         return "%s%s" % (prefix, key)
 
     @classmethod
-    def _get_or_create_inv_obj(cls, key, repo_name, commit=True):
+    def _get_or_create_inv_obj(cls, key, repo_name):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
                 inv_obj = CacheInvalidation(key, repo_name)
                 Session().add(inv_obj)
-                if commit:
-                    Session().commit()
+                Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
                 Session().rollback()
@@ -1686,11 +1687,8 @@ class CacheInvalidation(Base, BaseModel):
     @classmethod
     def invalidate(cls, key):
         """
-        Returns Invalidation object if this given key should be invalidated
-        None otherwise. `cache_active = False` means that this cache
-        state is not valid and needs to be invalidated
-
-        :param key:
+        Returns Invalidation object if the local cache with the given key is invalid,
+        None otherwise.
         """
         repo_name = key
         repo_name = remove_suffix(repo_name, '_README')
@@ -1698,10 +1696,12 @@ class CacheInvalidation(Base, BaseModel):
         repo_name = remove_suffix(repo_name, '_ATOM')
 
         cache_key = cls._get_cache_key(key)
-        inv = cls._get_or_create_inv_obj(cache_key, repo_name)
+        inv_obj = cls._get_or_create_inv_obj(cache_key, repo_name)
 
-        if inv and not inv.cache_active:
-            return inv
+        if inv_obj and not inv_obj.cache_active:
+            # `cache_active = False` means that this cache
+            # no longer is valid
+            return inv_obj
 
     @classmethod
     def set_invalidate(cls, key=None, repo_name=None):
@@ -1734,13 +1734,11 @@ class CacheInvalidation(Base, BaseModel):
         return invalidated_keys
 
     @classmethod
-    def set_valid(cls, key):
+    def set_valid(cls, cache_key):
         """
         Mark this cache key as active and currently cached
-
-        :param key:
         """
-        inv_obj = cls.query().filter(cls.cache_key == key).scalar()
+        inv_obj = cls.query().filter(cls.cache_key == cache_key).scalar()
         inv_obj.cache_active = True
         Session().add(inv_obj)
         Session().commit()

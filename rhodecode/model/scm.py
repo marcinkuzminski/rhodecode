@@ -297,10 +297,9 @@ class ScmModel(BaseModel):
 
     def mark_for_invalidation(self, repo_name):
         """
-        Puts cache invalidation task into db for
-        further global cache invalidation
+        Mark caches of this repo invalid in the database.
 
-        :param repo_name: this repo that should invalidation take place
+        :param repo_name: the repo for which caches should be marked invalid
         """
         invalidated_keys = CacheInvalidation.set_invalidate(repo_name=repo_name)
         repo = Repository.get_by_repo_name(repo_name)
