@@ -11,6 +11,10 @@
 <link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
 </%def>
 
+<%def name="page_nav()">
+    ${self.menu('repositories')}
+</%def>
+
 <%def name="breadcrumbs_links()">
     ${_('Edit file')} @ ${h.show_id(c.cs)}
 </%def>
