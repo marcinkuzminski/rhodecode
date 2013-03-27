@@ -115,9 +115,6 @@ class CompareController(BaseRepoController):
         org_repo = Repository.get_by_repo_name(org_repo)
         other_repo = Repository.get_by_repo_name(other_repo)
 
-        self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
-        self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
-
         if org_repo is None:
             log.error('Could not find org repo %s' % org_repo)
             raise HTTPNotFound
@@ -132,6 +129,9 @@ class CompareController(BaseRepoController):
         if org_repo.scm_instance.alias != other_repo.scm_instance.alias:
             log.error('compare of two different kind of remote repos not available')
             raise HTTPNotFound
+
+        self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
+        self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
 
         c.org_repo = org_repo
         c.other_repo = other_repo
