@@ -297,7 +297,13 @@ class RepoModel(BaseModel):
 
             new_name = cur_repo.get_new_name(kwargs['repo_name'])
             cur_repo.repo_name = new_name
+            #if private flag is set, reset default permission to NONE
 
+            if kwargs.get('repo_private'):
+                EMPTY_PERM = 'repository.none'
+                RepoModel().grant_user_permission(
+                    repo=cur_repo, user='default', perm=EMPTY_PERM
+                )
             #handle extra fields
             for field in filter(lambda k: k.startswith(RepositoryField.PREFIX), kwargs):
                 k = RepositoryField.un_prefix_key(field)

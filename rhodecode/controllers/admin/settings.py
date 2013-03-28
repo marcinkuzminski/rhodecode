@@ -491,40 +491,6 @@ class SettingsController(BaseController):
 
         return render('admin/users/user_edit_my_account_pullrequests.html')
 
-    @NotAnonymous()
-    def create_repository(self):
-        """GET /_admin/create_repository: Form to create a new item"""
-        new_repo = request.GET.get('repo', '')
-        parent_group = request.GET.get('parent_group')
-        if not HasPermissionAny('hg.admin', 'hg.create.repository')():
-            #you're not super admin nor have global create permissions,
-            #but maybe you have at least write permission to a parent group ?
-            _gr = RepoGroup.get(parent_group)
-            gr_name = _gr.group_name if _gr else None
-            if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
-                raise HTTPForbidden
-
-        acl_groups = GroupList(RepoGroup.query().all(),
-                               perm_set=['group.write', 'group.admin'])
-        c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
-        c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
-        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
-
-        c.new_repo = repo_name_slug(new_repo)
-
-        ## apply the defaults from defaults page
-        defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
-        if parent_group:
-            defaults.update({'repo_group': parent_group})
-
-        return htmlfill.render(
-            render('admin/repos/repo_add.html'),
-            defaults=defaults,
-            errors={},
-            prefix_error=False,
-            encoding="UTF-8"
-        )
-
     def _get_hg_ui_settings(self):
         ret = RhodeCodeUi.query().all()
 

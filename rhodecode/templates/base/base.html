@@ -116,11 +116,7 @@
           <a href="#" class="dropdown options"></span>${_('Options')}</a>
           <ul>
              %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
-               %if h.HasPermissionAll('hg.admin')('access settings on repository'):
                    <li>${h.link_to(_('Settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}</li>
-               %else:
-                   <li>${h.link_to(_('Settings'),h.url('repo_settings_home',repo_name=c.repo_name),class_='settings')}</li>
-               %endif
              %endif
               %if c.rhodecode_db_repo.fork:
                <li>${h.link_to(_('Compare fork'),h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default', merge=1),class_='compare_request')}</li>

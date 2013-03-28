@@ -106,6 +106,9 @@ def make_map(config):
             conditions=dict(method=["GET"]))
         m.connect("new_repo", "/repos/new",
              action="new", conditions=dict(method=["GET"]))
+        #TODO: refactor the name
+        m.connect("admin_settings_create_repository", "/create_repository",
+                  action="create_repository", conditions=dict(method=["GET"]))
         m.connect("formatted_new_repo", "/repos/new.{format}",
              action="new", conditions=dict(method=["GET"]))
         m.connect("/repos/{repo_name:.*?}",
@@ -114,10 +117,6 @@ def make_map(config):
         m.connect("/repos/{repo_name:.*?}",
              action="delete", conditions=dict(method=["DELETE"],
                                               function=check_repo))
-        # no longer used:
-        m.connect("edit_repo_admin", "/repos/{repo_name:.*?}/edit",
-             action="edit", conditions=dict(method=["GET"],
-                                            function=check_repo))
         m.connect("formatted_edit_repo", "/repos/{repo_name:.*?}.{format}/edit",
              action="edit", conditions=dict(method=["GET"],
                                             function=check_repo))
@@ -162,6 +161,10 @@ def make_map(config):
         m.connect('repo_locking', "/repo_locking/{repo_name:.*?}",
                   action="repo_locking", conditions=dict(method=["PUT"],
                                                       function=check_repo))
+        m.connect('toggle_locking', "/locking_toggle/{repo_name:.*?}",
+                  action="toggle_locking", conditions=dict(method=["GET"],
+                                                      function=check_repo))
+
         #repo fields
         m.connect('create_repo_fields', "/repo_fields/{repo_name:.*?}/new",
                   action="create_repo_field", conditions=dict(method=["PUT"],
@@ -334,8 +337,6 @@ def make_map(config):
                   action="my_account", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account_update", "/my_account_update",
                   action="my_account_update", conditions=dict(method=["PUT"]))
-        m.connect("admin_settings_create_repository", "/create_repository",
-                  action="create_repository", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_repos", "/my_account/repos",
                   action="my_account_my_repos", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_pullrequests", "/my_account/pull_requests",
@@ -466,7 +467,13 @@ def make_map(config):
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
 
-    rmap.connect("edit_repo", "/{repo_name:.*?}/edit",
+    # no longer user, but kept for routes to work
+    rmap.connect("_edit_repo", "/{repo_name:.*?}/edit",
+                 controller='admin/repos', action="edit",
+                 conditions=dict(method=["GET"], function=check_repo)
+                 )
+
+    rmap.connect("edit_repo", "/{repo_name:.*?}/settings",
                  controller='admin/repos', action="edit",
                  conditions=dict(method=["GET"], function=check_repo)
                  )
@@ -634,22 +641,6 @@ def make_map(config):
                  '/{repo_name:.*?}/nodelist/{revision}/{f_path:.*}',
                 controller='files', action='nodelist',
                 conditions=dict(function=check_repo))
-
-    rmap.connect('repo_settings_delete', '/{repo_name:.*?}/settings',
-                controller='settings', action="delete",
-                conditions=dict(method=["DELETE"], function=check_repo))
-
-    rmap.connect('repo_settings_update', '/{repo_name:.*?}/settings',
-                controller='settings', action="update",
-                conditions=dict(method=["PUT"], function=check_repo))
-
-    rmap.connect('repo_settings_home', '/{repo_name:.*?}/settings',
-                controller='settings', action='index',
-                conditions=dict(function=check_repo))
-
-    rmap.connect('toggle_locking', "/{repo_name:.*?}/locking_toggle",
-                 controller='settings', action="toggle_locking",
-                 conditions=dict(method=["GET"], function=check_repo))
 
     rmap.connect('repo_fork_create_home', '/{repo_name:.*?}/fork',
                 controller='forks', action='fork_create',

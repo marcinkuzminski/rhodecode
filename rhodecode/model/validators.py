@@ -16,7 +16,7 @@ from formencode.validators import (
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib import ipaddr
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib.utils2 import safe_int
+from rhodecode.lib.utils2 import safe_int, str2bool
 from rhodecode.model.db import RepoGroup, Repository, UserGroup, User,\
     ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
@@ -591,14 +591,11 @@ def ValidPerms(type_='repo'):
                          'g': 'users_group'
                     }[k[0]]
                     if member == 'default':
-                        if value.get('repo_private'):
+                        if str2bool(value.get('repo_private')):
                             # set none for default when updating to
-                            # private repo
+                            # private repo protects agains form manipulation
                             v = EMPTY_PERM
                     perms_update.add((member, v, t))
-            #always set NONE when private flag is set
-            if value.get('repo_private'):
-                perms_update.add(('default', EMPTY_PERM, 'user'))
 
             value['perms_updates'] = list(perms_update)
             value['perms_new'] = list(perms_new)

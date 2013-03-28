@@ -113,26 +113,14 @@
 <%def name="repo_actions(repo_name, super_user=True)">
   <div>
     <div style="float:left">
-    %if super_user:
       <a href="${h.url('edit_repo',repo_name=repo_name)}" title="${_('edit')}">
         ${h.submit('edit_%s' % repo_name,_('edit'),class_="edit_icon action_button")}
       </a>
-    %else:
-      <a href="${h.url('repo_settings_home',repo_name=repo_name)}" title="${_('edit')}">
-        ${h.submit('edit_%s' % repo_name,_('edit'),class_="edit_icon action_button")}
-      </a>
-    %endif
     </div>
     <div style="float:left">
-    %if super_user:
       ${h.form(h.url('repo', repo_name=repo_name),method='delete')}
         ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
       ${h.end_form()}
-    %else:
-      ${h.form(h.url('repo_settings_delete', repo_name=repo_name),method='delete')}
-        ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
-      ${h.end_form()}
-    %endif
     </div>
   </div>
 </%def>

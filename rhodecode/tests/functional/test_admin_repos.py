@@ -4,10 +4,21 @@ import os
 import urllib
 
 from rhodecode.lib import vcs
-from rhodecode.model.db import Repository, RepoGroup
+from rhodecode.model.db import Repository, RepoGroup, UserRepoToPerm, User,\
+    Permission
 from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.meta import Session
+
+
+def _get_permission_for_user(user, repo):
+    perm = UserRepoToPerm.query()\
+                .filter(UserRepoToPerm.repository ==
+                        Repository.get_by_repo_name(repo))\
+                .filter(UserRepoToPerm.user == User.get_by_username(user))\
+                .all()
+    return perm
 
 
 class TestAdminReposController(TestController):
@@ -200,13 +211,6 @@ class TestAdminReposController(TestController):
         except:
             self.fail('no repo %s in filesystem' % repo_name)
 
-    def test_new(self):
-        self.log_user()
-        response = self.app.get(url('new_repo'))
-
-    def test_new_as_xml(self):
-        response = self.app.get(url('formatted_new_repo', format='xml'))
-
     def test_update(self):
         response = self.app.put(url('repo', repo_name=HG_REPO))
 
@@ -328,3 +332,42 @@ class TestAdminReposController(TestController):
 
     def test_edit(self):
         response = self.app.get(url('edit_repo', repo_name=HG_REPO))
+
+    def test_set_private_flag_sets_default_to_none(self):
+        self.log_user()
+        #initially repository perm should be read
+        perm = _get_permission_for_user(user='default', repo=HG_REPO)
+        self.assertTrue(len(perm), 1)
+        self.assertEqual(perm[0].permission.permission_name, 'repository.read')
+        self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, False)
+
+        response = self.app.put(url('repo', repo_name=HG_REPO),
+                        _get_repo_create_params(repo_private=1,
+                                                repo_name=HG_REPO,
+                                                user=TEST_USER_ADMIN_LOGIN))
+        self.checkSessionFlash(response,
+                               msg='Repository %s updated successfully' % (HG_REPO))
+        self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, True)
+
+        #now the repo default permission should be None
+        perm = _get_permission_for_user(user='default', repo=HG_REPO)
+        self.assertTrue(len(perm), 1)
+        self.assertEqual(perm[0].permission.permission_name, 'repository.none')
+
+        response = self.app.put(url('repo', repo_name=HG_REPO),
+                        _get_repo_create_params(repo_private=False,
+                                                repo_name=HG_REPO,
+                                                user=TEST_USER_ADMIN_LOGIN))
+        self.checkSessionFlash(response,
+                               msg='Repository %s updated successfully' % (HG_REPO))
+        self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, False)
+
+        #we turn off private now the repo default permission should stay None
+        perm = _get_permission_for_user(user='default', repo=HG_REPO)
+        self.assertTrue(len(perm), 1)
+        self.assertEqual(perm[0].permission.permission_name, 'repository.none')
+
+        #update this permission back
+        perm[0].permission = Permission.get_by_key('repository.read')
+        Session().add(perm[0])
+        Session().commit()

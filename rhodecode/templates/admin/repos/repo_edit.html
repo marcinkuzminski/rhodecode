@@ -165,18 +165,19 @@ ${self.context_bar('options')}
                     <label for="input">${_('Permissions')}:</label>
                 </div>
                 <div class="input">
+                    ${h.hidden('repo_private')}
                     <%include file="repo_edit_perms.html"/>
                 </div>
             </div>
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-btn large")}
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
-            </div>            
+            </div>
        </div>
     </div>
-    ${h.end_form()} 
+    ${h.end_form()}
 </div>
-          
+
 
 <div class="box box-right"  style="clear:right">
     <div class="title">

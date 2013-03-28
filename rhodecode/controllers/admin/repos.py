@@ -38,7 +38,7 @@ import rhodecode
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, HasRepoPermissionAllDecorator, NotAnonymous,\
-    HasPermissionAny, HasReposGroupPermissionAny
+    HasPermissionAny, HasReposGroupPermissionAny, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
@@ -202,16 +202,27 @@ class ReposController(BaseRepoController):
         #redirect to our new repo !
         return redirect(url('summary_home', repo_name=new_repo.repo_name))
 
-    @HasPermissionAllDecorator('hg.admin')
-    def new(self, format='html'):
-        """
-        WARNING: this function is depracated see settings.create_repo !!
-
-        GET /repos/new: Form to create a new item
-        """
-
+    @NotAnonymous()
+    def create_repository(self):
+        """GET /_admin/create_repository: Form to create a new item"""
+        new_repo = request.GET.get('repo', '')
         parent_group = request.GET.get('parent_group')
-        self.__load_defaults()
+        if not HasPermissionAny('hg.admin', 'hg.create.repository')():
+            #you're not super admin nor have global create permissions,
+            #but maybe you have at least write permission to a parent group ?
+            _gr = RepoGroup.get(parent_group)
+            gr_name = _gr.group_name if _gr else None
+            if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
+                raise HTTPForbidden
+
+        acl_groups = GroupList(RepoGroup.query().all(),
+                               perm_set=['group.write', 'group.admin'])
+        c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
+        c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
+        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
+
+        c.new_repo = repo_name_slug(new_repo)
+
         ## apply the defaults from defaults page
         defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
         if parent_group:
@@ -225,7 +236,7 @@ class ReposController(BaseRepoController):
             encoding="UTF-8"
         )
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def update(self, repo_name):
         """
         PUT /repos/repo_name: Update an existing item"""
@@ -273,7 +284,7 @@ class ReposController(BaseRepoController):
                     % repo_name, category='error')
         return redirect(url('edit_repo', repo_name=changed_name))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def delete(self, repo_name):
         """
         DELETE /repos/repo_name: Delete an existing item"""
@@ -405,7 +416,7 @@ class ReposController(BaseRepoController):
                     category='error')
             raise HTTPInternalServerError()
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def repo_stats(self, repo_name):
         """
         DELETE an existing repository statistics
@@ -422,7 +433,7 @@ class ReposController(BaseRepoController):
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def repo_cache(self, repo_name):
         """
         INVALIDATE existing repository cache
@@ -439,7 +450,7 @@ class ReposController(BaseRepoController):
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def repo_locking(self, repo_name):
         """
         Unlock repository when it is locked !
@@ -459,7 +470,34 @@ class ReposController(BaseRepoController):
                     category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
+    def toggle_locking(self, repo_name):
+        """
+        Toggle locking of repository by simple GET call to url
+
+        :param repo_name:
+        """
+
+        try:
+            repo = Repository.get_by_repo_name(repo_name)
+
+            if repo.enable_locking:
+                if repo.locked[0]:
+                    Repository.unlock(repo)
+                    action = _('unlocked')
+                else:
+                    Repository.lock(repo, c.rhodecode_user.user_id)
+                    action = _('locked')
+
+                h.flash(_('Repository has been %s') % action,
+                        category='success')
+        except Exception, e:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during unlocking'),
+                    category='error')
+        return redirect(url('summary_home', repo_name=repo_name))
+
+    @HasRepoPermissionAllDecorator('repository.admin')
     def repo_public_journal(self, repo_name):
         """
         Set's this repository to be visible in public journal,
@@ -487,7 +525,7 @@ class ReposController(BaseRepoController):
             h.flash(_('Token mismatch'), category='error')
         return redirect(url('edit_repo', repo_name=repo_name))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def repo_pull(self, repo_name):
         """
         Runs task to update given repository with remote changes,
@@ -504,7 +542,7 @@ class ReposController(BaseRepoController):
 
         return redirect(url('edit_repo', repo_name=repo_name))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def repo_as_fork(self, repo_name):
         """
         Mark given repository as a fork of another
@@ -531,7 +569,7 @@ class ReposController(BaseRepoController):
         """GET /repos/repo_name: Show a specific item"""
         # url('repo', repo_name=ID)
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasRepoPermissionAllDecorator('repository.admin')
     def edit(self, repo_name, format='html'):
         """GET /repos/repo_name/edit: Form to edit an existing item"""
         # url('edit_repo', repo_name=ID)
