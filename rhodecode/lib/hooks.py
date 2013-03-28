@@ -143,7 +143,7 @@ def log_pull_action(ui, repo, **kwargs):
         kw.update(ex)
         callback(**kw)
 
-    if ex.make_lock is True:
+    if ex.make_lock:
         Repository.lock(Repository.get_by_repo_name(ex.repository), user.user_id)
         #msg = 'Made lock on repo `%s`' % repository
         #sys.stdout.write(msg)
@@ -202,7 +202,7 @@ def log_push_action(ui, repo, **kwargs):
         kw.update(ex)
         callback(**kw)
 
-    if ex.make_lock is False:
+    if not ex.make_lock:
         Repository.unlock(Repository.get_by_repo_name(ex.repository))
         msg = 'Released lock on repo `%s`\n' % ex.repository
         sys.stdout.write(msg)

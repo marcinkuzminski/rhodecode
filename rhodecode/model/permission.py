@@ -120,7 +120,7 @@ class PermissionModel(BaseModel):
                                .all():
 
                     #don't reset PRIVATE repositories
-                    if r2p.repository.private is False:
+                    if not r2p.repository.private:
                         r2p.permission = _def
                         self.sa.add(r2p)
 

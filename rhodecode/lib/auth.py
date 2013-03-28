@@ -381,7 +381,7 @@ class  AuthUser(object):
 
         if not is_user_loaded:
             # if we cannot authenticate user try anonymous
-            if self.anonymous_user.active is True:
+            if self.anonymous_user.active:
                 user_model.fill_data(self, user_id=self.anonymous_user.user_id)
                 # then we set this user is logged in
                 self.is_authenticated = True

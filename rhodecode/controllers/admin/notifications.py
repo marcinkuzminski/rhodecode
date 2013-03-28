@@ -159,7 +159,7 @@ class NotificationsController(BaseController):
             # if this association to user is not valid, we don't want to show
             # this message
             if unotification:
-                if unotification.read is False:
+                if not unotification.read:
                     unotification.mark_as_read()
                     Session().commit()
                 c.notification = no

@@ -444,7 +444,7 @@ def properly_encode_header(value, encoder, not_email):
     try:
         return value.encode("ascii")
     except UnicodeEncodeError:
-        if not_email is False and VALUE_IS_EMAIL_ADDRESS(value):
+        if not not_email and VALUE_IS_EMAIL_ADDRESS(value):
             # this could have an email address, make sure we don't screw it up
             name, address = parseaddr(value)
             return '"%s" <%s>' % (

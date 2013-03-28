@@ -421,7 +421,7 @@ class DiffProcessor(object):
 
         sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
 
-        if inline_diff is False:
+        if not inline_diff:
             return diff_container(sorted(_files, key=sorter))
 
         # highlight inline changes

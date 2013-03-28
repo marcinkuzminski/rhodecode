@@ -102,7 +102,7 @@ class UserGroupModel(BaseModel):
             assigned_groups = UserGroupRepoToPerm.query()\
                 .filter(UserGroupRepoToPerm.users_group == users_group).all()
 
-            if assigned_groups and force is False:
+            if assigned_groups and not force:
                 raise UserGroupsAssignedException('RepoGroup assigned to %s' %
                                                    assigned_groups)
 

@@ -183,7 +183,7 @@ def test_clone_with_credentials(no_errors=False, repo=HG_REPO, method=METHOD,
     else:
         stdout, stderr = Command(cwd).execute(backend, method, clone_url, dest)
         print stdout,'sdasdsadsa'
-        if no_errors is False:
+        if not no_errors:
             if backend == 'hg':
                 assert """adding file changes""" in stdout, 'no messages about cloning'
                 assert """abort""" not in stderr , 'got error from clone'

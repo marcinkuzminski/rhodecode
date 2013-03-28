@@ -72,7 +72,7 @@
             </div>
              <%cnt=0%>
              <%namespace name="dt" file="/data_table/_dt_elements.html"/>
-            % if c.visual.lightweight_dashboard is False:
+            % if not c.visual.lightweight_dashboard:
               ## old full detailed version
             <div id='repos_list_wrap' class="yui-skin-sam">
             <table id="repos_list">
@@ -131,7 +131,7 @@
             % endif
         </div>
     </div>
-    % if c.visual.lightweight_dashboard is False:
+    % if not c.visual.lightweight_dashboard:
     <script>
       YUD.get('repo_count').innerHTML = ${cnt+1 if cnt else 0};
 

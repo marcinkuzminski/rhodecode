@@ -52,7 +52,7 @@ class HomeController(BaseController):
         c.groups = self.scm_model.get_repos_groups()
         c.group = None
 
-        if c.visual.lightweight_dashboard is False:
+        if not c.visual.lightweight_dashboard:
             c.repos_list = self.scm_model.get_repos()
         ## lightweight version of dashboard
         else:

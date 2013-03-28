@@ -416,7 +416,7 @@ class FilesController(BaseRepoController):
 
         try:
             dbrepo = RepoModel().get_by_repo_name(repo_name)
-            if dbrepo.enable_downloads is False:
+            if not dbrepo.enable_downloads:
                 return _('downloads disabled')
 
             if c.rhodecode_repo.alias == 'hg':

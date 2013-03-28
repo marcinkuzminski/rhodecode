@@ -100,7 +100,7 @@ class NotificationModel(BaseModel):
             body=body, recipients=recipients_objs, type_=type_
         )
 
-        if with_email is False:
+        if not with_email:
             return notif
 
         #don't send email to person who created this comment

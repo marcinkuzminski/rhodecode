@@ -89,7 +89,7 @@ class SimpleHg(BaseVCSController):
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath, 'hg') is False:
+        if not is_valid_repo(repo_name, self.basepath, 'hg'):
             return HTTPNotFound()(environ, start_response)
 
         #======================================================================
@@ -106,11 +106,11 @@ class SimpleHg(BaseVCSController):
             anonymous_perm = self._check_permission(action, anonymous_user,
                                                     repo_name, ip_addr)
 
-            if anonymous_perm is not True or anonymous_user.active is False:
-                if anonymous_perm is not True:
+            if not anonymous_perm or not anonymous_user.active:
+                if not anonymous_perm:
                     log.debug('Not enough credentials to access this '
                               'repository as anonymous user')
-                if anonymous_user.active is False:
+                if not anonymous_user.active:
                     log.debug('Anonymous access is disabled, running '
                               'authentication')
                 #==============================================================
@@ -147,7 +147,7 @@ class SimpleHg(BaseVCSController):
 
                 #check permissions for this repository
                 perm = self._check_permission(action, user, repo_name, ip_addr)
-                if perm is not True:
+                if not perm:
                     return HTTPForbidden()(environ, start_response)
 
         # extras are injected into mercurial UI object and later available

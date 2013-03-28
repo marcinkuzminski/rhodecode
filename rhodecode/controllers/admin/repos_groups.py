@@ -348,7 +348,7 @@ class ReposGroupsController(BaseController):
             .filter(RepoGroup.group_parent_id == c.group.group_id).all()
         c.groups = self.scm_model.get_repos_groups(groups)
 
-        if c.visual.lightweight_dashboard is False:
+        if not c.visual.lightweight_dashboard:
             c.repos_list = self.scm_model.get_repos(all_repos=gr_filter)
         ## lightweight version of dashboard
         else:

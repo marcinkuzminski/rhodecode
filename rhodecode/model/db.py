@@ -1698,7 +1698,7 @@ class CacheInvalidation(Base, BaseModel):
         cache_key = cls._get_cache_key(key)
         inv = cls._get_or_create_inv_obj(cache_key, repo_name)
 
-        if inv and inv.cache_active is False:
+        if inv and not inv.cache_active:
             return inv
 
     @classmethod

@@ -69,9 +69,9 @@ class DbManage(object):
         self.init_db()
         global ask_ok
 
-        if self.cli_args.get('force_ask') is True:
+        if self.cli_args.get('force_ask'):
             ask_ok = lambda *args, **kwargs: True
-        elif self.cli_args.get('force_ask') is False:
+        elif not self.cli_args.get('force_ask'):
             ask_ok = lambda *args, **kwargs: False
 
     def init_db(self):
@@ -589,7 +589,7 @@ class DbManage(object):
 
         if retries == 0:
             sys.exit('max retries reached')
-        if path_ok is False:
+        if not path_ok:
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
 

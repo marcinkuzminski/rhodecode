@@ -280,7 +280,7 @@ def ValidAuth():
 
             if not authenticate(username, password):
                 user = User.get_by_username(username)
-                if user and user.active is False:
+                if user and not user.active:
                     log.warning('user %s is disabled' % username)
                     msg = M(self, 'disabled_account', state)
                     raise formencode.Invalid(msg, value, state,
@@ -503,7 +503,7 @@ def CanWriteGroup(old_data=None):
                         error_dict=dict(repo_type=msg)
                     )
                 ## check if we can write to root location !
-                elif gr is None and can_create_repos() is False:
+                elif gr is None and not can_create_repos():
                     msg = M(self, 'permission_denied_root', state)
                     raise formencode.Invalid(msg, value, state,
                         error_dict=dict(repo_type=msg)
@@ -533,7 +533,7 @@ def CanCreateGroup(can_create_in_root=False):
                 #we can create in root, we're fine no validations required
                 return
 
-            forbidden_in_root = gr is None and can_create_in_root is False
+            forbidden_in_root = gr is None and not can_create_in_root
             val = HasReposGroupPermissionAny('group.admin')
             forbidden = not val(gr_name, 'can create group validator')
             if forbidden_in_root or forbidden:
