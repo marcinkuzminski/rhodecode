@@ -186,7 +186,7 @@ ${h.end_form()}
                 <th class="left">${_('Edit Permission')}</th>
             </thead>
             <tbody>
-            %for k in c.users_group.permissions[section]:
+            %for k in sorted(c.users_group.permissions[section], key=lambda s: s.lower):
                  <%
                      section_perm = c.users_group.permissions[section].get(k)
                      _perm = section_perm.split('.')[-1]

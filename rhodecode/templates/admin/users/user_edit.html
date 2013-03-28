@@ -205,7 +205,7 @@
                     <th class="left">${_('Edit Permission')}</th>
                 </thead>
                 <tbody>
-                %for k in c.perm_user.permissions[section]:
+                %for k in sorted(c.perm_user.permissions[section], key=lambda s: s.lower):
                      <%
                      if section != 'global':
                          section_perm = c.perm_user.permissions[section].get(k)
