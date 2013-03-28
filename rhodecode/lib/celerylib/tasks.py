@@ -160,9 +160,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y, recurse_limit=100):
                          co_day_auth_aggr[akc(cs.author)]['data']]
                     time_pos = l.index(k)
                 except ValueError:
-                    time_pos = False
+                    time_pos = None
 
-                if time_pos >= 0 and time_pos is not False:
+                if time_pos >= 0 and time_pos is not None:
 
                     datadict = \
                         co_day_auth_aggr[akc(cs.author)]['data'][time_pos]
