@@ -199,9 +199,16 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
             user = All(v.UnicodeString(not_empty=True), v.ValidRepoUser())
 
         chained_validators = [v.ValidCloneUri(),
-                              v.ValidRepoName(edit, old_data),
-                              v.ValidPerms()]
+                              v.ValidRepoName(edit, old_data)]
     return _RepoForm
+
+
+def RepoPermsForm():
+    class _RepoPermsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        chained_validators = [v.ValidPerms()]
+    return _RepoPermsForm
 
 
 def RepoFieldForm():

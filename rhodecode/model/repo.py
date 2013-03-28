@@ -279,28 +279,6 @@ class RepoModel(BaseModel):
         try:
             cur_repo = self.get_by_repo_name(org_repo_name, cache=False)
 
-            # update permissions
-            for member, perm, member_type in kwargs['perms_updates']:
-                if member_type == 'user':
-                    # this updates existing one
-                    RepoModel().grant_user_permission(
-                        repo=cur_repo, user=member, perm=perm
-                    )
-                else:
-                    RepoModel().grant_users_group_permission(
-                        repo=cur_repo, group_name=member, perm=perm
-                    )
-            # set new permissions
-            for member, perm, member_type in kwargs['perms_new']:
-                if member_type == 'user':
-                    RepoModel().grant_user_permission(
-                        repo=cur_repo, user=member, perm=perm
-                    )
-                else:
-                    RepoModel().grant_users_group_permission(
-                        repo=cur_repo, group_name=member, perm=perm
-                    )
-
             if 'user' in kwargs:
                 cur_repo.user = User.get_by_username(kwargs['user'])
 

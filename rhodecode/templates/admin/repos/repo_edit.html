@@ -144,15 +144,6 @@ ${self.context_bar('options')}
                  </div>
               %endfor
             %endif
-            <div class="field">
-                <div class="label">
-                    <label for="input">${_('Permissions')}:</label>
-                </div>
-                <div class="input">
-                    <%include file="repo_edit_perms.html"/>
-                </div>
-            </div>
-
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-btn large")}
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
@@ -163,6 +154,31 @@ ${self.context_bar('options')}
 </div>
 
 <div class="box box-right">
+    <div class="title">
+        <h5>${_('Permissions')}</h5>
+    </div>
+    ${h.form(url('set_repo_perm_member', repo_name=c.repo_info.repo_name),method='post')}
+    <div class="form">
+       <div class="fields">
+            <div class="field">
+                <div class="label">
+                    <label for="input">${_('Permissions')}:</label>
+                </div>
+                <div class="input">
+                    <%include file="repo_edit_perms.html"/>
+                </div>
+            </div>
+            <div class="buttons">
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            </div>            
+       </div>
+    </div>
+    ${h.end_form()} 
+</div>
+          
+
+<div class="box box-right"  style="clear:right">
     <div class="title">
         <h5>${_('Advanced settings')}</h5>
     </div>

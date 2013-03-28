@@ -127,6 +127,11 @@ def make_map(config):
         m.connect("formatted_repo", "/repos/{repo_name:.*?}.{format}",
              action="show", conditions=dict(method=["GET"],
                                             function=check_repo))
+        #add repo perm member
+        m.connect('set_repo_perm_member', "/set_repo_perm_member/{repo_name:.*?}",
+             action="set_repo_perm_member",
+             conditions=dict(method=["POST"], function=check_repo))
+
         #ajax delete repo perm user
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*?}",
              action="delete_perm_user",
