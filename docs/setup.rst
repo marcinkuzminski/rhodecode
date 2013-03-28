@@ -652,7 +652,7 @@ Add the following at the end of the .ini file::
     prefix = /<someprefix>
 
 
-then change <someprefix> into your choosen prefix
+then change <someprefix> into your chosen prefix
 
 Apache's WSGI config
 --------------------

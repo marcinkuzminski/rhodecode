@@ -2044,7 +2044,7 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	        av_cache.push(node);
 	}
 	
-	//fill available only with those not in choosen
+	//fill available only with those not in chosen
 	ac.options.length=0;
 	tmp_cache = new Array();
 	
@@ -2067,7 +2067,7 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	
 	function prompts_action_callback(e){
 	
-	    var choosen = YUD.get(selected_container);
+	    var chosen = YUD.get(selected_container);
 	    var available = YUD.get(available_container);
 	
 	    //get checked and unchecked options from field
@@ -2110,30 +2110,30 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	    // add action
 	    if (this.id=='add_element'){
 	        var c = get_checked(available);
-	        add_to(choosen,c[0]);
+	        add_to(chosen,c[0]);
 	        fill_with(available,c[1]);
 	    }
 	    // remove action
 	    if (this.id=='remove_element'){
-	        var c = get_checked(choosen);
+	        var c = get_checked(chosen);
 	        add_to(available,c[0]);
-	        fill_with(choosen,c[1]);
+	        fill_with(chosen,c[1]);
 	    }
 	    // add all elements
 	    if(this.id=='add_all_elements'){
 	        for(var i=0; node = available.options[i];i++){
-	                choosen.appendChild(new Option(node.text,
+	                chosen.appendChild(new Option(node.text,
 	                        node.value, false, false));
 	        }
 	        available.options.length = 0;
 	    }
 	    //remove all elements
 	    if(this.id=='remove_all_elements'){
-	        for(var i=0; node = choosen.options[i];i++){
+	        for(var i=0; node = chosen.options[i];i++){
 	            available.appendChild(new Option(node.text,
 	                    node.value, false, false));
 	        }
-	        choosen.options.length = 0;
+	        chosen.options.length = 0;
 	    }
 	
 	}
@@ -2143,9 +2143,9 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	               prompts_action_callback)
 	if (form_id !== undefined) {
 		YUE.addListener(form_id,'submit',function(){
-		    var choosen = YUD.get(selected_container);
-		    for (var i = 0; i < choosen.options.length; i++) {
-		        choosen.options[i].selected = 'selected';
+		    var chosen = YUD.get(selected_container);
+		    for (var i = 0; i < chosen.options.length; i++) {
+		        chosen.options[i].selected = 'selected';
 		    }
 		});
 	}
