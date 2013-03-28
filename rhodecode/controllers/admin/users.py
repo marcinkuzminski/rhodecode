@@ -99,9 +99,9 @@ class UsersController(BaseController):
                 "lastname": user.lastname,
                 "last_login": h.fmt_date(user.last_login),
                 "last_login_raw": datetime_to_time(user.last_login),
-                "active": h.bool2icon(user.active),
-                "admin": h.bool2icon(user.admin),
-                "ldap": h.bool2icon(bool(user.ldap_dn)),
+                "active": h.boolicon(user.active),
+                "admin": h.boolicon(user.admin),
+                "ldap": h.boolicon(bool(user.ldap_dn)),
                 "action": user_actions(user.user_id, user.username),
             })
 

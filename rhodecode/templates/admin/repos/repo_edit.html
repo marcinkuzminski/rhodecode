@@ -221,7 +221,7 @@ ${self.context_bar('options')}
                   <tr>
                     <td>${cache.get_prefix() or '-'}</td>
                     <td>${cache.cache_key}</td>
-                    <td>${h.bool2icon(cache.cache_active)}</td>
+                    <td>${h.boolicon(cache.cache_active)}</td>
                   </tr>
               %endfor
               </table>

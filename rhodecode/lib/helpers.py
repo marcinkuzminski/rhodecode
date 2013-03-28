@@ -494,22 +494,19 @@ def desc_stylize(value):
     return value
 
 
-def bool2icon(value):
-    """Returns True/False values represented as small html image of true/false
+def boolicon(value):
+    """Returns boolean value of a value, represented as small html image of true/false
     icons
 
-    :param value: bool value
+    :param value: value
     """
 
-    if value is True:
+    if value:
         return HTML.tag('img', src=url("/images/icons/accept.png"),
                         alt=_('True'))
-
-    if value is False:
+    else:
         return HTML.tag('img', src=url("/images/icons/cancel.png"),
                         alt=_('False'))
-
-    return value
 
 
 def action_parser(user_log, feed=False, parse_cs=False):

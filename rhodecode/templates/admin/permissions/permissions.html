@@ -139,7 +139,7 @@
                         </td>
                         <td>
                             %if section == 'global':
-                             ${h.bool2icon(k.split('.')[-1] != 'none')}
+                             ${h.boolicon(k.split('.')[-1] != 'none')}
                             %else:
                              <span class="perm_tag ${_perm}">${section_perm}</span>
                             %endif
