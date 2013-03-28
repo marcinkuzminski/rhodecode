@@ -29,7 +29,7 @@ class TestLoginController(TestController):
         self.assertEqual(response.session['rhodecode_user'].get('username'),
                          'test_admin')
         response = response.follow()
-        self.assertTrue('%s repository' % HG_REPO in response.body)
+        response.mustcontain('/%s' % HG_REPO)
 
     def test_login_regular_ok(self):
         response = self.app.post(url(controller='login', action='index'),
@@ -40,8 +40,7 @@ class TestLoginController(TestController):
         self.assertEqual(response.session['rhodecode_user'].get('username'),
                          'test_regular')
         response = response.follow()
-        self.assertTrue('%s repository' % HG_REPO in response.body)
-        self.assertTrue('<a title="Admin" href="/_admin">' not in response.body)
+        response.mustcontain('/%s' % HG_REPO)
 
     def test_login_ok_came_from(self):
         test_came_from = '/_admin/users'
@@ -53,7 +52,7 @@ class TestLoginController(TestController):
         response = response.follow()
 
         self.assertEqual(response.status, '200 OK')
-        self.assertTrue('Users administration' in response.body)
+        response.mustcontain('Users administration')
 
     @parameterized.expand([
           ('data:text/html,<script>window.alert("xss")</script>',),
@@ -80,22 +79,22 @@ class TestLoginController(TestController):
                                   'password': 'as'})
         self.assertEqual(response.status, '200 OK')
 
-        self.assertTrue('Enter 3 characters or more' in response.body)
+        response.mustcontain('Enter 3 characters or more')
 
     def test_login_wrong_username_password(self):
         response = self.app.post(url(controller='login', action='index'),
                                  {'username': 'error',
                                   'password': 'test12'})
 
-        self.assertTrue('invalid user name' in response.body)
-        self.assertTrue('invalid password' in response.body)
+        response.mustcontain('invalid user name')
+        response.mustcontain('invalid password')
 
     #==========================================================================
     # REGISTRATIONS
     #==========================================================================
     def test_register(self):
         response = self.app.get(url(controller='login', action='register'))
-        self.assertTrue('Sign Up to RhodeCode' in response.body)
+        response.mustcontain('Sign Up to RhodeCode')
 
     def test_register_err_same_username(self):
         uname = 'test_admin'
