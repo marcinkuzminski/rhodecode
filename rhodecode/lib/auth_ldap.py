@@ -26,7 +26,7 @@
 import logging
 
 from rhodecode.lib.exceptions import LdapConnectionError, LdapUsernameError, \
-    LdapPasswordError
+    LdapPasswordError, LdapImportError
 from rhodecode.lib.utils2 import safe_str
 
 log = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ try:
     import ldap
 except ImportError:
     # means that python-ldap is not installed
-    pass
+    ldap = None
 
 
 class AuthLdap(object):
@@ -45,6 +45,9 @@ class AuthLdap(object):
                  tls_kind='PLAIN', tls_reqcert='DEMAND', ldap_version=3,
                  ldap_filter='(&(objectClass=user)(!(objectClass=computer)))',
                  search_scope='SUBTREE', attr_login='uid'):
+        if ldap is None:
+            raise LdapImportError
+
         self.ldap_version = ldap_version
         ldap_server_type = 'ldap'
 

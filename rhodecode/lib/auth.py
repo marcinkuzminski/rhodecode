@@ -40,7 +40,8 @@ from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
 
 from rhodecode.lib.utils2 import str2bool, safe_unicode
-from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
+from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError,\
+    LdapImportError
 from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug
 from rhodecode.lib.auth_ldap import AuthLdap
 
@@ -241,7 +242,7 @@ def authenticate(username, password):
 
                 Session().commit()
                 return True
-            except (LdapUsernameError, LdapPasswordError,):
+            except (LdapUsernameError, LdapPasswordError, LdapImportError):
                 pass
             except (Exception,):
                 log.error(traceback.format_exc())
