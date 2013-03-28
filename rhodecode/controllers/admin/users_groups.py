@@ -130,11 +130,13 @@ class UsersGroupsController(BaseController):
             c.users_group.permissions['repositories_groups'][gr.group.group_name] \
                 = gr.permission.permission_name
 
-        c.group_members_obj = [x.user for x in c.users_group.members]
+        c.group_members_obj = sorted((x.user for x in c.users_group.members),
+                                     key=lambda u: u.username.lower())
         c.group_members = [(x.user_id, x.username) for x in
                            c.group_members_obj]
-        c.available_members = [(x.user_id, x.username) for x in
-                               User.query().all()]
+        c.available_members = sorted(((x.user_id, x.username) for x in
+                                      User.query().all()),
+                                     key=lambda u: u[1].lower())
 
     def update(self, id):
         """PUT /users_groups/id: Update an existing item"""

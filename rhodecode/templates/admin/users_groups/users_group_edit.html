@@ -57,7 +57,7 @@
                                             <div style="float:left">
                                                 <div class="text" style="padding: 0px 0px 6px;">${_('Chosen group members')}</div>
                                                 ${h.select('users_group_members',[x[0] for x in c.group_members],c.group_members,multiple=True,size=8,style="min-width:210px")}
-                                               <div  id="remove_all_elements" style="cursor:pointer;text-align:center">
+                                               <div id="remove_all_elements" style="cursor:pointer;text-align:center">
                                                    ${_('Remove all elements')}
                                                    <img alt="remove" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_right.png')}"/>
                                                </div>
@@ -87,7 +87,7 @@
 
                 </div>
                 <div class="buttons">
-                  ${h.submit('save',_('save'),class_="ui-btn large")}
+                  ${h.submit('Save',_('save'),class_="ui-btn large")}
                 </div>
             </div>
     </div>
