@@ -122,7 +122,7 @@ class SimpleGit(BaseVCSController):
         try:
             repo_name = self.__get_repository(environ)
             log.debug('Extracted repo name is %s' % repo_name)
-        except:
+        except Exception:
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
@@ -178,7 +178,7 @@ class SimpleGit(BaseVCSController):
                     if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
                     username = user.username
-                except:
+                except Exception:
                     log.error(traceback.format_exc())
                     return HTTPInternalServerError()(environ, start_response)
 
@@ -272,7 +272,7 @@ class SimpleGit(BaseVCSController):
         try:
             environ['PATH_INFO'] = self._get_by_id(environ['PATH_INFO'])
             repo_name = GIT_PROTO_PAT.match(environ['PATH_INFO']).group(1)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 

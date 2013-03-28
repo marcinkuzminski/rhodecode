@@ -321,7 +321,7 @@ class ScmModel(BaseModel):
                               'stopped_following_repo',
                               RepoTemp(follow_repo_id))
                 return
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
 
@@ -334,7 +334,7 @@ class ScmModel(BaseModel):
             action_logger(UserTemp(user_id),
                           'started_following_repo',
                           RepoTemp(follow_repo_id))
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -347,7 +347,7 @@ class ScmModel(BaseModel):
             try:
                 self.sa.delete(f)
                 return
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
 
@@ -356,7 +356,7 @@ class ScmModel(BaseModel):
             f.user_id = user_id
             f.follows_user_id = follow_user_id
             self.sa.add(f)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -473,7 +473,7 @@ class ScmModel(BaseModel):
             else:
                 repo.pull(clone_uri)
             self.mark_for_invalidation(repo_name)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -658,7 +658,7 @@ class ScmModel(BaseModel):
                             ver = matches.groups()[0]
                             log.debug('got %s it is rhodecode' % (ver))
                             _rhodecode_hook = True
-                        except:
+                        except Exception:
                             log.error(traceback.format_exc())
             else:
                 # there is no hook in this dir, so we want to create one

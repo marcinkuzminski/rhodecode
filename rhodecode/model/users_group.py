@@ -59,7 +59,7 @@ class UserGroupModel(BaseModel):
             new.users_group_active = active
             self.sa.add(new)
             return new
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -82,7 +82,7 @@ class UserGroupModel(BaseModel):
                 setattr(users_group, k, v)
 
             self.sa.add(users_group)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -107,7 +107,7 @@ class UserGroupModel(BaseModel):
                                                    assigned_groups)
 
             self.sa.delete(users_group)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -130,7 +130,7 @@ class UserGroupModel(BaseModel):
 
             self.sa.add(users_group_member)
             return users_group_member
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -149,7 +149,7 @@ class UserGroupModel(BaseModel):
             try:
                 self.sa.delete(users_group_member)
                 return True
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
         else:

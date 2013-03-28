@@ -1140,7 +1140,7 @@ def urlify_commit(text_, repository=None, link_=None):
         if link_:
             # wrap not links into final link => link_
             newtext = linkify_others(newtext, link_)
-    except:
+    except Exception:
         log.error(traceback.format_exc())
         pass
 

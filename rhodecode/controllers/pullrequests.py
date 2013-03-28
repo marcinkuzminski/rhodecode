@@ -393,7 +393,7 @@ class PullrequestsController(BaseRepoController):
 
         try:
             cur_status = c.statuses[c.pull_request.revisions[0]][0]
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             cur_status = 'undefined'
         if c.pull_request.is_closed() and 0:

@@ -318,7 +318,7 @@ class RepoModel(BaseModel):
                 self.__rename_repo(old=org_repo_name, new=new_name)
 
             return cur_repo
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -419,7 +419,7 @@ class RepoModel(BaseModel):
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                                     owner.user_id)
             return new_repo
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -475,7 +475,7 @@ class RepoModel(BaseModel):
                 self.__delete_repo(repo)
                 log_delete_repository(old_repo_dict,
                                       deleted_by=owner.username)
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
 
@@ -586,7 +586,7 @@ class RepoModel(BaseModel):
                     .filter(Statistics.repository == repo).scalar()
             if obj:
                 self.sa.delete(obj)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 

@@ -802,7 +802,7 @@ class Repository(Base, BaseModel):
     def changeset_cache(self, val):
         try:
             self._changeset_cache = json.dumps(val)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
 
     @classmethod

@@ -71,7 +71,7 @@ def get_ignore_ws(fid, GET):
     if ig_ws:
         try:
             return int(ig_ws[0].split(':')[-1])
-        except:
+        except Exception:
             pass
     return ig_ws_global
 
@@ -124,7 +124,7 @@ def get_line_ctx(fid, GET):
 
     try:
         return int(retval)
-    except:
+    except Exception:
         return 3
 
 

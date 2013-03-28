@@ -166,7 +166,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
                  (action, safe_unicode(repo), user_obj, ipaddr))
         if commit:
             sa.commit()
-    except:
+    except Exception:
         log.error(traceback.format_exc())
         raise
 
@@ -486,7 +486,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                     sa.delete(repo)
                     sa.commit()
                     removed.append(repo.repo_name)
-                except:
+                except Exception:
                     #don't hold further removals on error
                     log.error(traceback.format_exc())
                     sa.rollback()
@@ -751,7 +751,7 @@ def check_git_version():
         ver = '.'.join(ver.split('.')[:3])
     try:
         _ver = StrictVersion(ver)
-    except:
+    except Exception:
         _ver = StrictVersion('0.0.0')
         stderr = traceback.format_exc()
 

@@ -319,7 +319,7 @@ class DbManage(object):
         try:
             self.sa.add(paths)
             self.sa.commit()
-        except:
+        except Exception:
             self.sa.rollback()
             raise
 
@@ -339,7 +339,7 @@ class DbManage(object):
         try:
             self.sa.add(def_user)
             self.sa.commit()
-        except:
+        except Exception:
             self.sa.rollback()
             raise
 
@@ -353,7 +353,7 @@ class DbManage(object):
         try:
             self.sa.add(hgsettings3)
             self.sa.commit()
-        except:
+        except Exception:
             self.sa.rollback()
             raise
 

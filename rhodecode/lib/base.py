@@ -127,7 +127,7 @@ class BaseVCSController(object):
                 if len(by_id) == 2 and by_id[1].isdigit():
                     _repo_name = Repository.get(by_id[1]).repo_name
                     data[1] = _repo_name
-        except:
+        except Exception:
             log.debug('Failed to extract repo_name from id %s' % (
                       traceback.format_exc()
                       )

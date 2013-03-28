@@ -61,7 +61,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_hg_non_ascii(self):
@@ -94,7 +94,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_hg_in_group(self):
@@ -134,7 +134,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name_full))
-        except:
+        except Exception:
             ReposGroupModel().delete(group_name)
             self.Session().commit()
             self.fail('no repo %s in filesystem' % repo_name)
@@ -172,7 +172,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_git_non_ascii(self):
@@ -208,7 +208,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_update(self):
@@ -246,7 +246,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
         response = self.app.delete(url('repo', repo_name=repo_name))
@@ -294,7 +294,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
         response = self.app.delete(url('repo', repo_name=repo_name))

@@ -162,7 +162,7 @@ class ReposGroupModel(BaseModel):
                 self.__create_group(new_repos_group.group_name)
 
             return new_repos_group
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -283,7 +283,7 @@ class ReposGroupModel(BaseModel):
             self.__rename_group(old_path, new_path)
 
             return repos_group
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -292,7 +292,7 @@ class ReposGroupModel(BaseModel):
         try:
             self.sa.delete(repos_group)
             self.__delete_group(repos_group, force_delete)
-        except:
+        except Exception:
             log.error('Error removing repos_group %s' % repos_group)
             raise
 

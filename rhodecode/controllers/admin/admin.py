@@ -130,7 +130,7 @@ class AdminController(BaseController):
         c.search_term = request.GET.get('filter')
         try:
             users_log = _journal_filter(users_log, c.search_term)
-        except:
+        except Exception:
             # we want this to crash for now
             raise
 

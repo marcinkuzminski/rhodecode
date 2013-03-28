@@ -95,7 +95,7 @@ class UserModel(BaseModel):
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
             return new_user
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -244,7 +244,7 @@ class UserModel(BaseModel):
                                        type_=Notification.TYPE_REGISTRATION,
                                        email_kwargs=kw)
 
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -268,7 +268,7 @@ class UserModel(BaseModel):
                         k = 'name'
                     setattr(user, k, v)
             self.sa.add(user)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -290,7 +290,7 @@ class UserModel(BaseModel):
                 setattr(user, k, v)
             self.sa.add(user)
             return user
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -311,7 +311,7 @@ class UserModel(BaseModel):
                     % (user.username, len(repos), ', '.join(repos))
                 )
             self.sa.delete(user)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -335,7 +335,7 @@ class UserModel(BaseModel):
                 log.info('send new password mail to %s' % user_email)
             else:
                 log.debug("password reset email %s not found" % user_email)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             return False
 
@@ -358,7 +358,7 @@ class UserModel(BaseModel):
                     log.info('change password for %s' % user_email)
                 if new_passwd is None:
                     raise Exception('unable to generate new password')
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 Session().rollback()
 
@@ -367,7 +367,7 @@ class UserModel(BaseModel):
                      _('Your new RhodeCode password:%s') % (new_passwd))
             log.info('send new password mail to %s' % user_email)
 
-        except:
+        except Exception:
             log.error('Failed to update user password')
             log.error(traceback.format_exc())
 
@@ -400,7 +400,7 @@ class UserModel(BaseModel):
             else:
                 return False
 
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             auth_user.is_authenticated = False
             return False

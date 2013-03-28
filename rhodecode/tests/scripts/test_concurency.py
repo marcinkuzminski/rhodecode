@@ -198,12 +198,12 @@ if __name__ == '__main__':
 
         try:
             METHOD = sys.argv[3]
-        except:
+        except Exception:
             pass
 
         try:
             backend = sys.argv[4]
-        except:
+        except Exception:
             backend = 'hg'
 
         if METHOD == 'pull':

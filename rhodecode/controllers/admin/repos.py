@@ -516,7 +516,7 @@ class ReposController(BaseRepoController):
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')
                 Session().commit()
-            except:
+            except Exception:
                 h.flash(_('An error occurred during setting this'
                           ' repository in public journal'),
                         category='error')

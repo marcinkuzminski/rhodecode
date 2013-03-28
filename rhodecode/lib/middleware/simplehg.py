@@ -85,7 +85,7 @@ class SimpleHg(BaseVCSController):
         try:
             repo_name = environ['REPO_NAME'] = self.__get_repository(environ)
             log.debug('Extracted repo name is %s' % repo_name)
-        except:
+        except Exception:
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
@@ -141,7 +141,7 @@ class SimpleHg(BaseVCSController):
                     if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
                     username = user.username
-                except:
+                except Exception:
                     log.error(traceback.format_exc())
                     return HTTPInternalServerError()(environ, start_response)
 
@@ -229,7 +229,7 @@ class SimpleHg(BaseVCSController):
             repo_name = '/'.join(environ['PATH_INFO'].split('/')[1:])
             if repo_name.endswith('/'):
                 repo_name = repo_name.rstrip('/')
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 

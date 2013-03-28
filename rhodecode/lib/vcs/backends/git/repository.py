@@ -259,7 +259,7 @@ class GitRepository(BaseRepository):
             or isinstance(revision, int) or is_null(revision)):
             try:
                 revision = self.revisions[int(revision)]
-            except:
+            except Exception:
                 raise ChangesetDoesNotExistError("Revision %s does not exist "
                     "for this repository" % (revision))
 

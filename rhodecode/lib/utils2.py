@@ -573,7 +573,7 @@ def obfuscate_url_pw(engine):
         _url = sa_url.make_url(engine)
         if _url.password:
             _url.password = 'XXXXX'
-    except:
+    except Exception:
         pass
     return str(_url)
 
@@ -593,7 +593,7 @@ def _extract_extras(env=None):
 
     try:
         rc_extras = json.loads(env['RC_SCM_DATA'])
-    except:
+    except Exception:
         print os.environ
         print >> sys.stderr, traceback.format_exc()
         rc_extras = {}

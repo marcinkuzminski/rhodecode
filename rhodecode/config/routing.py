@@ -41,7 +41,7 @@ def make_map(config):
             if len(by_id) == 2 and by_id[1].isdigit() and by_id[0] == '':
                 repo_name = Repository.get(by_id[1]).repo_name
                 match_dict['repo_name'] = repo_name
-        except:
+        except Exception:
             pass
 
         return is_valid_repo(repo_name, config['base_path'])
