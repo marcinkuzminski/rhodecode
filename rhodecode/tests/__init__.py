@@ -6,6 +6,16 @@ command.
 
 This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
+
+nosetests -x - fail on first error
+nosetests rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
+nosetests --pdb --pdb-failures
+nosetests --with-coverage --cover-package=rhodecode.model.validators rhodecode.tests.test_validators
+
+optional FLAGS:
+    RC_WHOOSH_TEST_DISABLE=1 - skip whoosh index building and tests
+    RC_NO_TMP_PATH=1 - disable new temp path for tests, used mostly for test_vcs_operations
+
 """
 import os
 import time
@@ -55,10 +65,6 @@ __all__ = [
 # Invoke websetup with the current config file
 # SetupCommand('setup-app').run([config_file])
 
-##RUNNING DESIRED TESTS
-# nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
-# nosetests --pdb --pdb-failures
-# nosetests --with-coverage --cover-package=rhodecode.model.validators rhodecode.tests.test_validators
 environ = {}
 
 #SOME GLOBALS FOR TESTS
