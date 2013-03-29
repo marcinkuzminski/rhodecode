@@ -907,7 +907,7 @@ class Repository(Base, BaseModel):
         # names in the database, but that eventually needs to be converted
         # into a valid system path
         p += self.repo_name.split(Repository.url_sep())
-        return os.path.join(*p)
+        return os.path.join(*map(safe_unicode, p))
 
     @property
     def cache_keys(self):
@@ -1062,13 +1062,15 @@ class Repository(Base, BaseModel):
         if (cs_cache != self.changeset_cache or not self.changeset_cache):
             _default = datetime.datetime.fromtimestamp(0)
             last_change = cs_cache.get('date') or _default
-            log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
+            log.debug('updated repo %s with new cs cache %s'
+                      % (self.repo_name, cs_cache))
             self.updated_on = last_change
             self.changeset_cache = cs_cache
             Session().add(self)
             Session().commit()
         else:
-            log.debug('Skipping repo:%s already with latest changes' % self)
+            log.debug('Skipping repo:%s already with latest changes'
+                      % self.repo_name)
 
     @property
     def tip(self):
