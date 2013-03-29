@@ -116,8 +116,8 @@ ${self.context_bar('summary')}
                   <label>${_('Clone url')}:</label>
               </div>
               <div class="input ${summary(c.show_stats)}">
-                  <input style="width:80%" type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}"/>
-                  <input style="display:none;width:80%" type="text" id="clone_url_id" readonly="readonly" value="${c.clone_repo_url_id}"/>
+                  <input style="width:${'75%' if c.show_stats else '80%'}" type="text" id="clone_url" readonly="readonly" value="${c.clone_repo_url}"/>
+                  <input style="display:none;width:${'75%' if c.show_stats else '80%'}" type="text" id="clone_url_id" readonly="readonly" value="${c.clone_repo_url_id}"/>
                   <div style="display:none" id="clone_by_name" class="ui-btn clone">${_('Show by Name')}</div>
                   <div id="clone_by_id" class="ui-btn clone">${_('Show by ID')}</div>
               </div>

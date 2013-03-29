@@ -37,13 +37,14 @@ from webob.exc import HTTPBadRequest
 
 from beaker.cache import cache_region, region_invalidate
 
+from rhodecode.lib import helpers as h
 from rhodecode.lib.compat import product
 from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
     NodeDoesNotExistError
 from rhodecode.config.conf import ALL_READMES, ALL_EXTS, LANGUAGES_EXTENSIONS_MAP
 from rhodecode.model.db import Statistics, CacheInvalidation
 from rhodecode.lib.utils import jsonify
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
     NotAnonymous
 from rhodecode.lib.base import BaseRepoController, render
@@ -101,10 +102,10 @@ class SummaryController(BaseRepoController):
            'pass': password,
            'scheme': parsed_url.scheme,
            'netloc': parsed_url.netloc,
-           'path': decoded_path
+           'path': urllib.quote(safe_str(decoded_path))
         }
 
-        uri = uri_tmpl % uri_dict
+        uri = (uri_tmpl % uri_dict)
         # generate another clone url by id
         uri_dict.update(
          {'path': decoded_path.replace(repo_name, '_%s' % c.dbrepo.repo_id)}
