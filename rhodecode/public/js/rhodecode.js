@@ -1982,14 +1982,13 @@ var dateSort = function(a, b, desc, field) {
     return compState;
 };
 
-var linkSort = function(a, b, desc, field) {
+var usernamelinkSort = function(a, b, desc, field) {
 	  var a_ = fromHTML(a.getData(field));
-	  var b_ = fromHTML(a.getData(field));
+	  var b_ = fromHTML(b.getData(field));
 	  
 	  // extract url text from string nodes 
 	  a_ = get_link(a_)
 	  b_ = get_link(b_)
-
 	  var comp = YAHOO.util.Sort.compare;
 	  var compState = comp(a_, b_, desc);
 	  return compState;
