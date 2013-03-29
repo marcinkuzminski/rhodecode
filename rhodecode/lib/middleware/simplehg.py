@@ -168,7 +168,8 @@ class SimpleHg(BaseVCSController):
         #======================================================================
         # MERCURIAL REQUEST HANDLING
         #======================================================================
-        repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
+        str_repo_name = safe_str(repo_name)
+        repo_path = os.path.join(safe_str(self.basepath), str_repo_name)
         log.debug('Repository path is %s' % repo_path)
 
         # CHECK LOCKING only if it's not ANONYMOUS USER
@@ -193,7 +194,7 @@ class SimpleHg(BaseVCSController):
 
         try:
             log.info('%s action on HG repo "%s" by "%s" from %s' %
-                     (action, repo_name, username, ip_addr))
+                     (action, str_repo_name, safe_str(username), ip_addr))
             app = self.__make_app(repo_path, baseui, extras)
             return app(environ, start_response)
         except RepoError, e:
