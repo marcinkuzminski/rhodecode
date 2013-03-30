@@ -85,8 +85,7 @@ class TestAdminSettingsController(TestController):
                                                  rhodecode_ga_code=new_ga_code
                                                  ))
 
-        self.assertTrue('Updated application settings' in
-                        response.session['flash'][0][1])
+        self.checkSessionFlash(response, 'Updated application settings')
         self.assertEqual(RhodeCodeSetting
                         .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 

@@ -251,8 +251,7 @@ class TestAdminReposController(TestController):
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        self.assertTrue('''Deleted repository %s''' % (repo_name) in
-                        response.session['flash'][0])
+        self.checkSessionFlash(response, 'Deleted repository %s' % (repo_name))
 
         response.follow()
 
@@ -299,8 +298,7 @@ class TestAdminReposController(TestController):
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        self.assertTrue('''Deleted repository %s''' % (repo_name) in
-                        response.session['flash'][0])
+        self.checkSessionFlash(response, 'Deleted repository %s' % (repo_name))
 
         response.follow()
 
