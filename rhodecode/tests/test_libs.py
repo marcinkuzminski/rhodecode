@@ -114,37 +114,42 @@ class TestLibs(unittest.TestCase):
         ], key=lambda k: k.lower())
         self.assertEqual(s, extract_mentioned_users(sample))
 
-    def test_age(self):
+    @parameterized.expand([
+        (dict(), u'just now'),
+        (dict(seconds= -1), u'1 second ago'),
+        (dict(seconds= -60 * 2), u'2 minutes ago'),
+        (dict(hours= -1), u'1 hour ago'),
+        (dict(hours= -24), u'1 day ago'),
+        (dict(hours= -24 * 5), u'5 days ago'),
+        (dict(months= -1), u'1 month ago'),
+        (dict(months= -1, days= -2), u'1 month and 2 days ago'),
+        (dict(years= -1, months= -1), u'1 year and 1 month ago'),
+    ])
+    def test_age(self, age_args, expected):
         from rhodecode.lib.utils2 import age
         from dateutil import relativedelta
-        n = datetime.datetime.now()
+        n = datetime.datetime(year=2012, month=5, day=17)
         delt = lambda *args, **kwargs: relativedelta.relativedelta(*args, **kwargs)
+        self.assertEqual(age(n + delt(**age_args), now=n), expected)
 
-        self.assertEqual(age(n), u'just now')
-        self.assertEqual(age(n + delt(seconds=-1)), u'1 second ago')
-        self.assertEqual(age(n + delt(seconds=-60 * 2)), u'2 minutes ago')
-        self.assertEqual(age(n + delt(hours=-1)), u'1 hour ago')
-        self.assertEqual(age(n + delt(hours=-24)), u'1 day ago')
-        self.assertEqual(age(n + delt(hours=-24 * 5)), u'5 days ago')
-        self.assertEqual(age(n + delt(months=-1)), u'1 month ago')
-        self.assertEqual(age(n + delt(months=-1, days=-2)), u'1 month and 2 days ago')
-        self.assertEqual(age(n + delt(years=-1, months=-1)), u'1 year and 1 month ago')
+    @parameterized.expand([
 
-    def test_age_in_future(self):
+        (dict(), u'just now'),
+        (dict(seconds=1), u'in 1 second'),
+        (dict(seconds=60 * 2), u'in 2 minutes'),
+        (dict(hours=1), u'in 1 hour'),
+        (dict(hours=24), u'in 1 day'),
+        (dict(hours=24 * 5), u'in 5 days'),
+        (dict(months=1), u'in 1 month'),
+        (dict(months=1, days=1), u'in 1 month and 1 day'),
+        (dict(years=1, months=1), u'in 1 year and 1 month')
+    ])
+    def test_age_in_future(self, age_args, expected):
         from rhodecode.lib.utils2 import age
         from dateutil import relativedelta
-        n = datetime.datetime.now()
+        n = datetime.datetime(year=2012, month=5, day=17)
         delt = lambda *args, **kwargs: relativedelta.relativedelta(*args, **kwargs)
-
-        self.assertEqual(age(n), u'just now')
-        self.assertEqual(age(n + delt(seconds=1)), u'in 1 second')
-        self.assertEqual(age(n + delt(seconds=60 * 2)), u'in 2 minutes')
-        self.assertEqual(age(n + delt(hours=1)), u'in 1 hour')
-        self.assertEqual(age(n + delt(hours=24)), u'in 1 day')
-        self.assertEqual(age(n + delt(hours=24 * 5)), u'in 5 days')
-        self.assertEqual(age(n + delt(months=1)), u'in 1 month')
-        self.assertEqual(age(n + delt(months=1, days=1)), u'in 1 month and 1 day')
-        self.assertEqual(age(n + delt(years=1, months=1)), u'in 1 year and 1 month')
+        self.assertEqual(age(n + delt(**age_args), now=n), expected)
 
     def test_tag_exctrator(self):
         sample = (
@@ -216,7 +221,7 @@ class TestLibs(unittest.TestCase):
         :param text:
         """
         import re
-        #quickly change expected url[] into a link
+        # quickly change expected url[] into a link
         URL_PAT = re.compile(r'(?:url\[)(.+?)(?:\])')
 
         def url_func(match_obj):

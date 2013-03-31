@@ -353,7 +353,7 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     return engine
 
 
-def age(prevdate, show_short_version=False):
+def age(prevdate, show_short_version=False, now=None):
     """
     turns a datetime into an age string.
     If show_short_version is True, then it will generate a not so accurate but shorter string,
@@ -364,8 +364,7 @@ def age(prevdate, show_short_version=False):
     :rtype: unicode
     :returns: unicode words describing age
     """
-    now = datetime.datetime.now()
-    now = now.replace(microsecond=0)
+    now = now or datetime.datetime.now()
     order = ['year', 'month', 'day', 'hour', 'minute', 'second']
     deltas = {}
     future = False
@@ -373,15 +372,13 @@ def age(prevdate, show_short_version=False):
     if prevdate > now:
         now, prevdate = prevdate, now
         future = True
-
+    if future:
+        prevdate = prevdate.replace(microsecond=0)
     # Get date parts deltas
+    from dateutil import relativedelta
     for part in order:
-        if future:
-            from dateutil import relativedelta
-            d = relativedelta.relativedelta(now, prevdate)
-            deltas[part] = getattr(d, part + 's')
-        else:
-            deltas[part] = getattr(now, part) - getattr(prevdate, part)
+        d = relativedelta.relativedelta(now, prevdate)
+        deltas[part] = getattr(d, part + 's')
 
     # Fix negative offsets (there is 1 second between 10:59:59 and 11:00:00,
     # not 1 hour, -59 minutes and -59 seconds)
