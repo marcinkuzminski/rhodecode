@@ -58,6 +58,10 @@ class StatusChangeOnClosedPullRequestError(Exception):
     pass
 
 
+class AttachedForksError(Exception):
+    pass
+
+
 class HTTPLockedRC(HTTPClientError):
     """
     Special Exception For locked Repos in RhodeCode, the return code can

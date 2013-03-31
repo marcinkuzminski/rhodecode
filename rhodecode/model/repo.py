@@ -42,6 +42,7 @@ from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
+from rhodecode.lib.exceptions import AttachedForksError
 
 log = logging.getLogger(__name__)
 
@@ -465,9 +466,27 @@ class RepoModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
-    def delete(self, repo):
+    def delete(self, repo, forks=None):
+        """
+        Delete given repository, forks parameter defines what do do with
+        attached forks. Throws AttachedForksError if deleted repo has attached
+        forks
+
+        :param repo:
+        :param forks: str 'delete' or 'detach'
+        """
         repo = self._get_repo(repo)
         if repo:
+            if forks == 'detach':
+                for r in repo.forks:
+                    r.fork = None
+                    self.sa.add(r)
+            elif forks == 'delete':
+                for r in repo.forks:
+                    self.delete(r, forks='delete')
+            elif [f for f in repo.forks]:
+                raise AttachedForksError()
+
             old_repo_dict = repo.get_dict()
             owner = repo.user
             try:

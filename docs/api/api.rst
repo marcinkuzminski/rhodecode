@@ -848,8 +848,10 @@ OUTPUT::
 delete_repo
 -----------
 
-Deletes a repository. This command can be executed only using api_key belonging to user with admin
-rights or regular user that have admin access to repository.
+Deletes a repository. This command can be executed only using api_key belonging
+to user with admin rights or regular user that have admin access to repository.
+When `forks` param is set it's possible to detach or delete forks of deleting
+repository
 
 
 INPUT::
@@ -858,7 +860,8 @@ INPUT::
     api_key : "<api_key>"
     method :  "delete_repo"
     args:     {
-                "repoid" : "<reponame or repo_id>"
+                "repoid" : "<reponame or repo_id>",
+                "forks"  : "`delete` or `detach` = Optional(None)"
               }
 
 OUTPUT::

@@ -50,6 +50,7 @@ from rhodecode.model.scm import ScmModel, GroupList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
 from sqlalchemy.sql.expression import func
+from rhodecode.lib.exceptions import AttachedForksError
 
 log = logging.getLogger(__name__)
 
@@ -302,38 +303,26 @@ class ReposController(BaseRepoController):
             return redirect(url('repos'))
         try:
             _forks = repo.forks.count()
+            handle_forks = None
             if _forks and request.POST.get('forks'):
                 do = request.POST['forks']
                 if do == 'detach_forks':
-                    for r in repo.forks:
-                        log.debug('Detaching fork %s from repo %s' % (r, repo))
-                        r.fork = None
-                        Session().add(r)
+                    handle_forks = 'detach'
                     h.flash(_('Detached %s forks') % _forks, category='success')
                 elif do == 'delete_forks':
-                    for r in repo.forks:
-                        log.debug('Deleting fork %s of repo %s' % (r, repo))
-                        repo_model.delete(r)
+                    handle_forks = 'delete'
                     h.flash(_('Deleted %s forks') % _forks, category='success')
+            repo_model.delete(repo, forks=handle_forks)
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
-                              repo_name, self.ip_addr, self.sa)
-            repo_model.delete(repo)
+                  repo_name, self.ip_addr, self.sa)
             invalidate_cache('get_repo_cached_%s' % repo_name)
             h.flash(_('Deleted repository %s') % repo_name, category='success')
             Session().commit()
-        except IntegrityError, e:
-            if e.message.find('repositories_fork_id_fkey') != -1:
-                log.error(traceback.format_exc())
-                h.flash(_('Cannot delete %s it still contains attached '
-                          'forks') % repo_name,
-                        category='warning')
-            else:
-                log.error(traceback.format_exc())
-                h.flash(_('An error occurred during '
-                          'deletion of %s') % repo_name,
-                        category='error')
+        except AttachedForksError:
+            h.flash(_('Cannot delete %s it still contains attached forks')
+                        % repo_name, category='warning')
 
-        except Exception, e:
+        except Exception:
             log.error(traceback.format_exc())
             h.flash(_('An error occurred during deletion of %s') % repo_name,
                     category='error')

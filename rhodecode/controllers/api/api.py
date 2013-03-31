@@ -853,12 +853,13 @@ class ApiController(JSONRPCController):
                                                             fork_name)
             )
 
-    def delete_repo(self, apiuser, repoid):
+    def delete_repo(self, apiuser, repoid, forks=Optional(None)):
         """
         Deletes a given repository
 
         :param apiuser:
         :param repoid:
+        :param forks: detach or delete, what do do with attached forks for repo
         """
         repo = get_repo_or_error(repoid)
 
@@ -866,13 +867,26 @@ class ApiController(JSONRPCController):
             # check if we have admin permission for this repo !
             if HasRepoPermissionAnyApi('repository.admin')(user=apiuser,
                                             repo_name=repo.repo_name) is False:
-                 raise JSONRPCError('repository `%s` does not exist' % (repoid))
+                raise JSONRPCError('repository `%s` does not exist' % (repoid))
 
         try:
-            RepoModel().delete(repo)
+            handle_forks = Optional.extract(forks)
+            _forks_msg = ''
+            _forks = [f for f in repo.forks]
+            if handle_forks == 'detach':
+                _forks_msg = ' ' + _('Detached %s forks') % len(_forks)
+            elif handle_forks == 'delete':
+                _forks_msg = ' ' + _('Deleted %s forks') % len(_forks)
+            elif _forks:
+                raise JSONRPCError(
+                    'Cannot delete `%s` it still contains attached forks'
+                    % repo.repo_name
+                )
+
+            RepoModel().delete(repo, forks=forks)
             Session().commit()
             return dict(
-                msg='Deleted repository `%s`' % repo.repo_name,
+                msg='Deleted repository `%s`%s' % (repo.repo_name, _forks_msg),
                 success=True
             )
         except Exception:
