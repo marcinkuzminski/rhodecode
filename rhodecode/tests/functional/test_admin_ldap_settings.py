@@ -1,6 +1,5 @@
 from rhodecode.tests import *
 from rhodecode.model.db import RhodeCodeSetting
-from nose.plugins.skip import SkipTest
 
 skip_ldap_test = False
 try:
@@ -17,7 +16,7 @@ class TestLdapSettingsController(TestController):
         self.log_user()
         response = self.app.get(url(controller='admin/ldap_settings',
                                     action='index'))
-        self.assertTrue('LDAP administration' in response.body)
+        response.mustcontain('LDAP administration')
 
     def test_ldap_save_settings(self):
         self.log_user()
@@ -72,14 +71,12 @@ class TestLdapSettingsController(TestController):
                     'ldap_attr_lastname':'',
                     'ldap_attr_email':'' })
 
-        self.assertTrue("""<span class="error-message">The LDAP Login"""
-                        """ attribute of the CN must be specified""" in
-                        response.body)
+        response.mustcontain("""<span class="error-message">The LDAP Login"""
+                             """ attribute of the CN must be specified""")
 
 
-
-        self.assertTrue("""<span class="error-message">Please """
-                        """enter a number</span>""" in response.body)
+        response.mustcontain("""<span class="error-message">Please """
+                             """enter a number</span>""")
 
     def test_ldap_login(self):
         pass

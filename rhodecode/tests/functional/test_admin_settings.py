@@ -90,8 +90,7 @@ class TestAdminSettingsController(TestController):
                         .get_app_settings()['rhodecode_ga_code'], new_ga_code)
 
         response = response.follow()
-        self.assertFalse("""_gaq.push(['_setAccount', '%s']);""" % new_ga_code
-                         in response.body)
+        response.mustcontain(no=["_gaq.push(['_setAccount', '%s']);" % new_ga_code])
 
     def test_title_change(self):
         self.log_user()
@@ -120,7 +119,7 @@ class TestAdminSettingsController(TestController):
         self.log_user()
         response = self.app.get(url('admin_settings_my_account'))
 
-        self.assertTrue('value="test_admin' in response.body)
+        response.mustcontain('value="test_admin')
 
     @parameterized.expand([('firstname', 'new_username'),
                            ('lastname', 'new_username'),
@@ -217,7 +216,7 @@ class TestAdminSettingsController(TestController):
         repo = Repository.get_by_repo_name(HG_REPO)
         response = self.app.get(url('edit_repo', repo_name=HG_REPO))
         opt = """<option value="%s">vcs_test_git</option>""" % repo.repo_id
-        assert opt not in response.body
+        response.mustcontain(no=[opt])
 
     def test_set_fork_of_repo(self):
         self.log_user()

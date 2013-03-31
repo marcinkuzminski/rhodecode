@@ -33,6 +33,7 @@ from paste.script.appinstall import SetupCommand
 from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
+from nose.plugins.skip import SkipTest
 
 from rhodecode import is_windows
 from rhodecode.model.meta import Session
@@ -51,6 +52,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     'parameterized', 'environ', 'url', 'get_new_dir', 'TestController',
+    'SkipTest',
     'TESTS_TMP_PATH', 'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO',
     'HG_FORK', 'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS',
     'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',

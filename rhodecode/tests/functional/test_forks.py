@@ -27,7 +27,7 @@ class TestForksController(TestController):
         response = self.app.get(url(controller='forks', action='forks',
                                     repo_name=repo_name))
 
-        self.assertTrue("""There are no forks yet""" in response.body)
+        response.mustcontain("""There are no forks yet""")
 
     def test_no_permissions_to_fork(self):
         usr = self.log_user(TEST_USER_REGULAR_LOGIN,
@@ -135,7 +135,7 @@ class TestForksController(TestController):
         response = self.app.get(url(controller='summary', action='index',
                                     repo_name=fork_name))
 
-        self.assertTrue('Fork of %s' % repo_name in response.body)
+        response.mustcontain('Fork of %s' % repo_name)
 
     def test_zz_fork_permission_page(self):
         usr = self.log_user(self.username, self.password)['user_id']
