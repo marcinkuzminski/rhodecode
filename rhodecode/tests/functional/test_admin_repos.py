@@ -23,9 +23,6 @@ def _get_permission_for_user(user, repo):
 
 class TestAdminReposController(TestController):
 
-    def __make_repo(self):
-        pass
-
     def test_index(self):
         self.log_user()
         response = self.app.get(url('repos'))

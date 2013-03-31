@@ -4,33 +4,9 @@ from rhodecode.model.meta import Session
 from rhodecode.model.db import Repository
 from rhodecode.model.scm import ScmModel
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.tests.fixture import Fixture
 
-
-def _fork_repo(fork_name, vcs_type, parent=None):
-    if vcs_type =='hg':
-        _REPO = HG_REPO
-    elif vcs_type == 'git':
-        _REPO = GIT_REPO
-
-    if parent:
-        _REPO = parent
-
-    form_data = dict(
-        repo_name=fork_name,
-        repo_name_full=fork_name,
-        repo_group=None,
-        repo_type=vcs_type,
-        description='',
-        private=False,
-        copy_permissions=False,
-        landing_rev='tip',
-        update_after_clone=False,
-        fork_parent_id=Repository.get_by_repo_name(_REPO),
-    )
-    RepoModel().create_fork(form_data, cur_user=TEST_USER_ADMIN_LOGIN)
-
-    Session().commit()
-    return Repository.get_by_repo_name(fork_name)
+fixture = Fixture()
 
 
 def _commit_change(repo, filename, content, message, vcs_type, parent=None, newfile=False):
@@ -86,7 +62,7 @@ class TestCompareController(TestController):
                              message='commit1', vcs_type='hg', parent=None, newfile=True)
 
         #fork this repo
-        repo2 = _fork_repo('one-fork', 'hg', parent='one')
+        repo2 = fixture.create_fork('one', 'one-fork')
         self.r2_id = repo2.repo_id
 
         #add two extra commit into fork
@@ -137,7 +113,7 @@ class TestCompareController(TestController):
                              message='commit1', vcs_type='hg', parent=None, newfile=True)
 
         #fork this repo
-        repo2 = _fork_repo('one-fork', 'hg', parent='one')
+        repo2 = fixture.create_fork('one', 'one-fork')
         self.r2_id = repo2.repo_id
 
         #now commit something to origin repo
@@ -205,7 +181,7 @@ class TestCompareController(TestController):
         cs1 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\n',
                              message='commit2', vcs_type='hg', parent=cs0)
         #fork this repo
-        repo2 = _fork_repo('repo1-fork', 'hg', parent='repo1')
+        repo2 = fixture.create_fork('repo1', 'repo1-fork')
         self.r2_id = repo2.repo_id
         #now make cs3-6
         cs2 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\n',
@@ -267,7 +243,7 @@ class TestCompareController(TestController):
         cs1 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\n',
                              message='commit2', vcs_type='hg', parent=cs0)
         #fork this repo
-        repo2 = _fork_repo('repo1-fork', 'hg', parent='repo1')
+        repo2 = fixture.create_fork('repo1', 'repo1-fork')
         self.r2_id = repo2.repo_id
         #now make cs3-6
         cs2 = _commit_change(repo1.repo_name, filename='file1', content='line1\nline2\nline3\n',
@@ -311,7 +287,7 @@ class TestCompareController(TestController):
     def test_compare_remote_branches_hg(self):
         self.log_user()
 
-        repo2 = _fork_repo(HG_FORK, 'hg')
+        repo2 = fixture.create_fork(HG_REPO, HG_FORK)
         self.r2_id = repo2.repo_id
         rev1 = '56349e29c2af'
         rev2 = '7d4bc8ec6be5'
