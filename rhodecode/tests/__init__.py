@@ -60,8 +60,7 @@ __all__ = [
     'TEST_USER_REGULAR2_PASS', 'TEST_USER_REGULAR2_EMAIL', 'TEST_HG_REPO',
     'TEST_HG_REPO_CLONE', 'TEST_HG_REPO_PULL', 'TEST_GIT_REPO',
     'TEST_GIT_REPO_CLONE', 'TEST_GIT_REPO_PULL', 'HG_REMOTE_REPO',
-    'GIT_REMOTE_REPO', 'SCM_TESTS', '_get_repo_create_params',
-    '_get_group_create_params'
+    'GIT_REMOTE_REPO', 'SCM_TESTS',
 ]
 
 # Invoke websetup with the current config file
@@ -174,37 +173,3 @@ class TestController(TestCase):
             msg = u'msg `%s` not found in session flash: got `%s` instead' % (
                       msg, response.session['flash'][0][1])
             self.fail(safe_str(msg))
-
-
-## HELPERS ##
-
-def _get_repo_create_params(**custom):
-    defs = {
-        'repo_name': None,
-        'repo_type': 'hg',
-        'clone_uri': '',
-        'repo_group': '',
-        'repo_description': 'DESC',
-        'repo_private': False,
-        'repo_landing_rev': 'tip'
-    }
-    defs.update(custom)
-    if 'repo_name_full' not in custom:
-        defs.update({'repo_name_full': defs['repo_name']})
-
-    return defs
-
-
-def _get_group_create_params(**custom):
-    defs = dict(
-        group_name=None,
-        group_description='DESC',
-        group_parent_id=None,
-        perms_updates=[],
-        perms_new=[],
-        enable_locking=False,
-        recursive=False
-    )
-    defs.update(custom)
-
-    return defs

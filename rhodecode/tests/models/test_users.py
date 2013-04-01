@@ -14,6 +14,9 @@ class TestUser(unittest.TestCase):
         Session.remove()
         super(TestUser, self).__init__(methodName=methodName)
 
+    def tearDown(self):
+        Session.remove()
+
     def test_create_and_remove(self):
         usr = UserModel().create_or_update(username=u'test_user',
                                            password=u'qweqwe',
@@ -99,6 +102,7 @@ class TestUsers(unittest.TestCase):
 
         UserModel().delete(self.u1)
         Session().commit()
+        Session.remove()
 
     def test_add_perm(self):
         perm = Permission.query().all()[0]

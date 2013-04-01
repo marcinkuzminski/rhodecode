@@ -12,7 +12,6 @@ from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.model.db import ChangesetStatus, Repository
 from rhodecode.model.changeset_status import ChangesetStatusModel
-from rhodecode.model.comment import ChangesetCommentsModel
 
 
 class TestReposGroups(unittest.TestCase):
@@ -21,7 +20,7 @@ class TestReposGroups(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        Session.remove()
 
     def test_Message_extractor(self):
         validator = v.ValidUsername()

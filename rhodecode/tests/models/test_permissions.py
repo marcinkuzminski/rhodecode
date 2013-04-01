@@ -1,7 +1,7 @@
 import os
 import unittest
 from rhodecode.tests import *
-from rhodecode.tests.models.common import _make_group
+from rhodecode.tests.fixture import Fixture
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import RepoGroup, User, UserGroupRepoGroupToPerm
@@ -10,7 +10,9 @@ from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.model.users_group import UserGroupModel
 from rhodecode.lib.auth import AuthUser
-from rhodecode.tests.api.api_base import create_repo
+
+
+fixture = Fixture()
 
 
 class TestPermissions(unittest.TestCase):
@@ -94,8 +96,8 @@ class TestPermissions(unittest.TestCase):
                          perms['repositories'][HG_REPO])
 
     def test_default_group_perms(self):
-        self.g1 = _make_group('test1', skip_if_exists=True)
-        self.g2 = _make_group('test2', skip_if_exists=True)
+        self.g1 = fixture.create_group('test1', skip_if_exists=True)
+        self.g2 = fixture.create_group('test2', skip_if_exists=True)
         u1_auth = AuthUser(user_id=self.u1.user_id)
         perms = {
             'repositories_groups': {u'test1': 'group.read', u'test2': 'group.read'},
@@ -108,8 +110,8 @@ class TestPermissions(unittest.TestCase):
                          perms['repositories_groups'])
 
     def test_default_admin_group_perms(self):
-        self.g1 = _make_group('test1', skip_if_exists=True)
-        self.g2 = _make_group('test2', skip_if_exists=True)
+        self.g1 = fixture.create_group('test1', skip_if_exists=True)
+        self.g2 = fixture.create_group('test2', skip_if_exists=True)
         a1_auth = AuthUser(user_id=self.a1.user_id)
         perms = {
             'repositories_groups': {u'test1': 'group.admin', u'test2': 'group.admin'},
@@ -216,9 +218,8 @@ class TestPermissions(unittest.TestCase):
                          perms['repositories_groups'])
 
     def test_repo_in_group_permissions(self):
-        self.g1 = _make_group('group1', skip_if_exists=True)
-        self.g2 = _make_group('group2', skip_if_exists=True)
-        Session().commit()
+        self.g1 = fixture.create_group('group1', skip_if_exists=True)
+        self.g2 = fixture.create_group('group2', skip_if_exists=True)
         # both perms should be read !
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
@@ -246,14 +247,10 @@ class TestPermissions(unittest.TestCase):
 
         # add repo to group
         name = RepoGroup.url_sep().join([self.g1.group_name, 'test_perm'])
-        self.test_repo = RepoModel().create_repo(
-            repo_name=name,
-            repo_type='hg',
-            description='',
-            repos_group=self.g1,
-            owner=self.u1,
-        )
-        Session().commit()
+        self.test_repo = fixture.create_repo(name=name,
+                                             repo_type='hg',
+                                             repos_group=self.g1,
+                                             cur_user=self.u1,)
 
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories_groups'],
@@ -287,8 +284,7 @@ class TestPermissions(unittest.TestCase):
 
     def test_repo_group_user_as_user_group_member(self):
         # create Group1
-        self.g1 = _make_group('group1', skip_if_exists=True)
-        Session().commit()
+        self.g1 = fixture.create_group('group1', skip_if_exists=True)
         a1_auth = AuthUser(user_id=self.anon.user_id)
 
         self.assertEqual(a1_auth.permissions['repositories_groups'],
@@ -429,12 +425,10 @@ class TestPermissions(unittest.TestCase):
 
     def test_owner_permissions_doesnot_get_overwritten_by_group(self):
         #create repo as USER,
-        self.test_repo = repo = RepoModel().create_repo(repo_name='myownrepo',
-                                repo_type='hg',
-                                description='desc',
-                                owner=self.u1)
+        self.test_repo = fixture.create_repo(name='myownrepo',
+                                             repo_type='hg',
+                                             cur_user=self.u1)
 
-        Session().commit()
         #he has permissions of admin as owner
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
@@ -443,7 +437,8 @@ class TestPermissions(unittest.TestCase):
         self.ug1 = UserGroupModel().create('G1')
         # add user to group
         UserGroupModel().add_user_to_group(self.ug1, self.u1)
-        RepoModel().grant_users_group_permission(repo, group_name=self.ug1,
+        RepoModel().grant_users_group_permission(self.test_repo,
+                                                 group_name=self.ug1,
                                                  perm='repository.none')
 
         Session().commit()
@@ -453,18 +448,16 @@ class TestPermissions(unittest.TestCase):
 
     def test_owner_permissions_doesnot_get_overwritten_by_others(self):
         #create repo as USER,
-        self.test_repo = repo = RepoModel().create_repo(repo_name='myownrepo',
-                                repo_type='hg',
-                                description='desc',
-                                owner=self.u1)
+        self.test_repo = fixture.create_repo(name='myownrepo',
+                                             repo_type='hg',
+                                             cur_user=self.u1)
 
-        Session().commit()
         #he has permissions of admin as owner
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
                          'repository.admin')
         #set his permission as user, he should still be admin
-        RepoModel().grant_user_permission(repo, user=self.u1,
+        RepoModel().grant_user_permission(self.test_repo, user=self.u1,
                                           perm='repository.none')
         Session().commit()
         u1_auth = AuthUser(user_id=self.u1.user_id)

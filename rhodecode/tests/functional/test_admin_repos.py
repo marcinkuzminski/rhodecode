@@ -10,6 +10,9 @@ from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
+from rhodecode.tests.fixture import Fixture
+
+fixture = Fixture()
 
 
 def _get_permission_for_user(user, repo):
@@ -36,7 +39,7 @@ class TestAdminReposController(TestController):
         repo_name = NEW_HG_REPO
         description = 'description for newly created repo'
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
@@ -70,7 +73,7 @@ class TestAdminReposController(TestController):
         description_unicode = description.decode('utf8')
         private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
@@ -108,7 +111,7 @@ class TestAdminReposController(TestController):
         repo_name_full = RepoGroup.url_sep().join([group_name, repo_name])
         description = 'description for newly created repo'
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description,
                                                 repo_group=gr.group_id,))
@@ -146,7 +149,7 @@ class TestAdminReposController(TestController):
         description = 'description for newly created repo'
 
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,
                                                 repo_description=description))
@@ -181,7 +184,7 @@ class TestAdminReposController(TestController):
         description_unicode = description.decode('utf8')
         private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,
                                                 repo_description=description))
@@ -220,7 +223,7 @@ class TestAdminReposController(TestController):
         repo_name = 'vcs_test_new_to_delete'
         description = 'description for newly created repo'
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='hg',
                                                 repo_name=repo_name,
                                                 repo_description=description))
@@ -267,7 +270,7 @@ class TestAdminReposController(TestController):
         description = 'description for newly created repo'
         private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,
                                                 repo_description=description))
@@ -337,7 +340,7 @@ class TestAdminReposController(TestController):
         self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, False)
 
         response = self.app.put(url('repo', repo_name=HG_REPO),
-                        _get_repo_create_params(repo_private=1,
+                        fixture._get_repo_create_params(repo_private=1,
                                                 repo_name=HG_REPO,
                                                 user=TEST_USER_ADMIN_LOGIN))
         self.checkSessionFlash(response,
@@ -350,7 +353,7 @@ class TestAdminReposController(TestController):
         self.assertEqual(perm[0].permission.permission_name, 'repository.none')
 
         response = self.app.put(url('repo', repo_name=HG_REPO),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=HG_REPO,
                                                 user=TEST_USER_ADMIN_LOGIN))
         self.checkSessionFlash(response,

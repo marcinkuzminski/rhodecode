@@ -3,6 +3,7 @@ import random
 import mock
 
 from rhodecode.tests import *
+from rhodecode.tests.fixture import Fixture
 from rhodecode.lib.compat import json
 from rhodecode.lib.auth import AuthUser
 from rhodecode.model.user import UserModel
@@ -12,7 +13,11 @@ from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import Repository
 
+
 API_URL = '/_admin/api'
+TEST_USER_GROUP = 'test_users_group'
+
+fixture = Fixture()
 
 
 def _build_data(apikey, method, **kw):
@@ -43,9 +48,7 @@ def api_call(test_obj, params):
     return response
 
 
-TEST_USER_GROUP = 'test_users_group'
-
-
+## helpers
 def make_users_group(name=TEST_USER_GROUP):
     gr = UserGroupModel().create(name=name)
     UserGroupModel().add_user_to_group(users_group=gr,
@@ -56,32 +59,6 @@ def make_users_group(name=TEST_USER_GROUP):
 
 def destroy_users_group(name=TEST_USER_GROUP):
     UserGroupModel().delete(users_group=name, force=True)
-    Session().commit()
-
-
-def create_repo(repo_name, repo_type, owner=None):
-    # create new repo
-    form_data = _get_repo_create_params(
-                    repo_name_full=repo_name,
-                    repo_description='description %s' % repo_name,
-                )
-    cur_user = UserModel().get_by_username(owner or TEST_USER_ADMIN_LOGIN)
-    r = RepoModel().create(form_data, cur_user)
-    Session().commit()
-    return r
-
-
-def create_fork(fork_name, fork_type, fork_of):
-    fork = RepoModel(Session())._get_repo(fork_of)
-    r = create_repo(fork_name, fork_type)
-    r.fork = fork
-    Session().add(r)
-    Session().commit()
-    return r
-
-
-def destroy_repo(repo_name):
-    RepoModel().delete(repo_name)
     Session().commit()
 
 
@@ -248,7 +225,7 @@ class BaseTestApi(object):
         pass
 
 #        repo_name = 'test_pull'
-#        r = create_repo(repo_name, self.REPO_TYPE)
+#        r = fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
 #        r.clone_uri = TEST_self.REPO
 #        Session.add(r)
 #        Session.commit()
@@ -261,7 +238,7 @@ class BaseTestApi(object):
 #        expected = 'Pulled from `%s`' % repo_name
 #        self._compare_ok(id_, expected, given=response.body)
 #
-#        destroy_repo(repo_name)
+#        fixture.destroy_repo(repo_name)
 
     def test_api_pull_error(self):
         id_, params = _build_data(self.apikey, 'pull',
@@ -317,7 +294,8 @@ class BaseTestApi(object):
 
     def test_api_lock_repo_lock_aquire_by_non_admin(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE,
+                            cur_user=self.TEST_USER_LOGIN)
         try:
             id_, params = _build_data(self.apikey_regular, 'lock',
                                       repoid=repo_name,
@@ -327,11 +305,12 @@ class BaseTestApi(object):
                        % (self.TEST_USER_LOGIN, repo_name, True))
             self._compare_ok(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_lock_repo_lock_aquire_non_admin_with_userid(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE,
+                            cur_user=self.TEST_USER_LOGIN)
         try:
             id_, params = _build_data(self.apikey_regular, 'lock',
                                       userid=TEST_USER_ADMIN_LOGIN,
@@ -341,7 +320,7 @@ class BaseTestApi(object):
             expected = 'userid is not the same as your user'
             self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_lock_repo_lock_aquire_non_admin_not_his_repo(self):
         id_, params = _build_data(self.apikey_regular, 'lock',
@@ -770,7 +749,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_unknown_owner(self):
         repo_name = 'api-repo'
@@ -800,7 +779,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_by_non_admin(self):
         repo_name = 'api-repo'
@@ -818,7 +797,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_by_non_admin_specify_owner(self):
         repo_name = 'api-repo'
@@ -832,7 +811,7 @@ class BaseTestApi(object):
 
         expected = 'Only RhodeCode admin can specify `owner` param'
         self._compare_error(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_exists(self):
         repo_name = self.REPO
@@ -859,7 +838,7 @@ class BaseTestApi(object):
 
     def test_api_delete_repo(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
 
         id_, params = _build_data(self.apikey, 'delete_repo',
                                   repoid=repo_name,)
@@ -874,7 +853,8 @@ class BaseTestApi(object):
 
     def test_api_delete_repo_by_non_admin(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE,
+                            cur_user=self.TEST_USER_LOGIN)
         try:
             id_, params = _build_data(self.apikey_regular, 'delete_repo',
                                       repoid=repo_name,)
@@ -887,11 +867,11 @@ class BaseTestApi(object):
             expected = ret
             self._compare_ok(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_delete_repo_by_non_admin_no_permission(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
         try:
             id_, params = _build_data(self.apikey_regular, 'delete_repo',
                                       repoid=repo_name,)
@@ -899,11 +879,11 @@ class BaseTestApi(object):
             expected = 'repository `%s` does not exist' % (repo_name)
             self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_delete_repo_exception_occurred(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
         try:
             with mock.patch.object(RepoModel, 'delete', crash):
                 id_, params = _build_data(self.apikey, 'delete_repo',
@@ -913,7 +893,7 @@ class BaseTestApi(object):
                 expected = 'failed to delete repository `%s`' % repo_name
                 self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_fork_repo(self):
         fork_name = 'api-repo-fork'
@@ -931,7 +911,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_non_admin(self):
         fork_name = 'api-repo-fork'
@@ -948,7 +928,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_non_admin_specify_owner(self):
         fork_name = 'api-repo-fork'
@@ -960,7 +940,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
         expected = 'Only RhodeCode admin can specify `owner` param'
         self._compare_error(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_non_admin_no_permission_to_fork(self):
         RepoModel().grant_user_permission(repo=self.REPO,
@@ -974,7 +954,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
         expected = 'repository `%s` does not exist' % (self.REPO)
         self._compare_error(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_unknown_owner(self):
         fork_name = 'api-repo-fork'
@@ -990,7 +970,7 @@ class BaseTestApi(object):
 
     def test_api_fork_repo_fork_exists(self):
         fork_name = 'api-repo-fork'
-        create_fork(fork_name, self.REPO_TYPE, self.REPO)
+        fixture.create_fork(self.REPO, fork_name)
 
         try:
             fork_name = 'api-repo-fork'
@@ -1005,7 +985,7 @@ class BaseTestApi(object):
             expected = "fork `%s` already exist" % fork_name
             self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(fork_name)
+            fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_repo_exists(self):
         fork_name = self.REPO

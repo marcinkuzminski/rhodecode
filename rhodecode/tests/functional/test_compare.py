@@ -52,10 +52,9 @@ class TestCompareController(TestController):
 
     def test_compare_forks_on_branch_extra_commits_hg(self):
         self.log_user()
-        repo1 = RepoModel().create_repo(repo_name='one', repo_type='hg',
-                                        description='diff-test',
-                                        owner=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
+        repo1 = fixture.create_repo('one', repo_type='hg',
+                                    repo_description='diff-test',
+                                    cur_user=TEST_USER_ADMIN_LOGIN)
         self.r1_id = repo1.repo_id
         #commit something !
         cs0 = _commit_change(repo1.repo_name, filename='file1', content='line1\n',
@@ -102,10 +101,10 @@ class TestCompareController(TestController):
     def test_compare_forks_on_branch_extra_commits_origin_has_incomming_hg(self):
         self.log_user()
 
-        repo1 = RepoModel().create_repo(repo_name='one', repo_type='hg',
-                                        description='diff-test',
-                                        owner=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
+        repo1 = fixture.create_repo('one', repo_type='hg',
+                                    repo_description='diff-test',
+                                    cur_user=TEST_USER_ADMIN_LOGIN)
+
         self.r1_id = repo1.repo_id
 
         #commit something !
@@ -168,10 +167,9 @@ class TestCompareController(TestController):
         #make repo1, and cs1+cs2
         self.log_user()
 
-        repo1 = RepoModel().create_repo(repo_name='repo1', repo_type='hg',
-                                        description='diff-test',
-                                        owner=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
+        repo1 = fixture.create_repo('repo1', repo_type='hg',
+                                    repo_description='diff-test',
+                                    cur_user=TEST_USER_ADMIN_LOGIN)
         self.r1_id = repo1.repo_id
 
         #commit something !
@@ -196,7 +194,7 @@ class TestCompareController(TestController):
         response = self.app.get(url(controller='compare', action='index',
                                     repo_name=repo2.repo_name,
                                     org_ref_type="rev",
-                                    org_ref=cs1.short_id, # parent of cs2, in repo2
+                                    org_ref=cs1.short_id,  # parent of cs2, in repo2
                                     other_repo=repo1.repo_name,
                                     other_ref_type="rev",
                                     other_ref=cs4.short_id,
@@ -230,10 +228,9 @@ class TestCompareController(TestController):
 #
         #make repo1, and cs1+cs2
         self.log_user()
-        repo1 = RepoModel().create_repo(repo_name='repo1', repo_type='hg',
-                                        description='diff-test',
-                                        owner=TEST_USER_ADMIN_LOGIN)
-        Session().commit()
+        repo1 = fixture.create_repo('repo1', repo_type='hg',
+                                    repo_description='diff-test',
+                                    cur_user=TEST_USER_ADMIN_LOGIN)
         self.r1_id = repo1.repo_id
 
         #commit something !
@@ -278,9 +275,6 @@ class TestCompareController(TestController):
         response.mustcontain("""#C--826e8142e6ba">file1</a>""")
 
     def test_compare_cherry_pick_changeset_mixed_branches(self):
-        """
-
-        """
         pass
         #TODO write this tastecase
 
@@ -316,11 +310,10 @@ class TestCompareController(TestController):
     def test_org_repo_new_commits_after_forking_simple_diff(self):
         self.log_user()
 
-        repo1 = RepoModel().create_repo(repo_name='one', repo_type='hg',
-                                        description='diff-test',
-                                        owner=TEST_USER_ADMIN_LOGIN)
+        repo1 = fixture.create_repo('one', repo_type='hg',
+                                    repo_description='diff-test',
+                                    cur_user=TEST_USER_ADMIN_LOGIN)
 
-        Session().commit()
         self.r1_id = repo1.repo_id
         r1_name = repo1.repo_name
 
@@ -336,10 +329,11 @@ class TestCompareController(TestController):
         Session().commit()
         self.assertEqual(repo1.scm_instance.revisions, [cs0.raw_id])
         #fork the repo1
-        repo2 = RepoModel().create_repo(repo_name='one-fork', repo_type='hg',
-                                description='compare-test',
-                                clone_uri=repo1.repo_full_path,
-                                owner=TEST_USER_ADMIN_LOGIN, fork_of='one')
+        repo2 = fixture.create_repo('one-fork', repo_type='hg',
+                                    repo_description='diff-test',
+                                    cur_user=TEST_USER_ADMIN_LOGIN,
+                                    clone_uri=repo1.repo_full_path,
+                                    fork_of='one')
         Session().commit()
         self.assertEqual(repo2.scm_instance.revisions, [cs0.raw_id])
         self.r2_id = repo2.repo_id

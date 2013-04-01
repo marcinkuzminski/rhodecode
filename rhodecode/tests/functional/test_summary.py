@@ -1,9 +1,11 @@
 from rhodecode.tests import *
+from rhodecode.tests.fixture import Fixture
 from rhodecode.model.db import Repository
 from rhodecode.lib.utils import invalidate_cache
 from rhodecode.model.repo import RepoModel
-from rhodecode.tests.models.common import _make_repo
 from rhodecode.model.meta import Session
+
+fixture = Fixture()
 
 
 class TestSummaryController(TestController):
@@ -87,14 +89,13 @@ class TestSummaryController(TestController):
 
     def test_index_by_repo_having_id_path_in_name_hg(self):
         self.log_user()
-        _make_repo(name='repo_1')
-        Session().commit()
+        fixture.create_repo(name='repo_1')
         response = self.app.get(url(controller='summary',
                                     action='index',
                                     repo_name='repo_1'))
 
         try:
-            response.mustcontain("""repo_1""")
+            response.mustcontain("repo_1")
         finally:
             RepoModel().delete(Repository.get_by_repo_name('repo_1'))
             Session().commit()
