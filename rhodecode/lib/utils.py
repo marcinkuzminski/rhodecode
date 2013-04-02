@@ -171,7 +171,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         raise
 
 
-def get_repos(path, recursive=False, skip_removed_repos=True):
+def get_filesystem_repos(path, recursive=False, skip_removed_repos=True):
     """
     Scans given path for repos and return (name,(type,path)) tuple
 
@@ -213,9 +213,6 @@ def get_repos(path, recursive=False, skip_removed_repos=True):
                         yield inner_scm
 
     return _get_repos(path)
-
-#alias for backward compat
-get_filesystem_repos = get_repos
 
 
 def is_valid_repo(repo_name, base_path, scm=None):
