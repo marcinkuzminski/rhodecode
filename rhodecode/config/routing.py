@@ -104,13 +104,8 @@ def make_map(config):
         m.connect("formatted_repos", "/repos.{format}",
              action="index",
             conditions=dict(method=["GET"]))
-        m.connect("new_repo", "/repos/new",
-             action="new", conditions=dict(method=["GET"]))
-        #TODO: refactor the name
-        m.connect("admin_settings_create_repository", "/create_repository",
+        m.connect("new_repo", "/create_repository",
                   action="create_repository", conditions=dict(method=["GET"]))
-        m.connect("formatted_new_repo", "/repos/new.{format}",
-             action="new", conditions=dict(method=["GET"]))
         m.connect("/repos/{repo_name:.*?}",
              action="update", conditions=dict(method=["PUT"],
                                               function=check_repo))
