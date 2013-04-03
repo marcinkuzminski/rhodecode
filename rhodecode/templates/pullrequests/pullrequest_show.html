@@ -21,11 +21,11 @@ ${self.context_bar('showpullrequest')}
     </div>
 
     <h3 class="${'closed' if c.pull_request.is_closed() else ''}">
-	    <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />
-	    ${_('Title')}: ${c.pull_request.title}
-	    %if c.pull_request.is_closed():
-	        (${_('Closed')})
-	    %endif
+        <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />
+        ${_('Title')}: ${c.pull_request.title}
+        %if c.pull_request.is_closed():
+            (${_('Closed')})
+        %endif
     </h3>
 
     <div class="form">
@@ -38,9 +38,9 @@ ${self.context_bar('showpullrequest')}
             <div class="changeset-status-container" style="float:none;clear:both">
             %if c.current_changeset_status:
               <div title="${_('Pull request status')}" class="changeset-status-lbl">
-			    %if c.pull_request.is_closed():
-			        ${_('Closed')},
-			    %endif
+                %if c.pull_request.is_closed():
+                    ${_('Closed')},
+                %endif
                 ${h.changeset_status_lbl(c.current_changeset_status)}
               </div>
               <div class="changeset-status-ico" style="padding:1px 4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>

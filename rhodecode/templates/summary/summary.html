@@ -19,14 +19,14 @@
 <script>
 redirect_hash_branch = function(){
     var branch = window.location.hash.replace(/^#(.*)/, '$1');
-	if (branch){
-	    window.location = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}"
-	    	.replace('__BRANCH__',branch);
-	}
+    if (branch){
+        window.location = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}"
+            .replace('__BRANCH__',branch);
+    }
 }
 redirect_hash_branch();
 window.onhashchange = function() {
-	redirect_hash_branch();
+    redirect_hash_branch();
 };
 </script>
 
