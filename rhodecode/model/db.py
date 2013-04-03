@@ -1697,27 +1697,18 @@ class CacheInvalidation(Base, BaseModel):
             return inv_obj
 
     @classmethod
-    def set_invalidate(cls, key=None, repo_name=None):
+    def set_invalidate(cls, repo_name):
         """
-        Mark this Cache key for invalidation, either by key or whole
-        cache sets based on repo_name
-
-        :param key:
+        Mark all caches of a repo as invalid in the database.
         """
         invalidated_keys = []
-        if key:
-            assert not repo_name
-            cache_key = cls._get_cache_key(key)
-            inv_objs = Session().query(cls).filter(cls.cache_key == cache_key).all()
-        else:
-            assert repo_name
-            inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
+        inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
         try:
             for inv_obj in inv_objs:
+                log.debug('marking %s key for invalidation based on repo_name=%s'
+                          % (inv_obj, safe_str(repo_name)))
                 inv_obj.cache_active = False
-                log.debug('marking %s key for invalidation based on key=%s,repo_name=%s'
-                  % (inv_obj, key, safe_str(repo_name)))
                 invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()

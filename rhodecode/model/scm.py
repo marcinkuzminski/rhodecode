@@ -301,7 +301,7 @@ class ScmModel(BaseModel):
 
         :param repo_name: the repo for which caches should be marked invalid
         """
-        invalidated_keys = CacheInvalidation.set_invalidate(repo_name=repo_name)
+        invalidated_keys = CacheInvalidation.set_invalidate(repo_name)
         repo = Repository.get_by_repo_name(repo_name)
         if repo:
             repo.update_changeset_cache()
