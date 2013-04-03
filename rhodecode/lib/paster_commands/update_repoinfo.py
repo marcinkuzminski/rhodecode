@@ -71,8 +71,7 @@ class Command(BasePasterCommand):
 
         if self.options.invalidate_cache:
             for r in repo_list:
-                r.invalidate
-        Session().commit()
+                r.set_invalidate()
         log.info('Updated cache for %s repositories' % (len(repo_list)))
 
     def update_parser(self):
