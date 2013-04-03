@@ -220,9 +220,8 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('repository `%s` does not exist' % (repoid))
 
         try:
-            invalidated_keys = ScmModel().mark_for_invalidation(repo.repo_name)
-            return ('Cache for repository `%s` was invalidated: '
-                    'invalidated cache keys: %s' % (repoid, invalidated_keys))
+            ScmModel().mark_for_invalidation(repo.repo_name)
+            return ('Caches of repository `%s` was invalidated' % repoid)
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(

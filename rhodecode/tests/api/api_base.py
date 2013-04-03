@@ -268,9 +268,7 @@ class BaseTestApi(object):
                                   repoid=self.REPO)
         response = api_call(self, params)
 
-        expected = ("Cache for repository `%s` was invalidated: "
-                    "invalidated cache keys: %s" % (self.REPO,
-                                                    [unicode(self.REPO)]))
+        expected = ("Caches of repository `%s` was invalidated" % (self.REPO))
         self._compare_ok(id_, expected, given=response.body)
 
     @mock.patch.object(ScmModel, 'mark_for_invalidation', crash)

@@ -171,7 +171,7 @@ INPUT::
 OUTPUT::
 
     id : <id_given_in_input>
-    result : "Cache for repository `<reponame>` was invalidated: invalidated cache keys: <list_of_cache_keys>"
+    result : "Caches of repository `<reponame>`"
     error :  null
 
 lock

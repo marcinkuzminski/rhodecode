@@ -1857,7 +1857,6 @@ class CacheInvalidation(Base, BaseModel):
         """
         Mark all caches of a repo as invalid in the database.
         """
-        invalidated_keys = []
         inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
         try:
@@ -1865,13 +1864,11 @@ class CacheInvalidation(Base, BaseModel):
                 log.debug('marking %s key for invalidation based on repo_name=%s'
                           % (inv_obj, safe_str(repo_name)))
                 inv_obj.cache_active = False
-                invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             Session().rollback()
-        return invalidated_keys
 
     @classmethod
     def set_valid(cls, cache_key):
