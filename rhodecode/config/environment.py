@@ -101,6 +101,12 @@ def load_environment(global_conf, app_conf, initial=False):
     set_available_permissions(config)
     config['base_path'] = repos_path
     set_rhodecode_config(config)
+
+    instance_id = rhodecode.CONFIG.get('instance_id')
+    if instance_id == '*':
+        instance_id = '%s-%s' % (os.uname()[1], os.getpid())
+        rhodecode.CONFIG['instance_id'] = instance_id
+
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
 
