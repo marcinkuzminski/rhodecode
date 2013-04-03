@@ -107,9 +107,9 @@ rss_cut_off_limit = 256000
 rss_items_per_page = 10
 rss_include_diff = false
 
-## show hash options for changelog
-sha_len = 12
-sha_show_numeric_rev = true
+## options for showing and identifying changesets
+show_sha_length = 12
+show_revision_number = true
 
 
 ## alternative_gravatar_url allows you to use your own avatar server application
