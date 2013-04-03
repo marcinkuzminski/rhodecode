@@ -126,7 +126,7 @@ class SummaryController(BaseRepoController):
 
         kind = 'README'
         valid = CacheInvalidation.test_and_set_valid(repo_name, kind)
-		if not valid:
+        if not valid:
             region_invalidate(_get_readme_from_cache, None, repo_name, kind)
         return _get_readme_from_cache(repo_name, kind)
 

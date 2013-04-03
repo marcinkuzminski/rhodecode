@@ -264,6 +264,9 @@ class BaseTestApi(object):
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_invalidate_cache(self):
+        repo = RepoModel().get_by_repo_name(self.REPO)
+        repo.scm_instance_cached() # seed cache
+
         id_, params = _build_data(self.apikey, 'invalidate_cache',
                                   repoid=self.REPO)
         response = api_call(self, params)

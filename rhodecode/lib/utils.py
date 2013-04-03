@@ -472,11 +472,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         elif install_git_hook:
             if db_repo.repo_type == 'git':
                 ScmModel().install_git_hook(db_repo.scm_instance)
-        # during starting install all cache keys for all repositories in the
-        # system, this will register all repos and multiple instances
-        cache_key = CacheInvalidation._get_cache_key(name)
-        log.debug("Creating invalidation cache key for %s: %s", name, cache_key)
-        CacheInvalidation.test_and_set_valid(name, None)
 
     sa.commit()
     removed = []
