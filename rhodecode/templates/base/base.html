@@ -39,12 +39,12 @@
    <div id="footer-inner" class="title">
        <div>
            <p class="footer-link">
-                <a href="${h.url('bugtracker')}">${_('Submit a bug')}</a>
+               ${_('Server instance: %s') % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}
            </p>
            <p class="footer-link-right">
                <a href="${h.url('rhodecode_official')}">RhodeCode ${c.rhodecode_version}</a>
-               ${'(%s)' % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}
                &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski and others
+               &ndash; <a href="${h.url('bugtracker')}">${_('Report a bug')}</a>
            </p>
        </div>
    </div>
