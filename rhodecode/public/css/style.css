@@ -4567,6 +4567,14 @@ PULL REQUESTS
     font-weight: bold;
 }
 
+div.closed h4 a,
+h3.closed,
+#pullrequests_container li.closed a
+ {
+    color: #555;
+    background: #eee;
+}
+
 /****
   PERMS
 *****/

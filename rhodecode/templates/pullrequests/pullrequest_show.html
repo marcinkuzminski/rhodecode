@@ -19,15 +19,14 @@ ${self.context_bar('showpullrequest')}
     <div class="title">
         ${self.breadcrumbs()}
     </div>
-        %if c.pull_request.is_closed():
-        <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))} ${_('with status %s') % h.changeset_status_lbl(c.current_changeset_status)}</div>
-        %endif
-    <h3>
-    %if c.pull_request.is_closed():
-        <img src="${h.url('/images/icons/lock_go.png')}" title="${_('Closed')}"/>
-    %endif
-    <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />
-    ${_('Title')}: ${c.pull_request.title}</h3>
+
+    <h3 class="${'closed' if c.pull_request.is_closed() else ''}">
+	    <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />
+	    ${_('Title')}: ${c.pull_request.title}
+	    %if c.pull_request.is_closed():
+	        (${_('Closed')})
+	    %endif
+    </h3>
 
     <div class="form">
       <div id="summary" class="fields">
@@ -38,7 +37,12 @@ ${self.context_bar('showpullrequest')}
           <div class="input">
             <div class="changeset-status-container" style="float:none;clear:both">
             %if c.current_changeset_status:
-              <div title="${_('Pull request status')}" class="changeset-status-lbl">${h.changeset_status_lbl(c.current_changeset_status)}</div>
+              <div title="${_('Pull request status')}" class="changeset-status-lbl">
+			    %if c.pull_request.is_closed():
+			        ${_('Closed')},
+			    %endif
+                ${h.changeset_status_lbl(c.current_changeset_status)}
+              </div>
               <div class="changeset-status-ico" style="padding:1px 4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
             %endif
             </div>
