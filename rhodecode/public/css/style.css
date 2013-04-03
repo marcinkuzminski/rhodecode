@@ -1952,7 +1952,7 @@ a.metatag[tag="license"]:hover {
     background-color: #FDF784 !important;
 }
 #quick_login {
-    min-height: 80px;
+    min-height: 110px;
     padding: 4px;
     position: absolute;
     right: 0;
@@ -2014,10 +2014,11 @@ a.metatag[tag="license"]:hover {
 
 #quick_login .links_left {
     float: left;
-    margin-right: 120px;
+    margin-right: 130px;
+    width: 170px;
 }
 #quick_login .links_right {
-    width: 120px;
+
     position: absolute;
     right: 0;
 }

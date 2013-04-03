@@ -230,14 +230,13 @@
             ${h.end_form()}
         %else:
             <div class="links_left">
+                <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
                 <div class="full_name">${c.rhodecode_user.full_name_or_username}</div>
                 <div class="email">${c.rhodecode_user.email}</div>
-                <div class="big_gravatar"><img alt="gravatar" src="${h.gravatar_url(c.rhodecode_user.email,48)}" /></div>
-                ##<div class="notifications"><a href="${h.url('notifications')}">${_('Notifications')}</a></div>
-                <div class="unread"><a href="${h.url('notifications')}">${_('Unread notifications')}: ${c.unread_notifications}</a></div>
             </div>
             <div class="links_right">
             <ol class="links">
+              <li><a href="${h.url('notifications')}">${_('Notifications')}: ${c.unread_notifications}</a></li>
               <li>${h.link_to(_(u'My account'),h.url('admin_settings_my_account'))}</li>
               <li class="logout">${h.link_to(_(u'Log Out'),h.url('logout_home'))}</li>
             </ol>
