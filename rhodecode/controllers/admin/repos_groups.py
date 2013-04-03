@@ -142,7 +142,7 @@ class ReposGroupsController(BaseController):
                     owner=self.rhodecode_user.user_id
             )
             Session().commit()
-            h.flash(_('Created repos group %s') \
+            h.flash(_('Created repository group %s') \
                     % form_result['group_name'], category='success')
             #TODO: in futureaction_logger(, '', '', '', self.sa)
         except formencode.Invalid, errors:
@@ -154,7 +154,7 @@ class ReposGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('Error occurred during creation of repos group %s') \
+            h.flash(_('Error occurred during creation of repository group %s') \
                     % request.POST.get('group_name'), category='error')
         parent_group_id = form_result['group_parent_id']
         #TODO: maybe we should get back to the main view, not the admin one
@@ -217,7 +217,7 @@ class ReposGroupsController(BaseController):
 
             new_gr = ReposGroupModel().update(group_name, form_result)
             Session().commit()
-            h.flash(_('Updated repos group %s') \
+            h.flash(_('Updated repository group %s') \
                     % form_result['group_name'], category='success')
             # we now have new name !
             group_name = new_gr.group_name
@@ -232,7 +232,7 @@ class ReposGroupsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('Error occurred during update of repos group %s') \
+            h.flash(_('Error occurred during update of repository group %s') \
                     % request.POST.get('group_name'), category='error')
 
         return redirect(url('edit_repos_group', group_name=group_name))
@@ -263,7 +263,7 @@ class ReposGroupsController(BaseController):
         try:
             ReposGroupModel().delete(group_name)
             Session().commit()
-            h.flash(_('Removed repos group %s') % group_name,
+            h.flash(_('Removed repository group %s') % group_name,
                     category='success')
             #TODO: in future action_logger(, '', '', '', self.sa)
         except Exception:

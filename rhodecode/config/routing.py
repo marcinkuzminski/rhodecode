@@ -205,13 +205,13 @@ def make_map(config):
         m.connect("formatted_repos_group", "/repos_groups/{group_name:.*?}.{format}",
                   action="show", conditions=dict(method=["GET"],
                                                  function=check_group))
-        # ajax delete repos group perm user
+        # ajax delete repository group perm user
         m.connect('delete_repos_group_user_perm',
                   "/delete_repos_group_user_perm/{group_name:.*?}",
              action="delete_repos_group_user_perm",
              conditions=dict(method=["DELETE"], function=check_group))
 
-        # ajax delete repos group perm users_group
+        # ajax delete repository group perm users_group
         m.connect('delete_repos_group_users_group_perm',
                   "/delete_repos_group_users_group_perm/{group_name:.*?}",
                   action="delete_repos_group_users_group_perm",

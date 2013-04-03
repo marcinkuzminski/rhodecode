@@ -472,7 +472,7 @@ class UserModel(BaseModel):
             return user
 
         #==================================================================
-        # SET DEFAULTS GLOBAL, REPOS, REPOS GROUPS
+        # SET DEFAULTS GLOBAL, REPOS, REPOSITORY GROUPS
         #==================================================================
         uid = user.user_id
 

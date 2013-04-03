@@ -104,7 +104,7 @@ class ReposGroupModel(BaseModel):
             log.debug('skipping group rename')
             return
 
-        log.debug('renaming repos group from %s to %s' % (old, new))
+        log.debug('renaming repository group from %s to %s' % (old, new))
 
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)

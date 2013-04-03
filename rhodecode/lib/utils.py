@@ -240,7 +240,7 @@ def is_valid_repo(repo_name, base_path, scm=None):
 
 def is_valid_repos_group(repos_group_name, base_path, skip_path_check=False):
     """
-    Returns True if given path is a repos group False otherwise
+    Returns True if given path is a repository group False otherwise
 
     :param repo_name:
     :param base_path:

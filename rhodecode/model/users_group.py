@@ -88,7 +88,7 @@ class UserGroupModel(BaseModel):
 
     def delete(self, users_group, force=False):
         """
-        Deletes repos group, unless force flag is used
+        Deletes repository group, unless force flag is used
         raises exception if there are members in that group, else deletes
         group and users
 

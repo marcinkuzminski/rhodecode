@@ -33,7 +33,7 @@ fixes
 - fixes #762 user global activation flag is also respected for LDAP created
   accounts
 - use password obfuscate when clonning a remote repo with credentials inside
-- fixed issue with renaming repos group together with changing parents
+- fixed issue with renaming repository group together with changing parents
 - disallow cloning from file:/// URIs
 - handle all cases with multiple IP addresses in proxy headers
 
@@ -239,7 +239,7 @@ news
 fixes
 +++++
 
-- fixed visual permissions check on repos groups inside groups
+- fixed visual permissions check on repository groups inside groups
 - fixed issues with non-ascii search terms in search, and indexers
 - fixed parsing of page number in GET parameters
 - fixed issues with generating pull-request overview for repos with
@@ -406,7 +406,7 @@ news
 - created rcextensions module with additional mappings (ref #322) and
   post push/pull/create repo hooks callbacks
 - implemented #377 Users view for his own permissions on account page
-- #399 added inheritance of permissions for user group on repos groups
+- #399 added inheritance of permissions for user group on repository groups
 - #401 repository group is automatically pre-selected when adding repos
   inside a repository group
 - added alternative HTTP 403 response when client failed to authenticate. Helps
@@ -600,7 +600,7 @@ fixes
 news
 ++++
 
-- added option to manage repos group for non admin users
+- added option to manage repository group for non admin users
 - added following API methods for get_users, create_user, get_users_groups,
   get_users_group, create_users_group, add_user_to_users_groups, get_repos,
   get_repo, create_repo, add_user_to_repo
