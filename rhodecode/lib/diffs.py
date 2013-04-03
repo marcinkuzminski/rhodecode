@@ -63,7 +63,7 @@ def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
         filenode_old = FileNode(filenode_new.path, '', EmptyChangeset())
 
     if filenode_old.is_binary or filenode_new.is_binary:
-        diff = wrap_to_table(_('binary file'))
+        diff = wrap_to_table(_('Binary file'))
         stats = (0, 0)
         size = 0
 

@@ -80,21 +80,21 @@ def _ignorews_url(GET, fileid=None):
     fileid = str(fileid) if fileid else None
     params = defaultdict(list)
     _update_with_GET(params, GET)
-    lbl = _('show white space')
+    lbl = _('Show white space')
     ig_ws = get_ignore_ws(fileid, GET)
     ln_ctx = get_line_ctx(fileid, GET)
     # global option
     if fileid is None:
         if ig_ws is None:
             params['ignorews'] += [1]
-            lbl = _('ignore white space')
+            lbl = _('Ignore white space')
         ctx_key = 'context'
         ctx_val = ln_ctx
     # per file options
     else:
         if ig_ws is None:
             params[fileid] += ['WS:1']
-            lbl = _('ignore white space')
+            lbl = _('Ignore white space')
 
         ctx_key = fileid
         ctx_val = 'C:%s' % ln_ctx

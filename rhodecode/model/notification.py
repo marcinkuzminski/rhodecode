@@ -221,26 +221,24 @@ class NotificationModel(BaseModel):
         #alias
         _n = notification
         _map = {
-            _n.TYPE_CHANGESET_COMMENT: _('commented on changeset at %(when)s'),
-            _n.TYPE_MESSAGE: _('sent message at %(when)s'),
-            _n.TYPE_MENTION: _('mentioned you at %(when)s'),
-            _n.TYPE_REGISTRATION: _('registered in RhodeCode at %(when)s'),
-            _n.TYPE_PULL_REQUEST: _('opened new pull request at %(when)s'),
-            _n.TYPE_PULL_REQUEST_COMMENT: _('commented on pull request at %(when)s')
+            _n.TYPE_CHANGESET_COMMENT: _('%(user)s commented on changeset at %(when)s'),
+            _n.TYPE_MESSAGE: _('%(user)s sent message at %(when)s'),
+            _n.TYPE_MENTION: _('%(user)s mentioned you at %(when)s'),
+            _n.TYPE_REGISTRATION: _('%(user)s registered in RhodeCode at %(when)s'),
+            _n.TYPE_PULL_REQUEST: _('%(user)s opened new pull request at %(when)s'),
+            _n.TYPE_PULL_REQUEST_COMMENT: _('%(user)s commented on pull request at %(when)s')
         }
+        tmpl = _map[notification.type_]
 
-        # action == _map string
-        tmpl = "%(user)s %(action)s "
         if show_age:
             when = h.age(notification.created_on)
         else:
             when = h.fmt_date(notification.created_on)
 
-        data = dict(
+        return tmpl % dict(
             user=notification.created_by_user.username,
-            action=_map[notification.type_] % {'when': when},
-        )
-        return tmpl % data
+            when=when,
+            )
 
 
 class EmailNotificationModel(BaseModel):

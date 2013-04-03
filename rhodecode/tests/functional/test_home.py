@@ -22,8 +22,8 @@ class TestHomeController(TestController):
         response.mustcontain("""<img class="icon" title="Mercurial repository" """
                         """alt="Mercurial repository" src="/images/icons/hg"""
                         """icon.png"/>""")
-        response.mustcontain("""<img class="icon" title="public repository" """
-                        """alt="public repository" src="/images/icons/lock_"""
+        response.mustcontain("""<img class="icon" title="Public repository" """
+                        """alt="Public repository" src="/images/icons/lock_"""
                         """open.png"/>""")
 
         response.mustcontain(

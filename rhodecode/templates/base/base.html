@@ -63,21 +63,21 @@
 
 <%def name="admin_menu()">
   <ul class="admin_menu">
-      <li>${h.link_to(_('admin journal'),h.url('admin_home'),class_='journal ')}</li>
-      <li>${h.link_to(_('repositories'),h.url('repos'),class_='repos')}</li>
-      <li>${h.link_to(_('repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
-      <li>${h.link_to(_('users'),h.url('users'),class_='users')}</li>
-      <li>${h.link_to(_('user groups'),h.url('users_groups'),class_='groups')}</li>
-      <li>${h.link_to(_('permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
-      <li>${h.link_to(_('ldap'),h.url('ldap_home'),class_='ldap')}</li>
-      <li>${h.link_to(_('defaults'),h.url('defaults'),class_='defaults')}</li>
-      <li class="last">${h.link_to(_('settings'),h.url('admin_settings'),class_='settings')}</li>
+      <li>${h.link_to(_('Admin journal'),h.url('admin_home'),class_='journal ')}</li>
+      <li>${h.link_to(_('Repositories'),h.url('repos'),class_='repos')}</li>
+      <li>${h.link_to(_('Repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+      <li>${h.link_to(_('Users'),h.url('users'),class_='users')}</li>
+      <li>${h.link_to(_('User groups'),h.url('users_groups'),class_='groups')}</li>
+      <li>${h.link_to(_('Permissions'),h.url('edit_permission',id='default'),class_='permissions')}</li>
+      <li>${h.link_to(_('LDAP'),h.url('ldap_home'),class_='ldap')}</li>
+      <li>${h.link_to(_('Defaults'),h.url('defaults'),class_='defaults')}</li>
+      <li class="last">${h.link_to(_('Settings'),h.url('admin_settings'),class_='settings')}</li>
   </ul>
 </%def>
 
 <%def name="admin_menu_simple()">
   <ul>
-      <li>${h.link_to(_('repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+      <li>${h.link_to(_('Repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
   </ul>
 </%def>
 

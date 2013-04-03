@@ -2,12 +2,12 @@
 %if c.repo_changesets:
 <table class="table_disp">
     <tr>
-        <th class="left">${_('revision')}</th>
-        <th class="left">${_('commit message')}</th>
-        <th class="left">${_('age')}</th>
-        <th class="left">${_('author')}</th>
-        <th class="left">${_('branch')}</th>
-        <th class="left">${_('tags')}</th>
+        <th class="left">${_('Revision')}</th>
+        <th class="left">${_('Commit message')}</th>
+        <th class="left">${_('Age')}</th>
+        <th class="left">${_('Author')}</th>
+        <th class="left">${_('Branch')}</th>
+        <th class="left">${_('Tags')}</th>
     </tr>
 %for cnt,cs in enumerate(c.repo_changesets):
     <tr class="parity${cnt%2}">
@@ -75,7 +75,7 @@ ${c.repo_changesets.pager('$link_previous ~2~ $link_next')}
 <h4>${_('Add or upload files directly via RhodeCode')}</h4>
 <div style="margin: 20px 30px;">
   <div id="add_node_id" class="add_node">
-      <a class="ui-btn" href="${h.url('files_add_home',repo_name=c.repo_name,revision=0,f_path='')}">${_('add new file')}</a>
+      <a class="ui-btn" href="${h.url('files_add_home',repo_name=c.repo_name,revision=0,f_path='')}">${_('Add new file')}</a>
   </div>
 </div>
 %endif

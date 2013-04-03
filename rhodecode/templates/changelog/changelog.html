@@ -86,18 +86,18 @@ ${self.context_bar('changelog')}
                                     %endif
                                     %if h.is_hg(c.rhodecode_repo):
                                         %for book in cs.bookmarks:
-                                            <div class="bookbook" title="${'%s %s' % (_('bookmark'),book)}">
+                                            <div class="bookbook" title="${_('Bookmark %s') % book}">
                                                 ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
                                             </div>
                                         %endfor
                                     %endif
                                     %for tag in cs.tags:
-                                        <div class="tagtag"  title="${'%s %s' % (_('tag'),tag)}">
+                                        <div class="tagtag" title="${_('Tag %s') % tag}">
                                             ${h.link_to(h.shorter(tag),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
                                         </div>
                                     %endfor
                                     %if (not c.branch_name) and cs.branch:
-                                        <div class="branchtag" title="${'%s %s' % (_('branch'),cs.branch)}">
+                                        <div class="branchtag" title="${_('Branch %s' % cs.branch)}">
                                             ${h.link_to(h.shorter(cs.branch),h.url('changelog_home',repo_name=c.repo_name,branch=cs.branch))}
                                         </div>
                                     %endif

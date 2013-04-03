@@ -9,7 +9,7 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${_('repository groups')}
+    ${_('Repository groups')}
 </%def>
 
 <%def name="page_nav()">
@@ -39,7 +39,7 @@
                         <th class="left"><a href="#">${_('Group name')}</a></th>
                         <th class="left"><a href="#">${_('Description')}</a></th>
                         <th class="left"><a href="#">${_('Number of toplevel repositories')}</a></th>
-                        <th class="left" colspan="2">${_('action')}</th>
+                        <th class="left" colspan="2">${_('Action')}</th>
                     </tr>
                 </thead>
 
@@ -57,7 +57,7 @@
                       <td>${gr.group_description}</td>
                       <td><b>${gr_cn}</b></td>
                       <td>
-                       <a href="${h.url('edit_repos_group',group_name=gr.group_name)}" title="${_('edit')}">
+                       <a href="${h.url('edit_repos_group',group_name=gr.group_name)}" title="${_('Edit')}">
                          ${h.submit('edit_%s' % gr.group_name,_('edit'),class_="edit_icon action_button")}
                        </a>
                       </td>

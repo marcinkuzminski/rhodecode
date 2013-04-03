@@ -74,17 +74,17 @@
   // main table sorting
   var myColumnDefs = [
       {key:"gravatar",label:"",sortable:false,},
-      {key:"username",label:"${_('username')}",sortable:true,
+      {key:"username",label:"${_('Username')}",sortable:true,
           sortOptions: { sortFunction: usernamelinkSort }
       },
-      {key:"firstname",label:"${_('firstname')}",sortable:true,},
-      {key:"lastname",label:"${_('lastname')}",sortable:true,},
-      {key:"last_login",label:"${_('last login')}",sortable:true,
+      {key:"firstname",label:"${_('Firstname')}",sortable:true,},
+      {key:"lastname",label:"${_('Lastname')}",sortable:true,},
+      {key:"last_login",label:"${_('Last login')}",sortable:true,
           sortOptions: { sortFunction: lastLoginSort }},
-      {key:"active",label:"${_('active')}",sortable:true,},
-      {key:"admin",label:"${_('admin')}",sortable:true,},
-      {key:"ldap",label:"${_('ldap')}",sortable:true,},
-      {key:"action",label:"${_('action')}",sortable:false},
+      {key:"active",label:"${_('Active')}",sortable:true,},
+      {key:"admin",label:"${_('Admin')}",sortable:true,},
+      {key:"ldap",label:"${_('LDAP')}",sortable:true,},
+      {key:"action",label:"${_('Action')}",sortable:false},
   ];
 
   var myDataTable = new YAHOO.widget.DataTable("users_list_wrap", myColumnDefs, myDataSource,{

@@ -10,7 +10,7 @@
     &raquo;
     ${h.link_to(_('Users'),h.url('users'))}
     &raquo;
-    ${_('edit')} "${c.user.username}"
+    ${_('Edit %s') % c.user.username}
 </%def>
 
 <%def name="page_nav()">

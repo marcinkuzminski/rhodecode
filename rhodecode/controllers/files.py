@@ -85,7 +85,7 @@ class FilesController(BaseRepoController):
             url_ = url('files_add_home',
                        repo_name=c.repo_name,
                        revision=0, f_path='')
-            add_new = h.link_to(_('click here to add new file'), url_)
+            add_new = h.link_to(_('Click here to add new file'), url_)
             h.flash(h.literal(_('There are no files yet %s') % add_new),
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
@@ -369,7 +369,7 @@ class FilesController(BaseRepoController):
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
             if location.startswith('/') or location.startswith('.') or '../' in location:
-                h.flash(_('location must be relative path and must not '
+                h.flash(_('Location must be relative path and must not '
                           'contain .. in path'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
@@ -417,7 +417,7 @@ class FilesController(BaseRepoController):
         try:
             dbrepo = RepoModel().get_by_repo_name(repo_name)
             if not dbrepo.enable_downloads:
-                return _('downloads disabled')
+                return _('Downloads disabled')
 
             if c.rhodecode_repo.alias == 'hg':
                 # patch and reset hooks section of UI config to not run any

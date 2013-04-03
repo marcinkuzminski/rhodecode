@@ -8,7 +8,7 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${_('settings')}
+    ${_('Settings')}
 </%def>
 
 <%def name="page_nav()">
@@ -267,7 +267,7 @@
                     ${h.text('paths_root_path',size=30,readonly="readonly")}
                     <span id="path_unlock" class="tooltip"
                             title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
-                        ${_('unlock')}
+                        ${_('Unlock')}
                     </span>
                     <span class="help-block">${_('Location where repositories are stored. After changing this value a restart, and rescan is required')}</span>
                 </div>

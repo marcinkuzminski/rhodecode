@@ -8,7 +8,7 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${_('user groups')}
+    ${_('User groups')}
 </%def>
 
 <%def name="page_nav()">
@@ -31,10 +31,10 @@
     <div class="table">
         <table class="table_disp">
         <tr class="header">
-            <th class="left">${_('group name')}</th>
-            <th class="left">${_('members')}</th>
-            <th class="left">${_('active')}</th>
-            <th class="left">${_('action')}</th>
+            <th class="left">${_('Group name')}</th>
+            <th class="left">${_('Members')}</th>
+            <th class="left">${_('Active')}</th>
+            <th class="left">${_('Action')}</th>
         </tr>
             %for cnt,u_group in enumerate(c.users_groups_list):
                 <tr class="parity${cnt%2}">

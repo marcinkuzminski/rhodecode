@@ -229,7 +229,7 @@ class UserModel(BaseModel):
             self.sa.flush()
 
             # notification to admins
-            subject = _('new user registration')
+            subject = _('New user registration')
             body = ('New user registration\n'
                     '---------------------\n'
                     '- Username: %s\n'
@@ -331,7 +331,7 @@ class UserModel(BaseModel):
                                                        'reset_url': link})
                 log.debug('sending email')
                 run_task(tasks.send_email, user_email,
-                         _("password reset link"), body, body)
+                         _("Password reset link"), body, body)
                 log.info('send new password mail to %s' % user_email)
             else:
                 log.debug("password reset email %s not found" % user_email)

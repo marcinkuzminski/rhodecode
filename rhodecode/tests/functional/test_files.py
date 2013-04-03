@@ -57,7 +57,7 @@ class TestFilesController(TestController):
                                     revision='97e8b885c04894463c51898e14387d80c30ed1ee',
                                     f_path='/'))
 
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: git</a></span>""")
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">Branch: git</a></span>""")
 
     def test_index_paging(self):
         self.log_user()
@@ -89,7 +89,7 @@ Improved test to clone into uniq repository.
 removed extra unicode conversion in diff.</div>
 """)
 
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">Branch: default</a></span>""")
 
     def test_file_source_history(self):
         self.log_user()
@@ -156,7 +156,7 @@ removed extra unicode conversion in diff.</div>
                                     f_path='vcs/nodes.py',
                                     annotate=True))
 
-        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">branch: default</a></span>""")
+        response.mustcontain("""<span style="text-transform: uppercase;"><a href="#">Branch: default</a></span>""")
 
     def test_file_annotation_history(self):
         self.log_user()

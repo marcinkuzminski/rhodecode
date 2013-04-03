@@ -14,9 +14,9 @@
                 <div style="padding:5px 3px 3px 42px;">${f.description}</div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
-            <div class="follower_date">${_('forked')} -
+            <div class="follower_date">${_('Forked')} -
                 <span class="tooltip" title="${h.tooltip(h.fmt_date(f.created_on))}"> ${h.age(f.created_on)}</span>
-                <a title="${_('compare fork with %s' % c.repo_name)}"
+                <a title="${_('Compare fork with %s' % c.repo_name)}"
                     href="${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='default',other_repo=f.repo_name,other_ref_type='branch',other_ref='default')}"
                     class="ui-btn small">${_('Compare fork')}</a>
             </div>

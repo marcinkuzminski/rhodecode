@@ -25,7 +25,7 @@ class TestSummaryController(TestController):
         )
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
-            """title="public repository" alt="public """
+            """title="Public repository" alt="Public """
             """repository" src="/images/icons/lock_open.png"/>"""
         )
 
@@ -64,7 +64,7 @@ class TestSummaryController(TestController):
         )
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
-            """title="public repository" alt="public """
+            """title="Public repository" alt="Public """
             """repository" src="/images/icons/lock_open.png"/>"""
         )
 
@@ -84,7 +84,7 @@ class TestSummaryController(TestController):
                         """title="Mercurial repository" alt="Mercurial """
                         """repository" src="/images/icons/hgicon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
-                        """title="public repository" alt="public """
+                        """title="Public repository" alt="Public """
                         """repository" src="/images/icons/lock_open.png"/>""")
 
     def test_index_by_repo_having_id_path_in_name_hg(self):
@@ -112,7 +112,7 @@ class TestSummaryController(TestController):
                         """title="Git repository" alt="Git """
                         """repository" src="/images/icons/giticon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
-                        """title="public repository" alt="public """
+                        """title="Public repository" alt="Public """
                         """repository" src="/images/icons/lock_open.png"/>""")
 
     def _enable_stats(self):

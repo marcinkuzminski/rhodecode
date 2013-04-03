@@ -194,7 +194,7 @@ class ReposController(BaseRepoController):
 
         except Exception:
             log.error(traceback.format_exc())
-            msg = _('error occurred during creation of repository %s') \
+            msg = _('Error creating repository %s') \
                     % form_result.get('repo_name')
             h.flash(msg, category='error')
             if c.rhodecode_user.is_admin:
@@ -362,7 +362,7 @@ class ReposController(BaseRepoController):
         #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
         #              repo_name, self.ip_addr, self.sa)
         Session().commit()
-        h.flash(_('updated repository permissions'), category='success')
+        h.flash(_('Repository permissions updated'), category='success')
         return redirect(url('edit_repo', repo_name=repo_name))
 
     @HasRepoPermissionAllDecorator('repository.admin')
@@ -473,10 +473,10 @@ class ReposController(BaseRepoController):
             if repo.enable_locking:
                 if repo.locked[0]:
                     Repository.unlock(repo)
-                    action = _('unlocked')
+                    action = _('Unlocked')
                 else:
                     Repository.lock(repo, c.rhodecode_user.user_id)
-                    action = _('locked')
+                    action = _('Locked')
 
                 h.flash(_('Repository has been %s') % action,
                         category='success')

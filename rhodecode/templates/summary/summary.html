@@ -13,8 +13,8 @@
 </%def>
 
 <%def name="head_extra()">
-<link href="${h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('repo %s ATOM feed') % c.repo_name}" type="application/atom+xml" />
-<link href="${h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('repo %s RSS feed') % c.repo_name}" type="application/rss+xml" />
+<link href="${h.url('atom_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('%s ATOM feed') % c.repo_name}" type="application/atom+xml" />
+<link href="${h.url('rss_feed_home',repo_name=c.dbrepo.repo_name,api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('%s RSS feed') % c.repo_name}" type="application/rss+xml" />
 </%def>
 
 <%def name="main()">
@@ -59,9 +59,9 @@ ${self.context_bar('summary')}
 
                  ##PUBLIC/PRIVATE
                  %if c.dbrepo.private:
-                    <img style="margin-bottom:2px" class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+                    <img style="margin-bottom:2px" class="icon" title="${_('Private repository')}" alt="${_('Private repository')}" src="${h.url('/images/icons/lock.png')}"/>
                  %else:
-                    <img style="margin-bottom:2px" class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+                    <img style="margin-bottom:2px" class="icon" title="${_('Public repository')}" alt="${_('Public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
                  %endif
 
                   ##REPO NAME
@@ -70,7 +70,7 @@ ${self.context_bar('summary')}
                   ##FORK
                   %if c.dbrepo.fork:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}"><img class="icon" alt="${_('public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
+                    <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}"><img class="icon" alt="${_('Public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
                         ${_('Fork of')} ${c.dbrepo.fork.repo_name}
                     </a>
                     </div>
@@ -78,7 +78,7 @@ ${self.context_bar('summary')}
                   ##REMOTE
                   %if c.dbrepo.clone_uri:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}"><img class="icon" alt="${_('remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
+                    <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}"><img class="icon" alt="${_('Remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
                         ${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}
                     </a>
                     </div>
@@ -386,7 +386,7 @@ for (var i=0;i<data.length;i++){
         lnk = document.createElement('a');
 
         lnk.href='#';
-        lnk.innerHTML = "${_('show more')}";
+        lnk.innerHTML = "${_('Show more')}";
         lnk.id='code_stats_show_more';
         td.appendChild(lnk);
 
@@ -676,7 +676,6 @@ function SummaryPlot(from,to,dataset,overview_dataset) {
                 var added_suffix = " ${_('files added')} ";
                 var changed_suffix = " ${_('files changed')} ";
                 var removed_suffix = " ${_('files removed')} ";
-
 
                 if(nr_commits == 1){nr_commits_suffix = " ${_('commit')} ";}
                 if(added==1){added_suffix=" ${_('file added')} ";}

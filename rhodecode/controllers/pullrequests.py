@@ -215,7 +215,7 @@ class PullrequestsController(BaseRepoController):
             elif errors.error_dict.get('pullrequest_title'):
                 msg = _('Pull request requires a title with min. 3 chars')
             else:
-                msg = _('error during creation of pull request')
+                msg = _('Error creating pull request')
 
             h.flash(msg, 'error')
             return redirect(url('pullrequest_home', repo_name=repo_name))
@@ -423,7 +423,7 @@ class PullrequestsController(BaseRepoController):
 
         allowed_to_change_status = self._get_is_allowed_change_status(pull_request)
         if status and change_status and allowed_to_change_status:
-            _def = (_('status change -> %s')
+            _def = (_('Status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
             if close_pr:
                 _def = _('Closing with') + ' ' + _def

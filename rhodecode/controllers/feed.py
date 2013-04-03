@@ -88,9 +88,8 @@ class FeedController(BaseRepoController):
 
     def __get_desc(self, cs):
         desc_msg = []
-        desc_msg.append('%s %s %s<br/>' % (h.person(cs.author),
-                                           _('commited on'),
-                                           h.fmt_date(cs.date)))
+        desc_msg.append((_('%s committed on %s')
+                         % (h.person(cs.author), h.fmt_date(cs.date))) + '<br/>')
         #branches, tags, bookmarks
         if cs.branch:
             desc_msg.append('branch: %s<br/>' % cs.branch)
@@ -103,7 +102,7 @@ class FeedController(BaseRepoController):
         # rev link
         _url = url('changeset_home', repo_name=cs.repository.name,
                    revision=cs.raw_id, qualified=True)
-        desc_msg.append('changesest: <a href="%s">%s</a>' % (_url, cs.raw_id[:8]))
+        desc_msg.append('changeset: <a href="%s">%s</a>' % (_url, cs.raw_id[:8]))
 
         desc_msg.append('<pre>')
         desc_msg.append(cs.message)

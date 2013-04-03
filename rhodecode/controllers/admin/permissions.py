@@ -67,11 +67,11 @@ class PermissionsController(BaseController):
                                     ('group.admin', _('Admin'),)]
         self.register_choices = [
             ('hg.register.none',
-                _('disabled')),
+                _('Disabled')),
             ('hg.register.manual_activate',
-                _('allowed with manual account activation')),
+                _('Allowed with manual account activation')),
             ('hg.register.auto_activate',
-                _('allowed with automatic account activation')), ]
+                _('Allowed with automatic account activation')), ]
 
         self.create_choices = [('hg.create.none', _('Disabled')),
                                ('hg.create.repository', _('Enabled'))]

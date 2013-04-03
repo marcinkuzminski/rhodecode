@@ -8,7 +8,7 @@
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${_('permissions')}
+    ${_('Permissions')}
 </%def>
 
 <%def name="page_nav()">
@@ -47,7 +47,7 @@
                     <label for="overwrite_default_repo">
                     <span class="tooltip"
                     title="${h.tooltip(_('All default permissions on each repository will be reset to chosen permission, note that all custom default permission on repositories will be lost'))}">
-                    ${_('overwrite existing settings')}</span> </label>
+                    ${_('Overwrite existing settings')}</span> </label>
                 </div>
             </div>
             <div class="field">
@@ -60,7 +60,7 @@
                     <label for="overwrite_default_group">
                     <span class="tooltip"
                     title="${h.tooltip(_('All default permissions on each repository group will be reset to chosen permission, note that all custom default permission on repository groups will be lost'))}">
-                    ${_('overwrite existing settings')}</span> </label>
+                    ${_('Overwrite existing settings')}</span> </label>
 
                 </div>
             </div>
@@ -180,7 +180,7 @@
                     ${h.hidden('del_ip',ip.ip_id)}
                     ${h.hidden('default_user', 'True')}
                     ${h.submit('remove_',_('delete'),id="remove_ip_%s" % ip.ip_id,
-                    class_="delete_icon action_button", onclick="return  confirm('"+_('Confirm to delete this ip: %s') % ip.ip_addr+"');")}
+                    class_="delete_icon action_button", onclick="return confirm('"+_('Confirm to delete this ip: %s') % ip.ip_addr+"');")}
                 ${h.end_form()}
               </td>
           </tr>
