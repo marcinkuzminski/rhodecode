@@ -1,9 +1,9 @@
 from rhodecode.tests import *
 from rhodecode.tests.fixture import Fixture
 from rhodecode.model.db import Repository
-from rhodecode.lib.utils import invalidate_cache
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
+from rhodecode.model.scm import ScmModel
 
 fixture = Fixture()
 
@@ -32,7 +32,7 @@ class TestSummaryController(TestController):
         #codes stats
         self._enable_stats()
 
-        invalidate_cache('get_repo_cached_%s' % HG_REPO)
+        ScmModel().mark_for_invalidation(HG_REPO)
         response = self.app.get(url(controller='summary', action='index',
                                     repo_name=HG_REPO))
         response.mustcontain(

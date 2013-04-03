@@ -21,7 +21,7 @@ from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
     safe_str, safe_int
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
-from rhodecode.lib.utils import get_repo_slug, invalidate_cache
+from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 
 from rhodecode.model.db import Repository, RhodeCodeUi, User, RhodeCodeSetting
@@ -149,7 +149,7 @@ class BaseVCSController(object):
 
         :param repo_name: full repo name, also a cache key
         """
-        invalidate_cache('get_repo_cached_%s' % repo_name)
+        ScmModel().mark_for_invalidation(repo_name)
 
     def _check_permission(self, action, user, repo_name, ip_addr=None):
         """

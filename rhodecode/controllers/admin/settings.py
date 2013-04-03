@@ -41,8 +41,8 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasReposGroupPermissionAll, HasReposGroupPermissionAny, AuthUser
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
-from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_rhodecode_config, repo_name_slug, check_git_version
+from rhodecode.lib.utils import repo2db_mapper, set_rhodecode_config, \
+    check_git_version
 from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
     RhodeCodeSetting, PullRequest, PullRequestReviewers
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
@@ -55,7 +55,6 @@ from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.compat import json
-from webob.exc import HTTPForbidden
 log = logging.getLogger(__name__)
 
 
@@ -119,7 +118,7 @@ class SettingsController(BaseController):
             initial = ScmModel().repo_scan()
             log.debug('invalidating all repositories')
             for repo_name in initial.keys():
-                invalidate_cache('get_repo_cached_%s' % repo_name)
+                ScmModel().mark_for_invalidation(repo_name)
 
             added, removed = repo2db_mapper(initial, rm_obsolete)
             _repr = lambda l: ', '.join(map(safe_unicode, l)) or '-'

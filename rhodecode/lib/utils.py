@@ -356,19 +356,6 @@ def set_rhodecode_config(config):
         config[k] = v
 
 
-def invalidate_cache(cache_key, *args):
-    """
-    Puts cache invalidation task into db for
-    further global cache invalidation
-    """
-
-    from rhodecode.model.scm import ScmModel
-
-    if cache_key.startswith('get_repo_cached_'):
-        name = cache_key.split('get_repo_cached_')[-1]
-        ScmModel().mark_for_invalidation(name)
-
-
 def map_groups(path):
     """
     Given a full path to a repository, create all nested groups that this

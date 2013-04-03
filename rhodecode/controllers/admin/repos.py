@@ -40,7 +40,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, HasRepoPermissionAllDecorator, NotAnonymous,\
     HasPermissionAny, HasReposGroupPermissionAny, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
+from rhodecode.lib.utils import action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
@@ -262,7 +262,7 @@ class ReposController(BaseRepoController):
         try:
             form_result = _form.to_python(dict(request.POST))
             repo = repo_model.update(repo_name, **form_result)
-            invalidate_cache('get_repo_cached_%s' % repo_name)
+            ScmModel().mark_for_invalidation(repo_name)
             h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')
             changed_name = repo.repo_name
@@ -315,7 +315,7 @@ class ReposController(BaseRepoController):
             repo_model.delete(repo, forks=handle_forks)
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
                   repo_name, self.ip_addr, self.sa)
-            invalidate_cache('get_repo_cached_%s' % repo_name)
+            ScmModel().mark_for_invalidation(repo_name)
             h.flash(_('Deleted repository %s') % repo_name, category='success')
             Session().commit()
         except AttachedForksError:
