@@ -7,7 +7,11 @@
 
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    %if h.HasPermissionAny('hg.admin')():
+        ${h.link_to(_('Admin'),h.url('admin_home'))}
+    %else:
+        ${_('Admin')}
+    %endif
     &raquo;
     ${_('Repository groups')}
 </%def>
