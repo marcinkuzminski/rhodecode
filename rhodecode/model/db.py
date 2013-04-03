@@ -1163,10 +1163,6 @@ class Repository(Base, BaseModel):
     # SCM CACHE INSTANCE
     #==========================================================================
 
-    @property
-    def invalidate(self):
-        return CacheInvalidation.invalidate(self.repo_name)
-
     def set_invalidate(self):
         """
         Mark caches of this repo as invalid.
@@ -1184,27 +1180,16 @@ class Repository(Base, BaseModel):
             return self.scm_instance_cached()
         return self.__get_instance()
 
-    def scm_instance_cached(self, cache_map=None):
+    def scm_instance_cached(self, valid_cache_keys=None):
         @cache_region('long_term')
         def _c(repo_name):
             return self.__get_instance()
         rn = self.repo_name
 
-        if cache_map:
-            # get using prefilled cache_map
-            invalidate_repo = cache_map[self.repo_name]
-            if invalidate_repo:
-                invalidate_repo = (None if invalidate_repo.cache_active
-                                   else invalidate_repo)
-        else:
-            # get from invalidate
-            invalidate_repo = self.invalidate
-
-        if invalidate_repo is not None:
-            region_invalidate(_c, None, rn)
+        valid = CacheInvalidation.test_and_set_valid(rn, valid_cache_keys=valid_cache_keys)
+        if not valid:
             log.debug('Cache for %s invalidated, getting new object' % (rn))
-            # update our cache
-            CacheInvalidation.set_valid(invalidate_repo.cache_key)
+            region_invalidate(_c, None, rn)
         else:
             log.debug('Getting obj for %s from cache' % (rn))
         return _c(rn)
@@ -1825,34 +1810,6 @@ class CacheInvalidation(Base, BaseModel):
         return "%s%s" % (prefix, key)
 
     @classmethod
-    def invalidate(cls, key):
-        """
-        Returns Invalidation object if the local cache with the given key is invalid,
-        None otherwise.
-        """
-        repo_name = key
-        repo_name = remove_suffix(repo_name, '_README')
-        repo_name = remove_suffix(repo_name, '_RSS')
-        repo_name = remove_suffix(repo_name, '_ATOM')
-
-        cache_key = cls._get_cache_key(key)
-        inv_obj = Session().query(cls).filter(cls.cache_key == cache_key).scalar()
-        if not inv_obj:
-            try:
-                inv_obj = CacheInvalidation(cache_key, repo_name)
-                Session().add(inv_obj)
-                Session().commit()
-            except Exception:
-                log.error(traceback.format_exc())
-                Session().rollback()
-                return
-
-        if not inv_obj.cache_active:
-            # `cache_active = False` means that this cache
-            # no longer is valid
-            return inv_obj
-
-    @classmethod
     def set_invalidate(cls, repo_name):
         """
         Mark all caches of a repo as invalid in the database.
@@ -1871,46 +1828,43 @@ class CacheInvalidation(Base, BaseModel):
             Session().rollback()
 
     @classmethod
-    def set_valid(cls, cache_key):
+    def test_and_set_valid(cls, key, valid_cache_keys=None):
         """
-        Mark this cache key as active and currently cached
+        Mark this cache key as active and currently cached.
+        Return True if the existing cache registration still was valid.
+        Return False to indicate that it had been invalidated and caches should be refreshed.
         """
-        inv_obj = cls.query().filter(cls.cache_key == cache_key).scalar()
-        inv_obj.cache_active = True
-        Session().add(inv_obj)
-        Session().commit()
+        cache_key = cls._get_cache_key(key)
+
+        if valid_cache_keys and cache_key in valid_cache_keys:
+            return True
+
+        repo_name = key
+        repo_name = remove_suffix(repo_name, '_README')
+        repo_name = remove_suffix(repo_name, '_RSS')
+        repo_name = remove_suffix(repo_name, '_ATOM')
+
+        try:
+            inv_obj = cls.query().filter(cls.cache_key == cache_key).scalar()
+            if not inv_obj:
+                inv_obj = CacheInvalidation(cache_key, repo_name)
+            was_valid = inv_obj.cache_active
+            inv_obj.cache_active = True
+            Session().add(inv_obj)
+            Session().commit()
+            return was_valid
+        except Exception:
+            log.error(traceback.format_exc())
+            Session().rollback()
+            return False
 
     @classmethod
-    def get_cache_map(cls):
-
-        class cachemapdict(dict):
-
-            def __init__(self, *args, **kwargs):
-                self.fixkey = kwargs.pop('fixkey', False)
-                super(cachemapdict, self).__init__(*args, **kwargs)
-
-            def __getattr__(self, name):
-                cache_key = name
-                if self.fixkey:
-                    cache_key = cls._get_cache_key(name)
-                if cache_key in self.__dict__:
-                    return self.__dict__[cache_key]
-                else:
-                    return self[cache_key]
-
-            def __getitem__(self, name):
-                cache_key = name
-                if self.fixkey:
-                    cache_key = cls._get_cache_key(name)
-                try:
-                    return super(cachemapdict, self).__getitem__(cache_key)
-                except KeyError:
-                    return None
-
-        cache_map = cachemapdict(fixkey=True)
-        for obj in cls.query().all():
-            cache_map[obj.cache_key] = cachemapdict(obj.get_dict())
-        return cache_map
+    def get_valid_cache_keys(cls):
+        """
+        Return opaque object with information of which caches still are valid
+        and can be used without checking for invalidation.
+        """
+        return set(inv_obj.cache_key for inv_obj in cls.query().filter(cls.cache_active).all())
 
 
 class ChangesetComment(Base, BaseModel):

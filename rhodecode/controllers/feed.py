@@ -141,10 +141,9 @@ class FeedController(BaseRepoController):
             return feed.writeString('utf-8')
 
         key = repo_name + '_ATOM'
-        inv = CacheInvalidation.invalidate(key)
-        if inv is not None:
+        valid = CacheInvalidation.test_and_set_valid(key)
+        if not valid:
             region_invalidate(_get_feed_from_cache, None, key)
-            CacheInvalidation.set_valid(inv.cache_key)
         return _get_feed_from_cache(key)
 
     def rss(self, repo_name):
@@ -174,8 +173,7 @@ class FeedController(BaseRepoController):
             return feed.writeString('utf-8')
 
         key = repo_name + '_RSS'
-        inv = CacheInvalidation.invalidate(key)
-        if inv is not None:
+        valid = CacheInvalidation.test_and_set_valid(key)
+        if not valid:
             region_invalidate(_get_feed_from_cache, None, key)
-            CacheInvalidation.set_valid(inv.cache_key)
         return _get_feed_from_cache(key)

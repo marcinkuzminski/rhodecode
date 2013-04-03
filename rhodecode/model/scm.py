@@ -97,12 +97,12 @@ class CachedRepoList(object):
         return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
 
     def __iter__(self):
-        # pre-propagated cache_map to save executing select statements
+        # pre-propagated valid_cache_keys to save executing select statements
         # for each repo
-        cache_map = CacheInvalidation.get_cache_map()
+        valid_cache_keys = CacheInvalidation.get_valid_cache_keys()
 
         for dbr in self.db_repo_list:
-            scmr = dbr.scm_instance_cached(cache_map)
+            scmr = dbr.scm_instance_cached(valid_cache_keys)
             # check permission at this level
             if not HasRepoPermissionAny(
                 *self.perm_set)(dbr.repo_name, 'get repo check'):
