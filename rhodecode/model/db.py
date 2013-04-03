@@ -1186,7 +1186,7 @@ class Repository(Base, BaseModel):
             return self.__get_instance()
         rn = self.repo_name
 
-        valid = CacheInvalidation.test_and_set_valid(rn, valid_cache_keys=valid_cache_keys)
+        valid = CacheInvalidation.test_and_set_valid(rn, None, valid_cache_keys=valid_cache_keys)
         if not valid:
             log.debug('Cache for %s invalidated, getting new object' % (rn))
             region_invalidate(_c, None, rn)
@@ -1828,21 +1828,18 @@ class CacheInvalidation(Base, BaseModel):
             Session().rollback()
 
     @classmethod
-    def test_and_set_valid(cls, key, valid_cache_keys=None):
+    def test_and_set_valid(cls, repo_name, kind, valid_cache_keys=None):
         """
         Mark this cache key as active and currently cached.
         Return True if the existing cache registration still was valid.
         Return False to indicate that it had been invalidated and caches should be refreshed.
         """
+
+        key = (repo_name + '_' + kind) if kind else repo_name
         cache_key = cls._get_cache_key(key)
 
         if valid_cache_keys and cache_key in valid_cache_keys:
             return True
-
-        repo_name = key
-        repo_name = remove_suffix(repo_name, '_README')
-        repo_name = remove_suffix(repo_name, '_RSS')
-        repo_name = remove_suffix(repo_name, '_ATOM')
 
         try:
             inv_obj = cls.query().filter(cls.cache_key == cache_key).scalar()

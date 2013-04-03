@@ -92,7 +92,7 @@ class SummaryController(BaseRepoController):
         repo_name = db_repo.repo_name
 
         @cache_region('long_term')
-        def _get_readme_from_cache(key):
+        def _get_readme_from_cache(key, kind):
             readme_data = None
             readme_file = None
             log.debug('Looking for README file')
@@ -124,11 +124,11 @@ class SummaryController(BaseRepoController):
 
             return readme_data, readme_file
 
-        key = repo_name + '_README'
-        valid = CacheInvalidation.test_and_set_valid(key)
-        if not valid:
-            region_invalidate(_get_readme_from_cache, None, key)
-        return _get_readme_from_cache(key)
+        kind = 'README'
+        valid = CacheInvalidation.test_and_set_valid(repo_name, kind)
+		if not valid:
+            region_invalidate(_get_readme_from_cache, None, repo_name, kind)
+        return _get_readme_from_cache(repo_name, kind)
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
