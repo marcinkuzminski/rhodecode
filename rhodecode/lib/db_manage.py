@@ -37,7 +37,7 @@ from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, \
     RhodeCodeSetting, UserToPerm, DbMigrateVersion, RepoGroup, \
-    UserRepoGroupToPerm
+    UserRepoGroupToPerm, CacheInvalidation
 
 from sqlalchemy.engine import create_engine
 from rhodecode.model.repos_group import ReposGroupModel
@@ -149,6 +149,10 @@ class DbManage(object):
 
         if curr_version == __dbversion__:
             sys.exit('This database is already at the newest version')
+
+        # clear cache keys
+        log.info("Clearing cache keys now...")
+        CacheInvalidation.clear_cache()
 
         #======================================================================
         # UPGRADE STEPS

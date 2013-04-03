@@ -1806,6 +1806,15 @@ class CacheInvalidation(Base, BaseModel):
         return self._cache_key_partition()[2]
 
     @classmethod
+    def clear_cache(cls):
+        """
+        Delete all cache keys from database.
+        Should only be run when all instances are down and all entries thus stale.
+        """
+        cls.query().delete()
+        Session().commit()
+
+    @classmethod
     def _get_cache_key(cls, key):
         """
         Wrapper for generating a unique cache key for this instance and "key".
