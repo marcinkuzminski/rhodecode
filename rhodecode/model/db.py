@@ -1669,19 +1669,6 @@ class CacheInvalidation(Base, BaseModel):
         return "%s%s" % (prefix, key)
 
     @classmethod
-    def _get_or_create_inv_obj(cls, key, repo_name):
-        inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
-        if not inv_obj:
-            try:
-                inv_obj = CacheInvalidation(key, repo_name)
-                Session().add(inv_obj)
-                Session().commit()
-            except Exception:
-                log.error(traceback.format_exc())
-                Session().rollback()
-        return inv_obj
-
-    @classmethod
     def invalidate(cls, key):
         """
         Returns Invalidation object if the local cache with the given key is invalid,
@@ -1693,9 +1680,18 @@ class CacheInvalidation(Base, BaseModel):
         repo_name = remove_suffix(repo_name, '_ATOM')
 
         cache_key = cls._get_cache_key(key)
-        inv_obj = cls._get_or_create_inv_obj(cache_key, repo_name)
+        inv_obj = Session().query(cls).filter(cls.cache_key == cache_key).scalar()
+        if not inv_obj:
+            try:
+                inv_obj = CacheInvalidation(cache_key, repo_name)
+                Session().add(inv_obj)
+                Session().commit()
+            except Exception:
+                log.error(traceback.format_exc())
+                Session().rollback()
+                return
 
-        if inv_obj and not inv_obj.cache_active:
+        if not inv_obj.cache_active:
             # `cache_active = False` means that this cache
             # no longer is valid
             return inv_obj
