@@ -97,7 +97,7 @@ class TestAdminReposController(TestController):
         except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
-    def z(self):
+    def test_create_hg_in_group(self):
         self.log_user()
 
         ## create GROUP
