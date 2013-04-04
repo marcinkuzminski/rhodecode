@@ -192,9 +192,10 @@ ${self.context_bar('summary')}
               </a>
             </li>
 
-             %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
-             <li>
-                  ${h.link_to(_('Settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}
+            %if c.rhodecode_user.username != 'default':
+            <li class="repo_size">
+              <a href="#" class="repo-size" onclick="javascript:showRepoSize('repo_size_2','${c.dbrepo.repo_name}','${str(h.get_token())}')">${_('Repository Size')}</a>
+              <span id="repo_size_2"></span>
             </li>
             %endif
 
@@ -206,11 +207,10 @@ ${self.context_bar('summary')}
             %endif
             </li>
 
-            %if c.rhodecode_user.username != 'default':
-            <li class="repo_size">
-              <a href="#" class="repo-size" onclick="javascript:showRepoSize('repo_size_2','${c.dbrepo.repo_name}','${str(h.get_token())}')">${_('Repository Size')}</a>
-              <span id="repo_size_2"></span>
-            </li>
+            %if h.HasRepoPermissionAll('repository.admin')(c.repo_name):
+             <li>
+                  ${h.link_to(_('Settings'),h.url('edit_repo',repo_name=c.repo_name),class_='settings')}
+             </li>
             %endif
           </ul>
         </div>
