@@ -67,12 +67,11 @@ class DbManage(object):
         self.db_exists = False
         self.cli_args = cli_args
         self.init_db()
-        global ask_ok
 
-        if self.cli_args.get('force_ask'):
-            ask_ok = lambda *args, **kwargs: True
-        elif not self.cli_args.get('force_ask'):
-            ask_ok = lambda *args, **kwargs: False
+        force_ask = self.cli_args.get('force_ask')
+        if force_ask is not None:
+            global ask_ok
+            ask_ok = lambda *args, **kwargs: force_ask
 
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
