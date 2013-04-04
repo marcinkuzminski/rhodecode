@@ -165,6 +165,7 @@ setup(
     make-rcext=rhodecode.lib.paster_commands.make_rcextensions:Command
     repo-scan=rhodecode.lib.paster_commands.repo_scan:Command
     cache-keys=rhodecode.lib.paster_commands.cache_keys:Command
+    ishell=rhodecode.lib.paster_commands.ishell:Command
     make-index=rhodecode.lib.indexers:MakeIndex
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
