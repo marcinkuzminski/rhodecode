@@ -170,7 +170,7 @@ class ReposController(BaseRepoController):
                     category='success')
             else:
                 repo_url = h.link_to(form_result['repo_name'],
-                    h.url('summary_home', repo_name=form_result['repo_name']))
+                    h.url('summary_home', repo_name=form_result['repo_name_full']))
                 h.flash(h.literal(_('Created repository %s') % repo_url),
                         category='success')
 
