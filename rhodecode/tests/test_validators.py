@@ -220,12 +220,16 @@ class TestReposGroups(unittest.TestCase):
         self.assertRaises(formencode.Invalid, validator.to_python, 'err')
 
     def test_LdapLibValidator(self):
-        validator = v.LdapLibValidator()
-        self.assertRaises(v.LdapImportError, validator.to_python, 'err')
+        if ldap_lib_installed:
+            validator = v.LdapLibValidator()
+            self.assertEqual("DN", validator.to_python('DN'))
+        else:
+            validator = v.LdapLibValidator()
+            self.assertRaises(v.LdapImportError, validator.to_python, 'err')
 
     def test_AttrLoginValidator(self):
         validator = v.AttrLoginValidator()
-        self.assertRaises(formencode.Invalid, validator.to_python, 123)
+        self.assertEqual('DN_attr', validator.to_python('DN_attr'))
 
     def test_NotReviewedRevisions(self):
         repo_id = Repository.get_by_repo_name(HG_REPO).repo_id

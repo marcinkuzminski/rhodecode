@@ -341,10 +341,7 @@ def LdapSettingsForm(tls_reqcert_choices, search_scope_choices,
         ldap_base_dn = v.UnicodeString(strip=True,)
         ldap_filter = v.UnicodeString(strip=True,)
         ldap_search_scope = v.OneOf(search_scope_choices)
-        ldap_attr_login = All(
-            v.AttrLoginValidator(),
-            v.UnicodeString(strip=True,)
-        )
+        ldap_attr_login = v.AttrLoginValidator()(not_empty=True)
         ldap_attr_firstname = v.UnicodeString(strip=True,)
         ldap_attr_lastname = v.UnicodeString(strip=True,)
         ldap_attr_email = v.UnicodeString(strip=True,)

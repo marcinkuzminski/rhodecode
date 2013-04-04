@@ -52,7 +52,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     'parameterized', 'environ', 'url', 'get_new_dir', 'TestController',
-    'SkipTest',
+    'SkipTest', 'ldap_lib_installed',
     'TESTS_TMP_PATH', 'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO',
     'HG_FORK', 'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS',
     'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',
@@ -116,6 +116,15 @@ TEST_REPO_PREFIX = 'vcs-test'
 # comment out to get some other repos from bb or github
 GIT_REMOTE_REPO = jn(TESTS_TMP_PATH, GIT_REPO)
 HG_REMOTE_REPO = jn(TESTS_TMP_PATH, HG_REPO)
+
+#skip ldap tests if LDAP lib is not installed
+ldap_lib_installed = False
+try:
+    import ldap
+    ldap_lib_installed = True
+except ImportError:
+    # means that python-ldap is not installed
+    pass
 
 
 def get_new_dir(title):

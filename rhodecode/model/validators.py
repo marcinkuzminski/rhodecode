@@ -723,13 +723,7 @@ def AttrLoginValidator():
                     'this is the name of the attribute that is equivalent '
                     'to "username"')
         }
-
-        def validate_python(self, value, state):
-            if not value or not isinstance(value, (str, unicode)):
-                msg = M(self, 'invalid_cn', state)
-                raise formencode.Invalid(msg, value, state,
-                    error_dict=dict(ldap_attr_login=msg)
-                )
+        messages['empty'] = messages['invalid_cn']
 
     return _validator
 
