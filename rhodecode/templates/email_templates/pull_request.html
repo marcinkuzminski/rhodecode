@@ -1,18 +1,19 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="main.html"/>
 
-${_('User %s opened pull request for repository %s and wants you to review changes.') % (('<b>%s</b>' % pr_user_created),pr_repo_url) |n}
-<div>${_('View this pull request here')}: ${pr_url}</div>
-<div>${_('title')}: ${pr_title}</div>
-<div>${_('description')}:</div>
-<p>
-${body}
-</p>
+<p>${_('URL')}: <a href="${pr_url}">${pr_url}</a></p>
 
-<div>${_('revisions for reviewing')}</div>
+<h4>${_('%s opened a pull request for repository %s and wants you to review changes.') % (pr_user_created,pr_repo_url) |n}</h4>
+
+<p>${_('Title')}: <b>${pr_title}</b></p>
+<p>${_('Description')}:</p>
+<p style="white-space: pre-wrap;">${body}</p>
+
+<p>${_('Changesets')}:</p>
 <p style="white-space: pre-wrap;">
 %for r,r_msg in pr_revisions:
 <b>${h.short_id(r)}</b>:
 ${h.shorter(r_msg, 256)}
+
 %endfor
 </p>
