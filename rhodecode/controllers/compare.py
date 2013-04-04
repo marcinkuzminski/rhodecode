@@ -161,7 +161,10 @@ class CompareController(BaseRepoController):
 
         diff_limit = self.cut_off_limit if not c.fulldiff else None
 
-        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
+        log.debug('running diff between %s@%s and %s@%s'
+                  % (org_repo.scm_instance.path, org_ref,
+                     other_repo.scm_instance.path, other_ref))
+        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]), rev2=safe_str(other_ref[1]))
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)
