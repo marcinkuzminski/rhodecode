@@ -1656,10 +1656,7 @@ class CacheInvalidation(Base, BaseModel):
         Guess prefix that might have been used in _get_cache_key to generate self.cache_key .
         Only used for informational purposes in repo_edit.html .
         """
-        _split = self.cache_key.split(self.cache_args, 1)
-        if len(_split) == 2:
-            return _split[0]
-        return ''
+        return self.cache_key.split(self.cache_args, 1)[0]
 
     @classmethod
     def _get_cache_key(cls, key):
