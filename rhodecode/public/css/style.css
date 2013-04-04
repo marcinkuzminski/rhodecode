@@ -4582,7 +4582,7 @@ div.pr-title {
 div.pr {
     border-bottom: 1px solid #DDD;
     margin: 0px 20px;
-    padding: 10px 0px;
+    padding: 10px 4px;
 }
 div.pr-closed {
     background-color: rgba(245,245,245,0.5);

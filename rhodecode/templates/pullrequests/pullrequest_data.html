@@ -29,5 +29,10 @@ YUE.onDOMReady(function(){
     },'.pager_link');
 });
 </script>
-${c.pullrequests_pager.pager('$link_previous ~2~ $link_next')}
+<div class="notification-paginator">
+  <div class="pagination-wh pagination-left">
+  ${c.pullrequests_pager.pager('$link_previous ~2~ $link_next')}
+  </div>
+</div>
+
 </div>
