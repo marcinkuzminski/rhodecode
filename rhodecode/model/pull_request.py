@@ -211,7 +211,8 @@ class PullRequestModel(BaseModel):
 
                 ancestors = scmutil.revrange(hgrepo,
                      ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
-                if len(ancestors) == 1:
+                if ancestors:
+                    # pick arbitrary ancestor - but there is usually only one
                     ancestor = hgrepo[ancestors[0]].hex()
             else:
                 # TODO: have both + and - changesets
