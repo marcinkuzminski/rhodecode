@@ -32,6 +32,22 @@ from rhodecode.model.meta import Session
 log = logging.getLogger(__name__)
 
 
+def _filter_proxy(ip):
+    """
+    HEADERS can have mutliple ips inside the left-most being the original
+    client, and each successive proxy that passed the request adding the IP
+    address where it received the request from.
+
+    :param ip:
+    """
+    if ',' in ip:
+        _ips = ip.split(',')
+        _first_ip = _ips[0].strip()
+        log.debug('Got multiple IPs %s, using %s' % (','.join(_ips), _first_ip))
+        return _first_ip
+    return ip
+
+
 def _get_ip_addr(environ):
     proxy_key = 'HTTP_X_REAL_IP'
     proxy_key2 = 'HTTP_X_FORWARDED_FOR'
@@ -39,22 +55,14 @@ def _get_ip_addr(environ):
 
     ip = environ.get(proxy_key)
     if ip:
-        return ip
+        return _filter_proxy(ip)
 
     ip = environ.get(proxy_key2)
     if ip:
-        return ip
+        return _filter_proxy(ip)
 
     ip = environ.get(def_key, '0.0.0.0')
-
-    # HEADERS can have mutliple ips inside
-    # the left-most being the original client, and each successive proxy
-    # that passed the request adding the IP address where it received the
-    # request from.
-    if ',' in ip:
-        ip = ip.split(',')[0].strip()
-
-    return ip
+    return _filter_proxy(ip)
 
 
 def _get_access_path(environ):
