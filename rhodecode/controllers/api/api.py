@@ -221,7 +221,6 @@ class ApiController(JSONRPCController):
 
         try:
             invalidated_keys = ScmModel().mark_for_invalidation(repo.repo_name)
-            Session().commit()
             return ('Cache for repository `%s` was invalidated: '
                     'invalidated cache keys: %s' % (repoid, invalidated_keys))
         except Exception:
