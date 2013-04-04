@@ -97,7 +97,7 @@ class TestAdminReposController(TestController):
         except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
-    def test_create_hg_in_group(self):
+    def z(self):
         self.log_user()
 
         ## create GROUP
@@ -118,7 +118,7 @@ class TestAdminReposController(TestController):
 
         self.checkSessionFlash(response,
                                'Created repository <a href="/%s">%s</a>'
-                               % (repo_name, repo_name))
+                               % (repo_name_full, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_full).one()
