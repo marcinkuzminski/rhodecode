@@ -38,6 +38,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
     NotAnonymous
+from rhodecode.lib.helpers import Page
 from rhodecode.lib import helpers as h
 from rhodecode.lib import diffs
 from rhodecode.lib.utils import action_logger, jsonify
@@ -53,6 +54,7 @@ from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
 from mercurial import scmutil
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -140,6 +142,15 @@ class PullrequestsController(BaseRepoController):
     def show_all(self, repo_name):
         c.pull_requests = PullRequestModel().get_all(repo_name)
         c.repo_name = repo_name
+        p = safe_int(request.params.get('page', 1), 1)
+
+        c.pullrequests_pager = Page(c.pull_requests, page=p, items_per_page=10)
+
+        c.pullrequest_data = render('/pullrequests/pullrequest_data.html')
+
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return c.pullrequest_data
+
         return render('/pullrequests/pullrequest_show_all.html')
 
     @NotAnonymous()
@@ -201,6 +212,7 @@ class PullrequestsController(BaseRepoController):
 
         c.default_other_repo_info = other_repos_info[c.default_other_repo]
         c.other_repos_info = json.dumps(other_repos_info)
+
         return render('/pullrequests/pullrequest.html')
 
     @NotAnonymous()
