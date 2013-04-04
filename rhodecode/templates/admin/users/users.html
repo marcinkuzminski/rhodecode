@@ -6,7 +6,7 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; <span id="user_count">0</span> ${_('users')}
+    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value=""/> ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; <span id="user_count">0</span> ${_('users')}
 </%def>
 
 <%def name="page_nav()">
@@ -134,9 +134,6 @@
       });
 
   };
-  YUE.on('q_filter','click',function(){
-      YUD.get('q_filter').value = '';
-   });
 
   YUE.on('q_filter','keyup',function (e) {
       clearTimeout(filterTimeout);

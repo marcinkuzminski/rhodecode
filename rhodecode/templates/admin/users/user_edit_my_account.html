@@ -28,7 +28,7 @@
     <!-- box / title -->
     <div class="title">
         <h5>
-        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
+        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value="" style="display: none"/>
         </h5>
          <ul class="links" style="color:#DADADA">
            <li>
@@ -268,7 +268,6 @@ function table_renderer(data){
       };
       YUE.on('q_filter','click',function(){
           if(!YUD.hasClass('q_filter', 'loaded')){
-              YUD.get('q_filter').value = '';
               //TODO: load here full list later to do search within groups
               YUD.addClass('q_filter', 'loaded');
           }

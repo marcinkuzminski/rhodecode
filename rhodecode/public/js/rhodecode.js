@@ -699,10 +699,6 @@ var q_filter = function(target,nodes,display_element){
 	var q_filter_field = YUD.get(target);
 	var F = YAHOO.namespace(target);
 
-	YUE.on(q_filter_field,'click',function(){
-	   q_filter_field.value = '';
-	});
-
 	YUE.on(q_filter_field,'keyup',function(e){
 	    clearTimeout(F.filterTimeout); 
 	    F.filterTimeout = setTimeout(F.updateFilter,600); 
