@@ -2521,6 +2521,16 @@ h3.files_location {
     text-align: left;
 }
 
+#graph_content .container .checkbox {
+    width: 12px;
+    font-size: 0.85em;
+}
+
+#graph_content .container .status {
+    width: 14px;
+    font-size: 0.85em;
+}
+
 #graph_content .container .author {
    width: 105px;
 }
@@ -2549,10 +2559,6 @@ h3.files_location {
 
 #graph_content .log-container {
     position: relative;
-}
-
-#graph_content #changesets td.checkbox {
-    width: 20px;
 }
 
 #graph_content .container .changeset_range {
