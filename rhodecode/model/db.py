@@ -1653,12 +1653,27 @@ class CacheInvalidation(Base, BaseModel):
         return u"<%s('%s:%s[%s]')>" % (self.__class__.__name__,
                             self.cache_id, self.cache_key, self.cache_active)
 
+    def _cache_key_partition(self):
+        prefix, repo_name, suffix = self.cache_key.partition(self.cache_args)
+        return prefix, repo_name, suffix
+
     def get_prefix(self):
         """
-        Guess prefix that might have been used in _get_cache_key to generate self.cache_key .
-        Only used for informational purposes in repo_edit.html .
+        get prefix that might have been used in _get_cache_key to
+        generate self.cache_key. Only used for informational purposes
+        in repo_edit.html.
         """
-        return self.cache_key.split(self.cache_args, 1)[0]
+        # prefix, repo_name, suffix
+        return self._cache_key_partition()[0]
+
+    def get_suffix(self):
+        """
+        get suffix that might have been used in _get_cache_key to
+        generate self.cache_key. Only used for informational purposes
+        in repo_edit.html.
+        """
+        # prefix, repo_name, suffix
+        return self._cache_key_partition()[2]
 
     @classmethod
     def _get_cache_key(cls, key):
