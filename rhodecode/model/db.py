@@ -1167,7 +1167,6 @@ class Repository(Base, BaseModel):
         def _c(repo_name):
             return self.__get_instance()
         rn = self.repo_name
-        log.debug('Getting cached instance of repo')
 
         if cache_map:
             # get using prefilled cache_map
@@ -1181,8 +1180,11 @@ class Repository(Base, BaseModel):
 
         if invalidate_repo is not None:
             region_invalidate(_c, None, rn)
+            log.debug('Cache for %s invalidated, getting new object' % (rn))
             # update our cache
             CacheInvalidation.set_valid(invalidate_repo.cache_key)
+        else:
+            log.debug('Getting obj for %s from cache' % (rn))
         return _c(rn)
 
     def __get_instance(self):
@@ -1648,8 +1650,8 @@ class CacheInvalidation(Base, BaseModel):
         self.cache_active = False
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__,
-                                  self.cache_id, self.cache_key)
+        return u"<%s('%s:%s[%s]')>" % (self.__class__.__name__,
+                            self.cache_id, self.cache_key, self.cache_active)
 
     def get_prefix(self):
         """
