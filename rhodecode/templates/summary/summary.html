@@ -148,7 +148,7 @@ ${self.context_bar('summary')}
                 %else:
                    ${_('Statistics are disabled for this repository')}
                    %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
+                        ${h.link_to(_('Enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                    %endif
                 %endif
               </div>
@@ -164,7 +164,7 @@ ${self.context_bar('summary')}
                 %elif not c.enable_downloads:
                   ${_('Downloads are disabled for this repository')}
                     %if h.HasPermissionAll('hg.admin')('enable downloads on from summary'):
-                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
+                        ${h.link_to(_('Enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                     %endif
                 %else:
                     ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}

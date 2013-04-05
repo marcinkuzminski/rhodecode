@@ -1166,7 +1166,7 @@ class Repository(Base, BaseModel):
         """
         Mark caches of this repo as invalid.
         """
-        CacheInvalidation.set_invalidate(repo_name=self.repo_name)
+        CacheInvalidation.set_invalidate(self.repo_name)
 
     def scm_instance_no_cache(self):
         return self.__get_instance()

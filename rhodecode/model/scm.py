@@ -105,8 +105,7 @@ class CachedRepoList(object):
             scmr = dbr.scm_instance_cached(cache_map)
             # check permission at this level
             if not HasRepoPermissionAny(
-                *self.perm_set
-            )(dbr.repo_name, 'get repo check'):
+                *self.perm_set)(dbr.repo_name, 'get repo check'):
                 continue
 
             try:
@@ -151,8 +150,7 @@ class SimpleCachedRepoList(CachedRepoList):
         for dbr in self.db_repo_list:
             # check permission at this level
             if not HasRepoPermissionAny(
-                *self.perm_set
-            )(dbr.repo_name, 'get repo check'):
+                *self.perm_set)(dbr.repo_name, 'get repo check'):
                 continue
 
             tmp_d = {}

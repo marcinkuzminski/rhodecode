@@ -247,6 +247,7 @@ ul#context-actions {
     border-left: 1px solid rgba(255,255,255,0.1);
     padding: 0;
 }
+
 #header #header-inner #quick li:last-child,
 #content #context-pages li:last-child {
     border-right: none;

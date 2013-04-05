@@ -275,7 +275,7 @@ ${self.context_bar('options')}
            ${h.submit('set_unlock' ,_('Unlock locked repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to unlock repository')+"');")}
            ${'Locked by %s on %s' % (h.person_by_id(c.repo_info.locked[0]),h.fmt_date(h.time_to_datetime(c.repo_info.locked[1])))}
           %else:
-            ${h.submit('set_lock',_('lock repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to lock repository')+"');")}
+            ${h.submit('set_lock',_('Lock repo'),class_="ui-btn",onclick="return confirm('"+_('Confirm to lock repository')+"');")}
             ${_('Repository is not locked')}
           %endif
        </div>
@@ -293,7 +293,7 @@ ${self.context_bar('options')}
     <div class="form">
        <div class="fields">
            ${h.select('id_fork_of','',c.repos_list,class_="medium")}
-           ${h.submit('set_as_fork_%s' % c.repo_info.repo_name,_('set'),class_="ui-btn",)}
+           ${h.submit('set_as_fork_%s' % c.repo_info.repo_name,_('Set'),class_="ui-btn",)}
        </div>
            <div class="field" style="border:none;color:#888">
            <ul>
