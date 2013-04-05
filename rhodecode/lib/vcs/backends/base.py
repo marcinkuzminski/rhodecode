@@ -80,6 +80,10 @@ class BaseRepository(object):
     def __len__(self):
         return self.count()
 
+    def __eq__(self, other):
+        same_instance = isinstance(other, self.__class__)
+        return same_instance and getattr(other, 'path', None) == self.path
+
     @LazyProperty
     def alias(self):
         for k, v in settings.BACKENDS.items():

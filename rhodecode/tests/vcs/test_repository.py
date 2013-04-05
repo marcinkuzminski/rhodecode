@@ -31,6 +31,19 @@ class RepositoryBaseTest(BackendTestMixin):
         self.assertEqual(self.repo.get_user_email(TEST_USER_CONFIG_FILE),
             'foo.bar@example.com')
 
+    def test_repo_equality(self):
+        self.assertTrue(self.repo == self.repo)
+
+    def test_repo_equality_broken_object(self):
+        import copy
+        _repo = copy.copy(self.repo)
+        delattr(_repo, 'path')
+        self.assertTrue(self.repo != _repo)
+
+    def test_repo_equality_other_object(self):
+        class dummy(object):
+            path = self.repo.path
+        self.assertTrue(self.repo != dummy())
 
 
 class RepositoryGetDiffTest(BackendTestMixin):
