@@ -466,7 +466,7 @@ class RepoModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
-    def delete(self, repo, forks=None):
+    def delete(self, repo, forks=None, fs_remove=True):
         """
         Delete given repository, forks parameter defines what do do with
         attached forks. Throws AttachedForksError if deleted repo has attached
@@ -474,6 +474,7 @@ class RepoModel(BaseModel):
 
         :param repo:
         :param forks: str 'delete' or 'detach'
+        :param fs_remove: remove(archive) repo from filesystem
         """
         repo = self._get_repo(repo)
         if repo:
@@ -491,7 +492,10 @@ class RepoModel(BaseModel):
             owner = repo.user
             try:
                 self.sa.delete(repo)
-                self.__delete_repo(repo)
+                if fs_remove:
+                    self.__delete_repo(repo)
+                else:
+                    log.debug('skipping removal from filesystem')
                 log_delete_repository(old_repo_dict,
                                       deleted_by=owner.username)
             except Exception:

@@ -467,9 +467,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 log.debug("Removing non-existing repository found in db `%s`" %
                           repo.repo_name)
                 try:
-                    sa.delete(repo)
-                    sa.commit()
                     removed.append(repo.repo_name)
+                    RepoModel(sa).delete(repo, forks='detach', fs_remove=False)
+                    sa.commit()
                 except Exception:
                     #don't hold further removals on error
                     log.error(traceback.format_exc())
