@@ -1154,7 +1154,7 @@ class Repository(Base, BaseModel):
     def scm_instance_no_cache(self):
         return self.__get_instance()
 
-    @LazyProperty
+    @property
     def scm_instance(self):
         import rhodecode
         full_cache = str2bool(rhodecode.CONFIG.get('vcs_full_cache'))
