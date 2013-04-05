@@ -8,17 +8,17 @@ python setup.py extract_messages <- get messages from project
 python setup.py init_catalog -l pl <- create a language directory for <pl> lang
 #edit the new po file with poedit or any other editor
 msgfmt -f -c <updated_file.po> <- check format and errors
-python setup.py compile_catalog <- create translation files
+python setup.py compile_catalog -l pl <- create translation files
 
 ############# 
 # to update #
 #############
 
 python setup.py extract_messages <- get messages from project
-python setup.py update_catalog <- to update the translations
+python setup.py update_catalog -l pl<- to update the translations
 #edit the new updated po file with poedit
 msgfmt -f -c <updated_file.po> <- check format and errors
-python setup.py compile_catalog <- create translation files
+python setup.py compile_catalog -l pl <- create translation files
 
 
 ###################
