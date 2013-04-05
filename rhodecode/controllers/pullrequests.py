@@ -74,10 +74,14 @@ class PullrequestsController(BaseRepoController):
     def _get_repo_refs(self, repo, rev=None, branch_rev=None):
         """return a structure with repo's interesting changesets, suitable for
         the selectors in pullrequest.html"""
-
         # list named branches that has been merged to this named branch - it should probably merge back
         peers = []
+
+        if rev:
+            rev = safe_str(rev)
+
         if branch_rev:
+            branch_rev = safe_str(branch_rev)
             # not restricting to merge() would also get branch point and be better
             # (especially because it would get the branch point) ... but is currently too expensive
             revs = ["sort(parents(branch(id('%s')) and merge()) - branch(id('%s')))" %
