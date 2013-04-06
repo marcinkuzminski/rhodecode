@@ -60,6 +60,10 @@
 
             var TOGGLE_FOLLOW_URL  = "${h.url('toggle_following')}";
 
+            var REPO_NAME = "";
+            %if hasattr(c, 'repo_name'):
+                var REPO_NAME = "${c.repo_name}";
+            %endif
             </script>
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js', ver=c.rhodecode_version)}"></script>
             <!--[if lt IE 9]>
@@ -90,6 +94,7 @@
               pyroutes.register('toggle_following', "${h.url('toggle_following')}");
               pyroutes.register('changeset_info', "${h.url('changeset_info', repo_name='%(repo_name)s', revision='%(revision)s')}", ['repo_name', 'revision']);
               pyroutes.register('repo_size', "${h.url('repo_size', repo_name='%(repo_name)s')}", ['repo_name']);
+              pyroutes.register('changeset_comment_preview', "${h.url('changeset_comment_preview', repo_name='%(repo_name)s')}", ['repo_name']);
            })
             </script>
         </%def>

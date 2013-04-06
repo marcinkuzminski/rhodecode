@@ -500,6 +500,11 @@ def make_map(config):
                 controller='changeset', revision='tip', action='comment',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('changeset_comment_preview',
+                 '/{repo_name:.*?}/changeset/comment/preview',
+                controller='changeset', action='preview_comment',
+                conditions=dict(function=check_repo, method=["POST"]))
+
     rmap.connect('changeset_comment_delete',
                  '/{repo_name:.*?}/changeset/comment/{comment_id}/delete',
                 controller='changeset', action='delete_comment',

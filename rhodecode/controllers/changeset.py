@@ -37,7 +37,8 @@ from rhodecode.lib.vcs.exceptions import RepositoryError, \
     ChangesetDoesNotExistError
 
 import rhodecode.lib.helpers as h
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
+    NotAnonymous
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.compat import OrderedDict
@@ -320,6 +321,7 @@ class ChangesetController(BaseRepoController):
     def changeset_download(self, revision):
         return self.index(revision, method='download')
 
+    @NotAnonymous()
     @jsonify
     def comment(self, repo_name, revision):
         status = request.POST.get('changeset_status')
@@ -382,6 +384,16 @@ class ChangesetController(BaseRepoController):
 
         return data
 
+    @NotAnonymous()
+    def preview_comment(self):
+        if not request.environ.get('HTTP_X_PARTIAL_XHR'):
+            raise HTTPBadRequest()
+        text = request.POST.get('text')
+        if text:
+            return h.rst_w_mentions(text)
+        return ''
+
+    @NotAnonymous()
     @jsonify
     def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)

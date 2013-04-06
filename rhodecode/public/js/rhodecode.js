@@ -865,6 +865,29 @@ var injectInlineForm = function(tr){
 		  
 		  ajaxPOST(submit_url, postData, success);
 	  });
+
+	  YUE.on('preview-btn_'+lineno, 'click', function(e){
+	       var _text = YUD.get('text_'+lineno).value;
+	       if(!_text){
+	           return
+	       }
+	       var post_data = {'text': _text};
+	       YUD.addClass('preview-box_'+lineno, 'unloaded');
+	       YUD.get('preview-box_'+lineno).innerHTML = _TM['Loading ...'];	       
+	       YUD.setStyle('edit-container_'+lineno, 'display', 'none');
+	       YUD.setStyle('preview-container_'+lineno, 'display', '');
+
+	       var url = pyroutes.url('changeset_comment_preview', {'repo_name': REPO_NAME});
+	       ajaxPOST(url,post_data,function(o){
+	           YUD.get('preview-box_'+lineno).innerHTML = o.responseText;
+	           YUD.removeClass('preview-box_'+lineno, 'unloaded');
+	       })
+	   })
+	   YUE.on('edit-btn_'+lineno, 'click', function(e){
+	       YUD.setStyle('edit-container_'+lineno, 'display', '');
+	       YUD.setStyle('preview-container_'+lineno, 'display', 'none');
+	   })	  
+	  
 	  
 	  setTimeout(function(){
 		  // callbacks
@@ -886,8 +909,11 @@ var deleteComment = function(comment_id){
         var root = prevElementSibling(prevElementSibling(n));
         n.parentNode.removeChild(n);
 
-        // scann nodes, and attach add button to last one
-        placeAddButton(root);
+        // scann nodes, and attach add button to last one only for TR
+        // which are the inline comments
+        if(root && root.tagName == 'TR'){
+        	placeAddButton(root);
+        }
     }
     ajaxPOST(url,postData,success);
 }

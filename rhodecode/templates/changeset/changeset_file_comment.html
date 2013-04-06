@@ -12,7 +12,7 @@
               ${co.author.username}
           </div>
           <div class="date">
-              ${h.age(co.modified_at)} <a class="permalink" href="#comment-${co.comment_id}">&para;</a>
+              ${h.age(co.modified_at)}
           </div>
         %if co.status_change:
            <div  style="float:left" class="changeset-status-container">
@@ -22,7 +22,7 @@
            </div>
         %endif
 
-       <div style="float:left;padding:3px 0px 0px 5px">
+       <div style="float:left;padding:4px 0px 0px 5px">
         <span class="">
          %if co.pull_request:
             <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">
@@ -35,11 +35,9 @@
          %endif
         </span>
        </div>
-
+      <a class="permalink" href="#comment-${co.comment_id}">&para;</a>
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
-        <div class="buttons">
-          <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
-        </div>
+          <div onClick="deleteComment(${co.comment_id})" class="buttons delete-comment ui-btn small">${_('Delete')}</div>
       %endif
       </div>
       <div class="text">
@@ -56,7 +54,7 @@
   %if c.rhodecode_user.username != 'default':
     <div class="overlay"><div class="overlay-text">${_('Submitting...')}</div></div>
       ${h.form('#', class_='inline-form')}
-      <div class="clearfix">
+      <div id="edit-container_{1}" class="clearfix">
           <div class="comment-help">${_('Commenting on line {1}.')}
           ${(_('Comments parsed using %s syntax with %s support.') % (
                  ('<a href="%s">RST</a>' % h.url('rst_help')),
@@ -64,9 +62,17 @@
                )
             )|n
            }
+          <div id="preview-btn_{1}" class="preview-btn ui-btn small">${_('preview')}</div>
           </div>
             <div class="mentions-container" id="mentions_container_{1}"></div>
-            <textarea id="text_{1}" name="text" class="yui-ac-input"></textarea>
+            <textarea id="text_{1}" name="text" class="comment-block-ta yui-ac-input"></textarea>
+      </div>
+      <div id="preview-container_{1}" class="clearfix" style="display:none">
+         <div class="comment-help">
+              ${_('Comment Preview')}
+            <div id="edit-btn_{1}" class="edit-btn ui-btn small">${_('edit')}</div>
+          </div>
+          <div id="preview-box_{1}" class="preview-box"></div>
       </div>
       <div class="comment-button">
       <input type="hidden" name="f_path" value="{0}">
@@ -134,7 +140,7 @@
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form ac">
         ${h.form(post_url)}
-        <div class="clearfix">
+        <div id="edit-container" class="clearfix">
             <div class="comment-help">
                 ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
                   '<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
@@ -143,6 +149,7 @@
                 | <a id="show_changeset_link" onClick="change_status_show();"> ${_('Change status')}</a>
                   <input id="show_changeset_status_box" type="checkbox" name="change_changeset_status" style="display: none;" />
               %endif
+              <div id="preview-btn" class="preview-btn ui-btn small">${_('preview')}</div>
             </div>
             %if change_status:
             <div id="status_block_container" class="status-block" style="display:none">
@@ -155,8 +162,17 @@
             </div>
             %endif
             <div class="mentions-container" id="mentions_container"></div>
-             ${h.textarea('text')}
+             ${h.textarea('text', class_="comment-block-ta")}
         </div>
+
+        <div id="preview-container" class="clearfix" style="display:none">
+           <div class="comment-help">
+                ${_('Comment Preview')}
+              <div id="edit-btn" class="edit-btn ui-btn small">${_('edit')}</div>
+            </div>
+            <div id="preview-box" class="preview-box"></div>
+        </div>
+
         <div class="comment-button">
         ${h.submit('save', _('Comment'), class_="ui-btn large")}
         %if close_btn and change_status:
@@ -184,6 +200,27 @@ YUE.onDOMReady(function () {
        }else{
            YUD.addClass('save_close', 'hidden');
        }
+   })
+   YUE.on('preview-btn', 'click', function(e){
+       var _text = YUD.get('text').value;
+       if(!_text){
+           return
+       }
+       var post_data = {'text': _text};
+       YUD.addClass('preview-box', 'unloaded');
+       YUD.get('preview-box').innerHTML = _TM['Loading ...'];
+       YUD.setStyle('edit-container', 'display', 'none');
+       YUD.setStyle('preview-container', 'display', '');
+
+       var url = pyroutes.url('changeset_comment_preview', {'repo_name': '${c.repo_name}'});
+       ajaxPOST(url,post_data,function(o){
+           YUD.get('preview-box').innerHTML = o.responseText;
+           YUD.removeClass('preview-box', 'unloaded');
+       })
+   })
+   YUE.on('edit-btn', 'click', function(e){
+       YUD.setStyle('edit-container', 'display', '');
+       YUD.setStyle('preview-container', 'display', 'none');
    })
 
 });
