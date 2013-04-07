@@ -37,7 +37,7 @@ from sqlalchemy.exc import IntegrityError
 
 import rhodecode
 from rhodecode.lib import helpers as h
-from rhodecode.lib.ext_json import json
+from rhodecode.lib.compat import json
 from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator,\
     HasReposGroupPermissionAnyDecorator, HasReposGroupPermissionAll,\
     HasPermissionAll

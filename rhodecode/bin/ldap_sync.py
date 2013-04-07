@@ -14,7 +14,14 @@
 import ldap
 import urllib2
 import uuid
-import json
+
+try:
+    from rhodecode.lib.compat import json
+except ImportError:
+    try:
+        import simplejson as json
+    except ImportError:
+        import json
 
 from ConfigParser import ConfigParser
 

@@ -32,7 +32,7 @@ from sqlalchemy.sql.expression import func
 
 import rhodecode
 from rhodecode.lib import helpers as h
-from rhodecode.lib.ext_json import json
+from rhodecode.lib.compat import json
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Repository

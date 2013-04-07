@@ -765,7 +765,7 @@ def jsonify(func, *args, **kwargs):
 
     """
     from pylons.decorators.util import get_pylons
-    from rhodecode.lib.ext_json import json
+    from rhodecode.lib.compat import json
     pylons = get_pylons(args)
     pylons.response.headers['Content-Type'] = 'application/json; charset=utf-8'
     data = func(*args, **kwargs)
