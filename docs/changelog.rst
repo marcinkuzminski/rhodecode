@@ -9,7 +9,7 @@ Changelog
 
 news
 ++++
- 
+
  - Redesign UI, with lots of small improvements.
  - Group management delegation. Group admin can manage a group, and repos
    under it, admin can create child groups inside group he manages.
@@ -37,7 +37,7 @@ news
  - Linaro's ldap sync scripts.
  - #797 git refs filter is now configurable via .ini file.
  - New ishell paster command for easier administrative tasks.
- 
+
 fixes
 +++++
 
@@ -48,8 +48,8 @@ fixes
  - #731 update-repoinfo sometimes failed to update data when changesets were
    initial commits.
  - #749,#805 and #516 Removed duplication of repo settings for rhodecode admins
-   and repo admins. 
- - Global permission update with "overwrite existing settings" shouldn't 
+   and repo admins.
+ - Global permission update with "overwrite existing settings" shouldn't
    override private repositories.
  - #642 added recursion limit for stats gathering.
  - #739 Delete/Edit repositories should only point to admin links if the user
@@ -79,7 +79,7 @@ fixes
  - Automatically assign instance_id for host and process if it has been set to *
  - Fixed multiple IP addresses in each of extracted IP.
  - Lot of other small bug fixes and improvements.
-  
+
 1.5.4 (**2013-03-13**)
 ----------------------
 
