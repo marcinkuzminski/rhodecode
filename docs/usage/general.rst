@@ -109,7 +109,7 @@ Currently it support following options:
 
 If you need to clone repositories that are protected via basic auth, you
 might pass the url with stored credentials inside eg.
-`http://user:passw@remote.server/repo, RhodeCode will try to login and clone
+`http://user:passw@remote.server/repo`, RhodeCode will try to login and clone
 using given credentials. Please take a note that they will be stored as
 plaintext inside the database. RhodeCode will remove auth info when showing the
 clone url in summary page.

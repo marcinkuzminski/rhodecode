@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.lib.paster_commands.make_rcextensions
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    rhodecode.lib.paster_commands.cleanup
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cleanup-repos paster command for RhodeCode
 
