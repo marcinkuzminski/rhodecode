@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    package.rhodecode.lib.cleanup
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    rhodecode.lib.paster_commands.cleanup
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cleanup-repos paster command for RhodeCode
 
