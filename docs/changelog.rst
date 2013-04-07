@@ -4,18 +4,82 @@
 Changelog
 =========
 
-1.6.0 (**2013-XX-XX**)
-----------------------
-
-:status: in-progress
-:branch: beta
+1.6.0rc1 (**2013-04-07**)
+-------------------------
 
 news
 ++++
-
+ 
+ - Redesign UI, with lots of small improvements.
+ - Group management delegation. Group admin can manage a group, and repos
+   under it, admin can create child groups inside group he manages.
+ - Repository extra fields. Optional unlimited extra fields can be defined for
+   each repository to store custom data.
+ - API get_repo call includes repo followers now.
+ - Large amounts of improvements in pull requests.
+ - #734 repo switcher is available in all pages.
+ - #733 API invalidate_cache function.
+ - Added option to turn on HSTS headers when using SSL.
+ - #83 show repo size on summary page.
+ - #745 added show full diff link into to big diff message.
+ - Deprecated RSS links - ATOM is the present and the future.
+ - Add option to define custom lexers for custom extensions for code highlight
+   in rcextension module.
+ - Git executable is now configurable via .ini files.
+ - #689 repositories now has optional detach/delete option for connected forks.
+ - Obfuscate password when cloning a remote repo with credentials.
+ - #788 tarball cache. zip or compressed tarballs can be optionally cached for
+   faster serving.
+ - Speed up of last_changeset extraction in VCS.
+ - API get_locks function.
+ - Configurable HTTP codes for repository locking.
+ - Possible to use closed branches in ?branch= in changelog.
+ - Linaro's ldap sync scripts.
+ - #797 git refs filter is now configurable via .ini file.
+ - New ishell paster command for easier administrative tasks.
+ 
 fixes
 +++++
 
+ - #654 switch to handles `/` in branch/tag/bookmark names.
+ - #572 moved out password reset tasks from celery.
+ - #730 filter out repo groups choices to only ones that you have write+ access.
+ - #462 disable file editing when not on branch head.
+ - #731 update-repoinfo sometimes failed to update data when changesets were
+   initial commits.
+ - #749,#805 and #516 Removed duplication of repo settings for rhodecode admins
+   and repo admins. 
+ - Global permission update with "overwrite existing settings" shouldn't 
+   override private repositories.
+ - #642 added recursion limit for stats gathering.
+ - #739 Delete/Edit repositories should only point to admin links if the user
+   is an super admin.
+ - Fixed escaping of html in "patch" view for GIT repos.
+ - #747 load changeset cache after forking to refresh lightweight dashboard caches.
+ - Quick repo list: public/private icon control should only control icons,
+   not repo visibility.
+ - #746 UnicodeDedode errors on feed controllers.
+ - #756 cleanup repos didn't properly compose paths of repos to be cleaned up.
+ - #763 gravatar helper function should fallback into default image if somehow
+   email provided is empty.
+ - Fixes #762, LDAP and container created users are now activated based on
+   the registration settings in permissions.
+ - Cleanup would recurse into every leaf and could thus not be used on lots of
+   large repositories.
+ - Better detection of deleting groups with subgroups inside.
+ - Fixed issue with renaming repos group together with changing parents with
+   multiple nested trees.
+ - #594 web interface file committing executes push hooks.
+ - Disallow cloning from different URI's that http[s]/svn/git/hg.
+ - Handling of RhodeCode extra params in consistent way.
+ - Don't normalize path if it's empty on adding a file through web interface.
+ - #808 missing changesets and files should return 404 not redirect
+ - #809 added url quote in clone url.
+ - Fixed issues with importing non-ascii repo names.
+ - Automatically assign instance_id for host and process if it has been set to *
+ - Fixed multiple IP addresses in each of extracted IP.
+ - Lot of other small bug fixes and improvements.
+  
 1.5.4 (**2013-03-13**)
 ----------------------
 
