@@ -2637,7 +2637,7 @@ h3.files_location {
     left: initial;
 }
 
-#graph_content .logtags .bookbook,
+#graph_content .logtags .booktag,
 #graph_content .logtags .tagtag {
     float: left;
     line-height: 1em;
@@ -2761,9 +2761,15 @@ h3.files_location {
     margin: 0px 2px;
 }
 
+#shortlog_data .branchtag,
+#shortlog_data .booktag,
+#shortlog_data .tagtag {
+    margin: 0px 2px;
+}
+
 .branchtag,
 .tagtag,
-.bookbook,
+.booktag,
 .spantag {
     padding: 1px 3px 1px 3px;
     font-size: 10px;
@@ -2777,14 +2783,14 @@ h3.files_location {
 
 #graph_content .branchtag,
 #graph_content .tagtag,
-#graph_content .bookbook {
+#graph_content .booktag {
     margin: 1.1em 0;
     margin-right: 0.5em;
 }
 
 .branchtag,
 .tagtag,
-.bookbook {
+.booktag {
     float: left;
 }
 
@@ -2797,7 +2803,7 @@ h3.files_location {
     display: block;
 }
 
-.bookbook {
+.booktag {
     border-color: #46A546;
     color: #46A546;
 }
@@ -2831,7 +2837,7 @@ h3.files_location {
     text-decoration: none;
     color: inherit;
 }
-.logbooks .bookbook, .logbooks .bookbook, .logtags .bookbook, .logtags .bookbook {
+.logbooks .booktag, .logbooks .booktag, .logtags .booktag, .logtags .booktag {
     padding: 1px 3px 1px 3px;
     background-color: #46A546;
     font-size: 10px;
@@ -2840,14 +2846,14 @@ h3.files_location {
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
-.logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
+.logbooks .booktag, .logbooks .booktag a, .right .logtags .booktag, .logtags .booktag a {
     color: #ffffff;
 }
 
-.logbooks .bookbook, .logbooks .bookbook a:hover,
-.logtags .bookbook, .logtags .bookbook a:hover,
-.bookbook a,
-.bookbook a:hover {
+.logbooks .booktag, .logbooks .booktag a:hover,
+.logtags .booktag, .logtags .booktag a:hover,
+.booktag a,
+.booktag a:hover {
     text-decoration: none;
     color: inherit;
 }

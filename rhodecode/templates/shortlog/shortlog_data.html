@@ -6,8 +6,7 @@
         <th class="left">${_('Commit message')}</th>
         <th class="left">${_('Age')}</th>
         <th class="left">${_('Author')}</th>
-        <th class="left">${_('Branch')}</th>
-        <th class="left">${_('Tags')}</th>
+        <th class="left">${_('Refs')}</th>
     </tr>
 %for cnt,cs in enumerate(c.repo_changesets):
     <tr class="parity${cnt%2}">
@@ -37,20 +36,23 @@
         </td>
         <td title="${cs.author}">${h.person(cs.author)}</td>
         <td>
-            <span class="logtags">
-                %if cs.branch:
-                <span class="branchtag">
-                    ${cs.branch}
-                </span>
-                %endif
-            </span>
-        </td>
-        <td>
-            <span class="logtags">
-                %for tag in cs.tags:
-                    <span class="tagtag">${tag}</span>
+            %if h.is_hg(c.rhodecode_repo):
+                %for book in cs.bookmarks:
+                    <div class="booktag" title="${_('Bookmark %s') % book}">
+                        ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+                    </div>
                 %endfor
-            </span>
+            %endif
+            %for tag in cs.tags:
+             <div class="tagtag" title="${_('Tag %s') % tag}">
+                 ${h.link_to(h.shorter(tag),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
+             </div>
+            %endfor
+            %if cs.branch:
+             <div class="branchtag" title="${_('Branch %s' % cs.branch)}">
+                 ${h.link_to(h.shorter(cs.branch),h.url('changelog_home',repo_name=c.repo_name,branch=cs.branch))}
+             </div>
+            %endif
         </td>
     </tr>
 %endfor
