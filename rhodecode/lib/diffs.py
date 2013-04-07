@@ -28,24 +28,16 @@
 import re
 import difflib
 import logging
-import traceback
 
 from itertools import tee, imap
 
-from mercurial import patch
-from mercurial.mdiff import diffopts
-from mercurial.bundlerepo import bundlerepository
-
 from pylons.i18n.translation import _
 
-from rhodecode.lib.compat import BytesIO
-from rhodecode.lib.vcs.utils.hgcompat import localrepo
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, SubModuleNode
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.helpers import escape
-from rhodecode.lib.utils import make_ui
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +63,7 @@ def wrapped_diff(filenode_old, filenode_new, cut_off_limit=None,
         filenode_old = FileNode(filenode_new.path, '', EmptyChangeset())
 
     if filenode_old.is_binary or filenode_new.is_binary:
-        diff = wrap_to_table(_('binary file'))
+        diff = wrap_to_table(_('Binary file'))
         stats = (0, 0)
         size = 0
 
@@ -429,7 +421,7 @@ class DiffProcessor(object):
 
         sorter = lambda info: {'A': 0, 'M': 1, 'D': 2}.get(info['operation'])
 
-        if inline_diff is False:
+        if not inline_diff:
             return diff_container(sorted(_files, key=sorter))
 
         # highlight inline changes
@@ -692,20 +684,8 @@ class DiffProcessor(object):
         return self.adds, self.removes
 
 
-class InMemoryBundleRepo(bundlerepository):
-    def __init__(self, ui, path, bundlestream):
-        self._tempparent = None
-        localrepo.localrepository.__init__(self, ui, path)
-        self.ui.setconfig('phases', 'publish', False)
-
-        self.bundle = bundlestream
-
-        # dict with the mapping 'filename' -> position in the bundle
-        self.bundlefilespos = {}
-
-
-def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
-           remote_compare=False, context=3, ignore_whitespace=False):
+def differ(org_repo, org_ref, other_repo, other_ref,
+           context=3, ignore_whitespace=False):
     """
     General differ between branches, bookmarks, revisions of two remote or
     local but related repositories
@@ -723,48 +703,15 @@ def differ(org_repo, org_ref, other_repo, other_ref, discovery_data=None,
     org_repo = org_repo_scm._repo
     other_repo = other_repo_scm._repo
 
-    org_ref = org_ref[1]
-    other_ref = other_ref[1]
+    org_ref = safe_str(org_ref[1])
+    other_ref = safe_str(other_ref[1])
 
     if org_repo_scm == other_repo_scm:
         log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo.path, org_ref, other_repo.path, other_ref))
+                  % (org_repo.path, org_ref,
+                     other_repo.path, other_ref))
         _diff = org_repo_scm.get_diff(rev1=org_ref, rev2=other_ref,
             ignore_whitespace=ignore_whitespace, context=context)
         return _diff
 
-    elif remote_compare:
-        opts = diffopts(git=True, ignorews=ignore_whitespace, context=context)
-        common, incoming, rheads = discovery_data
-        org_repo_peer = localrepo.locallegacypeer(org_repo.local())
-        # create a bundle (uncompressed if other repo is not local)
-        if org_repo_peer.capable('getbundle'):
-            # disable repo hooks here since it's just bundle !
-            # patch and reset hooks section of UI config to not run any
-            # hooks on fetching archives with subrepos
-            for k, _ in org_repo.ui.configitems('hooks'):
-                org_repo.ui.setconfig('hooks', k, None)
-            unbundle = org_repo.getbundle('incoming', common=None,
-                                          heads=None)
-
-            buf = BytesIO()
-            while True:
-                chunk = unbundle._stream.read(1024 * 4)
-                if not chunk:
-                    break
-                buf.write(chunk)
-
-            buf.seek(0)
-            # replace chunked _stream with data that can do tell() and seek()
-            unbundle._stream = buf
-
-            ui = make_ui('db')
-            bundlerepo = InMemoryBundleRepo(ui, path=org_repo.root,
-                                            bundlestream=unbundle)
-
-            return ''.join(patch.diff(bundlerepo,
-                                      node1=other_repo[other_ref].node(),
-                                      node2=org_repo[org_ref].node(),
-                                      opts=opts))
-
-    return ''
+    return '' # FIXME: when is it ever relevant to return nothing?

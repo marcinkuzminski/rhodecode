@@ -5,15 +5,15 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
-    &raquo;
     ${_('New pull request')}
 </%def>
 
-<%def name="main()">
+<%def name="page_nav()">
+    ${self.menu('repositories')}
+</%def>
 
+<%def name="main()">
+${self.context_bar('showpullrequest')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -21,19 +21,13 @@
     </div>
     ${h.form(url('pullrequest', repo_name=c.repo_name), method='post', id='pull_request_form')}
     <div style="float:left;padding:0px 30px 30px 30px">
-        <input type="hidden" name="rev_start" value="${request.GET.get('rev_start')}" />
-        <input type="hidden" name="rev_end" value="${request.GET.get('rev_end')}" />
-
         ##ORG
         <div style="float:left">
-            <div class="fork_user">
-                <div class="gravatar">
-                    <img alt="gravatar" src="${h.gravatar_url(c.rhodecode_db_repo.user.email,24)}"/>
-                </div>
+            <div>
                 <span style="font-size: 20px">
-                ${h.select('org_repo','',c.org_repos,class_='refs')}:${h.select('org_ref','',c.org_refs,class_='refs')}
+                ${h.select('org_repo','',c.org_repos,class_='refs')}:${h.select('org_ref',c.default_org_ref,c.org_refs,class_='refs')}
                 </span>
-                 <div style="padding:5px 3px 3px 42px;">${c.rhodecode_db_repo.description}</div>
+                 <div style="padding:5px 3px 3px 20px;">${c.rhodecode_db_repo.description}</div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
@@ -43,19 +37,11 @@
 
         ##OTHER, most Probably the PARENT OF THIS FORK
         <div style="float:left">
-            <div class="fork_user">
-                <div class="gravatar">
-                    <img id="other_repo_gravatar" alt="gravatar" src=""/>
-                </div>
+            <div>
                 <span style="font-size: 20px">
-                ${h.select('other_repo',c.default_pull_request ,c.other_repos,class_='refs')}:${h.select('other_ref',c.default_pull_request_rev,c.default_revs,class_='refs')}
+                ${h.select('other_repo',c.default_other_repo,c.other_repos,class_='refs')}:${c.default_other_repo_info['revs']}
                 </span>
-         <span style="padding:3px">
-           <a id="refresh" href="#" class="tooltip" title="${h.tooltip(_('refresh overview'))}">
-             <img style="margin:3px" class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/>
-           </a>
-         </span>
-                 <div id="other_repo_desc" style="padding:5px 3px 3px 42px;"></div>
+                 <div id="other_repo_desc" style="padding:5px 3px 3px 20px;"></div>
             </div>
             <div style="clear:both;padding-top: 10px"></div>
         </div>
@@ -72,13 +58,13 @@
           ## members goes here !
           <div class="group_members_wrap">
             <ul id="review_members" class="group_members">
-            %for member in c.review_members:
-              <li id="reviewer_${member.user_id}">
+            %for member in [c.default_other_repo_info['user']]:
+              <li id="reviewer_${member['user_id']}">
                 <div class="reviewers_member">
-                  <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(member.email,14)}"/> </div>
-                  <div style="float:left">${member.full_name} (${_('owner')})</div>
-                  <input type="hidden" value="${member.user_id}" name="review_members" />
-                  <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
+                  <div class="gravatar"><img alt="gravatar" src="${member['gravatar_link']}"/> </div>
+                  <div style="float:left">${member['firstname']} ${member['lastname']} (${_('owner')})</div>
+                  <input type="hidden" value="${member['user_id']}" name="review_members" />
+                  <span class="delete_icon action_button" onclick="removeReviewMember(${member['user_id']})"></span>
                 </div>
               </li>
             %endfor
@@ -112,7 +98,7 @@
 
             <div class="field">
                 <div class="label label-textarea">
-                    <label for="pullrequest_desc">${_('description')}:</label>
+                    <label for="pullrequest_desc">${_('Description')}:</label>
                 </div>
                 <div class="textarea text-area editor">
                     ${h.textarea('pullrequest_desc',size=30)}
@@ -136,68 +122,87 @@
 
   var other_repos_info = ${c.other_repos_info|n};
 
+  var otherrepoChanged = function(){
+      var sel_box = YUQ('#pull_request_form #other_repo')[0];
+      var repo_name = sel_box.options[sel_box.selectedIndex].value;
+
+      YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
+      // replace options of other_ref with the ones for the current other_repo
+      var other_ref_selector = YUD.get('other_ref');
+      var new_select = YUD.createElementFromMarkup(other_repos_info[repo_name]['revs']);
+      var new_selectedIndex = new_select.selectedIndex;
+      other_ref_selector.innerHTML = ""; // clear old options
+      while (new_select.length > 0){ // children will be popped when appened to other_ref_selector
+          other_ref_selector.appendChild(new_select.children[0]);
+      }
+      // browsers lost track of selected when appendChild was used
+      other_ref_selector.selectedIndex = new_selectedIndex;
+
+      // reset && add the reviewer based on selected repo
+      var _data = other_repos_info[repo_name];
+      YUD.get('review_members').innerHTML = '';
+      addReviewMember(_data.user.user_id, _data.user.firstname,
+                      _data.user.lastname, _data.user.username,
+                      _data.user.gravatar_link);
+  }
+
   var loadPreview = function(){
-	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','none');
+      //url template
       var url = "${h.url('compare_url',
-    	                 repo_name='org_repo',
-    	                 org_ref_type='org_ref_type', org_ref='org_ref',
-                         other_ref_type='other_ref_type', other_ref='other_ref',
-                         repo='other_repo',
-                         as_form=True, bundle=False,
-                         rev_start=request.GET.get('rev_start',''),
-                         rev_end=request.GET.get('rev_end',''))}";
+                         repo_name='__other_repo__',
+                         org_ref_type='__other_ref_type__',
+                         org_ref='__other_ref__',
+                         other_repo='__org_repo__',
+                         other_ref_type='__org_ref_type__',
+                         other_ref='__org_ref__',
+                         as_form=True,
+                         merge=True,
+                         )}";
+      var org_repo = YUQ('#pull_request_form #org_repo')[0].value;
+      var org_ref = YUQ('#pull_request_form #org_ref')[0].value.split(':');
+
+      var other_repo = YUQ('#pull_request_form #other_repo')[0].value;
+      var other_ref = YUQ('#pull_request_form #other_ref')[0].value.split(':');
 
       var select_refs = YUQ('#pull_request_form select.refs')
-      var rev_data = {}; // gather the org/other ref and repo here
-      for(var i=0;i<select_refs.length;i++){
-        var select_ref = select_refs[i];
-        var select_ref_data = select_ref.value.split(':');
-        var key = null;
-        var val = null;
+      var rev_data = {
+          'org_repo': org_repo,
+          'org_ref': org_ref[2],
+          'org_ref_type': 'rev',
+          'other_repo': other_repo,
+          'other_ref': other_ref[2],
+          'other_ref_type': 'rev',
+      }; // gather the org/other ref and repo here
 
-        if(select_ref_data.length>1){
-          key = select_ref.name+"_type";
-          val = select_ref_data[0];
-          url = url.replace(key,val);
-          rev_data[key] = val;
-
-          key = select_ref.name;
-          val = select_ref_data[1];
-          url = url.replace(key,val);
-          rev_data[key] = val;
-
-        }else{
-          key = select_ref.name;
-          val = select_ref.value;
-          url = url.replace(key,val);
-          rev_data[key] = val;
-        }
+      for (k in rev_data){
+          url = url.replace('__'+k+'__',rev_data[k]);
       }
 
-      YUE.on('other_repo', 'change', function(e){
-    	  var repo_name = e.currentTarget.value;
-    	  // replace the <select> of changed repo
-    	  YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
-      });
+      YUD.get('pull_request_overview').innerHTML = "${_('Loading ...')}";
+      ypjax(url,'pull_request_overview');
 
-      ypjax(url,'pull_request_overview', function(data){
-    	  var sel_box = YUQ('#pull_request_form #other_repo')[0];
-    	  var repo_name = sel_box.options[sel_box.selectedIndex].value;
-    	  YUD.get('pull_request_overview_url').href = url;
-    	  YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
-    	  YUD.get('other_repo_gravatar').src = other_repos_info[repo_name]['gravatar'];
-    	  YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
-    	  YUD.get('other_ref').innerHTML = other_repos_info[repo_name]['revs'];
-    	  // select back the revision that was just compared
-    	  setSelectValue(YUD.get('other_ref'), rev_data['other_ref']);
-      })
+      YUD.get('pull_request_overview_url').href = url; // shouldn't have as_form ... but ...
+      YUD.setStyle(YUD.get('pull_request_overview_url').parentElement,'display','');
   }
-  YUE.on('refresh','click',function(e){
-     loadPreview()
-  })
 
+  ## refresh automatically when something changes (org_repo can't change)
+
+  YUE.on('org_ref', 'change', function(e){
+     loadPreview();
+  });
+
+  YUE.on('other_repo', 'change', function(e){
+      otherrepoChanged();
+      loadPreview();
+  });
+
+  YUE.on('other_ref', 'change', function(e){
+     loadPreview();
+  });
+
+  otherrepoChanged();
   //lazy load overview after 0.5s
-  setTimeout(loadPreview, 500)
+  setTimeout(loadPreview, 500);
 
 </script>
 

@@ -1,6 +1,5 @@
 import os
 from rhodecode.tests import *
-from nose.plugins.skip import SkipTest
 
 
 class TestSearchController(TestController):
@@ -9,8 +8,7 @@ class TestSearchController(TestController):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'))
 
-        self.assertTrue('class="small" id="q" name="q" type="text"' in
-                        response.body)
+        response.mustcontain('class="small" id="q" name="q" type="text"')
         # Test response...
 
     def test_empty_search(self):
@@ -20,8 +18,8 @@ class TestSearchController(TestController):
             self.log_user()
             response = self.app.get(url(controller='search', action='index'),
                                     {'q': HG_REPO})
-            self.assertTrue('There is no index to search in. '
-                            'Please run whoosh indexer' in response.body)
+            response.mustcontain('There is no index to search in. '
+                                 'Please run whoosh indexer')
 
     def test_normal_search(self):
         self.log_user()
@@ -56,7 +54,7 @@ class TestSearchController(TestController):
     def test_search_commit_message_hg_repo(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index',
-                                    search_repo=HG_REPO),
+                                    repo_name=HG_REPO),
                     {'q': 'bother to ask where to fetch repo during tests',
                      'type': 'commit'})
 

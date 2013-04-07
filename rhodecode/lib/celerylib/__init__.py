@@ -59,6 +59,7 @@ class ResultWrapper(object):
 
 
 def run_task(task, *args, **kwargs):
+    global CELERY_ON
     if CELERY_ON:
         try:
             t = task.apply_async(args=args, kwargs=kwargs)
@@ -68,6 +69,7 @@ def run_task(task, *args, **kwargs):
         except socket.error, e:
             if isinstance(e, IOError) and e.errno == 111:
                 log.debug('Unable to connect to celeryd. Sync execution')
+                CELERY_ON = False
             else:
                 log.error(traceback.format_exc())
         except KeyError, e:
@@ -122,7 +124,7 @@ def dbsession(func):
             ret = func(*fargs, **fkwargs)
             return ret
         finally:
-            if CELERY_ON and CELERY_EAGER is False:
+            if CELERY_ON and not CELERY_EAGER:
                 meta.Session.remove()
 
     return decorator(__wrapper, func)

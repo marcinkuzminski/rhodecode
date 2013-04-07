@@ -4,8 +4,8 @@
 Installation
 ============
 
-``RhodeCode`` is written entirely in Python. Before posting any issues make 
-sure, your not missing any system libraries and using right version of 
+``RhodeCode`` is written entirely in Python. Before posting any issues make
+sure, your not missing any system libraries and using right version of
 libraries required by RhodeCode. There's also restriction in terms of mercurial
 clients. Minimal version of hg client known working fine with RhodeCode is
 **1.6**. If you're using older client, please upgrade.
@@ -41,14 +41,14 @@ Step by step installation example for Linux
 
 For installing RhodeCode i highly recommend using separate virtualenv_. This
 way many required by RhodeCode libraries will remain sandboxed from your main
-python and making things less problematic when doing system python updates. 
+python and making things less problematic when doing system python updates.
 
 Alternative very detailed installation instructions for Ubuntu Server with
 celery, indexer and daemon scripts: https://gist.github.com/4546398
 
 
-- Assuming you have installed virtualenv_ create a new virtual environment 
-  using virtualenv command:: 
+- Assuming you have installed virtualenv_ create a new virtual environment
+  using virtualenv command::
 
     virtualenv --no-site-packages /opt/rhodecode-venv
 
@@ -63,7 +63,7 @@ celery, indexer and daemon scripts: https://gist.github.com/4546398
    Python's "main" site-packages dir.
 
 
-- this will install new virtualenv_ into `/opt/rhodecode-venv`. 
+- this will install new virtualenv_ into `/opt/rhodecode-venv`.
 - Activate the virtualenv_ by running::
 
     source /opt/rhodecode-venv/bin/activate
@@ -71,52 +71,52 @@ celery, indexer and daemon scripts: https://gist.github.com/4546398
 .. note:: If you're using UNIX, *do not* use ``sudo`` to run the
    ``virtualenv`` script.  It's perfectly acceptable (and desirable)
    to create a virtualenv as a normal user.
-     
-- Make a folder for rhodecode data files, and configuration somewhere on the 
+
+- Make a folder for rhodecode data files, and configuration somewhere on the
   filesystem. For example::
 
     mkdir /opt/rhodecode
-  
-    
+
+
 - Go into the created directory run this command to install rhodecode::
 
     easy_install rhodecode
-  
-  or::
- 
-    pip install rhodecode 
 
-- This will install rhodecode together with pylons and all other required 
+  or::
+
+    pip install rhodecode
+
+- This will install rhodecode together with pylons and all other required
   python libraries into activated virtualenv
 
 Requirements for Celery (optional)
 ----------------------------------
 
 In order to gain maximum performance
-there are some third-party you must install. When RhodeCode is used 
+there are some third-party you must install. When RhodeCode is used
 together with celery you have to install some kind of message broker,
 recommended one is rabbitmq_ to make the async tasks work.
 
 Of course RhodeCode works in sync mode also and then you do not have to install
-any third party applications. However, using Celery_ will give you a large 
-speed improvement when using many big repositories. If you plan to use 
-RhodeCode for say 7 to 10 repositories, RhodeCode will perform perfectly well 
+any third party applications. However, using Celery_ will give you a large
+speed improvement when using many big repositories. If you plan to use
+RhodeCode for say 7 to 10 repositories, RhodeCode will perform perfectly well
 without celery running.
-   
-If you make the decision to run RhodeCode with celery make sure you run 
-celeryd using paster and message broker together with the application. 
+
+If you make the decision to run RhodeCode with celery make sure you run
+celeryd using paster and message broker together with the application.
 
 .. note::
    Installing message broker and using celery is optional, RhodeCode will
    work perfectly fine without them.
 
 
-**Message Broker** 
+**Message Broker**
 
 - preferred is `RabbitMq <http://www.rabbitmq.com/>`_
 - A possible alternative is `Redis <http://code.google.com/p/redis/>`_
 
-For installation instructions you can visit: 
+For installation instructions you can visit:
 http://ask.github.com/celery/getting-started/index.html.
 This is a very nice tutorial on how to start using celery_ with rabbitmq_
 
@@ -126,7 +126,7 @@ You can now proceed to :ref:`setup`
 
 
 
-.. _virtualenv: http://pypi.python.org/pypi/virtualenv  
+.. _virtualenv: http://pypi.python.org/pypi/virtualenv
 .. _python: http://www.python.org/
 .. _mercurial: http://mercurial.selenic.com/
 .. _celery: http://celeryproject.org/

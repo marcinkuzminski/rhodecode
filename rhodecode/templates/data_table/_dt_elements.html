@@ -58,9 +58,9 @@
 
    ##PRIVATE/PUBLIC
    %if private and c.visual.show_private_icon:
-     <img class="icon" title="${_('private repository')}" alt="${_('private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+     <img class="icon" title="${_('Private repository')}" alt="${_('Private repository')}" src="${h.url('/images/icons/lock.png')}"/>
    %elif not private and c.visual.show_public_icon:
-     <img class="icon" title="${_('public repository')}" alt="${_('public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+     <img class="icon" title="${_('Public repository')}" alt="${_('Public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
    %endif
 
    ##NAME
@@ -71,7 +71,7 @@
    %endif
    %if fork_of:
         <a href="${h.url('summary_home',repo_name=fork_of.repo_name)}">
-        <img class="icon" alt="${_('fork')}" title="${_('Fork of')} ${fork_of.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/></a>
+        <img class="icon" alt="${_('Fork')}" title="${_('Fork of %s') % fork_of.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/></a>
    %endif
   </div>
 </%def>
@@ -110,17 +110,17 @@
     <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(email, size)}"/> </div>
 </%def>
 
-<%def name="repo_actions(repo_name)">
+<%def name="repo_actions(repo_name, super_user=True)">
   <div>
     <div style="float:left">
-    <a href="${h.url('repo_settings_home',repo_name=repo_name)}" title="${_('edit')}">
-      ${h.submit('edit_%s' % repo_name,_('edit'),class_="edit_icon action_button")}
-    </a>
+      <a href="${h.url('edit_repo',repo_name=repo_name)}" title="${_('edit')}">
+        ${h.submit('edit_%s' % repo_name,_('edit'),class_="edit_icon action_button")}
+      </a>
     </div>
     <div style="float:left">
-    ${h.form(h.url('repo', repo_name=repo_name),method='delete')}
-      ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
-    ${h.end_form()}
+      ${h.form(h.url('repo', repo_name=repo_name),method='delete')}
+        ${h.submit('remove_%s' % repo_name,_('delete'),class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this repository: %s') % repo_name+"');")}
+      ${h.end_form()}
     </div>
   </div>
 </%def>

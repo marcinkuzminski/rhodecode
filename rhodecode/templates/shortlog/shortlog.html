@@ -2,28 +2,26 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Shortlog') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Lightweight Changelog') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
     %if c.file_history:
-        ${h.link_to(_('shortlog'),h.url('shortlog_home',repo_name=c.repo_name))}
+        ${h.link_to(_('Lightweight Changelog'),h.url('shortlog_home',repo_name=c.repo_name))}
         &raquo;
         ${c.file_history}
     %else:
-        ${_('shortlog')}
+        ${_('Lightweight Changelog')}
     %endif
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('shortlog')}
+    ${self.menu('repositories')}
 </%def>
+
 <%def name="main()">
+${self.context_bar('options')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -31,9 +29,9 @@
     </div>
     <!-- end box / title -->
     <div class="table">
-	    <div id="shortlog_data">
-	        ${c.shortlog_data}
-	    </div>
+        <div id="shortlog_data">
+            ${c.shortlog_data}
+        </div>
     </div>
 </div>
 </%def>

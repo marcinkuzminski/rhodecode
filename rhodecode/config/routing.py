@@ -41,21 +41,32 @@ def make_map(config):
             if len(by_id) == 2 and by_id[1].isdigit() and by_id[0] == '':
                 repo_name = Repository.get(by_id[1]).repo_name
                 match_dict['repo_name'] = repo_name
-        except:
+        except Exception:
             pass
 
         return is_valid_repo(repo_name, config['base_path'])
 
     def check_group(environ, match_dict):
         """
-        check for valid repositories group for proper 404 handling
+        check for valid repository group for proper 404 handling
 
         :param environ:
         :param match_dict:
         """
         repos_group_name = match_dict.get('group_name')
-
         return is_valid_repos_group(repos_group_name, config['base_path'])
+
+    def check_group_skip_path(environ, match_dict):
+        """
+        check for valid repository group for proper 404 handling, but skips
+        verification of existing path
+
+        :param environ:
+        :param match_dict:
+        """
+        repos_group_name = match_dict.get('group_name')
+        return is_valid_repos_group(repos_group_name, config['base_path'],
+                                    skip_path_check=True)
 
     def check_int(environ, match_dict):
         return match_dict.get('id').isdigit()
@@ -93,19 +104,14 @@ def make_map(config):
         m.connect("formatted_repos", "/repos.{format}",
              action="index",
             conditions=dict(method=["GET"]))
-        m.connect("new_repo", "/repos/new",
-             action="new", conditions=dict(method=["GET"]))
-        m.connect("formatted_new_repo", "/repos/new.{format}",
-             action="new", conditions=dict(method=["GET"]))
+        m.connect("new_repo", "/create_repository",
+                  action="create_repository", conditions=dict(method=["GET"]))
         m.connect("/repos/{repo_name:.*?}",
              action="update", conditions=dict(method=["PUT"],
                                               function=check_repo))
         m.connect("/repos/{repo_name:.*?}",
              action="delete", conditions=dict(method=["DELETE"],
                                               function=check_repo))
-        m.connect("edit_repo", "/repos/{repo_name:.*?}/edit",
-             action="edit", conditions=dict(method=["GET"],
-                                            function=check_repo))
         m.connect("formatted_edit_repo", "/repos/{repo_name:.*?}.{format}/edit",
              action="edit", conditions=dict(method=["GET"],
                                             function=check_repo))
@@ -115,6 +121,11 @@ def make_map(config):
         m.connect("formatted_repo", "/repos/{repo_name:.*?}.{format}",
              action="show", conditions=dict(method=["GET"],
                                             function=check_repo))
+        #add repo perm member
+        m.connect('set_repo_perm_member', "/set_repo_perm_member/{repo_name:.*?}",
+             action="set_repo_perm_member",
+             conditions=dict(method=["POST"], function=check_repo))
+
         #ajax delete repo perm user
         m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*?}",
              action="delete_perm_user",
@@ -145,6 +156,18 @@ def make_map(config):
         m.connect('repo_locking', "/repo_locking/{repo_name:.*?}",
                   action="repo_locking", conditions=dict(method=["PUT"],
                                                       function=check_repo))
+        m.connect('toggle_locking', "/locking_toggle/{repo_name:.*?}",
+                  action="toggle_locking", conditions=dict(method=["GET"],
+                                                      function=check_repo))
+
+        #repo fields
+        m.connect('create_repo_fields', "/repo_fields/{repo_name:.*?}/new",
+                  action="create_repo_field", conditions=dict(method=["PUT"],
+                                                      function=check_repo))
+
+        m.connect('delete_repo_fields', "/repo_fields/{repo_name:.*?}/{field_id}",
+                  action="delete_repo_field", conditions=dict(method=["DELETE"],
+                                                      function=check_repo))
 
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/repos_groups') as m:
@@ -158,33 +181,34 @@ def make_map(config):
                   action="new", conditions=dict(method=["GET"]))
         m.connect("formatted_new_repos_group", "/repos_groups/new.{format}",
                   action="new", conditions=dict(method=["GET"]))
-        m.connect("update_repos_group", "/repos_groups/{id}",
+        m.connect("update_repos_group", "/repos_groups/{group_name:.*?}",
                   action="update", conditions=dict(method=["PUT"],
-                                                   function=check_int))
-        m.connect("delete_repos_group", "/repos_groups/{id}",
+                                                   function=check_group))
+        m.connect("delete_repos_group", "/repos_groups/{group_name:.*?}",
                   action="delete", conditions=dict(method=["DELETE"],
-                                                   function=check_int))
-        m.connect("edit_repos_group", "/repos_groups/{id:.*?}/edit",
-                  action="edit", conditions=dict(method=["GET"],))
-        m.connect("formatted_edit_repos_group",
-                  "/repos_groups/{id}.{format}/edit",
+                                                   function=check_group_skip_path))
+        m.connect("edit_repos_group", "/repos_groups/{group_name:.*?}/edit",
                   action="edit", conditions=dict(method=["GET"],
-                                                 function=check_int))
-        m.connect("repos_group", "/repos_groups/{id}",
+                                                 function=check_group))
+        m.connect("formatted_edit_repos_group",
+                  "/repos_groups/{group_name:.*?}.{format}/edit",
+                  action="edit", conditions=dict(method=["GET"],
+                                                 function=check_group))
+        m.connect("repos_group", "/repos_groups/{group_name:.*?}",
                   action="show", conditions=dict(method=["GET"],
-                                                 function=check_int))
-        m.connect("formatted_repos_group", "/repos_groups/{id}.{format}",
+                                                 function=check_group))
+        m.connect("formatted_repos_group", "/repos_groups/{group_name:.*?}.{format}",
                   action="show", conditions=dict(method=["GET"],
-                                                 function=check_int))
-        # ajax delete repos group perm user
+                                                 function=check_group))
+        # ajax delete repository group perm user
         m.connect('delete_repos_group_user_perm',
-                  "/delete_repos_group_user_perm/{group_name:.*}",
+                  "/delete_repos_group_user_perm/{group_name:.*?}",
              action="delete_repos_group_user_perm",
              conditions=dict(method=["DELETE"], function=check_group))
 
-        # ajax delete repos group perm users_group
+        # ajax delete repository group perm users_group
         m.connect('delete_repos_group_users_group_perm',
-                  "/delete_repos_group_users_group_perm/{group_name:.*}",
+                  "/delete_repos_group_users_group_perm/{group_name:.*?}",
                   action="delete_repos_group_users_group_perm",
                   conditions=dict(method=["DELETE"], function=check_group))
 
@@ -227,7 +251,7 @@ def make_map(config):
         m.connect("user_ips_delete", "/users_ips/{id}",
                   action="delete_ip", conditions=dict(method=["DELETE"]))
 
-    #ADMIN USERS GROUPS REST ROUTES
+    #ADMIN USER GROUPS REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,
                         controller='admin/users_groups') as m:
         m.connect("users_groups", "/users_groups",
@@ -308,8 +332,6 @@ def make_map(config):
                   action="my_account", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_account_update", "/my_account_update",
                   action="my_account_update", conditions=dict(method=["PUT"]))
-        m.connect("admin_settings_create_repository", "/create_repository",
-                  action="create_repository", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_repos", "/my_account/repos",
                   action="my_account_my_repos", conditions=dict(method=["GET"]))
         m.connect("admin_settings_my_pullrequests", "/my_account/pull_requests",
@@ -389,8 +411,13 @@ def make_map(config):
 
     #SEARCH
     rmap.connect('search', '%s/search' % ADMIN_PREFIX, controller='search',)
-    rmap.connect('search_repo', '%s/search/{search_repo:.*}' % ADMIN_PREFIX,
-                  controller='search')
+    rmap.connect('search_repo_admin', '%s/search/{repo_name:.*}' % ADMIN_PREFIX,
+                 controller='search',
+                 conditions=dict(function=check_repo))
+    rmap.connect('search_repo', '/{repo_name:.*?}/search',
+                 controller='search',
+                 conditions=dict(function=check_repo),
+                 )
 
     #LOGIN/LOGOUT/REGISTER/SIGN IN
     rmap.connect('login_home', '%s/login' % ADMIN_PREFIX, controller='login')
@@ -423,6 +450,10 @@ def make_map(config):
                 controller='summary',
                 conditions=dict(function=check_repo))
 
+    rmap.connect('repo_size', '/{repo_name:.*?}/repo_size',
+                controller='summary', action='repo_size',
+                conditions=dict(function=check_repo))
+
     rmap.connect('repos_group_home', '/{group_name:.*}',
                 controller='admin/repos_groups', action="show_by_name",
                 conditions=dict(function=check_group))
@@ -430,6 +461,17 @@ def make_map(config):
     rmap.connect('changeset_home', '/{repo_name:.*?}/changeset/{revision}',
                 controller='changeset', revision='tip',
                 conditions=dict(function=check_repo))
+
+    # no longer user, but kept for routes to work
+    rmap.connect("_edit_repo", "/{repo_name:.*?}/edit",
+                 controller='admin/repos', action="edit",
+                 conditions=dict(method=["GET"], function=check_repo)
+                 )
+
+    rmap.connect("edit_repo", "/{repo_name:.*?}/settings",
+                 controller='admin/repos', action="edit",
+                 conditions=dict(method=["GET"], function=check_repo)
+                 )
 
     #still working url for backward compat.
     rmap.connect('raw_changeset_home_depraced',
@@ -471,8 +513,8 @@ def make_map(config):
                  controller='compare', action='index',
                  conditions=dict(function=check_repo),
                  requirements=dict(
-                            org_ref_type='(branch|book|tag|rev|org_ref_type)',
-                            other_ref_type='(branch|book|tag|rev|other_ref_type)')
+                            org_ref_type='(branch|book|tag|rev|__other_ref_type__)',
+                            other_ref_type='(branch|book|tag|rev|__org_ref_type__)')
                  )
 
     rmap.connect('pullrequest_home',
@@ -518,7 +560,7 @@ def make_map(config):
                 controller='pullrequests', action='delete_comment',
                 conditions=dict(function=check_repo, method=["DELETE"]))
 
-    rmap.connect('summary_home', '/{repo_name:.*?}/summary',
+    rmap.connect('summary_home_summary', '/{repo_name:.*?}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 
     rmap.connect('shortlog_home', '/{repo_name:.*?}/shortlog',
@@ -545,6 +587,10 @@ def make_map(config):
                 conditions=dict(function=check_repo))
 
     rmap.connect('files_home', '/{repo_name:.*?}/files/{revision}/{f_path:.*}',
+                controller='files', revision='tip', f_path='',
+                conditions=dict(function=check_repo))
+
+    rmap.connect('files_home_nopath', '/{repo_name:.*?}/files/{revision}',
                 controller='files', revision='tip', f_path='',
                 conditions=dict(function=check_repo))
 
@@ -590,22 +636,6 @@ def make_map(config):
                  '/{repo_name:.*?}/nodelist/{revision}/{f_path:.*}',
                 controller='files', action='nodelist',
                 conditions=dict(function=check_repo))
-
-    rmap.connect('repo_settings_delete', '/{repo_name:.*?}/settings',
-                controller='settings', action="delete",
-                conditions=dict(method=["DELETE"], function=check_repo))
-
-    rmap.connect('repo_settings_update', '/{repo_name:.*?}/settings',
-                controller='settings', action="update",
-                conditions=dict(method=["PUT"], function=check_repo))
-
-    rmap.connect('repo_settings_home', '/{repo_name:.*?}/settings',
-                controller='settings', action='index',
-                conditions=dict(function=check_repo))
-
-    rmap.connect('toggle_locking', "/{repo_name:.*?}/locking_toggle",
-                 controller='settings', action="toggle_locking",
-                 conditions=dict(method=["GET"], function=check_repo))
 
     rmap.connect('repo_fork_create_home', '/{repo_name:.*?}/fork',
                 controller='forks', action='fork_create',

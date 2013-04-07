@@ -2,23 +2,20 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Bookmarks') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Bookmarks') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
-
 <%def name="breadcrumbs_links()">
-    <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
-    ${_('bookmarks')}
+    <input class="q_filter_box" id="q_filter_bookmarks" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value=""/>
+    ${_('Bookmarks')}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('bookmarks')}
+    ${self.menu('repositories')}
 </%def>
+
 <%def name="main()">
+${self.context_bar('switch-to')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -29,6 +26,7 @@
         <%include file='bookmarks_data.html'/>
     </div>
 </div>
+
 <script type="text/javascript">
 
 // main table sorting

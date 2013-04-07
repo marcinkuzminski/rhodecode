@@ -26,7 +26,7 @@
 import logging
 import traceback
 from collections import defaultdict
-from webob.exc import HTTPForbidden, HTTPBadRequest
+from webob.exc import HTTPForbidden, HTTPBadRequest, HTTPNotFound
 
 from pylons import tmpl_context as c, url, request, response
 from pylons.i18n.translation import _
@@ -71,7 +71,7 @@ def get_ignore_ws(fid, GET):
     if ig_ws:
         try:
             return int(ig_ws[0].split(':')[-1])
-        except:
+        except Exception:
             pass
     return ig_ws_global
 
@@ -80,21 +80,21 @@ def _ignorews_url(GET, fileid=None):
     fileid = str(fileid) if fileid else None
     params = defaultdict(list)
     _update_with_GET(params, GET)
-    lbl = _('show white space')
+    lbl = _('Show white space')
     ig_ws = get_ignore_ws(fileid, GET)
     ln_ctx = get_line_ctx(fileid, GET)
     # global option
     if fileid is None:
         if ig_ws is None:
             params['ignorews'] += [1]
-            lbl = _('ignore white space')
+            lbl = _('Ignore white space')
         ctx_key = 'context'
         ctx_val = ln_ctx
     # per file options
     else:
         if ig_ws is None:
             params[fileid] += ['WS:1']
-            lbl = _('ignore white space')
+            lbl = _('Ignore white space')
 
         ctx_key = fileid
         ctx_val = 'C:%s' % ln_ctx
@@ -124,7 +124,7 @@ def get_line_ctx(fid, GET):
 
     try:
         return int(retval)
-    except:
+    except Exception:
         return 3
 
 
@@ -203,8 +203,8 @@ class ChangesetController(BaseRepoController):
 
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='warning')
-            return redirect(url('home'))
+            h.flash(str(e), category='error')
+            raise HTTPNotFound()
 
         c.changes = OrderedDict()
 
@@ -329,7 +329,7 @@ class ChangesetController(BaseRepoController):
             text = text or (_('Status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
 
-        comm = ChangesetCommentsModel().create(
+        c.co = comm = ChangesetCommentsModel().create(
             text=text,
             repo=c.rhodecode_db_repo.repo_id,
             user=c.rhodecode_user.user_id,
@@ -371,12 +371,11 @@ class ChangesetController(BaseRepoController):
         if not request.environ.get('HTTP_X_PARTIAL_XHR'):
             return redirect(h.url('changeset_home', repo_name=repo_name,
                                   revision=revision))
-
+        #only ajax below
         data = {
            'target_id': h.safeid(h.safe_unicode(request.POST.get('f_path'))),
         }
         if comm:
-            c.co = comm
             data.update(comm.get_dict())
             data.update({'rendered_text':
                          render('changeset/changeset_comment_block.html')})

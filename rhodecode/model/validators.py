@@ -16,8 +16,8 @@ from formencode.validators import (
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib import ipaddr
 from rhodecode.lib.utils import repo_name_slug
-from rhodecode.lib.utils2 import safe_int
-from rhodecode.model.db import RepoGroup, Repository, UsersGroup, User,\
+from rhodecode.lib.utils2 import safe_int, str2bool
+from rhodecode.model.db import RepoGroup, Repository, UserGroup, User,\
     ChangesetStatus
 from rhodecode.lib.exceptions import LdapImportError
 from rhodecode.config.routing import ADMIN_PREFIX
@@ -105,7 +105,7 @@ def ValidUsername(edit=False, old_data={}):
                     msg = M(self, 'username_exists', state, username=value)
                     raise formencode.Invalid(msg, value, state)
 
-            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
+            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]*$', value) is None:
                 msg = M(self, 'invalid_username', state)
                 raise formencode.Invalid(msg, value, state)
     return _validator
@@ -130,13 +130,13 @@ def ValidRepoUser():
     return _validator
 
 
-def ValidUsersGroup(edit=False, old_data={}):
+def ValidUserGroup(edit=False, old_data={}):
     class _validator(formencode.validators.FancyValidator):
         messages = {
-            'invalid_group': _(u'Invalid users group name'),
-            'group_exist': _(u'Users group "%(usersgroup)s" already exists'),
-            'invalid_usersgroup_name':
-                _(u'users group name may only contain  alphanumeric '
+            'invalid_group': _(u'Invalid user group name'),
+            'group_exist': _(u'User group "%(usergroup)s" already exists'),
+            'invalid_usergroup_name':
+                _(u'user group name may only contain alphanumeric '
                   'characters underscores, periods or dashes and must begin '
                   'with alphanumeric character')
         }
@@ -151,19 +151,19 @@ def ValidUsersGroup(edit=False, old_data={}):
             old_ugname = None
             if edit:
                 old_id = old_data.get('users_group_id')
-                old_ugname = UsersGroup.get(old_id).users_group_name
+                old_ugname = UserGroup.get(old_id).users_group_name
 
             if old_ugname != value or not edit:
-                is_existing_group = UsersGroup.get_by_group_name(value,
+                is_existing_group = UserGroup.get_by_group_name(value,
                                                         case_insensitive=True)
                 if is_existing_group:
-                    msg = M(self, 'group_exist', state, usersgroup=value)
+                    msg = M(self, 'group_exist', state, usergroup=value)
                     raise formencode.Invalid(msg, value, state,
                         error_dict=dict(users_group_name=msg)
                     )
 
             if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]+$', value) is None:
-                msg = M(self, 'invalid_usersgroup_name', state)
+                msg = M(self, 'invalid_usergroup_name', state)
                 raise formencode.Invalid(msg, value, state,
                     error_dict=dict(users_group_name=msg)
                 )
@@ -280,7 +280,7 @@ def ValidAuth():
 
             if not authenticate(username, password):
                 user = User.get_by_username(username)
-                if user and user.active is False:
+                if user and not user.active:
                     log.warning('user %s is disabled' % username)
                     msg = M(self, 'disabled_account', state)
                     raise formencode.Invalid(msg, value, state,
@@ -318,7 +318,7 @@ def ValidRepoName(edit=False, old_data={}):
                 _(u'Repository named %(repo)s already exists'),
             'repository_in_group_exists': _(u'Repository "%(repo)s" already '
                                             'exists in group "%(group)s"'),
-            'same_group_exists': _(u'Repositories group with name "%(repo)s" '
+            'same_group_exists': _(u'Repository group with name "%(repo)s" '
                                    'already exists')
         }
 
@@ -477,8 +477,16 @@ def CanWriteGroup(old_data=None):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'permission_denied': _(u"You don't have permissions "
-                                   "to create repository in this group")
+                                   "to create repository in this group"),
+            'permission_denied_root': _(u"no permission to create repository "
+                                        "in root location")
         }
+
+        def _to_python(self, value, state):
+            #root location
+            if value in [-1, "-1"]:
+                return None
+            return value
 
         def validate_python(self, value, state):
             gr = RepoGroup.get(value)
@@ -486,7 +494,7 @@ def CanWriteGroup(old_data=None):
             val = HasReposGroupPermissionAny('group.write', 'group.admin')
             can_create_repos = HasPermissionAny('hg.admin', 'hg.create.repository')
             forbidden = not val(gr_name, 'can write into group validator')
-            value_changed = old_data['repo_group'].get('group_id') != safe_int(value)
+            value_changed = True  # old_data['repo_group'].get('group_id') != safe_int(value)
             if value_changed:  # do check if we changed the value
                 #parent group need to be existing
                 if gr and forbidden:
@@ -495,7 +503,7 @@ def CanWriteGroup(old_data=None):
                         error_dict=dict(repo_type=msg)
                     )
                 ## check if we can write to root location !
-                elif gr is None and can_create_repos() is False:
+                elif gr is None and not can_create_repos():
                     msg = M(self, 'permission_denied_root', state)
                     raise formencode.Invalid(msg, value, state,
                         error_dict=dict(repo_type=msg)
@@ -525,7 +533,7 @@ def CanCreateGroup(can_create_in_root=False):
                 #we can create in root, we're fine no validations required
                 return
 
-            forbidden_in_root = gr is None and can_create_in_root is False
+            forbidden_in_root = gr is None and not can_create_in_root
             val = HasReposGroupPermissionAny('group.admin')
             forbidden = not val(gr_name, 'can create group validator')
             if forbidden_in_root or forbidden:
@@ -546,7 +554,7 @@ def ValidPerms(type_='repo'):
     class _validator(formencode.validators.FancyValidator):
         messages = {
             'perm_new_member_name':
-                _(u'This username or users group name is not valid')
+                _(u'This username or user group name is not valid')
         }
 
         def to_python(self, value, state):
@@ -583,9 +591,9 @@ def ValidPerms(type_='repo'):
                          'g': 'users_group'
                     }[k[0]]
                     if member == 'default':
-                        if value.get('repo_private'):
+                        if str2bool(value.get('repo_private')):
                             # set none for default when updating to
-                            # private repo
+                            # private repo protects agains form manipulation
                             v = EMPTY_PERM
                     perms_update.add((member, v, t))
 
@@ -600,9 +608,9 @@ def ValidPerms(type_='repo'):
                             .filter(User.active == True)\
                             .filter(User.username == k).one()
                     if t is 'users_group':
-                        self.user_db = UsersGroup.query()\
-                            .filter(UsersGroup.users_group_active == True)\
-                            .filter(UsersGroup.users_group_name == k).one()
+                        self.user_db = UserGroup.query()\
+                            .filter(UserGroup.users_group_active == True)\
+                            .filter(UserGroup.users_group_name == k).one()
 
                 except Exception:
                     log.exception('Updated permission failed')
@@ -715,13 +723,7 @@ def AttrLoginValidator():
                     'this is the name of the attribute that is equivalent '
                     'to "username"')
         }
-
-        def validate_python(self, value, state):
-            if not value or not isinstance(value, (str, unicode)):
-                msg = M(self, 'invalid_cn', state)
-                raise formencode.Invalid(msg, value, state,
-                    error_dict=dict(ldap_attr_login=msg)
-                )
+        messages['empty'] = messages['invalid_cn']
 
     return _validator
 
@@ -789,4 +791,17 @@ def ValidIp():
                 raise formencode.Invalid(self.message('badFormat', state),
                                          value, state)
 
+    return _validator
+
+
+def FieldKey():
+    class _validator(formencode.validators.FancyValidator):
+        messages = dict(
+            badFormat=_('Key name can only consist of letters, '
+                        'underscore, dash or numbers'),)
+
+        def validate_python(self, value, state):
+            if not re.match('[a-zA-Z0-9_-]+$', value):
+                raise formencode.Invalid(self.message('badFormat', state),
+                                         value, state)
     return _validator

@@ -2,21 +2,18 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Fork') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Fork') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_info.repo_name,h.url('summary_home',repo_name=c.repo_info.repo_name))}
-    &raquo;
-    ${_('fork')}
+    ${_('Fork')}
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('')}
+    ${self.menu('repositories')}
 </%def>
 <%def name="main()">
+${self.context_bar('showforks')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -80,7 +77,8 @@
                     ${h.checkbox('copy_permissions',value="True", checked="checked")}
                     <span class="help-block">${_('Copy permissions from forked repository')}</span>
                 </div>
-             </div>
+            </div>
+            %if c.can_update:
             <div class="field">
                 <div class="label label-checkbox">
                     <label for="private">${_('Update after clone')}:</label>
@@ -89,10 +87,11 @@
                     ${h.checkbox('update_after_clone',value="True")}
                     <span class="help-block">${_('Checkout source after making a clone')}</span>
                 </div>
-             </div>
-	        <div class="buttons">
-	          ${h.submit('',_('fork this repository'),class_="ui-btn large")}
-	        </div>
+            </div>
+            %endif
+            <div class="buttons">
+                ${h.submit('',_('Fork this repository'),class_="ui-btn large")}
+            </div>
         </div>
     </div>
     ${h.end_form()}

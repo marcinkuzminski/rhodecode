@@ -123,7 +123,7 @@ class LdapSettingsController(BaseController):
                         Session().add(setting)
 
                 Session().commit()
-                h.flash(_('Ldap settings updated successfully'),
+                h.flash(_('LDAP settings updated successfully'),
                         category='success')
                 if not ldap_active:
                     #if ldap is missing send an info to user
@@ -144,7 +144,7 @@ class LdapSettingsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of ldap settings'),
+            h.flash(_('Error occurred during update of ldap settings'),
                     category='error')
 
         return redirect(url('ldap_home'))

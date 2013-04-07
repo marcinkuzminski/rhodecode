@@ -38,10 +38,11 @@ from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator, \
     NotAnonymous, HasRepoPermissionAny, HasPermissionAllDecorator,\
     HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User
+from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User,\
+    RhodeCodeUi
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.forms import RepoForkForm
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.scm import ScmModel, GroupList
 from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
@@ -54,7 +55,9 @@ class ForksController(BaseRepoController):
         super(ForksController, self).__before__()
 
     def __load_defaults(self):
-        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
+        acl_groups = GroupList(RepoGroup.query().all(),
+                               perm_set=['group.write', 'group.admin'])
+        c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
         c.landing_revs_choices = choices
@@ -93,9 +96,16 @@ class ForksController(BaseRepoController):
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
 
+        c.can_update = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE).ui_active
+
         defaults = RepoModel()._get_defaults(repo_name)
+        # alter the description to indicate a fork
+        defaults['description'] = ('fork of repository: %s \n%s'
+                                   % (defaults['repo_name'],
+                                      defaults['description']))
         # add suffix to fork
         defaults['repo_name'] = '%s-fork' % defaults['repo_name']
+
         return defaults
 
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -152,11 +162,18 @@ class ForksController(BaseRepoController):
         try:
             form_result = _form.to_python(dict(request.POST))
 
+            # an approximation that is better than nothing
+            if not RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE).ui_active:
+                form_result['update_after_clone'] = False
+
             # create fork is done sometimes async on celery, db transaction
             # management is handled there.
             RepoModel().create_fork(form_result, self.rhodecode_user.user_id)
-            h.flash(_('forked %s repository as %s') \
-                      % (repo_name, form_result['repo_name']),
+            fork_url = h.link_to(form_result['repo_name_full'],
+                    h.url('summary_home', repo_name=form_result['repo_name_full']))
+
+            h.flash(h.literal(_('Forked repository %s as %s') \
+                      % (repo_name, fork_url)),
                     category='success')
         except formencode.Invalid, errors:
             c.new_repo = errors.value['repo_name']
@@ -172,4 +189,4 @@ class ForksController(BaseRepoController):
             h.flash(_('An error occurred during repository forking %s') %
                     repo_name, category='error')
 
-        return redirect(url('home'))
+        return redirect(h.url('summary_home', repo_name=repo_name))

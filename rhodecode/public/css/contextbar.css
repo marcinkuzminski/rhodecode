@@ -1,0 +1,342 @@
+/**
+ * Stylesheets for the context bar
+ */
+
+#quick .repo_switcher { background-image: url("../images/icons/database.png"); }
+#quick .journal { background-image: url("../images/icons/book.png"); }
+#quick .search { background-image: url("../images/icons/search_16.png"); }
+#quick .admin { background-image: url("../images/icons/cog_edit.png"); }
+
+#context-bar a.follow { background-image: url("../images/icons/heart.png"); }
+#context-bar a.following { background-image: url("../images/icons/heart_delete.png"); }
+#context-bar a.fork { background-image: url("../images/icons/arrow_divide.png"); }
+#context-bar a.summary { background-image: url("../images/icons/clipboard_16.png"); }
+#context-bar a.changelogs { background-image: url("../images/icons/time.png"); }
+#context-bar a.files { background-image: url("../images/icons/file.png"); }
+#context-bar a.switch-to { background-image: url("../images/icons/arrow_switch.png"); }
+#context-bar a.options { background-image: url("../images/icons/table_gear.png"); }
+#context-bar a.forks { background-image: url("../images/icons/arrow_divide.png"); }
+#context-bar a.pull-request { background-image: url("../images/icons/arrow_join.png"); }
+#context-bar a.branches { background-image: url("../images/icons/arrow_branch.png"); }
+#context-bar a.tags { background-image: url("../images/icons/tag_blue.png"); }
+#context-bar a.bookmarks { background-image: url("../images/icons/tag_green.png"); }
+#context-bar a.settings { background-image: url("../images/icons/cog.png"); }
+#context-bar a.shortlog { background-image: url("../images/icons/time.png"); }
+#context-bar a.search { background-image: url("../images/icons/search_16.png"); }
+#context-bar a.admin { background-image: url("../images/icons/cog_edit.png"); }
+
+#context-bar a.journal { background-image: url("../images/icons/book.png"); }
+#context-bar a.repos { background-image: url("../images/icons/database_edit.png"); }
+#context-bar a.repos_groups { background-image: url("../images/icons/database_link.png"); }
+#context-bar a.users { background-image: url("../images/icons/user_edit.png"); }
+#context-bar a.groups { background-image: url("../images/icons/group_edit.png"); }
+#context-bar a.permissions { background-image: url("../images/icons/key.png"); }
+#context-bar a.ldap { background-image: url("../images/icons/server_key.png"); }
+#context-bar a.defaults { background-image: url("../images/icons/wrench.png"); }
+#context-bar a.settings { background-image: url("../images/icons/cog_edit.png"); }
+#context-bar a.compare_request { background-image: url('../images/icons/arrow_inout.png')}
+#context-bar a.locking_del { background-image: url('../images/icons/lock_delete.png')}
+#context-bar a.locking_add { background-image: url('../images/icons/lock_add.png')}
+
+#content #context-bar {
+    position: relative;
+    overflow: visible;
+    background-color: #336699;
+    border-top: 1px solid #517da8;
+    border-bottom: 1px solid #003162;
+    padding: 0 5px;
+    min-height: 36px;
+}
+
+#header #header-inner #quick a,
+#content #context-bar,
+#content #context-bar a {
+    color: #FFFFFF;
+}
+
+#header #header-inner #quick a:hover,
+#content #context-bar a:hover {
+    text-decoration: none;
+}
+
+#content #context-bar .icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+}
+
+ul.horizontal-list {
+    display: block;
+}
+
+ul.horizontal-list > li {
+    float: left;
+    position: relative;
+}
+
+#header #header-inner #quick ul,
+ul.horizontal-list > li ul {
+    position: absolute;
+    display: none;
+    right: 0;
+    z-index: 999;
+}
+
+#header #header-inner #quick li:hover > ul,
+ul.horizontal-list li:hover > ul {
+    display: block;
+}
+
+#header #header-inner #quick li ul li,
+ul.horizontal-list ul li {
+    position: relative;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+ul.horizontal-list > li ul ul {
+    position: absolute;
+    right: 100%;
+    top: -1px;
+    min-width: 200px;
+    max-height: 400px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#header #header-inner #quick ul a,
+ul.horizontal-list li a {
+    white-space: nowrap;
+}
+
+#breadcrumbs {
+    float: left;
+    padding: 6px 0 5px 0;
+    padding-left: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#breadcrumbs span {
+    font-weight: bold;
+    font-size: 1.4em;
+}
+
+#header #header-inner #quick ul,
+#revision-changer,
+#context-pages,
+#context-pages ul {
+    background: #3b6998; /* Old browsers */
+    background: -moz-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4574a2), color-stop(100%,#2f5d8b)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #4574a2 0%, #2f5d8b 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #4574a2 0%, #2f5d8b 100%); /* W3C */
+    /*Filter on IE will also use overflow:hidden implicitly, and that would clip our inner menus.*/
+    /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4574a2', endColorstr='#2f5d8b',GradientType=0 ); /* IE6-9 */*/
+}
+
+#header #header-inner #quick a,
+#context-actions a,
+#context-pages a {
+    background-repeat: no-repeat;
+    background-position: 10px 50%;
+    padding-left: 30px;
+}
+
+#quick a,
+#context-pages ul ul a {
+    padding-left: 10px;
+}
+
+ul#context-actions {
+    display: inline-block;
+    float: right;
+    border-radius: 4px;
+    background-image: linear-gradient(top, #4574a2 0%, #2f5d8b 100%);
+}
+
+#content ul#context-actions li {
+    padding: 0px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+#context-actions a {
+    display: block;
+    cursor: pointer;
+    background: none;
+    border: none;
+    margin: 0px;
+    height: auto;
+    padding: 10px 10px 10px 30px;
+    background-repeat: no-repeat;
+    background-position: 10px 50%;
+    font-size: 1em;
+}
+
+#context-actions a {
+    padding: 11px 10px 12px 30px;
+}
+
+#header #header-inner #quick li:hover,
+#revision-changer:hover,
+#context-pages li:hover,
+#context-actions li:hover,
+#content #context-actions li:hover,
+#header #header-inner #quick li.current,
+#context-pages li.current {
+    background: #6388ad; /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); /* W3C */
+    /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#88bfe8', endColorstr='#70b0e0',GradientType=0 ); /* IE6-9 */*/
+}
+
+
+#content #context-actions li:first-child {
+    border-left: none;
+    border-radius: 4px 0 0px 4px;
+}
+
+#content #context-actions li:last-child {
+    border-right: none;
+    border-radius: 0 4px 4px 0;
+}
+
+#content #context-actions .icon {
+    margin: auto;
+    margin-bottom: 5px;
+    display: block;
+    clear: both;
+    float: none;
+}
+
+#content #context-pages .follow .show-following,
+#content #context-pages .following .show-follow {
+    display: none;
+}
+
+#context-pages {
+    float: right;
+    border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+#context-pages li.current {
+    background: #535353; /* Old browsers */
+    background: -moz-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5d5d5d), color-stop(100%,#484848)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #5d5d5d 0%, #484848 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #5d5d5d 0%, #484848 100%); /* W3C */
+}
+
+#content #context-pages .icon {
+    margin-right: 5px;
+}
+
+#header #header-inner #quick li,
+#content #context-pages li {
+    border-right: 1px solid rgba(0,0,0,0.1);
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding: 0;
+}
+#header #header-inner #quick li:last-child,
+#content #context-pages li:last-child {
+    border-right: none;
+}
+
+#header #header-inner #quick > li:first-child {
+    border-left: none;
+}
+
+#header #header-inner #quick > li:first-child > a {
+    border-radius: 4px 0 0 4px;
+}
+
+#header #header-inner #quick a,
+#context-pages a,
+#context-pages .admin_menu a {
+    display: block;
+    padding: 0px 10px 1px 30px;
+    padding-left: 30px;
+    line-height: 35px;
+}
+
+#header #header-inner #quick a.thin,
+#context-pages a.thin,
+#context-pages .admin_menu a.thin {
+    line-height: 28px !important;
+}
+
+#header #header-inner #quick a#quick_login_link {
+    padding-left: 0px;
+}
+
+#header #header-inner #quick a {
+    overflow: hidden;
+}
+#quick a.childs:after,
+#revision-changer:before,
+#context-pages a.childs:after,
+#context-pages a.dropdown:after {
+    content: ' \25BE';
+}
+#context-pages a.childs {
+    padding-right: 30px;
+}
+#context-pages a.childs:after {
+    position: absolute;
+    float: right;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#revision-changer:before {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    height: 25px;
+    padding-top: 10px;
+    padding-right: 10px;
+}
+
+#context-pages li:last-child a {
+    padding-right: 10px;
+}
+
+#context-bar #revision-changer {
+    position: relative;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #FFFFFF;
+    font-size: 0.85em;
+    padding: 2px 15px;
+    padding-bottom: 3px;
+    padding-right: 30px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+#revision-changer .branch-name,
+#revision-changer .revision {
+    display: block;
+    text-align: center;
+    line-height: 1.5em;
+}
+
+#revision-changer .branch-name {
+    font-weight: bold;
+}
+
+#revision-changer .revision {
+    text-transform: uppercase;
+}

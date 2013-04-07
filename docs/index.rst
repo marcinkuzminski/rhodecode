@@ -13,7 +13,7 @@ Users Guide
    installation
    setup
    upgrade
-   
+
 **Usage**
 
 .. toctree::
@@ -33,7 +33,7 @@ Users Guide
 
 .. toctree::
    :maxdepth: 1
-   
+
    contributing
    changelog
 
@@ -44,7 +44,7 @@ Users Guide
 
    api/api
    api/models
-   
+
 
 Other topics
 ------------

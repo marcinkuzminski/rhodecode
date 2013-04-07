@@ -99,9 +99,9 @@ class UsersController(BaseController):
                 "lastname": user.lastname,
                 "last_login": h.fmt_date(user.last_login),
                 "last_login_raw": datetime_to_time(user.last_login),
-                "active": h.bool2icon(user.active),
-                "admin": h.bool2icon(user.admin),
-                "ldap": h.bool2icon(bool(user.ldap_dn)),
+                "active": h.boolicon(user.active),
+                "admin": h.boolicon(user.admin),
+                "ldap": h.boolicon(bool(user.ldap_dn)),
                 "action": user_actions(user.user_id, user.username),
             })
 
@@ -127,7 +127,7 @@ class UsersController(BaseController):
             usr = form_result['username']
             action_logger(self.rhodecode_user, 'admin_created_user:%s' % usr,
                           None, self.ip_addr, self.sa)
-            h.flash(_('created user %s') % usr,
+            h.flash(_('Created user %s') % usr,
                     category='success')
             Session().commit()
         except formencode.Invalid, errors:
@@ -139,7 +139,7 @@ class UsersController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during creation of user %s') \
+            h.flash(_('Error occurred during creation of user %s') \
                     % request.POST.get('username'), category='error')
         return redirect(url('users'))
 
@@ -195,7 +195,7 @@ class UsersController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of user %s') \
+            h.flash(_('Error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
         return redirect(url('edit_user', id=id))
 
@@ -211,7 +211,7 @@ class UsersController(BaseController):
         try:
             UserModel().delete(usr)
             Session().commit()
-            h.flash(_('successfully deleted user'), category='success')
+            h.flash(_('Successfully deleted user'), category='success')
         except (UserOwnsReposException, DefaultUserException), e:
             h.flash(e, category='warning')
         except Exception:

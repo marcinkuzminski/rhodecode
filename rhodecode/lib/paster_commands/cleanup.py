@@ -3,6 +3,9 @@
     package.rhodecode.lib.cleanup
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    cleanup-repos paster command for RhodeCode
+
+
     :created_on: Jul 14, 2012
     :author: marcink
     :copyright: (C) 2010-2012 Marcin Kuzminski <marcin@python-works.com>
@@ -30,30 +33,28 @@ import logging
 import datetime
 
 from os.path import dirname as dn, join as jn
-from rhodecode.model import init_model
-from rhodecode.lib.utils2 import engine_from_config, safe_str
+#to get the rhodecode import
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
+from rhodecode.lib.utils import BasePasterCommand, ask_ok, REMOVED_REPO_PAT
+
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.model.db import RhodeCodeUi
 
-
-#to get the rhodecode import
-sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
-
-from rhodecode.lib.utils import BasePasterCommand, Command, ask_ok,\
-    REMOVED_REPO_PAT, add_cache
 
 log = logging.getLogger(__name__)
 
 
-class CleanupCommand(BasePasterCommand):
+class Command(BasePasterCommand):
 
     max_args = 1
     min_args = 1
 
     usage = "CONFIG_FILE"
-    summary = "Cleanup deleted repos"
     group_name = "RhodeCode"
     takes_config_file = -1
-    parser = Command.standard_parser(verbose=True)
+    parser = BasePasterCommand.standard_parser(verbose=True)
+    summary = "Cleanup deleted repos"
 
     def _parse_older_than(self, val):
         regex = re.compile(r'((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
@@ -78,21 +79,23 @@ class CleanupCommand(BasePasterCommand):
         return datetime.datetime.strptime(date_part, '%Y%m%d_%H%M%S')
 
     def command(self):
-        logging.config.fileConfig(self.path_to_ini_file)
-        from pylons import config
-
-        #get to remove repos !!
-        add_cache(config)
-        engine = engine_from_config(config, 'sqlalchemy.db1.')
-        init_model(engine)
+        #get SqlAlchemy session
+        self._init_session()
 
         repos_location = RhodeCodeUi.get_repos_location()
         to_remove = []
         for dn, dirs, f in os.walk(safe_str(repos_location)):
-            for loc in dirs:
+            alldirs = list(dirs)
+            del dirs[:]
+            if ('.hg' in alldirs or
+                'objects' in alldirs and ('refs' in alldirs or 'packed-refs' in f)):
+                continue
+            for loc in alldirs:
                 if REMOVED_REPO_PAT.match(loc):
                     to_remove.append([os.path.join(dn, loc),
                                       self._extract_date(loc)])
+                else:
+                    dirs.append(loc)
 
         #filter older than (if present)!
         now = datetime.datetime.now()
@@ -106,7 +109,7 @@ class CleanupCommand(BasePasterCommand):
                     to_remove_filtered.append([name, date_])
 
             to_remove = to_remove_filtered
-            print >> sys.stdout, 'removing [%s] deleted repos older than %s[%s]' \
+            print >> sys.stdout, 'removing %s deleted repos older than %s (%s)' \
                 % (len(to_remove), older_than, older_than_date)
         else:
             print >> sys.stdout, 'removing all [%s] deleted repos' \
@@ -115,30 +118,36 @@ class CleanupCommand(BasePasterCommand):
             # don't ask just remove !
             remove = True
         else:
-            remove = ask_ok('are you sure to remove listed repos \n%s [y/n]?'
+            remove = ask_ok('the following repositories will be deleted completely:\n%s\n'
+                            'are you sure you want to remove them [y/n]?'
                             % ', \n'.join(['%s removed on %s'
                     % (safe_str(x[0]), safe_str(x[1])) for x in to_remove]))
 
         if remove:
-            for name, date_ in to_remove:
-                print >> sys.stdout, 'removing repository %s' % name
-                shutil.rmtree(os.path.join(repos_location, name))
+            for path, date_ in to_remove:
+                print >> sys.stdout, 'removing repository %s' % path
+                shutil.rmtree(path)
         else:
             print 'nothing done exiting...'
             sys.exit(0)
 
     def update_parser(self):
-        self.parser.add_option('--older-than',
-                          action='store',
-                          dest='older_than',
-                          help=(
-                            "only remove repos that have been removed "
-                            "at least given time ago "
-                            "ex. --older-than=30d deletes repositores "
-                            "removed more than 30days ago. Possible options "
-                            "d[ays]/h[ours]/m[inutes]/s[seconds]. OPTIONAL"),
-                          )
-        self.parser.add_option('--dont-ask',
-                               action='store_true',
-                               dest='dont_ask',
-                               help=("Don't ask to remove repos"))
+        self.parser.add_option(
+            '--older-than',
+            action='store',
+            dest='older_than',
+            help=("only remove repos that have been removed "
+                 "at least given time ago. "
+                 "The default is to remove all removed repositories. "
+                 "Possible suffixes: "
+                 "d (days), h (hours), m (minutes), s (seconds). "
+                 "For example --older-than=30d deletes repositories "
+                 "removed more than 30 days ago.")
+            )
+
+        self.parser.add_option(
+            '--dont-ask',
+            action="store_true",
+            dest="dont_ask",
+            help="remove repositories without asking for confirmation."
+        )

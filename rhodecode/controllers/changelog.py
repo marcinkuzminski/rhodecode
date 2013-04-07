@@ -86,8 +86,8 @@ class ChangelogController(BaseRepoController):
             c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='warning')
-            return redirect(url('home'))
+            h.flash(str(e), category='error')
+            return redirect(url('changelog_home', repo_name=c.repo_name))
 
         self._graph(c.rhodecode_repo, collection, c.total_cs, c.size, p)
 

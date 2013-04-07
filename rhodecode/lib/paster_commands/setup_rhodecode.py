@@ -1,26 +1,30 @@
 import os
+import sys
 from paste.script.appinstall import AbstractInstallCommand
 from paste.script.command import BadCommand
 from paste.deploy import appconfig
 
+from os.path import dirname as dn, join as jn
+#to get the rhodecode import
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
 
-class SetupCommand(AbstractInstallCommand):
+
+class Command(AbstractInstallCommand):
 
     default_verbosity = 1
     max_args = 1
     min_args = 1
     summary = "Setup an application, given a config file"
     usage = "CONFIG_FILE"
+    group_name = "RhodeCode"
 
     description = """\
-    Note: this is an experimental command, and it will probably change
-    in several ways by the next release.
 
-    Setup an application according to its configuration file.  This is
+    Setup RhodeCode according to its configuration file.  This is
     the second part of a two-phase web application installation
-    process (the first phase is prepare-app).  The setup process may
-    consist of things like creating directories and setting up
-    databases.
+    process (the first phase is prepare-app).  The setup process
+    consist of things like setting up databases, creating super user
     """
 
     parser = AbstractInstallCommand.standard_parser(

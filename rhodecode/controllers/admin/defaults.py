@@ -107,7 +107,7 @@ class DefaultsController(BaseController):
                 encoding="UTF-8")
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of defaults'),
+            h.flash(_('Error occurred during update of defaults'),
                     category='error')
 
         return redirect(url('defaults'))

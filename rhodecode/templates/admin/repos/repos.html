@@ -2,14 +2,14 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Repositories administration')} - ${c.rhodecode_name}
+    ${_('Repositories administration')} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; <span id="repo_count">0</span> ${_('repositories')}
+    <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value=""/> ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; <span id="repo_count">0</span> ${_('repositories')}
 </%def>
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 <%def name="main()">
 <div class="box">
@@ -18,7 +18,7 @@
         ${self.breadcrumbs()}
         <ul class="links">
           <li>
-            <span>${h.link_to(_(u'ADD REPOSITORY'),h.url('new_repo'))}</span>
+            <span>${h.link_to(_(u'Add repository'),h.url('new_repo'))}</span>
           </li>
         </ul>
     </div>
@@ -69,7 +69,7 @@
   var myColumnDefs = [
       {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
       {key:"name",label:"${_('Name')}",sortable:true,
-    	  sortOptions: { sortFunction: nameSort }},
+          sortOptions: { sortFunction: nameSort }},
       {key:"desc",label:"${_('Description')}",sortable:true},
       {key:"last_changeset",label:"${_('Tip')}",sortable:true,
           sortOptions: { sortFunction: revisionSort }},
@@ -126,11 +126,10 @@
 
   };
   YUE.on('q_filter','click',function(){
-	  if(!YUD.hasClass('q_filter', 'loaded')){
-		  YUD.get('q_filter').value = '';
-		  //TODO: load here full list later to do search within groups
-		  YUD.addClass('q_filter', 'loaded');
-	  }
+      if(!YUD.hasClass('q_filter', 'loaded')){
+          //TODO: load here full list later to do search within groups
+          YUD.addClass('q_filter', 'loaded');
+      }
    });
 
   YUE.on('q_filter','keyup',function (e) {

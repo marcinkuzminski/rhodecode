@@ -43,6 +43,7 @@ from sqlalchemy.engine import create_engine
 from rhodecode.model.repos_group import ReposGroupModel
 #from rhodecode.model import meta
 from rhodecode.model.meta import Session, Base
+from rhodecode.model.repo import RepoModel
 
 
 log = logging.getLogger(__name__)
@@ -66,12 +67,11 @@ class DbManage(object):
         self.db_exists = False
         self.cli_args = cli_args
         self.init_db()
-        global ask_ok
 
-        if self.cli_args.get('force_ask') is True:
-            ask_ok = lambda *args, **kwargs: True
-        elif self.cli_args.get('force_ask') is False:
-            ask_ok = lambda *args, **kwargs: False
+        force_ask = self.cli_args.get('force_ask')
+        if force_ask is not None:
+            global ask_ok
+            ask_ok = lambda *args, **kwargs: force_ask
 
     def init_db(self):
         engine = create_engine(self.dburi, echo=self.log_sql)
@@ -289,6 +289,9 @@ class DbManage(object):
             def step_10(self):
                 pass
 
+            def step_11(self):
+                self.klass.update_repo_info()
+
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
@@ -315,7 +318,7 @@ class DbManage(object):
         try:
             self.sa.add(paths)
             self.sa.commit()
-        except:
+        except Exception:
             self.sa.rollback()
             raise
 
@@ -335,7 +338,7 @@ class DbManage(object):
         try:
             self.sa.add(def_user)
             self.sa.commit()
-        except:
+        except Exception:
             self.sa.rollback()
             raise
 
@@ -349,7 +352,7 @@ class DbManage(object):
         try:
             self.sa.add(hgsettings3)
             self.sa.commit()
-        except:
+        except Exception:
             self.sa.rollback()
             raise
 
@@ -549,6 +552,9 @@ class DbManage(object):
             self.populate_default_permissions()
         return fixed
 
+    def update_repo_info(self):
+        RepoModel.update_repoinfo()
+
     def config_prompt(self, test_repo_path='', retries=3):
         defaults = self.cli_args
         _path = defaults.get('repos_location')
@@ -582,7 +588,7 @@ class DbManage(object):
 
         if retries == 0:
             sys.exit('max retries reached')
-        if path_ok is False:
+        if not path_ok:
             retries -= 1
             return self.config_prompt(test_repo_path, retries)
 
@@ -704,7 +710,8 @@ class DbManage(object):
                 reg_perm.permission = perm
                 self.sa.add(reg_perm)
 
-    def finish(self):
+    @staticmethod
+    def check_waitress():
         """
         Function executed at the end of setup
         """

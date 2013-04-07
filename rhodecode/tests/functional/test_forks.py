@@ -27,7 +27,7 @@ class TestForksController(TestController):
         response = self.app.get(url(controller='forks', action='forks',
                                     repo_name=repo_name))
 
-        self.assertTrue("""There are no forks yet""" in response.body)
+        response.mustcontain("""There are no forks yet""")
 
     def test_no_permissions_to_fork(self):
         usr = self.log_user(TEST_USER_REGULAR_LOGIN,
@@ -66,7 +66,7 @@ class TestForksController(TestController):
                                     repo_name=repo_name))
 
         response.mustcontain(
-            """<a href="/%s/summary">%s</a>""" % (fork_name, fork_name)
+            """<a href="/%s">%s</a>""" % (fork_name, fork_name)
         )
 
         #remove this fork
@@ -95,7 +95,7 @@ class TestForksController(TestController):
                                     repo_name=repo_name))
 
         response.mustcontain(
-            """<a href="/%s/summary">%s</a>""" % (fork_name, fork_name)
+            """<a href="/%s">%s</a>""" % (fork_name, fork_name)
         )
 
         #remove this fork
@@ -109,7 +109,7 @@ class TestForksController(TestController):
         org_repo = Repository.get_by_repo_name(repo_name)
         response = self.app.post(url(controller='forks', action='fork_create',
                                     repo_name=repo_name),
-                                    {'repo_name':fork_name,
+                                    {'repo_name': fork_name,
                                      'repo_group':'',
                                      'fork_parent_id':org_repo.repo_id,
                                      'repo_type':'hg',
@@ -119,7 +119,8 @@ class TestForksController(TestController):
 
         #test if we have a message that fork is ok
         self.checkSessionFlash(response,
-                'forked %s repository as %s' % (repo_name, fork_name))
+                'Forked repository %s as <a href="/%s">%s</a>'
+                % (repo_name, fork_name, fork_name))
 
         #test if the fork was created in the database
         fork_repo = Session().query(Repository)\
@@ -134,7 +135,7 @@ class TestForksController(TestController):
         response = self.app.get(url(controller='summary', action='index',
                                     repo_name=fork_name))
 
-        self.assertTrue('Fork of %s' % repo_name in response.body)
+        response.mustcontain('Fork of %s' % repo_name)
 
     def test_zz_fork_permission_page(self):
         usr = self.log_user(self.username, self.password)['user_id']

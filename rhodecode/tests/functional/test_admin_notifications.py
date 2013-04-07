@@ -22,8 +22,7 @@ class TestNotificationsController(TestController):
         u1 = u1.user_id
 
         response = self.app.get(url('notifications'))
-        self.assertTrue('''<div class="table">No notifications here yet</div>'''
-                        in response.body)
+        response.mustcontain('<div class="table">No notifications here yet</div>')
 
         cur_user = self._get_logged_user()
 
@@ -32,7 +31,7 @@ class TestNotificationsController(TestController):
                                    recipients=[cur_user])
         self.Session().commit()
         response = self.app.get(url('notifications'))
-        self.assertTrue(u'test_notification_1' in response.body)
+        response.mustcontain(u'test_notification_1')
 
 #    def test_index_as_xml(self):
 #        response = self.app.get(url('formatted_notifications', format='xml'))

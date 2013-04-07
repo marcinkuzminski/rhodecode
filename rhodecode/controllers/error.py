@@ -91,7 +91,7 @@ class ErrorController(BaseController):
             [400, 401, 403, 404, 500]'''
         try:
             code = int(code)
-        except:
+        except Exception:
             code = 500
 
         if code == 400:

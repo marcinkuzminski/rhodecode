@@ -1,7 +1,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Edit file') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Files Add') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="js_extra()">
@@ -11,18 +11,16 @@
 <link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
 </%def>
 
-<%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
-    ${_('add file')} @ R${c.cs.revision}:${h.short_id(c.cs.raw_id)}
+<%def name="page_nav()">
+    ${self.menu('repositories')}
 </%def>
 
-<%def name="page_nav()">
-		${self.menu('files')}
+<%def name="breadcrumbs_links()">
+    ${_('Add file')} @ ${h.show_id(c.cs)}
 </%def>
+
 <%def name="main()">
+${self.context_bar('files')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -30,13 +28,13 @@
         <ul class="links">
             <li>
               <span style="text-transform: uppercase;">
-              <a href="#">${_('branch')}: ${c.cs.branch}</a></span>
+              <a href="#">${_('Branch')}: ${c.cs.branch}</a></span>
             </li>
         </ul>
     </div>
     <div class="table">
-		<div id="files_data">
-		  ${h.form(h.url.current(),method='post',id='eform',enctype="multipart/form-data")}
+        <div id="files_data">
+          ${h.form(h.url.current(),method='post',id='eform',enctype="multipart/form-data")}
             <h3>${_('Add new file')}</h3>
             <div class="form">
               <div class="fields">
@@ -51,7 +49,7 @@
                   </div>
                   <div id="upload_file_container" class="field" style="display:none">
                     <div class="label">
-                        <label for="location">${_('Upload file')}</label>
+                        <label for="upload_file_container">${_('Upload file')}</label>
                     </div>
                     <div class="file">
                         <input type="file"  size="30" name="upload_file" id="upload_file">
@@ -69,24 +67,24 @@
                    </div>
               </div>
             </div>
-			<div id="body" class="codeblock">
-			    <div id="editor_container">
+            <div id="body" class="codeblock">
+                <div id="editor_container">
                     <pre id="editor_pre"></pre>
-				    <textarea id="editor" name="content" style="display:none"></textarea>
+                    <textarea id="editor" name="content" style="display:none"></textarea>
                 </div>
-				<div style="padding: 10px;color:#666666">${_('commit message')}</div>
-				<textarea id="commit" name="message" style="height: 100px;width: 99%;margin-left:4px"></textarea>
-			</div>
-			<div style="text-align: l;padding-top: 5px">
+                <div style="padding: 10px;color:#666666">${_('Commit message')}</div>
+                <textarea id="commit" name="message" style="height: 100px;width: 99%;margin-left:4px" placeholder="${c.default_message}"></textarea>
+            </div>
+            <div style="text-align: l;padding-top: 5px">
             ${h.submit('commit',_('Commit changes'),class_="ui-btn")}
             ${h.reset('reset',_('Reset'),class_="ui-btn")}
-			</div>
-			${h.end_form()}
-			<script type="text/javascript">
-			var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path)}";
-		    initCodeMirror('editor',reset_url);
-			</script>
-		</div>
+            </div>
+            ${h.end_form()}
+            <script type="text/javascript">
+            var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path)}";
+            initCodeMirror('editor',reset_url);
+            </script>
+        </div>
     </div>
 </div>
 </%def>

@@ -2,15 +2,17 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Settings administration')} - ${c.rhodecode_name}
+    ${_('Settings administration')} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_('Admin'),h.url('admin_home'))} &raquo; ${_('Settings')}
+    ${h.link_to(_('Admin'),h.url('admin_home'))}
+    &raquo;
+    ${_('Settings')}
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
@@ -27,20 +29,20 @@
         <!-- fields -->
 
         <div class="fields">
-			<div class="field">
-		        <div class="label label-checkbox">
-		            <label for="destroy">${_('rescan option')}:</label>
-		        </div>
-		        <div class="checkboxes">
-		            <div class="checkbox">
-		                ${h.checkbox('destroy',True)}
-		                <label for="destroy">
-		                <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
-		                ${_('destroy old data')}</span> </label>
-		            </div>
+            <div class="field">
+                <div class="label label-checkbox">
+                    <label for="destroy">${_('Rescan option')}:</label>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('destroy',True)}
+                        <label for="destroy">
+                        <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
+                        ${_('Destroy old data')}</span> </label>
+                    </div>
                     <span class="help-block">${_('Rescan repositories location for new repositories. Also deletes obsolete if `destroy` flag is checked ')}</span>
-		        </div>
-			</div>
+                </div>
+            </div>
 
             <div class="buttons">
             ${h.submit('rescan',_('Rescan repositories'),class_="ui-btn large")}
@@ -57,12 +59,12 @@
         <div class="fields">
             <div class="field">
                 <div class="label label-checkbox">
-                    <label>${_('index build option')}:</label>
+                    <label>${_('Index build option')}:</label>
                 </div>
                 <div class="checkboxes">
                     <div class="checkbox">
                         ${h.checkbox('full_index',True)}
-                        <label for="full_index">${_('build from scratch')}</label>
+                        <label for="full_index">${_('Build from scratch')}</label>
                     </div>
                 </div>
             </div>
@@ -83,7 +85,7 @@
 
              <div class="field">
                 <div class="label">
-                    <label for="rhodecode_title">${_('Application name')}:</label>
+                    <label for="rhodecode_title">${_('Site branding')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('rhodecode_title',size=30)}
@@ -92,7 +94,7 @@
 
             <div class="field">
                 <div class="label">
-                    <label for="rhodecode_realm">${_('Realm text')}:</label>
+                    <label for="rhodecode_realm">${_('HTTP authentication realm')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('rhodecode_realm',size=30)}
@@ -101,7 +103,7 @@
 
             <div class="field">
                 <div class="label">
-                    <label for="rhodecode_ga_code">${_('GA code')}:</label>
+                    <label for="rhodecode_ga_code">${_('Google Analytics code')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('rhodecode_ga_code',size=30)}
@@ -131,7 +133,13 @@
                         ${h.checkbox('rhodecode_lightweight_dashboard','True')}
                         <label for="rhodecode_lightweight_dashboard">${_('Use lightweight dashboard')}</label>
                     </div>
-                 </div>
+                </div>
+                <div class="checkboxes">
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_repository_fields','True')}
+                        <label for="rhodecode_repository_fields">${_('Use repository extra fields')}</label>
+                    </div>
+                </div>
              </div>
 
              <div class="field">
@@ -191,17 +199,17 @@
 
         <div class="fields">
 
-             <div class="field">
+            <div class="field">
                 <div class="label label-checkbox">
                     <label>${_('Web')}:</label>
                 </div>
                 <div class="checkboxes">
-					<div class="checkbox">
-						${h.checkbox('web_push_ssl', 'True')}
-						<label for="web_push_ssl">${_('require ssl for vcs operations')}</label>
-					</div>
+                    <div class="checkbox">
+                        ${h.checkbox('web_push_ssl', 'True')}
+                        <label for="web_push_ssl">${_('Require SSL for vcs operations')}</label>
+                    </div>
                     <span class="help-block">${_('RhodeCode will require SSL for pushing or pulling. If SSL is missing it will return HTTP Error 406: Not Acceptable')}</span>
-				</div>
+                </div>
              </div>
 
              <div class="field">
@@ -209,14 +217,14 @@
                     <label>${_('Hooks')}:</label>
                 </div>
                 <div class="checkboxes">
-					<div class="checkbox">
-						${h.checkbox('hooks_changegroup_update','True')}
-						<label for="hooks_changegroup_update">${_('Update repository after push (hg update)')}</label>
-					</div>
-					<div class="checkbox">
-						${h.checkbox('hooks_changegroup_repo_size','True')}
-						<label for="hooks_changegroup_repo_size">${_('Show repository size after push')}</label>
-					</div>
+                    <div class="checkbox">
+                        ${h.checkbox('hooks_changegroup_update','True')}
+                        <label for="hooks_changegroup_update">${_('Update repository after push (hg update)')}</label>
+                    </div>
+                    <div class="checkbox">
+                        ${h.checkbox('hooks_changegroup_repo_size','True')}
+                        <label for="hooks_changegroup_repo_size">${_('Show repository size after push')}</label>
+                    </div>
                     <div class="checkbox">
                         ${h.checkbox('hooks_changegroup_push_logger','True')}
                         <label for="hooks_changegroup_push_logger">${_('Log user push commands')}</label>
@@ -225,9 +233,9 @@
                         ${h.checkbox('hooks_outgoing_pull_logger','True')}
                         <label for="hooks_outgoing_pull_logger">${_('Log user pull commands')}</label>
                     </div>
-				</div>
+                </div>
                 <div class="input" style="margin-top:10px">
-                    ${h.link_to(_('advanced setup'),url('admin_edit_setting',setting_id='hooks'),class_="ui-btn")}
+                    ${h.link_to(_('Advanced setup'),url('admin_edit_setting',setting_id='hooks'))}
                 </div>
              </div>
              <div class="field">
@@ -237,29 +245,30 @@
                 <div class="checkboxes">
                     <div class="checkbox">
                         ${h.checkbox('extensions_largefiles','True')}
-                        <label for="extensions_hgsubversion">${_('largefiles extensions')}</label>
+                        <label for="extensions_largefiles">${_('Enable largefiles extension')}</label>
                     </div>
                     <div class="checkbox">
                         ${h.checkbox('extensions_hgsubversion','True')}
-                        <label for="extensions_hgsubversion">${_('hgsubversion extensions')}</label>
+                        <label for="extensions_hgsubversion">${_('Enable hgsubversion extension')}</label>
                     </div>
-                    <span class="help-block">${_('Requires hgsubversion library installed. Allows clonning from svn remote locations')}</span>
+                    <span class="help-block">${_('Requires hgsubversion library installed. Allows cloning from svn remote locations')}</span>
                     ##<div class="checkbox">
                     ##    ${h.checkbox('extensions_hggit','True')}
-                    ##    <label for="extensions_hggit">${_('hg-git extensions')}</label>
+                    ##    <label for="extensions_hggit">${_('Enable hg-git extension')}</label>
                     ##</div>
-                    ##<span class="help-block">${_('Requires hg-git library installed. Allows clonning from git remote locations')}</span>
+                    ##<span class="help-block">${_('Requires hg-git library installed. Allows cloning from git remote locations')}</span>
                 </div>
-             </div>
+            </div>
             <div class="field">
                 <div class="label">
                     <label for="paths_root_path">${_('Repositories location')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('paths_root_path',size=30,readonly="readonly")}
-					<span id="path_unlock" class="tooltip"
-						title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
-		                ${_('unlock')}</span>
+                    <span id="path_unlock" class="tooltip"
+                            title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
+                        ${_('Unlock')}
+                    </span>
                     <span class="help-block">${_('Location where repositories are stored. After changing this value a restart, and rescan is required')}</span>
                 </div>
             </div>
@@ -304,9 +313,9 @@
 
     <h3>${_('System Info and Packages')}</h3>
     <div class="form">
-    <div>
-        <h5 id="expand_modules" style="cursor: pointer">&darr; ${_('show')} &darr;</h5>
-    </div>
+      <div>
+        <h5 id="expand_modules" style="cursor: pointer">&darr; ${_('Show')} &darr;</h5>
+      </div>
       <div id="expand_modules_table"  style="display:none">
       <h5>Python - ${c.py_version}</h5>
       <h5>System - ${c.platform}</h5>
@@ -329,8 +338,8 @@
 
     <script type="text/javascript">
     YUE.on('expand_modules','click',function(e){
-    	YUD.setStyle('expand_modules_table','display','');
-    	YUD.setStyle('expand_modules','display','none');
+            YUD.setStyle('expand_modules_table','display','');
+            YUD.setStyle('expand_modules','display','none');
     })
     </script>
 

@@ -19,6 +19,7 @@ def get_current_revision(quiet=False):
         return (tip.revision, tip.short_id)
     except Exception, err:
         if not quiet:
-            print ("Cannot retrieve rhodecode's revision. Original error "
-                   "was: %s" % err)
+            print ("WARNING: Cannot retrieve rhodecode's revision. "
+                   "disregard this if you don't know what that means. "
+                   "Original error was: %s" % err)
         return None

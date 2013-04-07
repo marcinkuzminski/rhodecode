@@ -79,7 +79,8 @@ from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
     HTTPBadRequest, HTTPNotAcceptable
 
-from rhodecode.lib.utils2 import safe_str, fix_PATH, get_server_url
+from rhodecode.lib.utils2 import safe_str, fix_PATH, get_server_url,\
+    _set_extras
 from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import is_valid_repo, make_ui
@@ -121,11 +122,11 @@ class SimpleGit(BaseVCSController):
         try:
             repo_name = self.__get_repository(environ)
             log.debug('Extracted repo name is %s' % repo_name)
-        except:
+        except Exception:
             return HTTPInternalServerError()(environ, start_response)
 
         # quick check if that dir exists...
-        if is_valid_repo(repo_name, self.basepath, 'git') is False:
+        if not is_valid_repo(repo_name, self.basepath, 'git'):
             return HTTPNotFound()(environ, start_response)
 
         #======================================================================
@@ -142,11 +143,11 @@ class SimpleGit(BaseVCSController):
             anonymous_perm = self._check_permission(action, anonymous_user,
                                                     repo_name, ip_addr)
 
-            if anonymous_perm is not True or anonymous_user.active is False:
-                if anonymous_perm is not True:
+            if not anonymous_perm or not anonymous_user.active:
+                if not anonymous_perm:
                     log.debug('Not enough credentials to access this '
                               'repository as anonymous user')
-                if anonymous_user.active is False:
+                if not anonymous_user.active:
                     log.debug('Anonymous access is disabled, running '
                               'authentication')
                 #==============================================================
@@ -177,13 +178,13 @@ class SimpleGit(BaseVCSController):
                     if user is None or not user.active:
                         return HTTPForbidden()(environ, start_response)
                     username = user.username
-                except:
+                except Exception:
                     log.error(traceback.format_exc())
                     return HTTPInternalServerError()(environ, start_response)
 
                 #check permissions for this repository
                 perm = self._check_permission(action, user, repo_name, ip_addr)
-                if perm is not True:
+                if not perm:
                     return HTTPForbidden()(environ, start_response)
 
         # extras are injected into UI object and later available
@@ -205,7 +206,8 @@ class SimpleGit(BaseVCSController):
         #===================================================================
         # GIT REQUEST HANDLING
         #===================================================================
-        repo_path = os.path.join(safe_str(self.basepath), safe_str(repo_name))
+        str_repo_name = safe_str(repo_name)
+        repo_path = os.path.join(safe_str(self.basepath),str_repo_name)
         log.debug('Repository path is %s' % repo_path)
 
         # CHECK LOCKING only if it's not ANONYMOUS USER
@@ -230,11 +232,12 @@ class SimpleGit(BaseVCSController):
         try:
             self._handle_githooks(repo_name, action, baseui, environ)
             log.info('%s action on GIT repo "%s" by "%s" from %s' %
-                     (action, repo_name, username, ip_addr))
+                     (action, str_repo_name, safe_str(username), ip_addr))
             app = self.__make_app(repo_name, repo_path, extras)
             return app(environ, start_response)
         except HTTPLockedRC, e:
-            log.debug('Repository LOCKED ret code 423!')
+            _code = CONFIG.get('lock_ret_code')
+            log.debug('Repository LOCKED ret code %s!' % (_code))
             return e(environ, start_response)
         except Exception:
             log.error(traceback.format_exc())
@@ -270,7 +273,7 @@ class SimpleGit(BaseVCSController):
         try:
             environ['PATH_INFO'] = self._get_by_id(environ['PATH_INFO'])
             repo_name = GIT_PROTO_PAT.match(environ['PATH_INFO']).group(1)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -315,7 +318,6 @@ class SimpleGit(BaseVCSController):
         from rhodecode.model.db import Repository
         _repo = Repository.get_by_repo_name(repo_name)
         _repo = _repo.scm_instance
-        _repo._repo.ui = baseui
 
         _hooks = dict(baseui.configitems('hooks')) or {}
         if action == 'pull':
@@ -332,10 +334,4 @@ class SimpleGit(BaseVCSController):
         :param extras: dict with extra params to put into baseui
         """
 
-        # make our hgweb quiet so it doesn't print output
-        baseui.setconfig('ui', 'quiet', 'true')
-
-        #inject some additional parameters that will be available in ui
-        #for hooks
-        for k, v in extras.items():
-            baseui.setconfig('rhodecode_extras', k, v)
+        _set_extras(extras)

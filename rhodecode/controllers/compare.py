@@ -3,7 +3,7 @@
     rhodecode.controllers.compare
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    compare controller for pylons showoing differences between two
+    compare controller for pylons showing differences between two
     repos, branches, bookmarks or tips
 
     :created_on: May 6, 2012
@@ -40,7 +40,6 @@ from rhodecode.lib import diffs
 from rhodecode.model.db import Repository
 from rhodecode.model.pull_request import PullRequestModel
 from webob.exc import HTTPBadRequest
-from rhodecode.lib.utils2 import str2bool
 from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
@@ -84,80 +83,85 @@ class CompareController(BaseRepoController):
             raise HTTPBadRequest()
 
     def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
-
+        # org_ref will be evaluated in org_repo
         org_repo = c.rhodecode_db_repo.repo_name
         org_ref = (org_ref_type, org_ref)
+        # other_ref will be evaluated in other_repo
         other_ref = (other_ref_type, other_ref)
-        other_repo = request.GET.get('repo', org_repo)
-        incoming_changesets = str2bool(request.GET.get('bundle', False))
-        c.fulldiff = fulldiff = request.GET.get('fulldiff')
-        rev_start = request.GET.get('rev_start')
-        rev_end = request.GET.get('rev_end')
+        other_repo = request.GET.get('other_repo', org_repo)
+        # If merge is True:
+        #   Show what org would get if merged with other:
+        #   List changesets that are ancestors of other but not of org.
+        #   New changesets in org is thus ignored.
+        #   Diff will be from common ancestor, and merges of org to other will thus be ignored.
+        # If merge is False:
+        #   Make a raw diff from org to other, no matter if related or not.
+        #   Changesets in one and not in the other will be ignored
+        merge = bool(request.GET.get('merge'))
+        # fulldiff disables cut_off_limit
+        c.fulldiff = request.GET.get('fulldiff')
+        # partial uses compare_cs.html template directly
+        partial = request.environ.get('HTTP_X_PARTIAL_XHR')
+        # as_form puts hidden input field with changeset revisions
+        c.as_form = partial and request.GET.get('as_form')
+        # swap url for compare_diff page - never partial and never as_form
+        c.swap_url = h.url('compare_url',
+            repo_name=other_repo,
+            org_ref_type=other_ref[0], org_ref=other_ref[1],
+            other_repo=org_repo,
+            other_ref_type=org_ref[0], other_ref=org_ref[1],
+            merge=merge or '')
 
-        c.swap_url = h.url('compare_url', repo_name=other_repo,
-              org_ref_type=other_ref[0], org_ref=other_ref[1],
-              other_ref_type=org_ref[0], other_ref=org_ref[1],
-              repo=org_repo, as_form=request.GET.get('as_form'),
-              bundle=incoming_changesets)
+        org_repo = Repository.get_by_repo_name(org_repo)
+        other_repo = Repository.get_by_repo_name(other_repo)
 
-        c.org_repo = org_repo = Repository.get_by_repo_name(org_repo)
-        c.other_repo = other_repo = Repository.get_by_repo_name(other_repo)
-
-        if c.org_repo is None:
+        if org_repo is None:
             log.error('Could not find org repo %s' % org_repo)
             raise HTTPNotFound
-        if c.other_repo is None:
+        if other_repo is None:
             log.error('Could not find other repo %s' % other_repo)
             raise HTTPNotFound
 
-        if c.org_repo != c.other_repo and h.is_git(c.rhodecode_repo):
+        if org_repo != other_repo and h.is_git(org_repo):
             log.error('compare of two remote repos not available for GIT REPOS')
             raise HTTPNotFound
 
-        if c.org_repo.scm_instance.alias != c.other_repo.scm_instance.alias:
+        if org_repo.scm_instance.alias != other_repo.scm_instance.alias:
             log.error('compare of two different kind of remote repos not available')
             raise HTTPNotFound
 
-        partial = request.environ.get('HTTP_X_PARTIAL_XHR')
         self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
         self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
 
-        if rev_start and rev_end:
-            #replace our org_ref with given CS
-            org_ref = ('rev', rev_start)
-            other_ref = ('rev', rev_end)
+        c.org_repo = org_repo
+        c.other_repo = other_repo
+        c.org_ref = org_ref[1]
+        c.other_ref = other_ref[1]
+        c.org_ref_type = org_ref[0]
+        c.other_ref_type = other_ref[0]
 
-        c.cs_ranges, discovery_data = PullRequestModel().get_compare_data(
-                                    org_repo, org_ref, other_repo, other_ref,
-                                    )
+        c.cs_ranges, c.ancestor = PullRequestModel().get_compare_data(
+            org_repo, org_ref, other_repo, other_ref, merge)
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
-        c.target_repo = c.repo_name
-        # defines that we need hidden inputs with changesets
-        c.as_form = request.GET.get('as_form', False)
         if partial:
+            assert c.ancestor
             return render('compare/compare_cs.html')
 
-        c.org_ref = org_ref[1]
-        c.other_ref = other_ref[1]
+        if c.ancestor:
+            assert merge
+            # case we want a simple diff without incoming changesets,
+            # previewing what will be merged.
+            # Make the diff on the other repo (which is known to have other_ref)
+            log.debug('Using ancestor %s as org_ref instead of %s'
+                      % (c.ancestor, org_ref))
+            org_ref = ('rev', c.ancestor)
+            org_repo = other_repo
 
-        if not incoming_changesets and c.cs_ranges and c.org_repo != c.other_repo:
-            # case we want a simple diff without incoming changesets, just
-            # for review purposes. Make the diff on the forked repo, with
-            # revision that is common ancestor
-            _org_ref = org_ref
-            org_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
-                                      if c.cs_ranges[0].parents
-                                      else EmptyChangeset(), 'raw_id'))
-            log.debug('Changed org_ref from %s to %s' % (_org_ref, org_ref))
-            other_repo = org_repo
+        diff_limit = self.cut_off_limit if not c.fulldiff else None
 
-        diff_limit = self.cut_off_limit if not fulldiff else None
-
-        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref,
-                             discovery_data,
-                             remote_compare=incoming_changesets)
+        _diff = diffs.differ(org_repo, org_ref, other_repo, other_ref)
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)

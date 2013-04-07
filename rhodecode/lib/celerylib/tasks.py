@@ -87,7 +87,7 @@ def whoosh_index(repo_location, full_index):
 
 @task(ignore_result=True)
 @dbsession
-def get_commits_stats(repo_name, ts_min_y, ts_max_y):
+def get_commits_stats(repo_name, ts_min_y, ts_max_y, recurse_limit=100):
     log = get_logger(get_commits_stats)
     DBS = get_session()
     lockkey = __get_lockkey('get_commits_stats', repo_name, ts_min_y,
@@ -160,9 +160,9 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
                          co_day_auth_aggr[akc(cs.author)]['data']]
                     time_pos = l.index(k)
                 except ValueError:
-                    time_pos = False
+                    time_pos = None
 
-                if time_pos >= 0 and time_pos is not False:
+                if time_pos >= 0 and time_pos is not None:
 
                     datadict = \
                         co_day_auth_aggr[akc(cs.author)]['data'][time_pos]
@@ -240,8 +240,12 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
         lock.release()
 
         # execute another task if celery is enabled
-        if len(repo.revisions) > 1 and CELERY_ON:
-            run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y)
+        if len(repo.revisions) > 1 and CELERY_ON and recurse_limit > 0:
+            recurse_limit -= 1
+            run_task(get_commits_stats, repo_name, ts_min_y, ts_max_y,
+                     recurse_limit)
+        if recurse_limit <= 0:
+            log.debug('Breaking recursive mode due to reach of recurse limit')
         return True
     except LockHeld:
         log.info('LockHeld')
@@ -250,7 +254,7 @@ def get_commits_stats(repo_name, ts_min_y, ts_max_y):
 
 @task(ignore_result=True)
 @dbsession
-def send_email(recipients, subject, body, html_body=''):
+def send_email(recipients, subject, body='', html_body=''):
     """
     Sends an email with defined parameters from the .ini files.
 
@@ -278,7 +282,7 @@ def send_email(recipients, subject, body, html_body=''):
     mail_port = email_config.get('smtp_port')
     tls = str2bool(email_config.get('smtp_use_tls'))
     ssl = str2bool(email_config.get('smtp_use_ssl'))
-    debug = str2bool(config.get('debug'))
+    debug = str2bool(email_config.get('debug'))
     smtp_auth = email_config.get('smtp_auth')
 
     if not mail_server:
@@ -363,6 +367,7 @@ def create_repo_fork(form_data, cur_user):
                    fork_name, '', DBS)
     # finally commit at latest possible stage
     DBS.commit()
+    fork_repo.update_changeset_cache()
 
 
 def __get_codes_stats(repo_name):

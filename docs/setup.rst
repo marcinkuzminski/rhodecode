@@ -478,7 +478,7 @@ Changing default encoding
 
 By default RhodeCode uses utf8 encoding, starting from 1.3 series this
 can be changed, simply edit default_encoding in .ini file to desired one.
-This affects many parts in rhodecode including commiters names, filenames,
+This affects many parts in rhodecode including committers names, filenames,
 encoding of commit messages. In addition RhodeCode can detect if `chardet`
 library is installed. If `chardet` is detected RhodeCode will fallback to it
 when there are encode/decode errors.
@@ -652,7 +652,7 @@ Add the following at the end of the .ini file::
     prefix = /<someprefix>
 
 
-then change <someprefix> into your choosen prefix
+then change <someprefix> into your chosen prefix
 
 Apache's WSGI config
 --------------------

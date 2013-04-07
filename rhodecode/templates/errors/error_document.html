@@ -8,45 +8,54 @@
         <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
 
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-	    %if c.redirect_time:
-	        <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
-	    %endif
+        %if c.redirect_time:
+            <meta http-equiv="refresh" content="${c.redirect_time}; url=${c.url_redirect}"/>
+        %endif
 
         <!-- stylesheets -->
         <link rel="stylesheet" type="text/css" href="${h.url('/css/style.css')}" media="screen" />
-	    <style type="text/css">
-	     #main_div{
-	       border: 0px solid #000;
-	       width: 500px;
-	       margin: auto;
-	       text-align: center;
-	       margin-top: 200px;
-	       font-size: 1.6em;
-	     }
-	     .error_message{
-	        text-align: center;
-	        color:#003367;
-	        font-size: 1.6em;
-	        margin:10px;
-	     }
-	    </style>
+        <style type="text/css">
+         #main_div{
+           border: 0px solid #000;
+           width: 500px;
+           margin: auto;
+           text-align: center;
+           margin-top: 200px;
+           font-size: 1.6em;
+         }
+         .error_message{
+            text-align: center;
+            color:#003367;
+            font-size: 1.6em;
+            margin:10px;
+         }
+        </style>
 
     </head>
     <body>
-
+        <div class="flash_msg">
+            <% messages = h.flash.pop_messages() %>
+            % if messages:
+            <ul id="flash-messages">
+                % for message in messages:
+                <li class="${message.category}_msg">${message}</li>
+                % endfor
+            </ul>
+            % endif
+        </div>
         <div id="login">
             <div class="table">
-				<div id="main_div">
-				    <div style="font-size:2.0em;margin: 10px">${c.rhodecode_name}</div>
-					<h1 class="error_message">${c.error_message}</h1>
+                <div id="main_div">
+                    <div style="font-size:2.0em;margin: 10px">${c.rhodecode_name}</div>
+                    <h1 class="error_message">${c.error_message}</h1>
 
-					<p>${c.error_explanation}</p>
+                    <p>${c.error_explanation}</p>
 
-			        %if c.redirect_time:
-			            <p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
-				    %endif
+                    %if c.redirect_time:
+                        <p>${_('You will be redirected to %s in %s seconds') % (c.redirect_module,c.redirect_time)}</p>
+                    %endif
 
-				</div>
+                </div>
             </div>
             <!-- end login -->
         </div>

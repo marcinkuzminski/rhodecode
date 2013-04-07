@@ -38,10 +38,11 @@ from rhodecode.lib.hooks import log_create_repository, log_delete_repository
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
-    Statistics, UsersGroup, UsersGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
-    RhodeCodeSetting
+    Statistics, UserGroup, UserGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
+    RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import HasRepoPermissionAny
+from rhodecode.lib.exceptions import AttachedForksError
 
 log = logging.getLogger(__name__)
 
@@ -52,8 +53,8 @@ class RepoModel(BaseModel):
     URL_SEPARATOR = Repository.url_sep()
 
     def __get_users_group(self, users_group):
-        return self._get_instance(UsersGroup, users_group,
-                                  callback=UsersGroup.get_by_group_name)
+        return self._get_instance(UserGroup, users_group,
+                                  callback=UserGroup.get_by_group_name)
 
     def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
@@ -118,8 +119,8 @@ class RepoModel(BaseModel):
         )
 
     def get_users_groups_js(self):
-        users_groups = self.sa.query(UsersGroup)\
-            .filter(UsersGroup.users_group_active == True).all()
+        users_groups = self.sa.query(UserGroup)\
+            .filter(UserGroup.users_group_active == True).all()
 
         return json.dumps([
             {
@@ -142,7 +143,15 @@ class RepoModel(BaseModel):
         kwargs.update(dict(_=_, h=h, c=c))
         return tmpl.render(*args, **kwargs)
 
-    def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True):
+    @classmethod
+    def update_repoinfo(cls, repositories=None):
+        if not repositories:
+            repositories = Repository.getAll()
+        for repo in repositories:
+            repo.update_changeset_cache()
+
+    def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
+                          super_user_actions=False):
         _render = self._render_datatable
 
         def quick_menu(repo_name):
@@ -174,7 +183,7 @@ class RepoModel(BaseModel):
                 return h.urlify_text(h.truncate(desc, 60))
 
         def repo_actions(repo_name):
-            return _render('repo_actions', repo_name)
+            return _render('repo_actions', repo_name, super_user_actions)
 
         def owner_actions(user_id, username):
             return _render('user_name', user_id, username)
@@ -232,7 +241,7 @@ class RepoModel(BaseModel):
             return None
 
         defaults = repo_info.get_dict()
-        group, repo_name = repo_info.groups_and_repo
+        group, repo_name, repo_name_full = repo_info.groups_and_repo
         defaults['repo_name'] = repo_name
         defaults['repo_group'] = getattr(group[-1] if group else None,
                                          'group_id', None)
@@ -271,28 +280,6 @@ class RepoModel(BaseModel):
         try:
             cur_repo = self.get_by_repo_name(org_repo_name, cache=False)
 
-            # update permissions
-            for member, perm, member_type in kwargs['perms_updates']:
-                if member_type == 'user':
-                    # this updates existing one
-                    RepoModel().grant_user_permission(
-                        repo=cur_repo, user=member, perm=perm
-                    )
-                else:
-                    RepoModel().grant_users_group_permission(
-                        repo=cur_repo, group_name=member, perm=perm
-                    )
-            # set new permissions
-            for member, perm, member_type in kwargs['perms_new']:
-                if member_type == 'user':
-                    RepoModel().grant_user_permission(
-                        repo=cur_repo, user=member, perm=perm
-                    )
-                else:
-                    RepoModel().grant_users_group_permission(
-                        repo=cur_repo, group_name=member, perm=perm
-                    )
-
             if 'user' in kwargs:
                 cur_repo.user = User.get_by_username(kwargs['user'])
 
@@ -311,7 +298,20 @@ class RepoModel(BaseModel):
 
             new_name = cur_repo.get_new_name(kwargs['repo_name'])
             cur_repo.repo_name = new_name
+            #if private flag is set, reset default permission to NONE
 
+            if kwargs.get('repo_private'):
+                EMPTY_PERM = 'repository.none'
+                RepoModel().grant_user_permission(
+                    repo=cur_repo, user='default', perm=EMPTY_PERM
+                )
+            #handle extra fields
+            for field in filter(lambda k: k.startswith(RepositoryField.PREFIX), kwargs):
+                k = RepositoryField.un_prefix_key(field)
+                ex_field = RepositoryField.get_by_key_name(key=k, repo=cur_repo)
+                if ex_field:
+                    ex_field.field_value = kwargs[field]
+                    self.sa.add(ex_field)
             self.sa.add(cur_repo)
 
             if org_repo_name != new_name:
@@ -319,7 +319,7 @@ class RepoModel(BaseModel):
                 self.__rename_repo(old=org_repo_name, new=new_name)
 
             return cur_repo
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -394,15 +394,15 @@ class RepoModel(BaseModel):
                     repo = fork_of
                     user_perms = UserRepoToPerm.query()\
                         .filter(UserRepoToPerm.repository == repo).all()
-                    group_perms = UsersGroupRepoToPerm.query()\
-                        .filter(UsersGroupRepoToPerm.repository == repo).all()
+                    group_perms = UserGroupRepoToPerm.query()\
+                        .filter(UserGroupRepoToPerm.repository == repo).all()
 
                     for perm in user_perms:
                         UserRepoToPerm.create(perm.user, new_repo,
                                               perm.permission)
 
                     for perm in group_perms:
-                        UsersGroupRepoToPerm.create(perm.users_group, new_repo,
+                        UserGroupRepoToPerm.create(perm.users_group, new_repo,
                                                     perm.permission)
                 else:
                     _create_default_perms()
@@ -420,7 +420,7 @@ class RepoModel(BaseModel):
             ScmModel(self.sa).toggle_following_repo(new_repo.repo_id,
                                                     owner.user_id)
             return new_repo
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -466,9 +466,27 @@ class RepoModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
-    def delete(self, repo):
+    def delete(self, repo, forks=None):
+        """
+        Delete given repository, forks parameter defines what do do with
+        attached forks. Throws AttachedForksError if deleted repo has attached
+        forks
+
+        :param repo:
+        :param forks: str 'delete' or 'detach'
+        """
         repo = self._get_repo(repo)
         if repo:
+            if forks == 'detach':
+                for r in repo.forks:
+                    r.fork = None
+                    self.sa.add(r)
+            elif forks == 'delete':
+                for r in repo.forks:
+                    self.delete(r, forks='delete')
+            elif [f for f in repo.forks]:
+                raise AttachedForksError()
+
             old_repo_dict = repo.get_dict()
             owner = repo.user
             try:
@@ -476,7 +494,7 @@ class RepoModel(BaseModel):
                 self.__delete_repo(repo)
                 log_delete_repository(old_repo_dict,
                                       deleted_by=owner.username)
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
 
@@ -528,12 +546,12 @@ class RepoModel(BaseModel):
 
     def grant_users_group_permission(self, repo, group_name, perm):
         """
-        Grant permission for users group on given repository, or update
+        Grant permission for user group on given repository, or update
         existing one if found
 
         :param repo: Instance of Repository, repository_id, or repository name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         :param perm: Instance of Permission, or permission_name
         """
         repo = self._get_repo(repo)
@@ -541,14 +559,14 @@ class RepoModel(BaseModel):
         permission = self._get_perm(perm)
 
         # check if we have that permission already
-        obj = self.sa.query(UsersGroupRepoToPerm)\
-            .filter(UsersGroupRepoToPerm.users_group == group_name)\
-            .filter(UsersGroupRepoToPerm.repository == repo)\
+        obj = self.sa.query(UserGroupRepoToPerm)\
+            .filter(UserGroupRepoToPerm.users_group == group_name)\
+            .filter(UserGroupRepoToPerm.repository == repo)\
             .scalar()
 
         if obj is None:
             # create new
-            obj = UsersGroupRepoToPerm()
+            obj = UserGroupRepoToPerm()
 
         obj.repository = repo
         obj.users_group = group_name
@@ -558,18 +576,18 @@ class RepoModel(BaseModel):
 
     def revoke_users_group_permission(self, repo, group_name):
         """
-        Revoke permission for users group on given repository
+        Revoke permission for user group on given repository
 
         :param repo: Instance of Repository, repository_id, or repository name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         """
         repo = self._get_repo(repo)
         group_name = self.__get_users_group(group_name)
 
-        obj = self.sa.query(UsersGroupRepoToPerm)\
-            .filter(UsersGroupRepoToPerm.repository == repo)\
-            .filter(UsersGroupRepoToPerm.users_group == group_name)\
+        obj = self.sa.query(UserGroupRepoToPerm)\
+            .filter(UserGroupRepoToPerm.repository == repo)\
+            .filter(UserGroupRepoToPerm.users_group == group_name)\
             .scalar()
         if obj:
             self.sa.delete(obj)
@@ -581,13 +599,13 @@ class RepoModel(BaseModel):
 
         :param repo_name:
         """
+        repo = self._get_repo(repo_name)
         try:
             obj = self.sa.query(Statistics)\
-                    .filter(Statistics.repository ==
-                            self.get_by_repo_name(repo_name))\
-                    .one()
-            self.sa.delete(obj)
-        except:
+                    .filter(Statistics.repository == repo).scalar()
+            if obj:
+                self.sa.delete(obj)
+        except Exception:
             log.error(traceback.format_exc())
             raise
 

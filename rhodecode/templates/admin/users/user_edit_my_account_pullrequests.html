@@ -1,14 +1,22 @@
-
+%if c.show_closed:
+  ${h.checkbox('show_closed',checked="checked", label=_('Show closed pull requests'))}
+%else:
+  ${h.checkbox('show_closed',label=_('Show closed pull requests'))}
+%endif
 <div class="pullrequests_section_head">${_('Opened by me')}</div>
 <ul>
     %if c.my_pull_requests:
       %for pull_request in c.my_pull_requests:
-      <li>
+      <li class="${'closed' if pull_request.is_closed() else ''}">
         <div style="height: 12px">
           <div style="float:left">
-          <a href="${h.url('pullrequest_show',repo_name=pull_request.other_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
-          ${_('Pull request #%s opened on %s') % (pull_request.pull_request_id, h.fmt_date(pull_request.created_on))}
-          </a>
+            <img src="${h.url('/images/icons/flag_status_%s.png' % str(pull_request.last_review_status))}" />
+            <a href="${h.url('pullrequest_show',repo_name=pull_request.other_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
+              ${_('Pull request #%s opened on %s') % (pull_request.pull_request_id, h.fmt_date(pull_request.created_on))}
+              %if pull_request.is_closed():
+                (${_('Closed')})
+              %endif
+            </a>
           </div>
           <div style="float:left;margin-top: -5px">
             ${h.form(url('pullrequest_delete', repo_name=pull_request.other_repo.repo_name, pull_request_id=pull_request.pull_request_id),method='delete')}
@@ -27,12 +35,16 @@
 <ul>
     %if c.participate_in_pull_requests:
       %for pull_request in c.participate_in_pull_requests:
-      <li>
+      <li class="${'closed' if pull_request.is_closed() else ''}">
         <div style="height: 12px">
-        <a href="${h.url('pullrequest_show',repo_name=pull_request.other_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
-        ${_('Pull request #%s opened by %s on %s') % (pull_request.pull_request_id, pull_request.author.full_name, h.fmt_date(pull_request.created_on))}
-        </a>
-      </div>
+          <img src="${h.url('/images/icons/flag_status_%s.png' % str(pull_request.last_review_status))}" />
+          <a href="${h.url('pullrequest_show',repo_name=pull_request.other_repo.repo_name,pull_request_id=pull_request.pull_request_id)}">
+            ${_('Pull request #%s opened by %s on %s') % (pull_request.pull_request_id, pull_request.author.full_name, h.fmt_date(pull_request.created_on))}
+          </a>
+          %if pull_request.is_closed():
+            (${_('Closed')})
+          %endif
+        </div>
       </li>
       %endfor
     %else:

@@ -30,20 +30,23 @@ import urllib
 from time import mktime
 from datetime import timedelta, date
 from urlparse import urlparse
-from rhodecode.lib.compat import product
-
-from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
-    NodeDoesNotExistError
 
 from pylons import tmpl_context as c, request, url, config
 from pylons.i18n.translation import _
+from webob.exc import HTTPBadRequest
 
 from beaker.cache import cache_region, region_invalidate
 
+from rhodecode.lib import helpers as h
+from rhodecode.lib.compat import product
+from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
+    NodeDoesNotExistError
 from rhodecode.config.conf import ALL_READMES, ALL_EXTS, LANGUAGES_EXTENSIONS_MAP
 from rhodecode.model.db import Statistics, CacheInvalidation
-from rhodecode.lib.utils2 import safe_unicode
-from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
+from rhodecode.lib.utils import jsonify
+from rhodecode.lib.utils2 import safe_unicode, safe_str
+from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
+    NotAnonymous
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.markup_renderer import MarkupRenderer
@@ -70,8 +73,6 @@ class SummaryController(BaseRepoController):
 
     def index(self, repo_name):
         c.dbrepo = dbrepo = c.rhodecode_db_repo
-        c.following = self.scm_model.is_following_repo(repo_name,
-                                                self.rhodecode_user.user_id)
 
         def url_generator(**kw):
             return url('shortlog_home', repo_name=repo_name, size=10, **kw)
@@ -101,10 +102,10 @@ class SummaryController(BaseRepoController):
            'pass': password,
            'scheme': parsed_url.scheme,
            'netloc': parsed_url.netloc,
-           'path': decoded_path
+           'path': urllib.quote(safe_str(decoded_path))
         }
 
-        uri = uri_tmpl % uri_dict
+        uri = (uri_tmpl % uri_dict)
         # generate another clone url by id
         uri_dict.update(
          {'path': decoded_path.replace(repo_name, '_%s' % c.dbrepo.repo_id)}
@@ -138,7 +139,9 @@ class SummaryController(BaseRepoController):
         if dbrepo.enable_statistics:
             c.show_stats = True
             c.no_data_msg = _('No data loaded yet')
-            run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y, ts_max_y)
+            recurse_limit = 500  # don't recurse more than 500 times when parsing
+            run_task(get_commits_stats, c.dbrepo.repo_name, ts_min_y,
+                     ts_max_y, recurse_limit)
         else:
             c.show_stats = False
             c.no_data_msg = _('Statistics are disabled for this repository')
@@ -185,6 +188,14 @@ class SummaryController(BaseRepoController):
         c.readme_data, c.readme_file = \
             self.__get_readme_data(c.rhodecode_db_repo)
         return render('summary/summary.html')
+
+    @NotAnonymous()
+    @jsonify
+    def repo_size(self, repo_name):
+        if request.is_xhr:
+            return c.rhodecode_db_repo._repo_size()
+        else:
+            raise HTTPBadRequest()
 
     def __get_readme_data(self, db_repo):
         repo_name = db_repo.repo_name

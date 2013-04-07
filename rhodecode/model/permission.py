@@ -118,8 +118,11 @@ class PermissionModel(BaseModel):
                 for r2p in self.sa.query(UserRepoToPerm)\
                                .filter(UserRepoToPerm.user == perm_user)\
                                .all():
-                    r2p.permission = _def
-                    self.sa.add(r2p)
+
+                    #don't reset PRIVATE repositories
+                    if not r2p.repository.private:
+                        r2p.permission = _def
+                        self.sa.add(r2p)
 
             if form_result['overwrite_default_group'] == True:
                 _def_name = form_result['default_group_perm'].split('group.')[-1]

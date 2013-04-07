@@ -35,6 +35,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import ChangesetComment, User, Repository, \
     Notification, PullRequest
 from rhodecode.model.notification import NotificationModel
+from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
 
@@ -57,67 +58,41 @@ class ChangesetCommentsModel(BaseModel):
                 user_objects.append(user_obj)
         return user_objects
 
-    def create(self, text, repo, user, revision=None, pull_request=None,
-               f_path=None, line_no=None, status_change=None):
+    def _get_notification_data(self, repo, comment, user, comment_text,
+                               line_no=None, revision=None, pull_request=None,
+                               status_change=None, closing_pr=False):
         """
-        Creates new comment for changeset or pull request.
-        IF status_change is not none this comment is associated with a
-        status change of changeset or changesets associated with pull request
+        Get notification data
 
-        :param text:
-        :param repo:
-        :param user:
-        :param revision:
-        :param pull_request:
-        :param f_path:
-        :param line_no:
-        :param status_change:
+        :param comment_text:
+        :param line:
+        :returns: tuple (subj,body,recipients,notification_type,email_kwargs)
         """
-        if not text:
-            return
-
-        repo = self._get_repo(repo)
-        user = self._get_user(user)
-        comment = ChangesetComment()
-        comment.repo = repo
-        comment.author = user
-        comment.text = text
-        comment.f_path = f_path
-        comment.line_no = line_no
-
-        if revision:
-            cs = repo.scm_instance.get_changeset(revision)
-            desc = "%s - %s" % (cs.short_id, h.shorter(cs.message, 256))
-            comment.revision = revision
-        elif pull_request:
-            pull_request = self.__get_pull_request(pull_request)
-            comment.pull_request = pull_request
-            desc = pull_request.pull_request_id
-        else:
-            raise Exception('Please specify revision or pull_request_id')
-
-        self.sa.add(comment)
-        self.sa.flush()
-
         # make notification
+        body = comment_text  # text of the comment
         line = ''
-        body = text
+        if line_no:
+            line = _('on line %s') % line_no
 
         #changeset
         if revision:
-            if line_no:
-                line = _('on line %s') % line_no
-            subj = safe_unicode(
-                h.link_to('Re commit: %(desc)s %(line)s' % \
-                          {'desc': desc, 'line': line},
-                          h.url('changeset_home', repo_name=repo.repo_name,
-                                revision=revision,
-                                anchor='comment-%s' % comment.comment_id,
-                                qualified=True,
-                          )
-                )
-            )
             notification_type = Notification.TYPE_CHANGESET_COMMENT
+            cs = repo.scm_instance.get_changeset(revision)
+            desc = "%s" % (cs.short_id)
+
+            _url = h.url('changeset_home',
+                repo_name=repo.repo_name,
+                revision=revision,
+                anchor='comment-%s' % comment.comment_id,
+                qualified=True,
+            )
+            subj = safe_unicode(
+                h.link_to('Re changeset: %(desc)s %(line)s' % \
+                          {'desc': desc, 'line': line},
+                          _url)
+            )
+            email_subject = 'User %s commented on changeset %s' % \
+                (user.username, h.short_id(revision))
             # get the current participants of this changeset
             recipients = ChangesetComment.get_users(revision=revision)
             # add changeset author if it's in rhodecode system
@@ -128,9 +103,17 @@ class ChangesetCommentsModel(BaseModel):
             recipients += [cs_author]
             email_kwargs = {
                 'status_change': status_change,
+                'cs_comment_user': h.person(user.email),
+                'cs_target_repo': h.url('summary_home', repo_name=repo.repo_name,
+                                        qualified=True),
+                'cs_comment_url': _url,
+                'raw_id': revision,
+                'message': cs.message
             }
         #pull request
         elif pull_request:
+            notification_type = Notification.TYPE_PULL_REQUEST_COMMENT
+            desc = comment.pull_request.title
             _url = h.url('pullrequest_show',
                 repo_name=pull_request.other_repo.repo_name,
                 pull_request_id=pull_request.pull_request_id,
@@ -138,11 +121,14 @@ class ChangesetCommentsModel(BaseModel):
                 qualified=True,
             )
             subj = safe_unicode(
-                h.link_to('Re pull request: %(desc)s %(line)s' % \
-                          {'desc': desc, 'line': line}, _url)
+                h.link_to('Re pull request #%(pr_id)s: %(desc)s %(line)s' % \
+                          {'desc': desc,
+                           'pr_id': comment.pull_request.pull_request_id,
+                           'line': line},
+                          _url)
             )
-
-            notification_type = Notification.TYPE_PULL_REQUEST_COMMENT
+            email_subject = 'User %s commented on pull request #%s' % \
+                    (user.username, comment.pull_request.pull_request_id)
             # get the current participants of this pull request
             recipients = ChangesetComment.get_users(pull_request_id=
                                                 pull_request.pull_request_id)
@@ -156,30 +142,87 @@ class ChangesetCommentsModel(BaseModel):
             email_kwargs = {
                 'pr_id': pull_request.pull_request_id,
                 'status_change': status_change,
+                'closing_pr': closing_pr,
                 'pr_comment_url': _url,
                 'pr_comment_user': h.person(user.email),
                 'pr_target_repo': h.url('summary_home',
                                    repo_name=pull_request.other_repo.repo_name,
                                    qualified=True)
             }
-        # create notification objects, and emails
-        NotificationModel().create(
-            created_by=user, subject=subj, body=body,
-            recipients=recipients, type_=notification_type,
-            email_kwargs=email_kwargs
-        )
 
-        mention_recipients = set(self._extract_mentions(body))\
-                                .difference(recipients)
-        if mention_recipients:
-            email_kwargs.update({'pr_mention': True})
-            subj = _('[Mention]') + ' ' + subj
+        return subj, body, recipients, notification_type, email_kwargs, email_subject
+
+    def create(self, text, repo, user, revision=None, pull_request=None,
+               f_path=None, line_no=None, status_change=None, closing_pr=False,
+               send_email=True):
+        """
+        Creates new comment for changeset or pull request.
+        IF status_change is not none this comment is associated with a
+        status change of changeset or changesets associated with pull request
+
+        :param text:
+        :param repo:
+        :param user:
+        :param revision:
+        :param pull_request:
+        :param f_path:
+        :param line_no:
+        :param status_change:
+        :param closing_pr:
+        :param send_email:
+        """
+        if not text:
+            log.warning('Missing text for comment, skipping...')
+            return
+
+        repo = self._get_repo(repo)
+        user = self._get_user(user)
+        comment = ChangesetComment()
+        comment.repo = repo
+        comment.author = user
+        comment.text = text
+        comment.f_path = f_path
+        comment.line_no = line_no
+
+        if revision:
+            comment.revision = revision
+        elif pull_request:
+            pull_request = self.__get_pull_request(pull_request)
+            comment.pull_request = pull_request
+        else:
+            raise Exception('Please specify revision or pull_request_id')
+
+        Session().add(comment)
+        Session().flush()
+
+        if send_email:
+            (subj, body, recipients, notification_type,
+             email_kwargs, email_subject) = self._get_notification_data(
+                                repo, comment, user,
+                                comment_text=text,
+                                line_no=line_no,
+                                revision=revision,
+                                pull_request=pull_request,
+                                status_change=status_change,
+                                closing_pr=closing_pr)
+            # create notification objects, and emails
             NotificationModel().create(
                 created_by=user, subject=subj, body=body,
-                recipients=mention_recipients,
-                type_=notification_type,
-                email_kwargs=email_kwargs
+                recipients=recipients, type_=notification_type,
+                email_kwargs=email_kwargs, email_subject=email_subject
             )
+
+            mention_recipients = set(self._extract_mentions(body))\
+                                    .difference(recipients)
+            if mention_recipients:
+                email_kwargs.update({'pr_mention': True})
+                subj = _('[Mention]') + ' ' + subj
+                NotificationModel().create(
+                    created_by=user, subject=subj, body=body,
+                    recipients=mention_recipients,
+                    type_=notification_type,
+                    email_kwargs=email_kwargs
+                )
 
         return comment
 
@@ -190,7 +233,7 @@ class ChangesetCommentsModel(BaseModel):
         :param comment_id:
         """
         comment = self.__get_changeset_comment(comment)
-        self.sa.delete(comment)
+        Session().delete(comment)
 
         return comment
 
@@ -199,11 +242,8 @@ class ChangesetCommentsModel(BaseModel):
         Get's main comments based on revision or pull_request_id
 
         :param repo_id:
-        :type repo_id:
         :param revision:
-        :type revision:
         :param pull_request:
-        :type pull_request:
         """
 
         q = ChangesetComment.query()\
@@ -221,7 +261,7 @@ class ChangesetCommentsModel(BaseModel):
         return q.all()
 
     def get_inline_comments(self, repo_id, revision=None, pull_request=None):
-        q = self.sa.query(ChangesetComment)\
+        q = Session().query(ChangesetComment)\
             .filter(ChangesetComment.repo_id == repo_id)\
             .filter(ChangesetComment.line_no != None)\
             .filter(ChangesetComment.f_path != None)\

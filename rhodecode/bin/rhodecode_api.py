@@ -238,7 +238,7 @@ def main(argv=None):
 
     try:
         margs = dict(map(lambda s: s.split(':', 1), other))
-    except:
+    except Exception:
         sys.stderr.write('Error parsing arguments \n')
         sys.exit()
 

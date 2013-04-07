@@ -10,7 +10,7 @@
 
 
 <div id="body" class="codeblock">
-	<div class="code-header">
+    <div class="code-header">
         <div class="stats">
             <div class="left img"><img src="${h.url('/images/icons/file.png')}"/></div>
             <div class="left item"><pre class="tooltip" title="${h.tooltip(h.fmt_date(c.file_changeset.date))}">${h.link_to("r%s:%s" % (c.file_changeset.revision,h.short_id(c.file_changeset.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id))}</pre></div>
@@ -18,15 +18,17 @@
             <div class="left item last"><pre>${c.file.mimetype}</pre></div>
             <div class="buttons">
               %if c.annotate:
-                ${h.link_to(_('show source'),    h.url('files_home',         repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+                ${h.link_to(_('Show source'),    h.url('files_home',         repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               %else:
-                ${h.link_to(_('show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+                ${h.link_to(_('Show annotation'),h.url('files_annotate_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               %endif
-              ${h.link_to(_('show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
-              ${h.link_to(_('download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              ${h.link_to(_('Show as raw'),h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+              ${h.link_to(_('Download as raw'),h.url('files_rawfile_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
               % if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name):
-               % if not c.file.is_binary:
-                ${h.link_to(_('edit'),h.url('files_edit_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path),class_="ui-btn")}
+               % if c.on_branch_head and c.changeset.branch and not c.file.is_binary:
+                ${h.link_to(_('Edit on branch:%s') % c.changeset.branch,h.url('files_edit_home',repo_name=c.repo_name,revision=c.changeset.branch,f_path=c.f_path),class_="ui-btn")}
+               %else:
+                ${h.link_to(_('Edit on branch:?'), '#', class_="ui-btn disabled tooltip", title=_('Editing files allowed only when on branch head revision'))}
                % endif
               % endif
             </div>
@@ -37,24 +39,24 @@
             </div>
             <div title="${c.file_changeset.author}" class="user">${h.person(c.file_changeset.author)}</div>
         </div>
-		<div class="commit">${h.urlify_commit(c.file_changeset.message,c.repo_name)}</div>
-	</div>
-	<div class="code-body">
-	   %if c.file.is_binary:
-	       ${_('Binary file (%s)') % c.file.mimetype}
-	   %else:
-		% if c.file.size < c.cut_off_limit:
+        <div class="commit">${h.urlify_commit(c.file_changeset.message,c.repo_name)}</div>
+    </div>
+    <div class="code-body">
+       %if c.file.is_binary:
+           ${_('Binary file (%s)') % c.file.mimetype}
+       %else:
+        % if c.file.size < c.cut_off_limit:
             %if c.annotate:
               ${h.pygmentize_annotation(c.repo_name,c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
             %else:
-			  ${h.pygmentize(c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
+              ${h.pygmentize(c.file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
             %endif
-		%else:
-			${_('File is too big to display')} ${h.link_to(_('show as raw'),
-			h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path))}
-		%endif
+        %else:
+            ${_('File is too big to display')} ${h.link_to(_('Show as raw'),
+            h.url('files_raw_home',repo_name=c.repo_name,revision=c.file_changeset.raw_id,f_path=c.f_path))}
+        %endif
      %endif
-	</div>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -84,8 +86,11 @@ YUE.onDOMReady(function(){
                 h_lines.push(parseInt(highlight_ranges[pos]));
             }
       }
-    highlight_lines(h_lines);
-
+      highlight_lines(h_lines);
+      var _first_line= YUD.get('L'+h_lines[0]);
+      if(_first_line){
+          _first_line.scrollIntoView()
+      }
     }
 
     // select code link event
@@ -95,7 +100,7 @@ YUE.onDOMReady(function(){
     YUE.on('load_node_history', 'click', function(e){
         var _url = node_history_url.replace('__REV__','${c.file_changeset.raw_id}').replace('__FPATH__', '${c.f_path}');
         ypjax(_url, 'node_history', function(o){
-        	tooltip_activate();
+            tooltip_activate();
         })
     });
 

@@ -1,12 +1,17 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="main.html"/>
-
-<h4>${subject}</h4>
-
+##message from user goes here
+<p>
+${cs_comment_user}: <br/>
 ${body}
+</p>
+%if status_change:
+    <span>${_('New status')} -&gt; ${status_change}</span>
+%endif
+<div>${_('View this comment here')}: ${cs_comment_url}</div>
 
-% if status_change is not None:
-<div>
-    ${_('New status$')} -> ${status_change}
-</div>
-% endif
+<pre>
+${_('Repo')}: ${cs_target_repo}
+${_('Changeset')}: ${h.short_id(raw_id)}
+${_('desc')}: ${h.shorter(message, 256)}
+</pre>

@@ -5,14 +5,13 @@ import formencode
 from rhodecode.tests import *
 
 from rhodecode.model import validators as v
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.model.db import ChangesetStatus, Repository
 from rhodecode.model.changeset_status import ChangesetStatusModel
-from rhodecode.model.comment import ChangesetCommentsModel
 
 
 class TestReposGroups(unittest.TestCase):
@@ -21,7 +20,7 @@ class TestReposGroups(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        Session.remove()
 
     def test_Message_extractor(self):
         validator = v.ValidUsername()
@@ -51,25 +50,25 @@ class TestReposGroups(unittest.TestCase):
         self.assertEqual(TEST_USER_ADMIN_LOGIN,
                          validator.to_python(TEST_USER_ADMIN_LOGIN))
 
-    def test_ValidUsersGroup(self):
-        validator = v.ValidUsersGroup()
+    def test_ValidUserGroup(self):
+        validator = v.ValidUserGroup()
         self.assertRaises(formencode.Invalid, validator.to_python, 'default')
         self.assertRaises(formencode.Invalid, validator.to_python, '.,')
 
-        gr = UsersGroupModel().create('test')
-        gr2 = UsersGroupModel().create('tes2')
+        gr = UserGroupModel().create('test')
+        gr2 = UserGroupModel().create('tes2')
         Session.commit()
         self.assertRaises(formencode.Invalid, validator.to_python, 'test')
         assert gr.users_group_id != None
-        validator = v.ValidUsersGroup(edit=True,
+        validator = v.ValidUserGroup(edit=True,
                                     old_data={'users_group_id':
                                               gr2.users_group_id})
 
         self.assertRaises(formencode.Invalid, validator.to_python, 'test')
         self.assertRaises(formencode.Invalid, validator.to_python, 'TesT')
         self.assertRaises(formencode.Invalid, validator.to_python, 'TEST')
-        UsersGroupModel().delete(gr)
-        UsersGroupModel().delete(gr2)
+        UserGroupModel().delete(gr)
+        UserGroupModel().delete(gr2)
         Session.commit()
 
     def test_ValidReposGroup(self):
@@ -79,7 +78,8 @@ class TestReposGroups(unittest.TestCase):
                           {'group_name': HG_REPO, })
         gr = model.create(group_name='test_gr', group_description='desc',
                           parent=None,
-                          just_db=True)
+                          just_db=True,
+                          owner=TEST_USER_ADMIN_LOGIN)
         self.assertRaises(formencode.Invalid,
                           validator.to_python, {'group_name': gr.group_name, })
 
@@ -150,7 +150,8 @@ class TestReposGroups(unittest.TestCase):
 
         gr = ReposGroupModel().create(group_name='group_test',
                                       group_description='desc',
-                                      parent=None,)
+                                      parent=None,
+                                      owner=TEST_USER_ADMIN_LOGIN)
         self.assertRaises(formencode.Invalid,
                           validator.to_python, {'repo_name': gr.group_name})
 
@@ -219,12 +220,16 @@ class TestReposGroups(unittest.TestCase):
         self.assertRaises(formencode.Invalid, validator.to_python, 'err')
 
     def test_LdapLibValidator(self):
-        validator = v.LdapLibValidator()
-        self.assertRaises(v.LdapImportError, validator.to_python, 'err')
+        if ldap_lib_installed:
+            validator = v.LdapLibValidator()
+            self.assertEqual("DN", validator.to_python('DN'))
+        else:
+            validator = v.LdapLibValidator()
+            self.assertRaises(v.LdapImportError, validator.to_python, 'err')
 
     def test_AttrLoginValidator(self):
         validator = v.AttrLoginValidator()
-        self.assertRaises(formencode.Invalid, validator.to_python, 123)
+        self.assertEqual('DN_attr', validator.to_python('DN_attr'))
 
     def test_NotReviewedRevisions(self):
         repo_id = Repository.get_by_repo_name(HG_REPO).repo_id

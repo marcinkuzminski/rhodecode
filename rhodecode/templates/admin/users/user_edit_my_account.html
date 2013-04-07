@@ -2,7 +2,7 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('My account')} ${c.rhodecode_user.username} - ${c.rhodecode_name}
+    ${_('My account')} ${c.rhodecode_user.username} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
@@ -10,7 +10,7 @@
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
@@ -28,7 +28,7 @@
     <!-- box / title -->
     <div class="title">
         <h5>
-        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
+        <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value="" style="display: none"/>
         </h5>
          <ul class="links" style="color:#DADADA">
            <li>
@@ -40,60 +40,15 @@
            <li>
              <span><a id="show_pullrequests" class="link-white" href="#pullrequests">${_('My pull requests')}</a> </span>
            </li>
-           %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-             <li>
-               <span>${h.link_to(_('Add repo'),h.url('admin_settings_create_repository'))}</span>
-             </li>
-           %endif
          </ul>
     </div>
     <!-- end box / title -->
-    <div id="perms_container" class="table">
-           %for section in sorted(c.rhodecode_user.permissions.keys()):
-            <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
-
-            <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
-            <table id="tbl_list_${section}">
-              <thead>
-                  <tr>
-                  <th class="left">${_('Name')}</th>
-                  <th class="left">${_('Permission')}</th>
-              </thead>
-              <tbody>
-            %for k in c.rhodecode_user.permissions[section]:
-           <%
-           if section != 'global':
-               section_perm = c.rhodecode_user.permissions[section].get(k)
-               _perm = section_perm.split('.')[-1]
-           else:
-               _perm = section_perm = None
-           %>
-            %if _perm not in ['none']:
-                <tr>
-                    <td>
-                        %if section == 'repositories':
-                            <a href="${h.url('summary_home',repo_name=k)}">${k}</a>
-                        %elif section == 'repositories_groups':
-                            <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
-                        %else:
-                            ${k}
-                        %endif
-                    </td>
-                    <td>
-                        %if section == 'global':
-                         ${h.bool2icon(True)}
-                        %else:
-                        <span class="perm_tag ${_perm}">${section_perm}</span>
-                        %endif
-                     </td>
-                </tr>
-             %endif
-            %endfor
-            </tbody>
-            </table>
-            </div>
-           %endfor
+    ## permissions overview
+    <div id="perms_container">
+    <%namespace name="p" file="/base/perms_summary.html"/>
+    ${p.perms_summary(c.perm_user.permissions)}
     </div>
+
     <div id="my_container" style="display:none">
         <div class="table yui-skin-sam" id="repos_list_wrap"></div>
         <div id="user-paginator" style="padding: 0px 0px 0px 20px"></div>
@@ -105,6 +60,7 @@
 </div>
 
 <script type="text/javascript">
+pyroutes.register('admin_settings_my_pullrequests', "${url('admin_settings_my_pullrequests')}", []);
 
 var show_perms = function(e){
     YUD.addClass('show_perms', 'current');
@@ -130,12 +86,12 @@ var show_my = function(e){
     YUD.setStyle('my_container','display','');
     YUD.setStyle('q_filter','display','');
     if(!YUD.hasClass('show_my', 'loaded')){
-    	table_renderer(${c.data |n});
+        table_renderer(${c.data |n});
         YUD.addClass('show_my', 'loaded');
     }
 }
 YUE.on('show_my','click',function(e){
-	show_my(e);
+    show_my(e);
 })
 
 var show_pullrequests = function(e){
@@ -148,11 +104,18 @@ var show_pullrequests = function(e){
     YUD.setStyle('pullrequests_container','display','');
     YUD.setStyle('q_filter','display','none');
 
-    var url = "${h.url('admin_settings_my_pullrequests')}";
-    ypjax(url, 'pullrequests_container');
+    var url = pyroutes.url('admin_settings_my_pullrequests');
+    if(YUD.get('show_closed') && YUD.get('show_closed').checked) {
+        var url = pyroutes.url('admin_settings_my_pullrequests', {'pr_show_closed': '1'});
+    }
+    ypjax(url, 'pullrequests_container', function(){
+        YUE.on('show_closed','change',function (e) {
+            show_pullrequests(e);
+        });
+    });
 }
 YUE.on('show_pullrequests','click',function(e){
-	show_pullrequests(e)
+    show_pullrequests(e)
 })
 
 var tabs = {
@@ -171,108 +134,108 @@ if (url[1]) {
 }
 
 function table_renderer(data){
-	  var myDataSource = new YAHOO.util.DataSource(data);
-	  myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+    var myDataSource = new YAHOO.util.DataSource(data);
+    myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
 
-	  myDataSource.responseSchema = {
-	      resultsList: "records",
-	      fields: [
-	         {key:"menu"},
-	         {key:"raw_name"},
-	         {key:"name"},
-	         {key:"last_changeset"},
-	         {key:"action"},
-	      ]
-	   };
-      myDataSource.doBeforeCallback = function(req,raw,res,cb) {
-          // This is the filter function
-          var data     = res.results || [],
-              filtered = [],
-              i,l;
+    myDataSource.responseSchema = {
+        resultsList: "records",
+        fields: [
+            {key:"menu"},
+            {key:"raw_name"},
+            {key:"name"},
+            {key:"last_changeset"},
+            {key:"action"},
+            ]
+        };
+    myDataSource.doBeforeCallback = function(req,raw,res,cb) {
+        // This is the filter function
+        var data     = res.results || [],
+            filtered = [],
+            i,l;
 
-          if (req) {
-              req = req.toLowerCase();
-              for (i = 0; i<data.length; i++) {
-                  var pos = data[i].raw_name.toLowerCase().indexOf(req)
-                  if (pos != -1) {
-                      filtered.push(data[i]);
-                  }
-              }
-              res.results = filtered;
-          }
-          return res;
+        if (req) {
+            req = req.toLowerCase();
+            for (i = 0; i<data.length; i++) {
+                var pos = data[i].raw_name.toLowerCase().indexOf(req)
+                if (pos != -1) {
+                    filtered.push(data[i]);
+                }
+            }
+            res.results = filtered;
+        }
+        return res;
+    }
+
+      // main table sorting
+      var myColumnDefs = [
+          {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
+          {key:"name",label:"${_('Name')}",sortable:true,
+              sortOptions: { sortFunction: nameSort }},
+          {key:"last_changeset",label:"${_('Tip')}",sortable:true,
+              sortOptions: { sortFunction: revisionSort }},
+          {key:"action",label:"${_('Action')}",sortable:false},
+      ];
+
+      var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
+        sortedBy:{key:"name",dir:"asc"},
+        paginator: new YAHOO.widget.Paginator({
+            rowsPerPage: 50,
+            alwaysVisible: false,
+            template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
+            pageLinks: 5,
+            containerClass: 'pagination-wh',
+            currentPageClass: 'pager_curpage',
+            pageLinkClass: 'pager_link',
+            nextPageLinkLabel: '&gt;',
+            previousPageLinkLabel: '&lt;',
+            firstPageLinkLabel: '&lt;&lt;',
+            lastPageLinkLabel: '&gt;&gt;',
+            containers:['user-paginator']
+        }),
+
+        MSG_SORTASC:"${_('Click to sort ascending')}",
+        MSG_SORTDESC:"${_('Click to sort descending')}",
+        MSG_EMPTY:"${_('No records found.')}",
+        MSG_ERROR:"${_('Data error.')}",
+        MSG_LOADING:"${_('Loading...')}",
       }
+      );
+      myDataTable.subscribe('postRenderEvent',function(oArgs) {
+          tooltip_activate();
+          quick_repo_menu();
+      });
 
-	  // main table sorting
-	  var myColumnDefs = [
-	      {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
-	      {key:"name",label:"${_('Name')}",sortable:true,
-	          sortOptions: { sortFunction: nameSort }},
-	      {key:"last_changeset",label:"${_('Tip')}",sortable:true,
-	          sortOptions: { sortFunction: revisionSort }},
-	      {key:"action",label:"${_('Action')}",sortable:false},
-	  ];
+      var filterTimeout = null;
 
-	  var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
-	    sortedBy:{key:"name",dir:"asc"},
-	    paginator: new YAHOO.widget.Paginator({
-	        rowsPerPage: 50,
-	        alwaysVisible: false,
-	        template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
-	        pageLinks: 5,
-	        containerClass: 'pagination-wh',
-	        currentPageClass: 'pager_curpage',
-	        pageLinkClass: 'pager_link',
-	        nextPageLinkLabel: '&gt;',
-	        previousPageLinkLabel: '&lt;',
-	        firstPageLinkLabel: '&lt;&lt;',
-	        lastPageLinkLabel: '&gt;&gt;',
-	        containers:['user-paginator']
-	    }),
+      updateFilter = function() {
+          // Reset timeout
+          filterTimeout = null;
 
-	    MSG_SORTASC:"${_('Click to sort ascending')}",
-	    MSG_SORTDESC:"${_('Click to sort descending')}",
-	    MSG_EMPTY:"${_('No records found.')}",
-	    MSG_ERROR:"${_('Data error.')}",
-	    MSG_LOADING:"${_('Loading...')}",
-	  }
-	  );
-	  myDataTable.subscribe('postRenderEvent',function(oArgs) {
-	      tooltip_activate();
-	      quick_repo_menu();
-	  });
+          // Reset sort
+          var state = myDataTable.getState();
+          state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
 
-	  var filterTimeout = null;
+          // Get filtered data
+          myDataSource.sendRequest(YUD.get('q_filter').value,{
+              success : myDataTable.onDataReturnInitializeTable,
+              failure : myDataTable.onDataReturnInitializeTable,
+              scope   : myDataTable,
+              argument: state
+          });
 
-	  updateFilter = function() {
-	      // Reset timeout
-	      filterTimeout = null;
+      };
+      YUE.on('q_filter','click',function(){
+          if(!YUD.hasClass('q_filter', 'loaded')){
+              //TODO: load here full list later to do search within groups
+              YUD.addClass('q_filter', 'loaded');
+          }
+       });
 
-	      // Reset sort
-	      var state = myDataTable.getState();
-	      state.sortedBy = {key:'name', dir:YAHOO.widget.DataTable.CLASS_ASC};
+      YUE.on('q_filter','keyup',function (e) {
+          clearTimeout(filterTimeout);
+          filterTimeout = setTimeout(updateFilter,600);
+      });
 
-	      // Get filtered data
-	      myDataSource.sendRequest(YUD.get('q_filter').value,{
-	          success : myDataTable.onDataReturnInitializeTable,
-	          failure : myDataTable.onDataReturnInitializeTable,
-	          scope   : myDataTable,
-	          argument: state
-	      });
-
-	  };
-	  YUE.on('q_filter','click',function(){
-	      if(!YUD.hasClass('q_filter', 'loaded')){
-	          YUD.get('q_filter').value = '';
-	          //TODO: load here full list later to do search within groups
-	          YUD.addClass('q_filter', 'loaded');
-	      }
-	   });
-
-	  YUE.on('q_filter','keyup',function (e) {
-	      clearTimeout(filterTimeout);
-	      filterTimeout = setTimeout(updateFilter,600);
-	  });
-	}
+    }
 </script>
 </%def>

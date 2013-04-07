@@ -15,6 +15,7 @@ from rhodecode.lib.middleware.simplehg import SimpleHg
 from rhodecode.lib.middleware.simplegit import SimpleGit
 from rhodecode.lib.middleware.https_fixup import HttpsFixup
 from rhodecode.config.environment import load_environment
+from rhodecode.lib.middleware.wrapper import RequestWrapper
 
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
@@ -55,7 +56,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
 
         from rhodecode.lib.middleware.sentry import Sentry
         from rhodecode.lib.middleware.errormator import Errormator
-        if Errormator:
+        if Errormator and asbool(config['app_conf'].get('errormator')):
             app = Errormator(app, config)
         elif Sentry:
             app = Sentry(app, config)
@@ -67,7 +68,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         # need any pylons stack middleware in them
         app = SimpleHg(app, config)
         app = SimpleGit(app, config)
-
+        app = RequestWrapper(app, config)
         # Display error documents for 401, 403, 404 status codes (and
         # 500 when debug is disabled)
         if asbool(config['debug']):

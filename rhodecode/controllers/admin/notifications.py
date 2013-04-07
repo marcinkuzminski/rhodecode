@@ -28,7 +28,7 @@ import traceback
 
 from pylons import request
 from pylons import tmpl_context as c, url
-from pylons.controllers.util import redirect
+from pylons.controllers.util import redirect, abort
 
 from webhelpers.paginate import Page
 
@@ -117,7 +117,7 @@ class NotificationsController(BaseController):
                     Session().commit()
                     return 'ok'
         except Exception:
-            Session.rollback()
+            Session().rollback()
             log.error(traceback.format_exc())
         return 'fail'
 
@@ -139,7 +139,7 @@ class NotificationsController(BaseController):
                     Session().commit()
                     return 'ok'
         except Exception:
-            Session.rollback()
+            Session().rollback()
             log.error(traceback.format_exc())
         return 'fail'
 
@@ -149,8 +149,9 @@ class NotificationsController(BaseController):
         c.user = self.rhodecode_user
         no = Notification.get(notification_id)
 
-        owner = all(un.user.user_id == c.rhodecode_user.user_id
+        owner = any(un.user.user_id == c.rhodecode_user.user_id
                     for un in no.notifications_to_users)
+
         if no and (h.HasPermissionAny('hg.admin', 'repository.admin')() or owner):
             unotification = NotificationModel()\
                             .get_user_notification(c.user.user_id, no)
@@ -158,14 +159,14 @@ class NotificationsController(BaseController):
             # if this association to user is not valid, we don't want to show
             # this message
             if unotification:
-                if unotification.read is False:
+                if not unotification.read:
                     unotification.mark_as_read()
                     Session().commit()
                 c.notification = no
 
                 return render('admin/notifications/show_notification.html')
 
-        return redirect(url('notifications'))
+        return abort(403)
 
     def edit(self, notification_id, format='html'):
         """GET /_admin/notifications/id/edit: Form to edit an existing item"""

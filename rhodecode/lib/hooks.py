@@ -26,6 +26,7 @@ import os
 import sys
 import time
 import binascii
+import traceback
 from inspect import isfunction
 
 from mercurial.scmutil import revrange
@@ -36,7 +37,7 @@ from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.compat import json
 from rhodecode.lib.exceptions import HTTPLockedRC
-from rhodecode.lib.utils2 import safe_str, datetime_to_time
+from rhodecode.lib.utils2 import safe_str, _extract_extras
 from rhodecode.model.db import Repository, User
 
 
@@ -91,55 +92,35 @@ def repo_size(ui, repo, hooktype=None, **kwargs):
 def pre_push(ui, repo, **kwargs):
     # pre push function, currently used to ban pushing when
     # repository is locked
-    try:
-        rc_extras = json.loads(os.environ.get('RC_SCM_DATA', "{}"))
-    except:
-        rc_extras = {}
-    extras = dict(repo.ui.configitems('rhodecode_extras'))
+    ex = _extract_extras()
 
-    if 'username' in extras:
-        username = extras['username']
-        repository = extras['repository']
-        scm = extras['scm']
-        locked_by = extras['locked_by']
-    elif 'username' in rc_extras:
-        username = rc_extras['username']
-        repository = rc_extras['repository']
-        scm = rc_extras['scm']
-        locked_by = rc_extras['locked_by']
-    else:
-        raise Exception('Missing data in repo.ui and os.environ')
-
-    usr = User.get_by_username(username)
-    if locked_by[0] and usr.user_id != int(locked_by[0]):
-        locked_by = User.get(locked_by[0]).username
-        raise HTTPLockedRC(repository, locked_by)
+    usr = User.get_by_username(ex.username)
+    if ex.locked_by[0] and usr.user_id != int(ex.locked_by[0]):
+        locked_by = User.get(ex.locked_by[0]).username
+        # this exception is interpreted in git/hg middlewares and based
+        # on that proper return code is server to client
+        _http_ret = HTTPLockedRC(ex.repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
+        else:
+            raise _http_ret
 
 
 def pre_pull(ui, repo, **kwargs):
     # pre push function, currently used to ban pushing when
     # repository is locked
-    try:
-        rc_extras = json.loads(os.environ.get('RC_SCM_DATA', "{}"))
-    except:
-        rc_extras = {}
-    extras = dict(repo.ui.configitems('rhodecode_extras'))
-    if 'username' in extras:
-        username = extras['username']
-        repository = extras['repository']
-        scm = extras['scm']
-        locked_by = extras['locked_by']
-    elif 'username' in rc_extras:
-        username = rc_extras['username']
-        repository = rc_extras['repository']
-        scm = rc_extras['scm']
-        locked_by = rc_extras['locked_by']
-    else:
-        raise Exception('Missing data in repo.ui and os.environ')
-
-    if locked_by[0]:
-        locked_by = User.get(locked_by[0]).username
-        raise HTTPLockedRC(repository, locked_by)
+    ex = _extract_extras()
+    if ex.locked_by[0]:
+        locked_by = User.get(ex.locked_by[0]).username
+        # this exception is interpreted in git/hg middlewares and based
+        # on that proper return code is server to client
+        _http_ret = HTTPLockedRC(ex.repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
+        else:
+            raise _http_ret
 
 
 def log_pull_action(ui, repo, **kwargs):
@@ -149,42 +130,30 @@ def log_pull_action(ui, repo, **kwargs):
     :param ui:
     :param repo:
     """
-    try:
-        rc_extras = json.loads(os.environ.get('RC_SCM_DATA', "{}"))
-    except:
-        rc_extras = {}
-    extras = dict(repo.ui.configitems('rhodecode_extras'))
-    if 'username' in extras:
-        username = extras['username']
-        repository = extras['repository']
-        scm = extras['scm']
-        make_lock = extras['make_lock']
-        ip = extras['ip']
-    elif 'username' in rc_extras:
-        username = rc_extras['username']
-        repository = rc_extras['repository']
-        scm = rc_extras['scm']
-        make_lock = rc_extras['make_lock']
-        ip = rc_extras['ip']
-    else:
-        raise Exception('Missing data in repo.ui and os.environ')
-    user = User.get_by_username(username)
+    ex = _extract_extras()
+
+    user = User.get_by_username(ex.username)
     action = 'pull'
-    action_logger(user, action, repository, ip, commit=True)
+    action_logger(user, action, ex.repository, ex.ip, commit=True)
     # extension hook call
     from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'PULL_HOOK', None)
-
     if isfunction(callback):
         kw = {}
-        kw.update(extras)
+        kw.update(ex)
         callback(**kw)
 
-    if make_lock is True:
-        Repository.lock(Repository.get_by_repo_name(repository), user.user_id)
+    if ex.make_lock is not None and ex.make_lock:
+        Repository.lock(Repository.get_by_repo_name(ex.repository), user.user_id)
         #msg = 'Made lock on repo `%s`' % repository
         #sys.stdout.write(msg)
 
+    if ex.locked_by[0]:
+        locked_by = User.get(ex.locked_by[0]).username
+        _http_ret = HTTPLockedRC(ex.repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
     return 0
 
 
@@ -196,28 +165,11 @@ def log_push_action(ui, repo, **kwargs):
     :param repo: repo object containing the `ui` object
     """
 
-    try:
-        rc_extras = json.loads(os.environ.get('RC_SCM_DATA', "{}"))
-    except:
-        rc_extras = {}
+    ex = _extract_extras()
 
-    extras = dict(repo.ui.configitems('rhodecode_extras'))
-    if 'username' in extras:
-        username = extras['username']
-        repository = extras['repository']
-        scm = extras['scm']
-        make_lock = extras['make_lock']
-    elif 'username' in rc_extras:
-        username = rc_extras['username']
-        repository = rc_extras['repository']
-        scm = rc_extras['scm']
-        make_lock = rc_extras['make_lock']
-    else:
-        raise Exception('Missing data in repo.ui and os.environ')
+    action = ex.action + ':%s'
 
-    action = 'push' + ':%s'
-
-    if scm == 'hg':
+    if ex.scm == 'hg':
         node = kwargs['node']
 
         def get_revs(repo, rev_opt):
@@ -233,27 +185,34 @@ def log_push_action(ui, repo, **kwargs):
         stop, start = get_revs(repo, [node + ':'])
         h = binascii.hexlify
         revs = [h(repo[r].node()) for r in xrange(start, stop + 1)]
-    elif scm == 'git':
+    elif ex.scm == 'git':
         revs = kwargs.get('_git_revs', [])
         if '_git_revs' in kwargs:
             kwargs.pop('_git_revs')
 
     action = action % ','.join(revs)
 
-    action_logger(username, action, repository, extras['ip'], commit=True)
+    action_logger(ex.username, action, ex.repository, ex.ip, commit=True)
 
     # extension hook call
     from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'PUSH_HOOK', None)
     if isfunction(callback):
         kw = {'pushed_revs': revs}
-        kw.update(extras)
+        kw.update(ex)
         callback(**kw)
 
-    if make_lock is False:
-        Repository.unlock(Repository.get_by_repo_name(repository))
-        msg = 'Released lock on repo `%s`\n' % repository
+    if ex.make_lock is not None and not ex.make_lock:
+        Repository.unlock(Repository.get_by_repo_name(ex.repository))
+        msg = 'Released lock on repo `%s`\n' % ex.repository
         sys.stdout.write(msg)
+
+    if ex.locked_by[0]:
+        locked_by = User.get(ex.locked_by[0]).username
+        _http_ret = HTTPLockedRC(ex.repository, locked_by)
+        if str(_http_ret.code).startswith('2'):
+            #2xx Codes don't raise exceptions
+            sys.stdout.write(_http_ret.title)
 
     return 0
 
@@ -359,7 +318,7 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
     from rhodecode.model import init_model
     from rhodecode.model.db import RhodeCodeUi
     from rhodecode.lib.utils import make_ui
-    extras = json.loads(env['RHODECODE_EXTRAS'])
+    extras = _extract_extras(env)
 
     path, ini_name = os.path.split(extras['config'])
     conf = appconfig('config:%s' % ini_name, relative_to=path)
@@ -380,15 +339,11 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
 
     _hooks = dict(baseui.configitems('hooks')) or {}
 
-    for k, v in extras.items():
-        baseui.setconfig('rhodecode_extras', k, v)
     if hook_type == 'pre':
         repo = repo.scm_instance
     else:
         #post push shouldn't use the cached instance never
-        repo = repo.scm_instance_no_cache
-
-    repo.ui = baseui
+        repo = repo.scm_instance_no_cache()
 
     if hook_type == 'pre':
         pre_push(baseui, repo)

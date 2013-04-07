@@ -162,16 +162,16 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         user_log.user_ip = ipaddr
         sa.add(user_log)
 
-        log.info('Logging action %s on %s by %s' %
-                 (action, safe_unicode(repo), user_obj))
+        log.info('Logging action:%s on %s by user:%s ip:%s' %
+                 (action, safe_unicode(repo), user_obj, ipaddr))
         if commit:
             sa.commit()
-    except:
+    except Exception:
         log.error(traceback.format_exc())
         raise
 
 
-def get_repos(path, recursive=False, skip_removed_repos=True):
+def get_filesystem_repos(path, recursive=False, skip_removed_repos=True):
     """
     Scans given path for repos and return (name,(type,path)) tuple
 
@@ -185,6 +185,7 @@ def get_repos(path, recursive=False, skip_removed_repos=True):
 
     def _get_repos(p):
         if not os.access(p, os.W_OK):
+            log.warn('ignoring repo path without write access: %s', p)
             return
         for dirpath in os.listdir(p):
             if os.path.isfile(os.path.join(p, dirpath)):
@@ -213,9 +214,6 @@ def get_repos(path, recursive=False, skip_removed_repos=True):
 
     return _get_repos(path)
 
-#alias for backward compat
-get_filesystem_repos = get_repos
-
 
 def is_valid_repo(repo_name, base_path, scm=None):
     """
@@ -240,9 +238,9 @@ def is_valid_repo(repo_name, base_path, scm=None):
         return False
 
 
-def is_valid_repos_group(repos_group_name, base_path):
+def is_valid_repos_group(repos_group_name, base_path, skip_path_check=False):
     """
-    Returns True if given path is a repos group False otherwise
+    Returns True if given path is a repository group False otherwise
 
     :param repo_name:
     :param base_path:
@@ -263,7 +261,7 @@ def is_valid_repos_group(repos_group_name, base_path):
         pass
 
     # check if it's a valid path
-    if os.path.isdir(full_path):
+    if skip_path_check or os.path.isdir(full_path):
         return True
 
     return False
@@ -429,11 +427,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         raise Exception('Missing administrative account!')
     added = []
 
-#    # clear cache keys
-#    log.debug("Clearing cache keys now...")
-#    CacheInvalidation.clear_cache()
-#    sa.commit()
-
     ##creation defaults
     defs = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
     enable_statistics = defs.get('repo_enable_statistics')
@@ -474,10 +467,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 ScmModel().install_git_hook(db_repo.scm_instance)
         # during starting install all cache keys for all repositories in the
         # system, this will register all repos and multiple instances
-        key, _prefix, _org_key = CacheInvalidation._get_key(name)
+        cache_key = CacheInvalidation._get_cache_key(name)
+        log.debug("Creating invalidation cache key for %s: %s", name, cache_key)
         CacheInvalidation.invalidate(name)
-        log.debug("Creating a cache key for %s, instance_id %s"
-                  % (name, _prefix or 'unknown'))
 
     sa.commit()
     removed = []
@@ -491,11 +483,10 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                     sa.delete(repo)
                     sa.commit()
                     removed.append(repo.repo_name)
-                except:
+                except Exception:
                     #don't hold further removals on error
                     log.error(traceback.format_exc())
                     sa.rollback()
-
     return added, removed
 
 
@@ -549,6 +540,26 @@ def load_rcextensions(root_path):
         #ADDITIONAL MAPPINGS
         log.debug('adding extra into INDEX_EXTENSIONS')
         conf.INDEX_EXTENSIONS.extend(getattr(EXT, 'EXTRA_INDEX_EXTENSIONS', []))
+
+        # auto check if the module is not missing any data, set to default if is
+        # this will help autoupdate new feature of rcext module
+        from rhodecode.config import rcextensions
+        for k in dir(rcextensions):
+            if not k.startswith('_') and not hasattr(EXT, k):
+                setattr(EXT, k, getattr(rcextensions, k))
+
+
+def get_custom_lexer(extension):
+    """
+    returns a custom lexer if it's defined in rcextensions module, or None
+    if there's no custom lexer defined
+    """
+    import rhodecode
+    from pygments import lexers
+    #check if we didn't define this extension as other lexer
+    if rhodecode.EXTENSIONS and extension in rhodecode.EXTENSIONS.EXTRA_LEXERS:
+        _lexer_name = rhodecode.EXTENSIONS.EXTRA_LEXERS[extension]
+        return lexers.get_lexer_by_name(_lexer_name)
 
 
 #==============================================================================
@@ -704,26 +715,40 @@ class BasePasterCommand(Command):
         conf = paste.deploy.appconfig('config:' + self.path_to_ini_file)
         pylonsconfig.init_app(conf.global_conf, conf.local_conf)
 
+    def _init_session(self):
+        """
+        Inits SqlAlchemy Session
+        """
+        logging.config.fileConfig(self.path_to_ini_file)
+        from pylons import config
+        from rhodecode.model import init_model
+        from rhodecode.lib.utils2 import engine_from_config
+
+        #get to remove repos !!
+        add_cache(config)
+        engine = engine_from_config(config, 'sqlalchemy.db1.')
+        init_model(engine)
+
 
 def check_git_version():
     """
     Checks what version of git is installed in system, and issues a warning
     if it's too old for RhodeCode to properly work.
     """
-    import subprocess
-    from distutils.version import StrictVersion
     from rhodecode import BACKENDS
+    from rhodecode.lib.vcs.backends.git.repository import GitRepository
+    from distutils.version import StrictVersion
 
-    p = subprocess.Popen('git --version', shell=True,
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
+    stdout, stderr = GitRepository._run_git_command('--version', _bare=True,
+                                                    _safe=True)
+
     ver = (stdout.split(' ')[-1] or '').strip() or '0.0.0'
     if len(ver.split('.')) > 3:
         #StrictVersion needs to be only 3 element type
         ver = '.'.join(ver.split('.')[:3])
     try:
         _ver = StrictVersion(ver)
-    except:
+    except Exception:
         _ver = StrictVersion('0.0.0')
         stderr = traceback.format_exc()
 
@@ -735,7 +760,7 @@ def check_git_version():
     if 'git' in BACKENDS:
         log.debug('GIT version detected: %s' % stdout)
         if stderr:
-            log.warning('Unable to detect git version org error was:%r' % stderr)
+            log.warning('Unable to detect git version, org error was: %r' % stderr)
         elif to_old_git:
             log.warning('RhodeCode detected git version %s, which is too old '
                         'for the system to function properly. Make sure '

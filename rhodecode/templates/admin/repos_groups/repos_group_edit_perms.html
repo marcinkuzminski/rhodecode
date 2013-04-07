@@ -9,7 +9,9 @@
     </tr>
     ## USERS
     %for r2p in c.repos_group.repo_group_to_perm:
+        ##forbid revoking permission from yourself
         <tr id="id${id(r2p.user.username)}">
+            %if c.rhodecode_user.user_id != r2p.user.user_id or c.rhodecode_user.is_admin:
             <td>${h.radio('u_perm_%s' % r2p.user.username,'group.none')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'group.read')}</td>
             <td>${h.radio('u_perm_%s' % r2p.user.username,'group.write')}</td>
@@ -24,10 +26,21 @@
                 </span>
               %endif
             </td>
+            %else:
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.none', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.read', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.write', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'group.admin', disabled="disabled")}</td>
+            <td style="white-space: nowrap;">
+                <img class="perm-gravatar" src="${h.gravatar_url(r2p.user.email,14)}"/>${r2p.user.username if r2p.user.username != 'default' else _('default')}
+            </td>
+            <td>
+            </td>
+            %endif
         </tr>
     %endfor
 
-    ## USERS GROUPS
+    ## USER GROUPS
     %for g2p in c.repos_group.users_group_to_perm:
         <tr id="id${id(g2p.users_group.users_group_name)}">
             <td>${h.radio('g_perm_%s' % g2p.users_group.users_group_name,'group.none')}</td>
@@ -38,7 +51,7 @@
                 <img class="perm-gravatar" src="${h.url('/images/icons/group.png')}"/>${g2p.users_group.users_group_name}
             </td>
             <td>
-                <span class="delete_icon action_button" onclick="ajaxActionUsersGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionUserGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
                 ${_('revoke')}
                 </span>
             </td>
@@ -92,7 +105,7 @@ function ajaxActionUser(user_id, field_id) {
     var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
 };
 
-function ajaxActionUsersGroup(users_group_id,field_id){
+function ajaxActionUserGroup(users_group_id,field_id){
     var sUrl = "${h.url('delete_repos_group_users_group_perm',group_name=c.repos_group.group_name)}";
     var callback = {
         success:function(o){
@@ -100,7 +113,7 @@ function ajaxActionUsersGroup(users_group_id,field_id){
             tr.parentNode.removeChild(tr);
         },
         failure:function(o){
-            alert("${_('Failed to remove users group')}");
+            alert("${_('Failed to remove user group')}");
         },
     };
     var recursive = YUD.get('recursive').checked;
@@ -113,7 +126,7 @@ YUE.onDOMReady(function () {
         YUD.setStyle('add_perm_input', 'display', 'none');
     }
     YAHOO.util.Event.addListener('add_perm', 'click', function () {
-    	addPermAction(${_tmpl}, ${c.users_array|n}, ${c.users_groups_array|n});
+        addPermAction(${_tmpl}, ${c.users_array|n}, ${c.users_groups_array|n});
     });
 });
 

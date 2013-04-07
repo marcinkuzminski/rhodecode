@@ -23,13 +23,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import re
+import sys
 import time
 import datetime
+import traceback
 import webob
 
 from pylons.i18n.translation import _, ungettext
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.compat import json
 
 
 def __get_lem():
@@ -349,31 +353,35 @@ def engine_from_config(configuration, prefix='sqlalchemy.', **kwargs):
     return engine
 
 
-def age(prevdate):
+def age(prevdate, show_short_version=False, now=None):
     """
     turns a datetime into an age string.
+    If show_short_version is True, then it will generate a not so accurate but shorter string,
+    example: 2days ago, instead of 2 days and 23 hours ago.
 
     :param prevdate: datetime object
+    :param show_short_version: if it should aproximate the date and return a shorter string
     :rtype: unicode
     :returns: unicode words describing age
     """
-
+    now = now or datetime.datetime.now()
     order = ['year', 'month', 'day', 'hour', 'minute', 'second']
     deltas = {}
     future = False
 
-    # Get date parts deltas
-    now = datetime.datetime.now()
     if prevdate > now:
         now, prevdate = prevdate, now
         future = True
-
+    if future:
+        prevdate = prevdate.replace(microsecond=0)
+    # Get date parts deltas
+    from dateutil import relativedelta
     for part in order:
-        deltas[part] = getattr(now, part) - getattr(prevdate, part)
+        d = relativedelta.relativedelta(now, prevdate)
+        deltas[part] = getattr(d, part + 's')
 
     # Fix negative offsets (there is 1 second between 10:59:59 and 11:00:00,
     # not 1 hour, -59 minutes and -59 seconds)
-
     for num, length in [(5, 60), (4, 60), (3, 24)]:  # seconds, minutes, hours
         part = order[num]
         carry_part = order[num - 1]
@@ -419,7 +427,7 @@ def age(prevdate):
         else:
             sub_value = 0
 
-        if sub_value == 0:
+        if sub_value == 0 or show_short_version:
             if future:
                 return _(u'in %s') % fmt_funcs[part](value)
             else:
@@ -545,7 +553,6 @@ def fix_PATH(os_=None):
     Get current active python path, and append it to PATH variable to fix issues
     of subprocess calls and different python versions
     """
-    import sys
     if os_ is None:
         import os
     else:
@@ -563,7 +570,7 @@ def obfuscate_url_pw(engine):
         _url = sa_url.make_url(engine)
         if _url.password:
             _url.password = 'XXXXX'
-    except:
+    except Exception:
         pass
     return str(_url)
 
@@ -571,3 +578,32 @@ def obfuscate_url_pw(engine):
 def get_server_url(environ):
     req = webob.Request(environ)
     return req.host_url + req.script_name
+
+
+def _extract_extras(env=None):
+    """
+    Extracts the rc extras data from os.environ, and wraps it into named
+    AttributeDict object
+    """
+    if not env:
+        env = os.environ
+
+    try:
+        rc_extras = json.loads(env['RC_SCM_DATA'])
+    except Exception:
+        print os.environ
+        print >> sys.stderr, traceback.format_exc()
+        rc_extras = {}
+
+    try:
+        for k in ['username', 'repository', 'locked_by', 'scm', 'make_lock',
+                  'action', 'ip']:
+            rc_extras[k]
+    except KeyError, e:
+        raise Exception('Missing key %s in os.environ %s' % (e, rc_extras))
+
+    return AttributeDict(rc_extras)
+
+
+def _set_extras(extras):
+    os.environ['RC_SCM_DATA'] = json.dumps(extras)

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    rhodecode.config.rcextensions.make_rcextensions
+    rhodecode.lib.paster_commands.make_rcextensions
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Whoosh indexing module for RhodeCode
+    make-rcext paster command for RhodeCode
 
     :created_on: Mar 6, 2012
     :author: marcink
@@ -29,26 +29,27 @@ import sys
 import pkg_resources
 import traceback
 import logging
+
 from os.path import dirname as dn, join as jn
-
 #to get the rhodecode import
-sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
 
-from rhodecode.lib.utils import BasePasterCommand, Command, ask_ok
+from rhodecode.lib.utils import BasePasterCommand, ask_ok
 
 log = logging.getLogger(__name__)
 
 
-class MakeRcExt(BasePasterCommand):
+class Command(BasePasterCommand):
 
     max_args = 1
     min_args = 1
 
     usage = "CONFIG_FILE"
-    summary = "Creates additional extensions for rhodecode"
     group_name = "RhodeCode"
     takes_config_file = -1
-    parser = Command.standard_parser(verbose=True)
+    parser = BasePasterCommand.standard_parser(verbose=True)
+    summary = "Creates additional extensions for rhodecode"
 
     def command(self):
         logging.config.fileConfig(self.path_to_ini_file)

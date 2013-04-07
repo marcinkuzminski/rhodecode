@@ -2,16 +2,17 @@
 <%inherit file="main.html"/>
 
 ${_('User %s opened pull request for repository %s and wants you to review changes.') % (('<b>%s</b>' % pr_user_created),pr_repo_url) |n}
+<div>${_('View this pull request here')}: ${pr_url}</div>
 <div>${_('title')}: ${pr_title}</div>
 <div>${_('description')}:</div>
-<div>${_('View this pull request here')}: ${pr_url}</div>
 <p>
 ${body}
 </p>
 
 <div>${_('revisions for reviewing')}</div>
-<ul>
-%for r in pr_revisions:
-    <li>${r}</li>
+<p style="white-space: pre-wrap;">
+%for r,r_msg in pr_revisions:
+<b>${h.short_id(r)}</b>:
+${h.shorter(r_msg, 256)}
 %endfor
-</ul>
+</p>

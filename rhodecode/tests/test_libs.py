@@ -66,41 +66,37 @@ TEST_URLS += [
 
 class TestLibs(unittest.TestCase):
 
-    def test_uri_filter(self):
+    @parameterized.expand(TEST_URLS)
+    def test_uri_filter(self, test_url, expected, expected_creds):
         from rhodecode.lib.utils2 import uri_filter
+        self.assertEqual(uri_filter(test_url), expected)
 
-        for url in TEST_URLS:
-            self.assertEqual(uri_filter(url[0]), url[1])
-
-    def test_credentials_filter(self):
+    @parameterized.expand(TEST_URLS)
+    def test_credentials_filter(self, test_url, expected, expected_creds):
         from rhodecode.lib.utils2 import credentials_filter
+        self.assertEqual(credentials_filter(test_url), expected_creds)
 
-        for url in TEST_URLS:
-            self.assertEqual(credentials_filter(url[0]), url[2])
-
-    def test_str2bool(self):
+    @parameterized.expand([('t', True),
+                           ('true', True),
+                           ('y', True),
+                           ('yes', True),
+                           ('on', True),
+                           ('1', True),
+                           ('Y', True),
+                           ('yeS', True),
+                           ('Y', True),
+                           ('TRUE', True),
+                           ('T', True),
+                           ('False', False),
+                           ('F', False),
+                           ('FALSE', False),
+                           ('0', False),
+                           ('-1', False),
+                           ('', False)
+    ])
+    def test_str2bool(self, str_bool, expected):
         from rhodecode.lib.utils2 import str2bool
-        test_cases = [
-            ('t', True),
-            ('true', True),
-            ('y', True),
-            ('yes', True),
-            ('on', True),
-            ('1', True),
-            ('Y', True),
-            ('yeS', True),
-            ('Y', True),
-            ('TRUE', True),
-            ('T', True),
-            ('False', False),
-            ('F', False),
-            ('FALSE', False),
-            ('0', False),
-            ('-1', False),
-            ('', False), ]
-
-        for case in test_cases:
-            self.assertEqual(str2bool(case[0]), case[1])
+        self.assertEqual(str2bool(str_bool), expected)
 
     def test_mention_extractor(self):
         from rhodecode.lib.utils2 import extract_mentioned_users
@@ -118,40 +114,42 @@ class TestLibs(unittest.TestCase):
         ], key=lambda k: k.lower())
         self.assertEqual(s, extract_mentioned_users(sample))
 
-    def test_age(self):
-        import calendar
+    @parameterized.expand([
+        (dict(), u'just now'),
+        (dict(seconds= -1), u'1 second ago'),
+        (dict(seconds= -60 * 2), u'2 minutes ago'),
+        (dict(hours= -1), u'1 hour ago'),
+        (dict(hours= -24), u'1 day ago'),
+        (dict(hours= -24 * 5), u'5 days ago'),
+        (dict(months= -1), u'1 month ago'),
+        (dict(months= -1, days= -2), u'1 month and 2 days ago'),
+        (dict(years= -1, months= -1), u'1 year and 1 month ago'),
+    ])
+    def test_age(self, age_args, expected):
         from rhodecode.lib.utils2 import age
-        n = datetime.datetime.now()
-        delt = lambda *args, **kwargs: datetime.timedelta(*args, **kwargs)
-        prev_month = n.month - 1 if n.month != 1 else n.month - 2
-        self.assertEqual(age(n), u'just now')
-        self.assertEqual(age(n - delt(seconds=1)), u'1 second ago')
-        self.assertEqual(age(n - delt(seconds=60 * 2)), u'2 minutes ago')
-        self.assertEqual(age(n - delt(hours=1)), u'1 hour ago')
-        self.assertEqual(age(n - delt(hours=24)), u'1 day ago')
-        self.assertEqual(age(n - delt(hours=24 * 5)), u'5 days ago')
-        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[prev_month]))),
-                         u'1 month ago')
-        self.assertEqual(age(n - delt(hours=24 * (calendar.mdays[prev_month] + 2))),
-                         u'1 month and 2 days ago')
-        self.assertEqual(age(n - delt(hours=24 * 400)), u'1 year and 1 month ago')
+        from dateutil import relativedelta
+        n = datetime.datetime(year=2012, month=5, day=17)
+        delt = lambda *args, **kwargs: relativedelta.relativedelta(*args, **kwargs)
+        self.assertEqual(age(n + delt(**age_args), now=n), expected)
 
-    def test_age_in_future(self):
-        import calendar
+    @parameterized.expand([
+
+        (dict(), u'just now'),
+        (dict(seconds=1), u'in 1 second'),
+        (dict(seconds=60 * 2), u'in 2 minutes'),
+        (dict(hours=1), u'in 1 hour'),
+        (dict(hours=24), u'in 1 day'),
+        (dict(hours=24 * 5), u'in 5 days'),
+        (dict(months=1), u'in 1 month'),
+        (dict(months=1, days=1), u'in 1 month and 1 day'),
+        (dict(years=1, months=1), u'in 1 year and 1 month')
+    ])
+    def test_age_in_future(self, age_args, expected):
         from rhodecode.lib.utils2 import age
-        n = datetime.datetime.now()
-        delt = lambda *args, **kwargs: datetime.timedelta(*args, **kwargs)
-        self.assertEqual(age(n), u'just now')
-        self.assertEqual(age(n + delt(seconds=1)), u'in 1 second')
-        self.assertEqual(age(n + delt(seconds=60 * 2)), u'in 2 minutes')
-        self.assertEqual(age(n + delt(hours=1)), u'in 1 hour')
-        self.assertEqual(age(n + delt(hours=24)), u'in 1 day')
-        self.assertEqual(age(n + delt(hours=24 * 5)), u'in 5 days')
-        self.assertEqual(age(n + delt(hours=24 * (calendar.mdays[n.month]))),
-                         u'in 1 month')
-        self.assertEqual(age(n + delt(hours=24 * (calendar.mdays[n.month] + 1))),
-                         u'in 1 month and 1 day')
-        self.assertEqual(age(n + delt(hours=24 * 400)), u'in 1 year and 1 month')
+        from dateutil import relativedelta
+        n = datetime.datetime(year=2012, month=5, day=17)
+        delt = lambda *args, **kwargs: relativedelta.relativedelta(*args, **kwargs)
+        self.assertEqual(age(n + delt(**age_args), now=n), expected)
 
     def test_tag_exctrator(self):
         sample = (
@@ -215,3 +213,83 @@ class TestLibs(unittest.TestCase):
                 em = 'test@foo.com'
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'https://server.com/%s/%s' % (_md5(em), 24)
+
+    def _quick_url(self, text, tmpl="""<a class="revision-link" href="%s">%s</a>""", url_=None):
+        """
+        Changes `some text url[foo]` => `some text <a href="/">foo</a>
+
+        :param text:
+        """
+        import re
+        # quickly change expected url[] into a link
+        URL_PAT = re.compile(r'(?:url\[)(.+?)(?:\])')
+
+        def url_func(match_obj):
+            _url = match_obj.groups()[0]
+            return tmpl % (url_ or '/some-url', _url)
+        return URL_PAT.sub(url_func, text)
+
+    @parameterized.expand([
+      ("",
+       ""),
+      ("git-svn-id: https://svn.apache.org/repos/asf/libcloud/trunk@1441655 13f79535-47bb-0310-9956-ffa450edef68",
+       "git-svn-id: https://svn.apache.org/repos/asf/libcloud/trunk@1441655 13f79535-47bb-0310-9956-ffa450edef68"),
+      ("from rev 000000000000",
+       "from rev url[000000000000]"),
+      ("from rev 000000000000123123 also rev 000000000000",
+       "from rev url[000000000000123123] also rev url[000000000000]"),
+      ("this should-000 00",
+       "this should-000 00"),
+      ("longtextffffffffff rev 123123123123",
+       "longtextffffffffff rev url[123123123123]"),
+      ("rev ffffffffffffffffffffffffffffffffffffffffffffffffff",
+       "rev ffffffffffffffffffffffffffffffffffffffffffffffffff"),
+      ("ffffffffffff some text traalaa",
+       "url[ffffffffffff] some text traalaa"),
+       ("""Multi line
+       123123123123
+       some text 123123123123
+       sometimes !
+       """,
+       """Multi line
+       url[123123123123]
+       some text url[123123123123]
+       sometimes !
+       """)
+    ])
+    def test_urlify_changesets(self, sample, expected):
+        def fake_url(self, *args, **kwargs):
+            return '/some-url'
+
+        expected = self._quick_url(expected)
+
+        with mock.patch('pylons.url', fake_url):
+            from rhodecode.lib.helpers import urlify_changesets
+            self.assertEqual(urlify_changesets(sample, 'repo_name'), expected)
+
+    @parameterized.expand([
+      ("",
+       "",
+       ""),
+      ("https://svn.apache.org/repos",
+       "url[https://svn.apache.org/repos]",
+       "https://svn.apache.org/repos"),
+      ("http://svn.apache.org/repos",
+       "url[http://svn.apache.org/repos]",
+       "http://svn.apache.org/repos"),
+      ("from rev a also rev http://google.com",
+       "from rev a also rev url[http://google.com]",
+       "http://google.com"),
+       ("""Multi line
+       https://foo.bar.com
+       some text lalala""",
+       """Multi line
+       url[https://foo.bar.com]
+       some text lalala""",
+       "https://foo.bar.com")
+    ])
+    def test_urlify_test(self, sample, expected, url_):
+        from rhodecode.lib.helpers import urlify_text
+        expected = self._quick_url(expected,
+                                   tmpl="""<a href="%s">%s</a>""", url_=url_)
+        self.assertEqual(urlify_text(sample), expected)

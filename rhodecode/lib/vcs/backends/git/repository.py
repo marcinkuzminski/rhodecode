@@ -20,7 +20,8 @@ import urllib2
 from dulwich.repo import Repo, NotGitRepository
 from dulwich.objects import Tag
 from string import Template
-from subprocess import Popen, PIPE
+
+import rhodecode
 from rhodecode.lib.vcs.backends.base import BaseRepository
 from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
@@ -63,18 +64,9 @@ class GitRepository(BaseRepository):
             abspath(get_user_home(), '.gitconfig'),
         ]
 
-    @ThreadLocalLazyProperty
+    @property
     def _repo(self):
-        repo = Repo(self.path)
-        #temporary set that to now at later we will move it to constructor
-        baseui = None
-        if baseui is None:
-            from mercurial.ui import ui
-            baseui = ui()
-        # patch the instance of GitRepo with an "FAKE" ui object to add
-        # compatibility layer with Mercurial
-        setattr(repo, 'ui', baseui)
-        return repo
+        return Repo(self.path)
 
     @property
     def head(self):
@@ -91,20 +83,27 @@ class GitRepository(BaseRepository):
         """
         return self._get_all_revisions()
 
-    def run_git_command(self, cmd):
+    @classmethod
+    def _run_git_command(cls, cmd, **opts):
         """
         Runs given ``cmd`` as git command and returns tuple
-        (returncode, stdout, stderr).
-
-        .. note::
-           This method exists only until log/blame functionality is implemented
-           at Dulwich (see https://bugs.launchpad.net/bugs/645142). Parsing
-           os command's output is road to hell...
+        (stdout, stderr).
 
         :param cmd: git command to be executed
+        :param opts: env options to pass into Subprocess command
         """
 
-        _copts = ['-c', 'core.quotepath=false', ]
+        if '_bare' in opts:
+            _copts = []
+            del opts['_bare']
+        else:
+            _copts = ['-c', 'core.quotepath=false', ]
+        safe_call = False
+        if '_safe' in opts:
+            #no exc on failure
+            del opts['_safe']
+            safe_call = True
+
         _str_cmd = False
         if isinstance(cmd, basestring):
             cmd = [cmd]
@@ -116,23 +115,33 @@ class GitRepository(BaseRepository):
             del gitenv['GIT_DIR']
         gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
-        cmd = ['git'] + _copts + cmd
+        _git_path = rhodecode.CONFIG.get('git_path', 'git')
+        cmd = [_git_path] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
         try:
-            opts = dict(
+            _opts = dict(
                 env=gitenv,
                 shell=False,
             )
-            if os.path.isdir(self.path):
-                opts['cwd'] = self.path
-            p = subprocessio.SubprocessIOChunker(cmd, **opts)
+            _opts.update(opts)
+            p = subprocessio.SubprocessIOChunker(cmd, **_opts)
         except (EnvironmentError, OSError), err:
-            log.error(traceback.format_exc())
-            raise RepositoryError("Couldn't run git command (%s).\n"
-                                  "Original error was:%s" % (cmd, err))
+            tb_err = ("Couldn't run git command (%s).\n"
+                      "Original error was:%s\n" % (cmd, err))
+            log.error(tb_err)
+            if safe_call:
+                return '', err
+            else:
+                raise RepositoryError(tb_err)
 
         return ''.join(p.output), ''.join(p.error)
+
+    def run_git_command(self, cmd):
+        opts = {}
+        if os.path.isdir(self.path):
+            opts['cwd'] = self.path
+        return self._run_git_command(cmd, **opts)
 
     @classmethod
     def _check_url(cls, url):
@@ -203,7 +212,7 @@ class GitRepository(BaseRepository):
                 else:
                     return Repo.init(self.path)
             else:
-                return Repo(self.path)
+                return self._repo
         except (NotGitRepository, OSError), err:
             raise RepositoryError(err)
 
@@ -215,7 +224,9 @@ class GitRepository(BaseRepository):
             self._repo.head()
         except KeyError:
             return []
-        cmd = 'rev-list --all --reverse --date-order'
+        rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
+                                                      '--all').strip()
+        cmd = 'rev-list %s --reverse --date-order' % (rev_filter)
         try:
             so, se = self.run_git_command(cmd)
         except RepositoryError:
@@ -248,9 +259,9 @@ class GitRepository(BaseRepository):
             or isinstance(revision, int) or is_null(revision)):
             try:
                 revision = self.revisions[int(revision)]
-            except:
-                raise ChangesetDoesNotExistError("Revision %r does not exist "
-                    "for this repository %s" % (revision, self))
+            except Exception:
+                raise ChangesetDoesNotExistError("Revision %s does not exist "
+                    "for this repository" % (revision))
 
         elif is_bstr(revision):
             # get by branch/tag name
@@ -264,12 +275,12 @@ class GitRepository(BaseRepository):
                 return _tags_shas[_tags_shas.index(revision)]
 
             elif not pattern.match(revision) or revision not in self.revisions:
-                raise ChangesetDoesNotExistError("Revision %r does not exist "
-                    "for this repository %s" % (revision, self))
+                raise ChangesetDoesNotExistError("Revision %s does not exist "
+                    "for this repository" % (revision))
 
         # Ensure we return full id
         if not pattern.match(str(revision)):
-            raise ChangesetDoesNotExistError("Given revision %r not recognized"
+            raise ChangesetDoesNotExistError("Given revision %s not recognized"
                 % revision)
         return revision
 
@@ -287,6 +298,15 @@ class GitRepository(BaseRepository):
         if url != 'default' and not '://' in url:
             url = ':///'.join(('file', url))
         return url
+
+    def get_hook_location(self):
+        """
+        returns absolute path to location where hooks are stored
+        """
+        loc = os.path.join(self.path, 'hooks')
+        if not self.bare:
+            loc = os.path.join(self.path, '.git', 'hooks')
+        return loc
 
     @LazyProperty
     def name(self):
@@ -399,7 +419,9 @@ class GitRepository(BaseRepository):
         return self._get_parsed_refs()
 
     def _get_parsed_refs(self):
-        refs = self._repo.get_refs()
+        # cache the property
+        _repo = self._repo
+        refs = _repo.get_refs()
         keys = [('refs/heads/', 'H'),
                 ('refs/remotes/origin/', 'RH'),
                 ('refs/tags/', 'T')]
@@ -409,9 +431,9 @@ class GitRepository(BaseRepository):
                 if ref.startswith(k):
                     _key = ref[len(k):]
                     if type_ == 'T':
-                        obj = self._repo.get_object(sha)
+                        obj = _repo.get_object(sha)
                         if isinstance(obj, Tag):
-                            sha = self._repo.get_object(sha).object[1]
+                            sha = _repo.get_object(sha).object[1]
                     _refs[_key] = [sha, type_]
                     break
         return _refs
@@ -480,7 +502,9 @@ class GitRepository(BaseRepository):
             cmd_template += ' $branch_name'
             cmd_params['branch_name'] = branch_name
         else:
-            cmd_template += ' --all'
+            rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
+                                                          '--all').strip()
+            cmd_template += ' %s' % (rev_filter)
 
         cmd = Template(cmd_template).safe_substitute(**cmd_params)
         revs = self.run_git_command(cmd)[0].splitlines()

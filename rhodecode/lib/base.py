@@ -32,6 +32,22 @@ from rhodecode.model.meta import Session
 log = logging.getLogger(__name__)
 
 
+def _filter_proxy(ip):
+    """
+    HEADERS can have mutliple ips inside the left-most being the original
+    client, and each successive proxy that passed the request adding the IP
+    address where it received the request from.
+
+    :param ip:
+    """
+    if ',' in ip:
+        _ips = ip.split(',')
+        _first_ip = _ips[0].strip()
+        log.debug('Got multiple IPs %s, using %s' % (','.join(_ips), _first_ip))
+        return _first_ip
+    return ip
+
+
 def _get_ip_addr(environ):
     proxy_key = 'HTTP_X_REAL_IP'
     proxy_key2 = 'HTTP_X_FORWARDED_FOR'
@@ -39,22 +55,14 @@ def _get_ip_addr(environ):
 
     ip = environ.get(proxy_key)
     if ip:
-        return ip
+        return _filter_proxy(ip)
 
     ip = environ.get(proxy_key2)
     if ip:
-        return ip
+        return _filter_proxy(ip)
 
     ip = environ.get(def_key, '0.0.0.0')
-
-    # HEADERS can have mutliple ips inside
-    # the left-most being the original client, and each successive proxy
-    # that passed the request adding the IP address where it received the
-    # request from.
-    if ',' in ip:
-        ip = ip.split(',')[0].strip()
-
-    return ip
+    return _filter_proxy(ip)
 
 
 def _get_access_path(environ):
@@ -127,7 +135,7 @@ class BaseVCSController(object):
                 if len(by_id) == 2 and by_id[1].isdigit():
                     _repo_name = Repository.get(by_id[1]).repo_name
                     data[1] = _repo_name
-        except:
+        except Exception:
             log.debug('Failed to extract repo_name from id %s' % (
                       traceback.format_exc()
                       )
@@ -265,8 +273,8 @@ class BaseController(WSGIController):
         c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
         c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
         c.visual.lightweight_dashboard_items = safe_int(config.get('dashboard_items', 100))
-
-        c.repo_name = get_repo_slug(request)
+        c.visual.repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
+        c.repo_name = get_repo_slug(request)  # can be empty
         c.backends = BACKENDS.keys()
         c.unread_notifications = NotificationModel()\
                         .get_unread_cnt_for_user(c.rhodecode_user.user_id)
@@ -280,7 +288,6 @@ class BaseController(WSGIController):
         # WSGIController.__call__ dispatches to the Controller method
         # the request is routed to. This routing information is
         # available in environ['pylons.routes_dict']
-        start = time.time()
         try:
             self.ip_addr = _get_ip_addr(environ)
             # make sure that we update permissions each time we call controller
@@ -301,10 +308,6 @@ class BaseController(WSGIController):
             )
             return WSGIController.__call__(self, environ, start_response)
         finally:
-            log.info('IP: %s Request to %s time: %.3fs' % (
-                _get_ip_addr(environ),
-                safe_unicode(_get_access_path(environ)), time.time() - start)
-            )
             meta.Session.remove()
 
 
@@ -317,6 +320,7 @@ class BaseRepoController(BaseController):
     c.rhodecode_db_repo: instance of db
     c.repository_followers: number of followers
     c.repository_forks: number of forks
+    c.repository_following: weather the current user is following the current repo
     """
 
     def __before__(self):
@@ -337,3 +341,5 @@ class BaseRepoController(BaseController):
             c.repository_followers = self.scm_model.get_followers(dbr)
             c.repository_forks = self.scm_model.get_forks(dbr)
             c.repository_pull_requests = self.scm_model.get_pull_requests(dbr)
+            c.repository_following = self.scm_model.is_following_repo(c.repo_name,
+                                                self.rhodecode_user.user_id)

@@ -2,7 +2,7 @@
 <%inherit file="base/root.html"/>
 
 <%def name="title()">
-    ${_('Sign In')} - ${c.rhodecode_name}
+    ${_('Log In')} &middot; ${c.rhodecode_name}
 </%def>
 
 <div id="login">
@@ -18,7 +18,7 @@
 </div>
     <!-- login -->
     <div class="title top-left-rounded-corner top-right-rounded-corner">
-        <h5>${_('Sign In to')} ${c.rhodecode_name}</h5>
+        <h5>${_('Log In to %s') % c.rhodecode_name}</h5>
     </div>
     <div class="inner">
         ${h.form(h.url.current(came_from=c.came_from))}
@@ -31,7 +31,7 @@
                         <label for="username">${_('Username')}:</label>
                     </div>
                     <div class="input">
-                        ${h.text('username',class_='focus',size=40)}
+                        ${h.text('username',class_='focus large')}
                     </div>
 
                 </div>
@@ -40,7 +40,7 @@
                         <label for="password">${_('Password')}:</label>
                     </div>
                     <div class="input">
-                        ${h.password('password',class_='focus',size=40)}
+                        ${h.password('password',class_='focus large')}
                     </div>
 
                 </div>
@@ -69,7 +69,7 @@
         ${h.end_form()}
         <script type="text/javascript">
         YUE.onDOMReady(function(){
-        	YUD.get('username').focus();
+            YUD.get('username').focus();
         })
         </script>
     </div>

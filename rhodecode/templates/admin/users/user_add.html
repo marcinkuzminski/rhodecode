@@ -2,18 +2,18 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Add user')} - ${c.rhodecode_name}
+    ${_('Add user')} &middot; ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
     ${h.link_to(_('Users'),h.url('users'))}
     &raquo;
-    ${_('add new user')}
+    ${_('Add new user')}
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
@@ -91,9 +91,9 @@
              </div>
 
             <div class="buttons">
-              ${h.submit('save',_('save'),class_="ui-btn large")}
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
             </div>
-    	</div>
+        </div>
     </div>
     ${h.end_form()}
 </div>

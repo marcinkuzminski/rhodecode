@@ -38,6 +38,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator,\
     NotAnonymous
+from rhodecode.lib.helpers import Page
 from rhodecode.lib import helpers as h
 from rhodecode.lib import diffs
 from rhodecode.lib.utils import action_logger, jsonify
@@ -52,6 +53,8 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
+from mercurial import scmutil
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -67,34 +70,68 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def _get_repo_refs(self, repo):
-        hist_l = []
+    def _get_repo_refs(self, repo, rev=None, branch_rev=None):
+        """return a structure with repo's interesting changesets, suitable for
+        the selectors in pullrequest.html"""
 
-        branches_group = ([('branch:%s:%s' % (k, v), k) for
-                         k, v in repo.branches.iteritems()], _("Branches"))
-        bookmarks_group = ([('book:%s:%s' % (k, v), k) for
-                         k, v in repo.bookmarks.iteritems()], _("Bookmarks"))
-        tags_group = ([('tag:%s:%s' % (k, v), k) for
-                         k, v in repo.tags.iteritems()], _("Tags"))
+        # list named branches that has been merged to this named branch - it should probably merge back
+        peers = []
+        if branch_rev:
+            # not restricting to merge() would also get branch point and be better
+            # (especially because it would get the branch point) ... but is currently too expensive
+            revs = ["sort(parents(branch(id('%s')) and merge()) - branch(id('%s')))" %
+                    (branch_rev, branch_rev)]
+            otherbranches = {}
+            for i in scmutil.revrange(repo._repo, revs):
+                cs = repo.get_changeset(i)
+                otherbranches[cs.branch] = cs.raw_id
+            for branch, node in otherbranches.iteritems():
+                selected = 'branch:%s:%s' % (branch, node)
+                peers.append((selected, branch))
 
-        hist_l.append(bookmarks_group)
-        hist_l.append(branches_group)
-        hist_l.append(tags_group)
+        selected = None
+        branches = []
+        for branch, branchrev in repo.branches.iteritems():
+            n = 'branch:%s:%s' % (branch, branchrev)
+            branches.append((n, branch))
+            if rev == branchrev:
+                selected = n
+        bookmarks = []
+        for bookmark, bookmarkrev in repo.bookmarks.iteritems():
+            n = 'book:%s:%s' % (bookmark, bookmarkrev)
+            bookmarks.append((n, bookmark))
+            if rev == bookmarkrev:
+                selected = n
+        tags = []
+        for tag, tagrev in repo.tags.iteritems():
+            n = 'tag:%s:%s' % (tag, tagrev)
+            tags.append((n, tag))
+            if rev == tagrev and tag != 'tip': # tip is not a real tag - and its branch is better
+                selected = n
 
-        return hist_l
+        # prio 1: rev was selected as existing entry above
 
-    def _get_default_rev(self, repo):
-        """
-        Get's default revision to do compare on pull request
+        # prio 2: create special entry for rev; rev _must_ be used
+        specials = []
+        if rev and selected is None:
+            selected = 'rev:%s:%s' % (rev, rev)
+            specials = [(selected, '%s: %s' % (_("Changeset"), rev[:12]))]
 
-        :param repo:
-        """
-        repo = repo.scm_instance
-        if 'default' in repo.branches:
-            return 'default'
-        else:
-            #if repo doesn't have default branch return first found
-            return repo.branches.keys()[0]
+        # prio 3: most recent peer branch
+        if peers and not selected:
+            selected = peers[0][0][0]
+
+        # prio 4: tip revision
+        if not selected:
+            selected = 'tag:tip:%s' % repo.tags['tip']
+
+        groups = [(specials, _("Special")),
+                  (peers, _("Peer branches")),
+                  (bookmarks, _("Bookmarks")),
+                  (branches, _("Branches")),
+                  (tags, _("Tags")),
+                  ]
+        return [g for g in groups if g[0]], selected
 
     def _get_is_allowed_change_status(self, pull_request):
         owner = self.rhodecode_user.user_id == pull_request.user_id
@@ -105,6 +142,15 @@ class PullrequestsController(BaseRepoController):
     def show_all(self, repo_name):
         c.pull_requests = PullRequestModel().get_all(repo_name)
         c.repo_name = repo_name
+        p = safe_int(request.params.get('page', 1), 1)
+
+        c.pullrequests_pager = Page(c.pull_requests, page=p, items_per_page=10)
+
+        c.pullrequest_data = render('/pullrequests/pullrequest_data.html')
+
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return c.pullrequest_data
+
         return render('/pullrequests/pullrequest_show_all.html')
 
     @NotAnonymous()
@@ -122,59 +168,51 @@ class PullrequestsController(BaseRepoController):
                     category='warning')
             redirect(url('summary_home', repo_name=org_repo.repo_name))
 
+        org_rev = request.GET.get('rev_end')
+        # rev_start is not directly useful - its parent could however be used
+        # as default for other and thus give a simple compare view
+        #other_rev = request.POST.get('rev_start')
+
+        c.org_repos = []
+        c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
+        c.default_org_repo = org_repo.repo_name
+        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, org_rev)
+
+        c.other_repos = []
         other_repos_info = {}
 
-        c.org_refs = self._get_repo_refs(c.rhodecode_repo)
-        c.org_repos = []
-        c.other_repos = []
-        c.org_repos.append((org_repo.repo_name, '%s/%s' % (
-                                org_repo.user.username, c.repo_name))
-                           )
+        def add_other_repo(repo, branch_rev=None):
+            if repo.repo_name in other_repos_info: # shouldn't happen
+                return
+            c.other_repos.append((repo.repo_name, repo.repo_name))
+            other_refs, selected_other_ref = self._get_repo_refs(repo.scm_instance, branch_rev=branch_rev)
+            other_repos_info[repo.repo_name] = {
+                'user': dict(user_id=repo.user.user_id,
+                             username=repo.user.username,
+                             firstname=repo.user.firstname,
+                             lastname=repo.user.lastname,
+                             gravatar_link=h.gravatar_url(repo.user.email, 14)),
+                'description': repo.description.split('\n', 1)[0],
+                'revs': h.select('other_ref', selected_other_ref, other_refs, class_='refs')
+            }
 
-        # add org repo to other so we can open pull request agains itself
-        c.other_repos.extend(c.org_repos)
+        # add org repo to other so we can open pull request against peer branches on itself
+        add_other_repo(org_repo, branch_rev=org_rev)
+        c.default_other_repo = org_repo.repo_name
 
-        c.default_pull_request = org_repo.repo_name  # repo name pre-selected
-        c.default_pull_request_rev = self._get_default_rev(org_repo)  # revision pre-selected
-        c.default_revs = self._get_repo_refs(org_repo.scm_instance)
-        #add orginal repo
-        other_repos_info[org_repo.repo_name] = {
-            'gravatar': h.gravatar_url(org_repo.user.email, 24),
-            'description': org_repo.description,
-            'revs': h.select('other_ref', '', c.default_revs, class_='refs')
-        }
-
-        #gather forks and add to this list
+        # gather forks and add to this list ... even though it is rare to
+        # request forks to pull from their parent
         for fork in org_repo.forks:
-            c.other_repos.append((fork.repo_name, '%s/%s' % (
-                                    fork.user.username, fork.repo_name))
-                                 )
-            other_repos_info[fork.repo_name] = {
-                'gravatar': h.gravatar_url(fork.user.email, 24),
-                'description': fork.description,
-                'revs': h.select('other_ref', '',
-                                 self._get_repo_refs(fork.scm_instance),
-                                 class_='refs')
-            }
-        #add parents of this fork also, but only if it's not empty
-        if org_repo.parent and org_repo.parent.scm_instance.revisions:
-            c.default_pull_request = org_repo.parent.repo_name
-            c.default_pull_request_rev = self._get_default_rev(org_repo.parent)
-            c.default_revs = self._get_repo_refs(org_repo.parent.scm_instance)
-            c.other_repos.append((org_repo.parent.repo_name, '%s/%s' % (
-                                        org_repo.parent.user.username,
-                                        org_repo.parent.repo_name))
-                                     )
-            other_repos_info[org_repo.parent.repo_name] = {
-                'gravatar': h.gravatar_url(org_repo.parent.user.email, 24),
-                'description': org_repo.parent.description,
-                'revs': h.select('other_ref', '',
-                                 self._get_repo_refs(org_repo.parent.scm_instance),
-                                 class_='refs')
-            }
+            add_other_repo(fork)
 
+        # add parents of this fork also, but only if it's not empty
+        if org_repo.parent and org_repo.parent.scm_instance.revisions:
+            add_other_repo(org_repo.parent)
+            c.default_other_repo = org_repo.parent.repo_name
+
+        c.default_other_repo_info = other_repos_info[c.default_other_repo]
         c.other_repos_info = json.dumps(other_repos_info)
-        c.review_members = [org_repo.user]
+
         return render('/pullrequests/pullrequest.html')
 
     @NotAnonymous()
@@ -189,28 +227,17 @@ class PullrequestsController(BaseRepoController):
             elif errors.error_dict.get('pullrequest_title'):
                 msg = _('Pull request requires a title with min. 3 chars')
             else:
-                msg = _('error during creation of pull request')
+                msg = _('Error creating pull request')
 
             h.flash(msg, 'error')
             return redirect(url('pullrequest_home', repo_name=repo_name))
 
         org_repo = _form['org_repo']
-        org_ref = _form['org_ref']
+        org_ref = 'rev:merge:%s' % _form['merge_rev']
         other_repo = _form['other_repo']
-        other_ref = _form['other_ref']
+        other_ref = 'rev:ancestor:%s' % _form['ancestor_rev']
         revisions = _form['revisions']
         reviewers = _form['review_members']
-
-        # if we have cherry picked pull request we don't care what is in
-        # org_ref/other_ref
-        rev_start = request.POST.get('rev_start')
-        rev_end = request.POST.get('rev_end')
-
-        if rev_start and rev_end:
-            # this is swapped to simulate that rev_end is a revision from
-            # parent of the fork
-            org_ref = 'rev:%s:%s' % (rev_end, rev_end)
-            other_ref = 'rev:%s:%s' % (rev_start, rev_start)
 
         title = _form['pullrequest_title']
         description = _form['pullrequest_desc']
@@ -269,9 +296,6 @@ class PullrequestsController(BaseRepoController):
         :param pull_request:
         :type pull_request:
         """
-        rev_start = request.GET.get('rev_start')
-        rev_end = request.GET.get('rev_end')
-
         org_repo = pull_request.org_repo
         (org_ref_type,
          org_ref_name,
@@ -283,7 +307,7 @@ class PullrequestsController(BaseRepoController):
          other_ref_rev) = pull_request.other_ref.split(':')
 
         # despite opening revisions for bookmarks/branches/tags, we always
-        # convert this to rev to prevent changes after book or branch change
+        # convert this to rev to prevent changes after bookmark or branch change
         org_ref = ('rev', org_ref_rev)
         other_ref = ('rev', other_ref_rev)
 
@@ -294,17 +318,12 @@ class PullrequestsController(BaseRepoController):
 
         c.cs_ranges = [org_repo.get_changeset(x) for x in pull_request.revisions]
 
-        other_ref = ('rev', getattr(c.cs_ranges[0].parents[0]
-                                  if c.cs_ranges[0].parents
-                                  else EmptyChangeset(), 'raw_id'))
-
         c.statuses = org_repo.statuses([x.raw_id for x in c.cs_ranges])
-        c.target_repo = other_repo.repo_name
-        # defines that we need hidden inputs with changesets
-        c.as_form = request.GET.get('as_form', False)
 
         c.org_ref = org_ref[1]
+        c.org_ref_type = org_ref[0]
         c.other_ref = other_ref[1]
+        c.other_ref_type = other_ref[0]
 
         diff_limit = self.cut_off_limit if not fulldiff else None
 
@@ -386,7 +405,7 @@ class PullrequestsController(BaseRepoController):
 
         try:
             cur_status = c.statuses[c.pull_request.revisions[0]][0]
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             cur_status = 'undefined'
         if c.pull_request.is_closed() and 0:
@@ -398,6 +417,8 @@ class PullrequestsController(BaseRepoController):
                                          )
         c.changeset_statuses = ChangesetStatus.STATUSES
 
+        c.as_form = False
+        c.ancestor = None # there is one - but right here we don't know which
         return render('/pullrequests/pullrequest_show.html')
 
     @NotAnonymous()
@@ -410,11 +431,15 @@ class PullrequestsController(BaseRepoController):
         status = request.POST.get('changeset_status')
         change_status = request.POST.get('change_changeset_status')
         text = request.POST.get('text')
+        close_pr = request.POST.get('save_close')
 
         allowed_to_change_status = self._get_is_allowed_change_status(pull_request)
         if status and change_status and allowed_to_change_status:
-            text = text or (_('Status change -> %s')
+            _def = (_('Status change -> %s')
                             % ChangesetStatus.get_status_lbl(status))
+            if close_pr:
+                _def = _('Closing with') + ' ' + _def
+            text = text or _def
         comm = ChangesetCommentsModel().create(
             text=text,
             repo=c.rhodecode_db_repo.repo_id,
@@ -423,7 +448,9 @@ class PullrequestsController(BaseRepoController):
             f_path=request.POST.get('f_path'),
             line_no=request.POST.get('line'),
             status_change=(ChangesetStatus.get_status_lbl(status)
-            if status and change_status and allowed_to_change_status else None)
+                           if status and change_status
+                           and allowed_to_change_status else None),
+            closing_pr=close_pr
         )
 
         action_logger(self.rhodecode_user,
@@ -441,7 +468,7 @@ class PullrequestsController(BaseRepoController):
                     pull_request=pull_request_id
                 )
 
-            if request.POST.get('save_close'):
+            if close_pr:
                 if status in ['rejected', 'approved']:
                     PullRequestModel().close_pull_request(pull_request_id)
                     action_logger(self.rhodecode_user,

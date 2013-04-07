@@ -44,9 +44,10 @@ from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
-    safe_unicode, remove_suffix, remove_prefix
+    safe_unicode, remove_suffix, remove_prefix, time_to_datetime, _set_extras
 from rhodecode.lib.compat import json
 from rhodecode.lib.caching_query import FromCache
 
@@ -341,7 +342,7 @@ class User(Base, BaseModel):
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
     repo_group_to_perm = relationship('UserRepoGroupToPerm', primaryjoin='UserRepoGroupToPerm.user_id==User.user_id', cascade='all')
 
-    group_member = relationship('UsersGroupMember', cascade='all')
+    group_member = relationship('UserGroupMember', cascade='all')
 
     notifications = relationship('UserNotification', cascade='all')
     # notifications assigned to this user
@@ -604,7 +605,7 @@ class UserLog(Base, BaseModel):
     repository = relationship('Repository', cascade='')
 
 
-class UsersGroup(Base, BaseModel):
+class UserGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = (
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
@@ -616,9 +617,9 @@ class UsersGroup(Base, BaseModel):
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
     inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
 
-    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
-    users_group_to_perm = relationship('UsersGroupToPerm', cascade='all')
-    users_group_repo_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
+    users_group_to_perm = relationship('UserGroupToPerm', cascade='all')
+    users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
 
     def __unicode__(self):
         return u'<userGroup(%s)>' % (self.users_group_name)
@@ -658,7 +659,7 @@ class UsersGroup(Base, BaseModel):
         return data
 
 
-class UsersGroupMember(Base, BaseModel):
+class UserGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = (
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
@@ -670,11 +671,49 @@ class UsersGroupMember(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User', lazy='joined')
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
 
     def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
         self.user_id = u_id
+
+
+class RepositoryField(Base, BaseModel):
+    __tablename__ = 'repositories_fields'
+    __table_args__ = (
+        UniqueConstraint('repository_id', 'field_key'),  # no-multi field
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'},
+    )
+    PREFIX = 'ex_'  # prefix used in form to not conflict with already existing fields
+
+    repo_field_id = Column("repo_field_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
+    field_key = Column("field_key", String(250, convert_unicode=False, assert_unicode=None))
+    field_label = Column("field_label", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_value = Column("field_value", String(10000, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_desc = Column("field_desc", String(1024, convert_unicode=False, assert_unicode=None), nullable=False)
+    field_type = Column("field_type", String(256), nullable=False, unique=None)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+
+    repository = relationship('Repository')
+
+    @property
+    def field_key_prefixed(self):
+        return 'ex_%s' % self.field_key
+
+    @classmethod
+    def un_prefix_key(cls, key):
+        if key.startswith(cls.PREFIX):
+            return key[len(cls.PREFIX):]
+        return key
+
+    @classmethod
+    def get_by_key_name(cls, key, repo):
+        row = cls.query()\
+                .filter(cls.repository == repo)\
+                .filter(cls.field_key == key).scalar()
+        return row
 
 
 class Repository(Base, BaseModel):
@@ -709,12 +748,14 @@ class Repository(Base, BaseModel):
     fork = relationship('Repository', remote_side=repo_id)
     group = relationship('RepoGroup')
     repo_to_perm = relationship('UserRepoToPerm', cascade='all', order_by='UserRepoToPerm.repo_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
     followers = relationship('UserFollowing',
                              primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id',
                              cascade='all')
+    extra_fields = relationship('RepositoryField',
+                                cascade="all, delete, delete-orphan")
 
     logs = relationship('UserLog')
     comments = relationship('ChangesetComment', cascade="all, delete, delete-orphan")
@@ -761,7 +802,7 @@ class Repository(Base, BaseModel):
     def changeset_cache(self, val):
         try:
             self._changeset_cache = json.dumps(val)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
 
     @classmethod
@@ -846,7 +887,7 @@ class Repository(Base, BaseModel):
 
     @property
     def groups_and_repo(self):
-        return self.groups_with_parents, self.just_name
+        return self.groups_with_parents, self.just_name, self.repo_name
 
     @LazyProperty
     def repo_path(self):
@@ -866,7 +907,7 @@ class Repository(Base, BaseModel):
         # names in the database, but that eventually needs to be converted
         # into a valid system path
         p += self.repo_name.split(Repository.url_sep())
-        return os.path.join(*p)
+        return os.path.join(*map(safe_unicode, p))
 
     @property
     def cache_keys(self):
@@ -894,18 +935,6 @@ class Repository(Base, BaseModel):
         """
         from rhodecode.lib.utils import make_ui
         return make_ui('db', clear_session=False)
-
-    @classmethod
-    def inject_ui(cls, repo, extras={}):
-        from rhodecode.lib.vcs.backends.hg import MercurialRepository
-        from rhodecode.lib.vcs.backends.git import GitRepository
-        required = (MercurialRepository, GitRepository)
-        if not isinstance(repo, required):
-            raise Exception('repo must be instance of %s' % required)
-
-        # inject ui extra param to log this action via push logger
-        for k, v in extras.items():
-            repo._repo.ui.setconfig('rhodecode_extras', k, v)
 
     @classmethod
     def is_valid(cls, repo_name):
@@ -939,8 +968,17 @@ class Repository(Base, BaseModel):
             enable_statistics=repo.enable_statistics,
             enable_locking=repo.enable_locking,
             enable_downloads=repo.enable_downloads,
-            last_changeset=repo.changeset_cache
+            last_changeset=repo.changeset_cache,
+            locked_by=User.get(self.locked[0]).get_api_data() \
+                if self.locked[0] else None,
+            locked_date=time_to_datetime(self.locked[1]) \
+                if self.locked[1] else None
         )
+        rc_config = RhodeCodeSetting.get_app_settings()
+        repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
+        if repository_fields:
+            for f in self.extra_fields:
+                data[f.field_key_prefixed] = f.field_value
 
         return data
 
@@ -955,6 +993,10 @@ class Repository(Base, BaseModel):
         repo.locked = None
         Session().add(repo)
         Session().commit()
+
+    @classmethod
+    def getlock(cls, repo):
+        return repo.locked
 
     @property
     def last_db_change(self):
@@ -1008,22 +1050,27 @@ class Repository(Base, BaseModel):
         """
         from rhodecode.lib.vcs.backends.base import BaseChangeset
         if cs_cache is None:
-            cs_cache = self.get_changeset()
+            cs_cache = EmptyChangeset()
+            # use no-cache version here
+            scm_repo = self.scm_instance_no_cache()
+            if scm_repo:
+                cs_cache = scm_repo.get_changeset()
+
         if isinstance(cs_cache, BaseChangeset):
             cs_cache = cs_cache.__json__()
 
-        if (cs_cache != self.changeset_cache
-            or not self.last_change
-            or not self.changeset_cache):
+        if (cs_cache != self.changeset_cache or not self.changeset_cache):
             _default = datetime.datetime.fromtimestamp(0)
-            last_change = cs_cache.get('date') or self.last_change or _default
-            log.debug('updated repo %s with new cs cache %s' % (self, cs_cache))
+            last_change = cs_cache.get('date') or _default
+            log.debug('updated repo %s with new cs cache %s'
+                      % (self.repo_name, cs_cache))
             self.updated_on = last_change
             self.changeset_cache = cs_cache
             Session().add(self)
             Session().commit()
         else:
-            log.debug('Skipping repo:%s already with latest changes' % self)
+            log.debug('Skipping repo:%s already with latest changes'
+                      % self.repo_name)
 
     @property
     def tip(self):
@@ -1085,6 +1132,11 @@ class Repository(Base, BaseModel):
                                       pr_id, pr_repo]
         return grouped
 
+    def _repo_size(self):
+        from rhodecode.lib import helpers as h
+        log.debug('calculating repository size...')
+        return h.format_byte_size(self.scm_instance.size)
+
     #==========================================================================
     # SCM CACHE INSTANCE
     #==========================================================================
@@ -1099,7 +1151,6 @@ class Repository(Base, BaseModel):
         """
         CacheInvalidation.set_invalidate(repo_name=self.repo_name)
 
-    @LazyProperty
     def scm_instance_no_cache(self):
         return self.__get_instance()
 
@@ -1138,7 +1189,8 @@ class Repository(Base, BaseModel):
         repo_full_path = self.repo_full_path
         try:
             alias = get_scm(repo_full_path)[0]
-            log.debug('Creating instance of %s repository' % alias)
+            log.debug('Creating instance of %s repository from %s'
+                      % (alias, repo_full_path))
             backend = get_backend(alias)
         except VCSError:
             log.error(traceback.format_exc())
@@ -1177,7 +1229,7 @@ class RepoGroup(Base, BaseModel):
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoGroupToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
 
     parent_group = relationship('RepoGroup', remote_side=group_id)
 
@@ -1190,15 +1242,14 @@ class RepoGroup(Base, BaseModel):
                                   self.group_name)
 
     @classmethod
-    def groups_choices(cls, check_perms=False):
+    def groups_choices(cls, groups=None, show_empty_group=True):
         from webhelpers.html import literal as _literal
-        from rhodecode.model.scm import ScmModel
-        groups = cls.query().all()
-        if check_perms:
-            #filter group user have access to, it's done
-            #magically inside ScmModel based on current user
-            groups = ScmModel().get_repos_groups(groups)
-        repo_groups = [('', '')]
+        if not groups:
+            groups = cls.query().all()
+
+        repo_groups = []
+        if show_empty_group:
+            repo_groups = [('-1', '-- %s --' % _('top level'))]
         sep = ' &raquo; '
         _name = lambda k: _literal(sep.join(k))
 
@@ -1311,7 +1362,7 @@ class RepoGroup(Base, BaseModel):
 
     def recursive_groups(self):
         """
-        Returns all children groups for this group including children of children 
+        Returns all children groups for this group including children of children
         """
         return self._recursive_objects(include_repos=False)
 
@@ -1339,10 +1390,10 @@ class Permission(Base, BaseModel):
         ('repository.write', _('Repository write access')),
         ('repository.admin', _('Repository admin access')),
 
-        ('group.none', _('Repositories Group no access')),
-        ('group.read', _('Repositories Group read access')),
-        ('group.write', _('Repositories Group write access')),
-        ('group.admin', _('Repositories Group admin access')),
+        ('group.none', _('Repository group no access')),
+        ('group.read', _('Repository group read access')),
+        ('group.write', _('Repository group write access')),
+        ('group.admin', _('Repository group admin access')),
 
         ('hg.admin', _('RhodeCode Administrator')),
         ('hg.create.none', _('Repository creation disabled')),
@@ -1451,7 +1502,7 @@ class UserToPerm(Base, BaseModel):
     permission = relationship('Permission', lazy='joined')
 
 
-class UsersGroupRepoToPerm(Base, BaseModel):
+class UserGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (
         UniqueConstraint('repository_id', 'users_group_id', 'permission_id'),
@@ -1463,7 +1514,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     repository = relationship('Repository')
 
@@ -1480,7 +1531,7 @@ class UsersGroupRepoToPerm(Base, BaseModel):
         return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
 
 
-class UsersGroupToPerm(Base, BaseModel):
+class UserGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'permission_id',),
@@ -1491,7 +1542,7 @@ class UsersGroupToPerm(Base, BaseModel):
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
 
 
@@ -1513,7 +1564,7 @@ class UserRepoGroupToPerm(Base, BaseModel):
     permission = relationship('Permission')
 
 
-class UsersGroupRepoGroupToPerm(Base, BaseModel):
+class UserGroupRepoGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_group_to_perm'
     __table_args__ = (
         UniqueConstraint('users_group_id', 'group_id'),
@@ -1526,7 +1577,7 @@ class UsersGroupRepoGroupToPerm(Base, BaseModel):
     group_id = Column("group_id", Integer(), ForeignKey('groups.group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     group = relationship('RepoGroup')
 
@@ -1581,9 +1632,13 @@ class CacheInvalidation(Base, BaseModel):
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'},
     )
+    # cache_id, not used
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    # cache_key as created by _get_cache_key
     cache_key = Column("cache_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    # cache_args is usually a repo_name, possibly with _README/_RSS/_ATOM suffix
     cache_args = Column("cache_args", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
+    # instance sets cache_active True when it is caching, other instances set cache_active to False to invalidate
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
     def __init__(self, cache_key, cache_args=''):
@@ -1595,43 +1650,27 @@ class CacheInvalidation(Base, BaseModel):
         return u"<%s('%s:%s')>" % (self.__class__.__name__,
                                   self.cache_id, self.cache_key)
 
-    @property
-    def prefix(self):
+    def get_prefix(self):
+        """
+        Guess prefix that might have been used in _get_cache_key to generate self.cache_key .
+        Only used for informational purposes in repo_edit.html .
+        """
         _split = self.cache_key.split(self.cache_args, 1)
-        if _split and len(_split) == 2:
+        if len(_split) == 2:
             return _split[0]
         return ''
 
     @classmethod
-    def clear_cache(cls):
-        cls.query().delete()
-
-    @classmethod
-    def _get_key(cls, key):
+    def _get_cache_key(cls, key):
         """
-        Wrapper for generating a key, together with a prefix
-
-        :param key:
+        Wrapper for generating a unique cache key for this instance and "key".
         """
         import rhodecode
-        prefix = ''
-        org_key = key
-        iid = rhodecode.CONFIG.get('instance_id')
-        if iid:
-            prefix = iid
-
-        return "%s%s" % (prefix, key), prefix, org_key
+        prefix = rhodecode.CONFIG.get('instance_id', '')
+        return "%s%s" % (prefix, key)
 
     @classmethod
-    def get_by_key(cls, key):
-        return cls.query().filter(cls.cache_key == key).scalar()
-
-    @classmethod
-    def get_by_repo_name(cls, repo_name):
-        return cls.query().filter(cls.cache_args == repo_name).all()
-
-    @classmethod
-    def _get_or_create_key(cls, key, repo_name, commit=True):
+    def _get_or_create_inv_obj(cls, key, repo_name, commit=True):
         inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
         if not inv_obj:
             try:
@@ -1658,11 +1697,10 @@ class CacheInvalidation(Base, BaseModel):
         repo_name = remove_suffix(repo_name, '_RSS')
         repo_name = remove_suffix(repo_name, '_ATOM')
 
-        # adds instance prefix
-        key, _prefix, _org_key = cls._get_key(key)
-        inv = cls._get_or_create_key(key, repo_name)
+        cache_key = cls._get_cache_key(key)
+        inv = cls._get_or_create_inv_obj(cache_key, repo_name)
 
-        if inv and inv.cache_active is False:
+        if inv and not inv.cache_active:
             return inv
 
     @classmethod
@@ -1673,22 +1711,27 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
+        invalidated_keys = []
         if key:
-            key, _prefix, _org_key = cls._get_key(key)
-            inv_objs = Session().query(cls).filter(cls.cache_key == key).all()
-        elif repo_name:
+            assert not repo_name
+            cache_key = cls._get_cache_key(key)
+            inv_objs = Session().query(cls).filter(cls.cache_key == cache_key).all()
+        else:
+            assert repo_name
             inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
-        log.debug('marking %s key[s] for invalidation based on key=%s,repo_name=%s'
-                  % (len(inv_objs), key, repo_name))
         try:
             for inv_obj in inv_objs:
                 inv_obj.cache_active = False
+                log.debug('marking %s key for invalidation based on key=%s,repo_name=%s'
+                  % (inv_obj, key, safe_str(repo_name)))
+                invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             Session().rollback()
+        return invalidated_keys
 
     @classmethod
     def set_valid(cls, key):
@@ -1697,7 +1740,7 @@ class CacheInvalidation(Base, BaseModel):
 
         :param key:
         """
-        inv_obj = cls.get_by_key(key)
+        inv_obj = cls.query().filter(cls.cache_key == key).scalar()
         inv_obj.cache_active = True
         Session().add(inv_obj)
         Session().commit()
@@ -1708,28 +1751,26 @@ class CacheInvalidation(Base, BaseModel):
         class cachemapdict(dict):
 
             def __init__(self, *args, **kwargs):
-                fixkey = kwargs.get('fixkey')
-                if fixkey:
-                    del kwargs['fixkey']
-                self.fixkey = fixkey
+                self.fixkey = kwargs.pop('fixkey', False)
                 super(cachemapdict, self).__init__(*args, **kwargs)
 
             def __getattr__(self, name):
-                key = name
+                cache_key = name
                 if self.fixkey:
-                    key, _prefix, _org_key = cls._get_key(key)
-                if key in self.__dict__:
-                    return self.__dict__[key]
+                    cache_key = cls._get_cache_key(name)
+                if cache_key in self.__dict__:
+                    return self.__dict__[cache_key]
                 else:
-                    return self[key]
+                    return self[cache_key]
 
-            def __getitem__(self, key):
+            def __getitem__(self, name):
+                cache_key = name
                 if self.fixkey:
-                    key, _prefix, _org_key = cls._get_key(key)
+                    cache_key = cls._get_cache_key(name)
                 try:
-                    return super(cachemapdict, self).__getitem__(key)
+                    return super(cachemapdict, self).__getitem__(cache_key)
                 except KeyError:
-                    return
+                    return None
 
         cache_map = cachemapdict(fixkey=True)
         for obj in cls.query().all():
@@ -1881,6 +1922,10 @@ class PullRequest(Base, BaseModel):
 
     def is_closed(self):
         return self.status == self.STATUS_CLOSED
+
+    @property
+    def last_review_status(self):
+        return self.statuses[-1].status if self.statuses else ''
 
     def __json__(self):
         return dict(

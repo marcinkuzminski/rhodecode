@@ -40,7 +40,8 @@ from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
 
 from rhodecode.lib.utils2 import str2bool, safe_unicode
-from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError
+from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError,\
+    LdapImportError
 from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug
 from rhodecode.lib.auth_ldap import AuthLdap
 
@@ -241,7 +242,7 @@ def authenticate(username, password):
 
                 Session().commit()
                 return True
-            except (LdapUsernameError, LdapPasswordError,):
+            except (LdapUsernameError, LdapPasswordError, LdapImportError):
                 pass
             except (Exception,):
                 log.error(traceback.format_exc())
@@ -381,7 +382,7 @@ class  AuthUser(object):
 
         if not is_user_loaded:
             # if we cannot authenticate user try anonymous
-            if self.anonymous_user.active is True:
+            if self.anonymous_user.active:
                 user_model.fill_data(self, user_id=self.anonymous_user.user_id)
                 # then we set this user is logged in
                 self.is_authenticated = True
@@ -399,6 +400,22 @@ class  AuthUser(object):
     @property
     def is_admin(self):
         return self.admin
+
+    @property
+    def repos_admin(self):
+        """
+        Returns list of repositories you're an admin of
+        """
+        return [x[0] for x in self.permissions['repositories'].iteritems()
+                if x[1] == 'repository.admin']
+
+    @property
+    def groups_admin(self):
+        """
+        Returns list of repository groups you're an admin of
+        """
+        return [x[0] for x in self.permissions['repositories_groups'].iteritems()
+                if x[1] == 'group.admin']
 
     @property
     def ip_allowed(self):
@@ -663,7 +680,6 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
 
     def check_permissions(self):
         repo_name = get_repo_slug(request)
-
         try:
             user_perms = set([self.user_perms['repositories'][repo_name]])
         except KeyError:
@@ -686,6 +702,7 @@ class HasReposGroupPermissionAllDecorator(PermsDecorator):
             user_perms = set([self.user_perms['repositories_groups'][group_name]])
         except KeyError:
             return False
+
         if self.required_perms.issubset(user_perms):
             return True
         return False
@@ -699,11 +716,11 @@ class HasReposGroupPermissionAnyDecorator(PermsDecorator):
 
     def check_permissions(self):
         group_name = get_repos_group_slug(request)
-
         try:
             user_perms = set([self.user_perms['repositories_groups'][group_name]])
         except KeyError:
             return False
+
         if self.required_perms.intersection(user_perms):
             return True
         return False
@@ -726,7 +743,8 @@ class PermsFunction(object):
         self.repo_name = None
         self.group_name = None
 
-    def __call__(self, check_Location=''):
+    def __call__(self, check_location=''):
+        #TODO: put user as attribute here
         user = request.user
         cls_name = self.__class__.__name__
         check_scope = {
@@ -739,19 +757,19 @@ class PermsFunction(object):
         }.get(cls_name, '?')
         log.debug('checking cls:%s %s usr:%s %s @ %s', cls_name,
                   self.required_perms, user, check_scope,
-                  check_Location or 'unspecified location')
+                  check_location or 'unspecified location')
         if not user:
             log.debug('Empty request user')
             return False
         self.user_perms = user.permissions
         if self.check_permissions():
             log.debug('Permission to %s granted for user: %s @ %s', self.repo_name, user,
-                      check_Location or 'unspecified location')
+                      check_location or 'unspecified location')
             return True
 
         else:
             log.debug('Permission to %s denied for user: %s @ %s', self.repo_name, user,
-                        check_Location or 'unspecified location')
+                        check_location or 'unspecified location')
             return False
 
     def check_permissions(self):
@@ -774,9 +792,9 @@ class HasPermissionAny(PermsFunction):
 
 
 class HasRepoPermissionAll(PermsFunction):
-    def __call__(self, repo_name=None, check_Location=''):
+    def __call__(self, repo_name=None, check_location=''):
         self.repo_name = repo_name
-        return super(HasRepoPermissionAll, self).__call__(check_Location)
+        return super(HasRepoPermissionAll, self).__call__(check_location)
 
     def check_permissions(self):
         if not self.repo_name:
@@ -794,9 +812,9 @@ class HasRepoPermissionAll(PermsFunction):
 
 
 class HasRepoPermissionAny(PermsFunction):
-    def __call__(self, repo_name=None, check_Location=''):
+    def __call__(self, repo_name=None, check_location=''):
         self.repo_name = repo_name
-        return super(HasRepoPermissionAny, self).__call__(check_Location)
+        return super(HasRepoPermissionAny, self).__call__(check_location)
 
     def check_permissions(self):
         if not self.repo_name:
@@ -814,9 +832,9 @@ class HasRepoPermissionAny(PermsFunction):
 
 
 class HasReposGroupPermissionAny(PermsFunction):
-    def __call__(self, group_name=None, check_Location=''):
+    def __call__(self, group_name=None, check_location=''):
         self.group_name = group_name
-        return super(HasReposGroupPermissionAny, self).__call__(check_Location)
+        return super(HasReposGroupPermissionAny, self).__call__(check_location)
 
     def check_permissions(self):
         try:
@@ -831,9 +849,9 @@ class HasReposGroupPermissionAny(PermsFunction):
 
 
 class HasReposGroupPermissionAll(PermsFunction):
-    def __call__(self, group_name=None, check_Location=''):
+    def __call__(self, group_name=None, check_location=''):
         self.group_name = group_name
-        return super(HasReposGroupPermissionAll, self).__call__(check_Location)
+        return super(HasReposGroupPermissionAll, self).__call__(check_location)
 
     def check_permissions(self):
         try:

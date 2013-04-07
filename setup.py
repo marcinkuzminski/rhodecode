@@ -33,14 +33,14 @@ __platform__ = platform.system()
 is_windows = __platform__ in _get_meta_var('PLATFORM_WIN', _metadata)
 
 requirements = [
-    "waitress==0.8.1",
+    "waitress==0.8.2",
     "webob==1.0.8",
     "webtest==1.4.3",
     "Pylons==1.0.0",
     "Beaker==1.6.4",
     "WebHelpers==1.3",
     "formencode==1.2.4",
-    "SQLAlchemy==0.7.9",
+    "SQLAlchemy==0.7.10",
     "Mako==0.7.3",
     "pygments>=1.5",
     "whoosh>=2.4.0,<2.5",
@@ -62,10 +62,10 @@ if sys.version_info < (2, 7):
     requirements.append("argparse")
 
 if is_windows:
-    requirements.append("mercurial==2.4.2")
+    requirements.append("mercurial==2.5.4")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial==2.4.2")
+    requirements.append("mercurial==2.5.4")
 
 
 dependency_links = [
@@ -92,8 +92,9 @@ data_files = []
 # additional files that goes into package itself
 package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 
-description = ('Mercurial repository browser/management with '
-               'build in push/pull server and full text search')
+description = ('RhodeCode is a fast and powerful management tool '
+               'for Mercurial and GIT with a built in push/pull server, '
+               'full text search and code-review.')
 keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
                      'code review', 'repo groups', 'ldap'
                       'repository management', 'hgweb replacement'
@@ -158,11 +159,14 @@ setup(
     main = pylons.util:PylonsInstaller
 
     [paste.global_paster_command]
-    setup-rhodecode=rhodecode.config.setup_rhodecode:SetupCommand
-    cleanup-repos=rhodecode.lib.cleanup:CleanupCommand
-    update-repoinfo=rhodecode.lib.update_repoinfo:UpdateCommand
+    setup-rhodecode=rhodecode.lib.paster_commands.setup_rhodecode:Command
+    cleanup-repos=rhodecode.lib.paster_commands.cleanup:Command
+    update-repoinfo=rhodecode.lib.paster_commands.update_repoinfo:Command
+    make-rcext=rhodecode.lib.paster_commands.make_rcextensions:Command
+    repo-scan=rhodecode.lib.paster_commands.repo_scan:Command
+    cache-keys=rhodecode.lib.paster_commands.cache_keys:Command
+    ishell=rhodecode.lib.paster_commands.ishell:Command
     make-index=rhodecode.lib.indexers:MakeIndex
-    make-rcext=rhodecode.config.rcextensions.make_rcextensions:MakeRcExt
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
     """,

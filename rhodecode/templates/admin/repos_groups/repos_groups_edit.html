@@ -2,14 +2,15 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Edit repos group')} ${c.repos_group.name} - ${c.rhodecode_name}
+    ${_('Edit repository group')} ${c.repos_group.name} &middot; ${c.rhodecode_name}
 </%def>
+
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${h.link_to(_('Repos groups'),h.url('repos_groups'))}
+    ${h.link_to(_('Repository groups'),h.url('repos_groups'))}
     &raquo;
-    ${_('edit repos group')} "${c.repos_group.name}"
+    ${_('Edit repository group %s') % c.repos_group.name}"
 </%def>
 
 <%def name="page_nav()">
@@ -21,38 +22,43 @@
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
+        <ul class="links">
+          <li>
+            <span>${h.link_to(_(u'Add child group'),h.url('new_repos_group', parent_group=c.repos_group.group_id))}</span>
+          </li>
+        </ul>
     </div>
     <!-- end box / title -->
-    ${h.form(url('repos_group',id=c.repos_group.group_id),method='put')}
+    ${h.form(url('repos_group',group_name=c.repos_group.group_name),method='put')}
     <div class="form">
         <!-- fields -->
         <div class="fields">
-             <div class="field">
+            <div class="field">
                 <div class="label">
                     <label for="group_name">${_('Group name')}:</label>
                 </div>
                 <div class="input">
                     ${h.text('group_name',class_='medium')}
                 </div>
-             </div>
+            </div>
 
-	        <div class="field">
-	            <div class="label label-textarea">
-	                <label for="group_description">${_('Description')}:</label>
-	            </div>
-	            <div class="textarea text-area editor">
-	                ${h.textarea('group_description',cols=23,rows=5,class_="medium")}
-	            </div>
-	         </div>
+            <div class="field">
+                <div class="label label-textarea">
+                    <label for="group_description">${_('Description')}:</label>
+                </div>
+                <div class="textarea text-area editor">
+                    ${h.textarea('group_description',cols=23,rows=5,class_="medium")}
+                </div>
+            </div>
 
-	         <div class="field">
-	             <div class="label">
-	                 <label for="group_parent_id">${_('Group parent')}:</label>
-	             </div>
-	             <div class="input">
-	                 ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
-	             </div>
-	         </div>
+            <div class="field">
+                <div class="label">
+                    <label for="group_parent_id">${_('Group parent')}:</label>
+                </div>
+                <div class="input">
+                    ${h.select('group_parent_id','',c.repo_groups,class_="medium")}
+                </div>
+            </div>
             <div class="field">
                 <div class="label">
                     <label for="input">${_('Permissions')}:</label>

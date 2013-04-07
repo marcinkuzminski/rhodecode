@@ -9,71 +9,70 @@ div.codeblock {
     line-height: 125%;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
-    border-radius: 4px;     
+    border-radius: 4px;
 }
-div.codeblock .code-header{
-	border-bottom: 1px solid #CCCCCC;
-	background: #EEEEEE;
-	padding:10px 0 10px 0;
-}
-
-div.codeblock .code-header .stats{
-	clear: both;
-	padding: 6px 8px 6px 10px; 
-	border-bottom: 1px solid rgb(204, 204, 204);  
-	height: 23px;
-	margin-bottom: 6px;
+div.codeblock .code-header {
+    border-bottom: 1px solid #CCCCCC;
+    background: #EEEEEE;
+    padding: 10px 0 10px 0;
 }
 
-div.codeblock .code-header .stats .left{
-	float:left;
-}
-div.codeblock .code-header .stats .left.img{
-	margin-top:-2px;
-}
-div.codeblock .code-header .stats .left.item{
-	float:left;
-	padding: 0 9px 0 9px;
-	border-right:1px solid #ccc;
-}
-div.codeblock .code-header .stats .left.item pre{
-	
-}
-div.codeblock .code-header .stats .left.item.last{
-	border-right:none;
-}
-div.codeblock .code-header .stats .buttons{
-	float:right;
-	padding-right:4px;
+div.codeblock .code-header .stats {
+    clear: both;
+    padding: 6px 8px 6px 10px;
+    border-bottom: 1px solid rgb(204, 204, 204);
+    height: 23px;
+    margin-bottom: 6px;
 }
 
-div.codeblock .code-header .author{
-	margin-left:25px;
-	font-weight: bold;
-	height: 25px;
+div.codeblock .code-header .stats .left {
+    float: left;
 }
-div.codeblock .code-header .author .user{
-	padding-top:3px;
+div.codeblock .code-header .stats .left.img {
+    margin-top: -2px;
 }
-div.codeblock .code-header .commit{
-	margin-left:25px;
-	font-weight: normal;
-	white-space:pre;
+div.codeblock .code-header .stats .left.item {
+    float: left;
+    padding: 0 9px 0 9px;
+    border-right: 1px solid #ccc;
+}
+div.codeblock .code-header .stats .left.item pre {
+}
+div.codeblock .code-header .stats .left.item.last {
+    border-right: none;
+}
+div.codeblock .code-header .stats .buttons {
+    float: right;
+    padding-right: 4px;
 }
 
-div.codeblock .code-body table{
+div.codeblock .code-header .author {
+    margin-left: 25px;
+    font-weight: bold;
+    height: 25px;
+}
+div.codeblock .code-header .author .user {
+    padding-top: 3px;
+}
+div.codeblock .code-header .commit {
+    margin-left: 25px;
+    font-weight: normal;
+    white-space: pre;
+}
+
+div.codeblock .code-body table {
     width: 0 !important;
     border: 0px !important;
 }
 div.codeblock .code-body table td {
-	border: 0px !important;
+    border: 0px !important;
 }
 div.code-body {
-	background-color: #FFFFFF;
+    background-color: #FFFFFF;
 }
 
 div.codeblock .code-header .search-path {
-	padding: 0px 0px 0px 10px;
+    padding: 0px 0px 0px 10px;
 }
 
 div.search-code-body {
@@ -81,19 +80,18 @@ div.search-code-body {
     padding: 5px 0px 5px 10px;
 }
 
-div.search-code-body pre .match{
-	background-color: #FAFFA6;
+div.search-code-body pre .match {
+    background-color: #FAFFA6;
 }
-div.search-code-body pre .break{
-	background-color: #DDE7EF;
-	width: 100%;
-	color: #747474;
-	display: block;
-	
+div.search-code-body pre .break {
+    background-color: #DDE7EF;
+    width: 100%;
+    color: #747474;
+    display: block;
 }
-div.annotatediv{
-	margin-left:2px;
-	margin-right:4px;
+div.annotatediv {
+    margin-left: 2px;
+    margin-right: 4px;
 }
 .code-highlight {
     padding: 0px;
@@ -101,14 +99,14 @@ div.annotatediv{
     margin-bottom: 5px;
     border-left: 2px solid #ccc;
 }
-.code-highlight pre, .linenodiv pre { 
-	padding: 5px;
+.code-highlight pre, .linenodiv pre {
+    padding: 5px;
     margin: 0;
 }
-.code-highlight pre div:target { 
+.code-highlight pre div:target {
     background-color: #FFFFBE !important;
 }
-    
+
 .linenos a { text-decoration: none; }
 
 .code { display: block; }

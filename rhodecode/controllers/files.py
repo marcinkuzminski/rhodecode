@@ -27,6 +27,7 @@ import os
 import logging
 import traceback
 import tempfile
+import shutil
 
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
@@ -55,6 +56,7 @@ from rhodecode.model.db import Repository
 
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
+from webob.exc import HTTPNotFound
 
 
 log = logging.getLogger(__name__)
@@ -83,14 +85,14 @@ class FilesController(BaseRepoController):
             url_ = url('files_add_home',
                        repo_name=c.repo_name,
                        revision=0, f_path='')
-            add_new = '<a href="%s">[%s]</a>' % (url_, _('click here to add new file'))
+            add_new = h.link_to(_('Click here to add new file'), url_)
             h.flash(h.literal(_('There are no files yet %s') % add_new),
                     category='warning')
             redirect(h.url('summary_home', repo_name=repo_name))
 
-        except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name, revision='tip'))
+        except RepositoryError, e:  # including ChangesetDoesNotExistError
+            h.flash(str(e), category='error')
+            raise HTTPNotFound()
 
     def __get_filenode_or_redirect(self, repo_name, cs, path):
         """
@@ -107,9 +109,8 @@ class FilesController(BaseRepoController):
             if file_node.is_dir():
                 raise RepositoryError('given path is a directory')
         except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision=cs.raw_id))
+            h.flash(str(e), category='error')
+            raise HTTPNotFound()
 
         return file_node
 
@@ -121,13 +122,12 @@ class FilesController(BaseRepoController):
         post_revision = request.POST.get('at_rev', None)
         if post_revision:
             cs = self.__get_cs_or_redirect(post_revision, repo_name)
-            redirect(url('files_home', repo_name=c.repo_name,
-                         revision=cs.raw_id, f_path=f_path))
 
         c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         c.branch = request.GET.get('branch', None)
         c.f_path = f_path
         c.annotate = annotate
+        c.changeset = self.__get_cs_or_redirect(revision, repo_name)
         cur_rev = c.changeset.revision
 
         # prev link
@@ -160,6 +160,9 @@ class FilesController(BaseRepoController):
                 c.file_changeset = (c.changeset
                                     if c.changeset.revision < file_last_cs.revision
                                     else file_last_cs)
+                #determine if we're on branch head
+                _branches = c.rhodecode_repo.branches
+                c.on_branch_head = revision in _branches.keys() + _branches.values()
                 _hist = []
                 c.file_history = []
                 if c.load_full_history:
@@ -171,9 +174,8 @@ class FilesController(BaseRepoController):
             else:
                 c.authors = c.file_history = []
         except RepositoryError, e:
-            h.flash(str(e), category='warning')
-            redirect(h.url('files_home', repo_name=repo_name,
-                           revision='tip'))
+            h.flash(str(e), category='error')
+            raise HTTPNotFound()
 
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return render('files/files_ypjax.html')
@@ -260,7 +262,7 @@ class FilesController(BaseRepoController):
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.write', 'repository.admin')
     def edit(self, repo_name, revision, f_path):
-        repo = Repository.get_by_repo_name(repo_name)
+        repo = c.rhodecode_db_repo
         if repo.enable_locking and repo.locked[0]:
             h.flash(_('This repository is has been locked by %s on %s')
                 % (h.person_by_id(repo.locked[0]),
@@ -268,6 +270,17 @@ class FilesController(BaseRepoController):
                   'warning')
             return redirect(h.url('files_home',
                                   repo_name=repo_name, revision='tip'))
+
+        # check if revision is a branch identifier- basically we cannot
+        # create multiple heads via file editing
+        _branches = repo.scm_instance.branches
+        # check if revision is a branch name or branch hash
+        if revision not in _branches.keys() + _branches.values():
+            h.flash(_('You can only edit files with revision '
+                      'being a valid branch '), category='warning')
+            return redirect(h.url('files_home',
+                                  repo_name=repo_name, revision='tip',
+                                  f_path=f_path))
 
         r_post = request.POST
 
@@ -277,7 +290,7 @@ class FilesController(BaseRepoController):
         if c.file.is_binary:
             return redirect(url('files_home', repo_name=c.repo_name,
                          revision=c.cs.raw_id, f_path=f_path))
-
+        c.default_message = _('Edited file %s via RhodeCode') % (f_path)
         c.f_path = f_path
 
         if r_post:
@@ -289,20 +302,17 @@ class FilesController(BaseRepoController):
             mode = detect_mode(first_line, 0)
             content = convert_line_endings(r_post.get('content'), mode)
 
-            message = r_post.get('message') or (_('Edited %s via RhodeCode')
-                                                % (f_path))
+            message = r_post.get('message') or c.default_message
             author = self.rhodecode_user.full_contact
 
             if content == old_content:
-                h.flash(_('No changes'),
-                    category='warning')
+                h.flash(_('No changes'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
-
             try:
                 self.scm_model.commit_change(repo=c.rhodecode_repo,
                                              repo_name=repo_name, cs=c.cs,
-                                             user=self.rhodecode_user,
+                                             user=self.rhodecode_user.user_id,
                                              author=author, message=message,
                                              content=content, f_path=f_path)
                 h.flash(_('Successfully committed to %s') % f_path,
@@ -334,25 +344,21 @@ class FilesController(BaseRepoController):
                                          redirect_after=False)
         if c.cs is None:
             c.cs = EmptyChangeset(alias=c.rhodecode_repo.alias)
-
+        c.default_message = (_('Added file via RhodeCode'))
         c.f_path = f_path
 
         if r_post:
             unix_mode = 0
             content = convert_line_endings(r_post.get('content'), unix_mode)
 
-            message = r_post.get('message') or (_('Added %s via RhodeCode')
-                                                % (f_path))
-            location = r_post.get('location')
+            message = r_post.get('message') or c.default_message
             filename = r_post.get('filename')
+            location = r_post.get('location')
             file_obj = r_post.get('upload_file', None)
 
             if file_obj is not None and hasattr(file_obj, 'filename'):
                 filename = file_obj.filename
                 content = file_obj.file
-
-            node_path = os.path.join(location, filename)
-            author = self.rhodecode_user.full_contact
 
             if not content:
                 h.flash(_('No content'), category='warning')
@@ -362,16 +368,26 @@ class FilesController(BaseRepoController):
                 h.flash(_('No filename'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
+            if location.startswith('/') or location.startswith('.') or '../' in location:
+                h.flash(_('Location must be relative path and must not '
+                          'contain .. in path'), category='warning')
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))
+            if location:
+                location = os.path.normpath(location)
+            filename = os.path.basename(filename)
+            node_path = os.path.join(location, filename)
+            author = self.rhodecode_user.full_contact
 
             try:
                 self.scm_model.create_node(repo=c.rhodecode_repo,
                                            repo_name=repo_name, cs=c.cs,
-                                           user=self.rhodecode_user,
+                                           user=self.rhodecode_user.user_id,
                                            author=author, message=message,
                                            content=content, f_path=node_path)
                 h.flash(_('Successfully committed to %s') % node_path,
                         category='success')
-            except NodeAlreadyExistsError, e:
+            except (NodeError, NodeAlreadyExistsError), e:
                 h.flash(_(e), category='error')
             except Exception:
                 log.error(traceback.format_exc())
@@ -400,8 +416,8 @@ class FilesController(BaseRepoController):
 
         try:
             dbrepo = RepoModel().get_by_repo_name(repo_name)
-            if dbrepo.enable_downloads is False:
-                return _('downloads disabled')
+            if not dbrepo.enable_downloads:
+                return _('Downloads disabled')
 
             if c.rhodecode_repo.alias == 'hg':
                 # patch and reset hooks section of UI config to not run any
@@ -417,11 +433,40 @@ class FilesController(BaseRepoController):
             return _('Empty repository')
         except (ImproperArchiveTypeError, KeyError):
             return _('Unknown archive type')
+        # archive cache
+        from rhodecode import CONFIG
+        rev_name = cs.raw_id[:12]
+        archive_name = '%s-%s%s' % (safe_str(repo_name.replace('/', '_')),
+                                    safe_str(rev_name), ext)
 
-        fd, archive = tempfile.mkstemp()
-        t = open(archive, 'wb')
-        cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
-        t.close()
+        use_cached_archive = False  # defines if we use cached version of archive
+        archive_cache_enabled = CONFIG.get('archive_cache_dir')
+        if not subrepos and archive_cache_enabled:
+            #check if we it's ok to write
+            if not os.path.isdir(CONFIG['archive_cache_dir']):
+                os.makedirs(CONFIG['archive_cache_dir'])
+            cached_archive_path = os.path.join(CONFIG['archive_cache_dir'], archive_name)
+            if os.path.isfile(cached_archive_path):
+                log.debug('Found cached archive in %s' % cached_archive_path)
+                fd, archive = None, cached_archive_path
+                use_cached_archive = True
+            else:
+                log.debug('Archive %s is not yet cached' % (archive_name))
+
+        if not use_cached_archive:
+            #generate new archive
+            try:
+                fd, archive = tempfile.mkstemp()
+                t = open(archive, 'wb')
+                log.debug('Creating new temp archive in %s' % archive)
+                cs.fill_archive(stream=t, kind=fileformat, subrepos=subrepos)
+                if archive_cache_enabled:
+                    #if we generated the archive and use cache rename that
+                    log.debug('Storing new archive in %s' % cached_archive_path)
+                    shutil.move(archive, cached_archive_path)
+                    archive = cached_archive_path
+            finally:
+                t.close()
 
         def get_chunked_archive(archive):
             stream = open(archive, 'rb')
@@ -429,13 +474,15 @@ class FilesController(BaseRepoController):
                 data = stream.read(16 * 1024)
                 if not data:
                     stream.close()
-                    os.close(fd)
-                    os.remove(archive)
+                    if fd:  # fd means we used temporary file
+                        os.close(fd)
+                    if not archive_cache_enabled:
+                        log.debug('Destroing temp archive %s' % archive)
+                        os.remove(archive)
                     break
                 yield data
 
-        response.content_disposition = str('attachment; filename=%s-%s%s' \
-                                           % (repo_name, revision[:12], ext))
+        response.content_disposition = str('attachment; filename=%s' % (archive_name))
         response.content_type = str(content_type)
         return get_chunked_archive(archive)
 
@@ -474,6 +521,9 @@ class FilesController(BaseRepoController):
                 c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
                 try:
                     node1 = c.changeset_1.get_node(f_path)
+                    if node1.is_dir():
+                        raise NodeError('%s path is a %s not a file'
+                                        % (node1, type(node1)))
                 except NodeDoesNotExistError:
                     c.changeset_1 = EmptyChangeset(cs=diff1,
                                                    revision=c.changeset_1.revision,
@@ -487,6 +537,9 @@ class FilesController(BaseRepoController):
                 c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
                 try:
                     node2 = c.changeset_2.get_node(f_path)
+                    if node2.is_dir():
+                        raise NodeError('%s path is a %s not a file'
+                                        % (node2, type(node2)))
                 except NodeDoesNotExistError:
                     c.changeset_2 = EmptyChangeset(cs=diff2,
                                                    revision=c.changeset_2.revision,

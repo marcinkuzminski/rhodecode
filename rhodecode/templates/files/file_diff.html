@@ -1,21 +1,19 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s File diff') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s File Diff') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
     ${_('File diff')} r${c.changeset_1.revision}:${h.short_id(c.changeset_1.raw_id)} &rarr; r${c.changeset_2.revision}:${h.short_id(c.changeset_2.raw_id)}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('files')}
+    ${self.menu('repositories')}
 </%def>
+
 <%def name="main()">
+${self.context_bar('files')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -27,6 +25,7 @@
     ${diff_block.diff_block(c.changes)}
     </div>
 </div>
+
 <script>
 YUE.onDOMReady(function(){
 

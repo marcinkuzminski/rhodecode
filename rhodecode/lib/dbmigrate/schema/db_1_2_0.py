@@ -41,7 +41,7 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 
 from rhodecode.lib.utils2 import str2bool, safe_str, get_changeset_safe, \
     generate_api_key, safe_unicode
-from rhodecode.lib.exceptions import UsersGroupsAssignedException
+from rhodecode.lib.exceptions import UserGroupsAssignedException
 from rhodecode.lib.compat import json
 
 from rhodecode.model.meta import Base, Session
@@ -282,7 +282,7 @@ class User(Base, BaseModel):
     user_followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_user_id==User.user_id', cascade='all')
     repo_to_perm = relationship('UserRepoToPerm', primaryjoin='UserRepoToPerm.user_id==User.user_id', cascade='all')
 
-    group_member = relationship('UsersGroupMember', cascade='all')
+    group_member = relationship('UserGroupMember', cascade='all')
 
     @property
     def full_contact(self):
@@ -361,7 +361,7 @@ class UserLog(Base, BaseModel):
     repository = relationship('Repository')
 
 
-class UsersGroup(Base, BaseModel):
+class UserGroup(Base, BaseModel):
     __tablename__ = 'users_groups'
     __table_args__ = {'extend_existing':True}
 
@@ -369,7 +369,7 @@ class UsersGroup(Base, BaseModel):
     users_group_name = Column("users_group_name", String(length=255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
 
-    members = relationship('UsersGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
+    members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
 
     def __repr__(self):
         return '<userGroup(%s)>' % (self.users_group_name)
@@ -425,7 +425,7 @@ class UsersGroup(Base, BaseModel):
                     if v:
                         v = [v] if isinstance(v, basestring) else v
                         for u_id in set(v):
-                            member = UsersGroupMember(users_group_id, u_id)
+                            member = UserGroupMember(users_group_id, u_id)
                             members_list.append(member)
                     setattr(users_group, 'members', members_list)
                 setattr(users_group, k, v)
@@ -442,12 +442,12 @@ class UsersGroup(Base, BaseModel):
         try:
 
             # check if this group is not assigned to repo
-            assigned_groups = UsersGroupRepoToPerm.query()\
-                .filter(UsersGroupRepoToPerm.users_group_id ==
+            assigned_groups = UserGroupRepoToPerm.query()\
+                .filter(UserGroupRepoToPerm.users_group_id ==
                         users_group_id).all()
 
             if assigned_groups:
-                raise UsersGroupsAssignedException('RepoGroup assigned to %s' %
+                raise UserGroupsAssignedException('RepoGroup assigned to %s' %
                                                    assigned_groups)
 
             users_group = cls.get(users_group_id, cache=False)
@@ -458,7 +458,7 @@ class UsersGroup(Base, BaseModel):
             Session.rollback()
             raise
 
-class UsersGroupMember(Base, BaseModel):
+class UserGroupMember(Base, BaseModel):
     __tablename__ = 'users_groups_members'
     __table_args__ = {'extend_existing':True}
 
@@ -467,7 +467,7 @@ class UsersGroupMember(Base, BaseModel):
     user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
 
     user = relationship('User', lazy='joined')
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
 
     def __init__(self, gr_id='', u_id=''):
         self.users_group_id = gr_id
@@ -475,7 +475,7 @@ class UsersGroupMember(Base, BaseModel):
 
     @staticmethod
     def add_user_to_group(group, user):
-        ugm = UsersGroupMember()
+        ugm = UserGroupMember()
         ugm.users_group = group
         ugm.user = user
         Session.add(ugm)
@@ -505,7 +505,7 @@ class Repository(Base, BaseModel):
     fork = relationship('Repository', remote_side=repo_id)
     group = relationship('RepoGroup')
     repo_to_perm = relationship('UserRepoToPerm', cascade='all', order_by='UserRepoToPerm.repo_to_perm_id')
-    users_group_to_perm = relationship('UsersGroupRepoToPerm', cascade='all')
+    users_group_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
     stats = relationship('Statistics', cascade='all', uselist=False)
 
     followers = relationship('UserFollowing', primaryjoin='UserFollowing.follows_repo_id==Repository.repo_id', cascade='all')
@@ -909,7 +909,7 @@ class UserToPerm(Base, BaseModel):
         except:
             Session.rollback()
 
-class UsersGroupRepoToPerm(Base, BaseModel):
+class UserGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
     __table_args__ = (UniqueConstraint('repository_id', 'users_group_id', 'permission_id'), {'extend_existing':True})
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -917,21 +917,21 @@ class UsersGroupRepoToPerm(Base, BaseModel):
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     repository_id = Column("repository_id", Integer(), ForeignKey('repositories.repo_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
     repository = relationship('Repository')
 
     def __repr__(self):
         return '<userGroup:%s => %s >' % (self.users_group, self.repository)
 
-class UsersGroupToPerm(Base, BaseModel):
+class UserGroupToPerm(Base, BaseModel):
     __tablename__ = 'users_group_to_perm'
     __table_args__ = {'extend_existing':True}
     users_group_to_perm_id = Column("users_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     users_group_id = Column("users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
 
-    users_group = relationship('UsersGroup')
+    users_group = relationship('UserGroup')
     permission = relationship('Permission')
 
 

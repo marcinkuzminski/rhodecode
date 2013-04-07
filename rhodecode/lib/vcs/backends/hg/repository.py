@@ -79,6 +79,13 @@ class MercurialRepository(BaseRepository):
     def branches(self):
         return self._get_branches()
 
+    @LazyProperty
+    def allbranches(self):
+        """
+        List all branches, including closed branches.
+        """
+        return self._get_branches(closed=True)
+
     def _get_branches(self, closed=False):
         """
         Get's branches for this repository
@@ -397,9 +404,9 @@ class MercurialRepository(BaseRepository):
         try:
             revision = hex(self._repo.lookup(revision))
         except (IndexError, ValueError, RepoLookupError, TypeError):
-            raise ChangesetDoesNotExistError("Revision %r does not "
-                                    "exist for this repository %s" \
-                                    % (revision, self))
+            raise ChangesetDoesNotExistError("Revision %s does not "
+                                    "exist for this repository"
+                                    % (revision))
         return revision
 
     def _get_archives(self, archive_name='tip'):
@@ -421,6 +428,12 @@ class MercurialRepository(BaseRepository):
         if url != 'default' and not '://' in url:
             url = "file:" + urllib.pathname2url(url)
         return url
+
+    def get_hook_location(self):
+        """
+        returns absolute path to location where hooks are stored
+        """
+        return os.path.join(self.path, '.hg', '.hgrc')
 
     def get_changeset(self, revision=None):
         """
@@ -451,11 +464,11 @@ class MercurialRepository(BaseRepository):
         end_pos = self.revisions.index(end_raw_id) if end else None
 
         if None not in [start, end] and start_pos > end_pos:
-            raise RepositoryError("start revision '%s' cannot be "
+            raise RepositoryError("Start revision '%s' cannot be "
                                   "after end revision '%s'" % (start, end))
 
-        if branch_name and branch_name not in self.branches.keys():
-            raise BranchDoesNotExistError('Such branch %s does not exists for'
+        if branch_name and branch_name not in self.allbranches.keys():
+            raise BranchDoesNotExistError('Branch %s not found in'
                                   ' this repository' % branch_name)
         if end_pos is not None:
             end_pos += 1
@@ -492,7 +505,7 @@ class MercurialRepository(BaseRepository):
         """
         return MercurialWorkdir(self)
 
-    def get_config_value(self, section, name, config_file=None):
+    def get_config_value(self, section, name=None, config_file=None):
         """
         Returns configuration value for a given [``section``] and ``name``.
 

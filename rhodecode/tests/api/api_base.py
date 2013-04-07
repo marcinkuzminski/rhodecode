@@ -3,16 +3,21 @@ import random
 import mock
 
 from rhodecode.tests import *
+from rhodecode.tests.fixture import Fixture
 from rhodecode.lib.compat import json
 from rhodecode.lib.auth import AuthUser
 from rhodecode.model.user import UserModel
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import Repository
 
+
 API_URL = '/_admin/api'
+TEST_USER_GROUP = 'test_users_group'
+
+fixture = Fixture()
 
 
 def _build_data(apikey, method, **kw):
@@ -43,45 +48,17 @@ def api_call(test_obj, params):
     return response
 
 
-TEST_USERS_GROUP = 'test_users_group'
-
-
-def make_users_group(name=TEST_USERS_GROUP):
-    gr = UsersGroupModel().create(name=name)
-    UsersGroupModel().add_user_to_group(users_group=gr,
+## helpers
+def make_users_group(name=TEST_USER_GROUP):
+    gr = UserGroupModel().create(name=name)
+    UserGroupModel().add_user_to_group(users_group=gr,
                                         user=TEST_USER_ADMIN_LOGIN)
     Session().commit()
     return gr
 
 
-def destroy_users_group(name=TEST_USERS_GROUP):
-    UsersGroupModel().delete(users_group=name, force=True)
-    Session().commit()
-
-
-def create_repo(repo_name, repo_type, owner=None):
-    # create new repo
-    form_data = _get_repo_create_params(
-                    repo_name_full=repo_name,
-                    repo_description='description %s' % repo_name,
-                )
-    cur_user = UserModel().get_by_username(owner or TEST_USER_ADMIN_LOGIN)
-    r = RepoModel().create(form_data, cur_user)
-    Session().commit()
-    return r
-
-
-def create_fork(fork_name, fork_type, fork_of):
-    fork = RepoModel(Session())._get_repo(fork_of)
-    r = create_repo(fork_name, fork_type)
-    r.fork = fork
-    Session().add(r)
-    Session().commit()
-    return r
-
-
-def destroy_repo(repo_name):
-    RepoModel().delete(repo_name)
+def destroy_users_group(name=TEST_USER_GROUP):
+    UserGroupModel().delete(users_group=name, force=True)
     Session().commit()
 
 
@@ -248,7 +225,7 @@ class BaseTestApi(object):
         pass
 
 #        repo_name = 'test_pull'
-#        r = create_repo(repo_name, self.REPO_TYPE)
+#        r = fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
 #        r.clone_uri = TEST_self.REPO
 #        Session.add(r)
 #        Session.commit()
@@ -261,7 +238,7 @@ class BaseTestApi(object):
 #        expected = 'Pulled from `%s`' % repo_name
 #        self._compare_ok(id_, expected, given=response.body)
 #
-#        destroy_repo(repo_name)
+#        fixture.destroy_repo(repo_name)
 
     def test_api_pull_error(self):
         id_, params = _build_data(self.apikey, 'pull',
@@ -286,6 +263,25 @@ class BaseTestApi(object):
         expected = 'Error occurred during rescan repositories action'
         self._compare_error(id_, expected, given=response.body)
 
+    def test_api_invalidate_cache(self):
+        id_, params = _build_data(self.apikey, 'invalidate_cache',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+
+        expected = ("Cache for repository `%s` was invalidated: "
+                    "invalidated cache keys: %s" % (self.REPO,
+                                                    [unicode(self.REPO)]))
+        self._compare_ok(id_, expected, given=response.body)
+
+    @mock.patch.object(ScmModel, 'mark_for_invalidation', crash)
+    def test_api_invalidate_cache_error(self):
+        id_, params = _build_data(self.apikey, 'invalidate_cache',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+
+        expected = 'Error occurred during cache invalidation action'
+        self._compare_error(id_, expected, given=response.body)
+
     def test_api_lock_repo_lock_aquire(self):
         id_, params = _build_data(self.apikey, 'lock',
                                   userid=TEST_USER_ADMIN_LOGIN,
@@ -298,7 +294,8 @@ class BaseTestApi(object):
 
     def test_api_lock_repo_lock_aquire_by_non_admin(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE,
+                            cur_user=self.TEST_USER_LOGIN)
         try:
             id_, params = _build_data(self.apikey_regular, 'lock',
                                       repoid=repo_name,
@@ -308,11 +305,12 @@ class BaseTestApi(object):
                        % (self.TEST_USER_LOGIN, repo_name, True))
             self._compare_ok(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_lock_repo_lock_aquire_non_admin_with_userid(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE,
+                            cur_user=self.TEST_USER_LOGIN)
         try:
             id_, params = _build_data(self.apikey_regular, 'lock',
                                       userid=TEST_USER_ADMIN_LOGIN,
@@ -322,7 +320,7 @@ class BaseTestApi(object):
             expected = 'userid is not the same as your user'
             self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_lock_repo_lock_aquire_non_admin_not_his_repo(self):
         id_, params = _build_data(self.apikey_regular, 'lock',
@@ -351,6 +349,17 @@ class BaseTestApi(object):
                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
         self._compare_ok(id_, expected, given=response.body)
 
+    def test_api_lock_repo_lock_optional_locked(self):
+        from rhodecode.lib.utils2 import  time_to_datetime
+        _locked_since = json.dumps(time_to_datetime(Repository\
+                                    .get_by_repo_name(self.REPO).locked[1]))
+        id_, params = _build_data(self.apikey, 'lock',
+                                  repoid=self.REPO)
+        response = api_call(self, params)
+        expected = ('Repo `%s` locked by `%s`. Locked=`True`. Locked since: `%s`'
+                   % (self.REPO, TEST_USER_ADMIN_LOGIN, _locked_since))
+        self._compare_ok(id_, expected, given=response.body)
+
     @mock.patch.object(Repository, 'lock', crash)
     def test_api_lock_error(self):
         id_, params = _build_data(self.apikey, 'lock',
@@ -361,6 +370,32 @@ class BaseTestApi(object):
 
         expected = 'Error occurred locking repository `%s`' % self.REPO
         self._compare_error(id_, expected, given=response.body)
+
+    def test_api_get_locks_regular_user(self):
+        id_, params = _build_data(self.apikey_regular, 'get_locks')
+        response = api_call(self, params)
+        expected = []
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_locks_with_userid_regular_user(self):
+        id_, params = _build_data(self.apikey_regular, 'get_locks',
+                                  userid=TEST_USER_ADMIN_LOGIN)
+        response = api_call(self, params)
+        expected = 'userid is not the same as your user'
+        self._compare_error(id_, expected, given=response.body)
+
+    def test_api_get_locks(self):
+        id_, params = _build_data(self.apikey, 'get_locks')
+        response = api_call(self, params)
+        expected = []
+        self._compare_ok(id_, expected, given=response.body)
+
+    def test_api_get_locks_with_userid(self):
+        id_, params = _build_data(self.apikey, 'get_locks',
+                                  userid=TEST_USER_REGULAR_LOGIN)
+        response = api_call(self, params)
+        expected = []
+        self._compare_ok(id_, expected, given=response.body)
 
     def test_api_create_existing_user(self):
         id_, params = _build_data(self.apikey, 'create_user',
@@ -539,6 +574,7 @@ class BaseTestApi(object):
         ret = repo.get_api_data()
 
         members = []
+        followers = []
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
@@ -555,7 +591,11 @@ class BaseTestApi(object):
             users_group_data['permission'] = perm
             members.append(users_group_data)
 
+        for user in repo.followers:
+            followers.append(user.user.get_api_data())
+
         ret['members'] = members
+        ret['followers'] = followers
 
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
@@ -570,6 +610,7 @@ class BaseTestApi(object):
         ret = repo.get_api_data()
 
         members = []
+        followers = []
         for user in repo.repo_to_perm:
             perm = user.permission.permission_name
             user = user.user
@@ -586,7 +627,11 @@ class BaseTestApi(object):
             users_group_data['permission'] = perm
             members.append(users_group_data)
 
+        for user in repo.followers:
+            followers.append(user.user.get_api_data())
+
         ret['members'] = members
+        ret['followers'] = followers
 
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
@@ -704,7 +749,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_unknown_owner(self):
         repo_name = 'api-repo'
@@ -734,7 +779,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_by_non_admin(self):
         repo_name = 'api-repo'
@@ -752,7 +797,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_by_non_admin_specify_owner(self):
         repo_name = 'api-repo'
@@ -766,7 +811,7 @@ class BaseTestApi(object):
 
         expected = 'Only RhodeCode admin can specify `owner` param'
         self._compare_error(id_, expected, given=response.body)
-        destroy_repo(repo_name)
+        fixture.destroy_repo(repo_name)
 
     def test_api_create_repo_exists(self):
         repo_name = self.REPO
@@ -793,7 +838,7 @@ class BaseTestApi(object):
 
     def test_api_delete_repo(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
 
         id_, params = _build_data(self.apikey, 'delete_repo',
                                   repoid=repo_name,)
@@ -808,7 +853,8 @@ class BaseTestApi(object):
 
     def test_api_delete_repo_by_non_admin(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE, owner=self.TEST_USER_LOGIN)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE,
+                            cur_user=self.TEST_USER_LOGIN)
         try:
             id_, params = _build_data(self.apikey_regular, 'delete_repo',
                                       repoid=repo_name,)
@@ -821,11 +867,11 @@ class BaseTestApi(object):
             expected = ret
             self._compare_ok(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_delete_repo_by_non_admin_no_permission(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
         try:
             id_, params = _build_data(self.apikey_regular, 'delete_repo',
                                       repoid=repo_name,)
@@ -833,11 +879,11 @@ class BaseTestApi(object):
             expected = 'repository `%s` does not exist' % (repo_name)
             self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_delete_repo_exception_occurred(self):
         repo_name = 'api_delete_me'
-        create_repo(repo_name, self.REPO_TYPE)
+        fixture.create_repo(repo_name, repo_type=self.REPO_TYPE)
         try:
             with mock.patch.object(RepoModel, 'delete', crash):
                 id_, params = _build_data(self.apikey, 'delete_repo',
@@ -847,7 +893,7 @@ class BaseTestApi(object):
                 expected = 'failed to delete repository `%s`' % repo_name
                 self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(repo_name)
+            fixture.destroy_repo(repo_name)
 
     def test_api_fork_repo(self):
         fork_name = 'api-repo-fork'
@@ -865,7 +911,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_non_admin(self):
         fork_name = 'api-repo-fork'
@@ -882,7 +928,7 @@ class BaseTestApi(object):
         }
         expected = ret
         self._compare_ok(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_non_admin_specify_owner(self):
         fork_name = 'api-repo-fork'
@@ -894,7 +940,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
         expected = 'Only RhodeCode admin can specify `owner` param'
         self._compare_error(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_non_admin_no_permission_to_fork(self):
         RepoModel().grant_user_permission(repo=self.REPO,
@@ -908,7 +954,7 @@ class BaseTestApi(object):
         response = api_call(self, params)
         expected = 'repository `%s` does not exist' % (self.REPO)
         self._compare_error(id_, expected, given=response.body)
-        destroy_repo(fork_name)
+        fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_unknown_owner(self):
         fork_name = 'api-repo-fork'
@@ -924,7 +970,7 @@ class BaseTestApi(object):
 
     def test_api_fork_repo_fork_exists(self):
         fork_name = 'api-repo-fork'
-        create_fork(fork_name, self.REPO_TYPE, self.REPO)
+        fixture.create_fork(self.REPO, fork_name)
 
         try:
             fork_name = 'api-repo-fork'
@@ -939,7 +985,7 @@ class BaseTestApi(object):
             expected = "fork `%s` already exist" % fork_name
             self._compare_error(id_, expected, given=response.body)
         finally:
-            destroy_repo(fork_name)
+            fixture.destroy_repo(fork_name)
 
     def test_api_fork_repo_repo_exists(self):
         fork_name = self.REPO
@@ -970,10 +1016,10 @@ class BaseTestApi(object):
 
     def test_api_get_users_group(self):
         id_, params = _build_data(self.apikey, 'get_users_group',
-                                  usersgroupid=TEST_USERS_GROUP)
+                                  usersgroupid=TEST_USER_GROUP)
         response = api_call(self, params)
 
-        users_group = UsersGroupModel().get_group(TEST_USERS_GROUP)
+        users_group = UserGroupModel().get_group(TEST_USER_GROUP)
         members = []
         for user in users_group.members:
             user = user.user
@@ -992,13 +1038,13 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = []
-        for gr_name in [TEST_USERS_GROUP, 'test_users_group2']:
-            users_group = UsersGroupModel().get_group(gr_name)
+        for gr_name in [TEST_USER_GROUP, 'test_users_group2']:
+            users_group = UserGroupModel().get_group(gr_name)
             ret = users_group.get_api_data()
             expected.append(ret)
         self._compare_ok(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group='test_users_group2')
+        UserGroupModel().delete(users_group='test_users_group2')
         Session().commit()
 
     def test_api_create_users_group(self):
@@ -1008,8 +1054,8 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         ret = {
-            'msg': 'created new users group `%s`' % group_name,
-            'users_group': jsonify(UsersGroupModel()\
+            'msg': 'created new user group `%s`' % group_name,
+            'users_group': jsonify(UserGroupModel()\
                                    .get_by_name(group_name)\
                                    .get_api_data())
         }
@@ -1020,13 +1066,13 @@ class BaseTestApi(object):
 
     def test_api_get_users_group_that_exist(self):
         id_, params = _build_data(self.apikey, 'create_users_group',
-                                  group_name=TEST_USERS_GROUP)
+                                  group_name=TEST_USER_GROUP)
         response = api_call(self, params)
 
-        expected = "users group `%s` already exist" % TEST_USERS_GROUP
+        expected = "user group `%s` already exist" % TEST_USER_GROUP
         self._compare_error(id_, expected, given=response.body)
 
-    @mock.patch.object(UsersGroupModel, 'create', crash)
+    @mock.patch.object(UserGroupModel, 'create', crash)
     def test_api_get_users_group_exception_occurred(self):
         group_name = 'exception_happens'
         id_, params = _build_data(self.apikey, 'create_users_group',
@@ -1038,7 +1084,7 @@ class BaseTestApi(object):
 
     def test_api_add_user_to_users_group(self):
         gr_name = 'test_group'
-        UsersGroupModel().create(gr_name)
+        UserGroupModel().create(gr_name)
         Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
@@ -1046,13 +1092,13 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = {
-                    'msg': 'added member `%s` to users group `%s`' % (
+                    'msg': 'added member `%s` to user group `%s`' % (
                                 TEST_USER_ADMIN_LOGIN, gr_name
                             ),
                     'success': True}
         self._compare_ok(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
     def test_api_add_user_to_users_group_that_doesnt_exist(self):
@@ -1061,29 +1107,29 @@ class BaseTestApi(object):
                                   userid=TEST_USER_ADMIN_LOGIN)
         response = api_call(self, params)
 
-        expected = 'users group `%s` does not exist' % 'false-group'
+        expected = 'user group `%s` does not exist' % 'false-group'
         self._compare_error(id_, expected, given=response.body)
 
-    @mock.patch.object(UsersGroupModel, 'add_user_to_group', crash)
+    @mock.patch.object(UserGroupModel, 'add_user_to_group', crash)
     def test_api_add_user_to_users_group_exception_occurred(self):
         gr_name = 'test_group'
-        UsersGroupModel().create(gr_name)
+        UserGroupModel().create(gr_name)
         Session().commit()
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
         response = api_call(self, params)
 
-        expected = 'failed to add member to users group `%s`' % gr_name
+        expected = 'failed to add member to user group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
     def test_api_remove_user_from_users_group(self):
         gr_name = 'test_group_3'
-        gr = UsersGroupModel().create(gr_name)
-        UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
+        gr = UserGroupModel().create(gr_name)
+        UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
@@ -1091,30 +1137,30 @@ class BaseTestApi(object):
         response = api_call(self, params)
 
         expected = {
-                    'msg': 'removed member `%s` from users group `%s`' % (
+                    'msg': 'removed member `%s` from user group `%s`' % (
                                 TEST_USER_ADMIN_LOGIN, gr_name
                             ),
                     'success': True}
         self._compare_ok(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
-    @mock.patch.object(UsersGroupModel, 'remove_user_from_group', crash)
+    @mock.patch.object(UserGroupModel, 'remove_user_from_group', crash)
     def test_api_remove_user_from_users_group_exception_occurred(self):
         gr_name = 'test_group_3'
-        gr = UsersGroupModel().create(gr_name)
-        UsersGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
+        gr = UserGroupModel().create(gr_name)
+        UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
         response = api_call(self, params)
 
-        expected = 'failed to remove member from users group `%s`' % gr_name
+        expected = 'failed to remove member from user group `%s`' % gr_name
         self._compare_error(id_, expected, given=response.body)
 
-        UsersGroupModel().delete(users_group=gr_name)
+        UserGroupModel().delete(users_group=gr_name)
         Session().commit()
 
     @parameterized.expand([('none', 'repository.none'),
@@ -1195,13 +1241,13 @@ class BaseTestApi(object):
     def test_api_grant_users_group_permission(self, name, perm):
         id_, params = _build_data(self.apikey, 'grant_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,
+                                  usersgroupid=TEST_USER_GROUP,
                                   perm=perm)
         response = api_call(self, params)
 
         ret = {
-            'msg': 'Granted perm: `%s` for users group: `%s` in repo: `%s`' % (
-                perm, TEST_USERS_GROUP, self.REPO
+            'msg': 'Granted perm: `%s` for user group: `%s` in repo: `%s`' % (
+                perm, TEST_USER_GROUP, self.REPO
             ),
             'success': True
         }
@@ -1212,7 +1258,7 @@ class BaseTestApi(object):
         perm = 'haha.no.permission'
         id_, params = _build_data(self.apikey, 'grant_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,
+                                  usersgroupid=TEST_USER_GROUP,
                                   perm=perm)
         response = api_call(self, params)
 
@@ -1224,28 +1270,28 @@ class BaseTestApi(object):
         perm = 'repository.read'
         id_, params = _build_data(self.apikey, 'grant_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,
+                                  usersgroupid=TEST_USER_GROUP,
                                   perm=perm)
         response = api_call(self, params)
 
-        expected = 'failed to edit permission for users group: `%s` in repo: `%s`' % (
-                    TEST_USERS_GROUP, self.REPO
+        expected = 'failed to edit permission for user group: `%s` in repo: `%s`' % (
+                    TEST_USER_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_revoke_users_group_permission(self):
         RepoModel().grant_users_group_permission(repo=self.REPO,
-                                                 group_name=TEST_USERS_GROUP,
+                                                 group_name=TEST_USER_GROUP,
                                                  perm='repository.read')
         Session().commit()
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,)
+                                  usersgroupid=TEST_USER_GROUP,)
         response = api_call(self, params)
 
         expected = {
-            'msg': 'Revoked perm for users group: `%s` in repo: `%s`' % (
-                TEST_USERS_GROUP, self.REPO
+            'msg': 'Revoked perm for user group: `%s` in repo: `%s`' % (
+                TEST_USER_GROUP, self.REPO
             ),
             'success': True
         }
@@ -1256,10 +1302,10 @@ class BaseTestApi(object):
 
         id_, params = _build_data(self.apikey, 'revoke_users_group_permission',
                                   repoid=self.REPO,
-                                  usersgroupid=TEST_USERS_GROUP,)
+                                  usersgroupid=TEST_USER_GROUP,)
         response = api_call(self, params)
 
-        expected = 'failed to edit permission for users group: `%s` in repo: `%s`' % (
-                    TEST_USERS_GROUP, self.REPO
+        expected = 'failed to edit permission for user group: `%s` in repo: `%s`' % (
+                    TEST_USER_GROUP, self.REPO
                 )
         self._compare_error(id_, expected, given=response.body)

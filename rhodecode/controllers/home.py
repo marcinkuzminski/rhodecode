@@ -52,7 +52,7 @@ class HomeController(BaseController):
         c.groups = self.scm_model.get_repos_groups()
         c.group = None
 
-        if c.visual.lightweight_dashboard is False:
+        if not c.visual.lightweight_dashboard:
             c.repos_list = self.scm_model.get_repos()
         ## lightweight version of dashboard
         else:
@@ -81,7 +81,7 @@ class HomeController(BaseController):
     def branch_tag_switcher(self, repo_name):
         if request.is_xhr:
             c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)
-            c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
-            return render('/switch_to_list.html')
-        else:
-            raise HTTPBadRequest()
+            if c.rhodecode_db_repo:
+                c.rhodecode_repo = c.rhodecode_db_repo.scm_instance
+                return render('/switch_to_list.html')
+        raise HTTPBadRequest()

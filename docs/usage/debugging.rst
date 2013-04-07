@@ -14,7 +14,7 @@ enable detailed debug
 
 RhodeCode uses standard python logging modules to log it's output.
 By default only loggers with INFO level are displayed. To enable full output
-change `level = DEBUG` for all logging handlers in currently used .ini file. 
+change `level = DEBUG` for all logging handlers in currently used .ini file.
 This change will allow to see much more detailed output in the logfile or
 console. This generally helps a lot to track issues.
 

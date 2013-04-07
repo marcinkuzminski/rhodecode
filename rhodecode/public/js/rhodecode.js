@@ -86,19 +86,6 @@ var prevElementSibling = function( el ) {
     }
 }
 
-var setSelectValue = function(select, val){
-	var selection =  YUD.get(select);
-	
-    // select element
-    for(var i=0;i<selection.options.length;i++){
-        if (selection.options[i].innerHTML == val) {
-            selection.selectedIndex = i;
-            break;
-        }
-    }	
-}
-
-
 /**
  * SmartColorGenerator
  *
@@ -163,7 +150,188 @@ ColorGenerator.prototype = {
     }
 }
 
+/**
+ * PyRoutesJS
+ * 
+ * Usage pyroutes.url('mark_error_fixed',{"error_id":error_id}) // /mark_error_fixed/<error_id>
+ */
+var pyroutes = (function() {
+	// access global map defined in special file pyroutes
+    var matchlist = PROUTES_MAP;
+    var sprintf = (function() {
+        function get_type(variable) {
+            return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase();
+        }
+        function str_repeat(input, multiplier) {
+            for (var output = []; multiplier > 0; output[--multiplier] = input) {/* do nothing */}
+            return output.join('');
+        }
 
+        var str_format = function() {
+            if (!str_format.cache.hasOwnProperty(arguments[0])) {
+                str_format.cache[arguments[0]] = str_format.parse(arguments[0]);
+            }
+            return str_format.format.call(null, str_format.cache[arguments[0]], arguments);
+        };
+
+        str_format.format = function(parse_tree, argv) {
+            var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
+            for (i = 0; i < tree_length; i++) {
+                node_type = get_type(parse_tree[i]);
+                if (node_type === 'string') {
+                    output.push(parse_tree[i]);
+                }
+                else if (node_type === 'array') {
+                    match = parse_tree[i]; // convenience purposes only
+                    if (match[2]) { // keyword argument
+                        arg = argv[cursor];
+                        for (k = 0; k < match[2].length; k++) {
+                            if (!arg.hasOwnProperty(match[2][k])) {
+                                throw(sprintf('[sprintf] property "%s" does not exist', match[2][k]));
+                            }
+                            arg = arg[match[2][k]];
+                        }
+                    }
+                    else if (match[1]) { // positional argument (explicit)
+                        arg = argv[match[1]];
+                    }
+                    else { // positional argument (implicit)
+                        arg = argv[cursor++];
+                    }
+
+                    if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
+                        throw(sprintf('[sprintf] expecting number but found %s', get_type(arg)));
+                    }
+                    switch (match[8]) {
+                        case 'b': arg = arg.toString(2); break;
+                        case 'c': arg = String.fromCharCode(arg); break;
+                        case 'd': arg = parseInt(arg, 10); break;
+                        case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
+                        case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
+                        case 'o': arg = arg.toString(8); break;
+                        case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
+                        case 'u': arg = Math.abs(arg); break;
+                        case 'x': arg = arg.toString(16); break;
+                        case 'X': arg = arg.toString(16).toUpperCase(); break;
+                    }
+                    arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
+                    pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
+                    pad_length = match[6] - String(arg).length;
+                    pad = match[6] ? str_repeat(pad_character, pad_length) : '';
+                    output.push(match[5] ? arg + pad : pad + arg);
+                }
+            }
+            return output.join('');
+        };
+
+        str_format.cache = {};
+
+        str_format.parse = function(fmt) {
+            var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
+            while (_fmt) {
+                if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
+                    parse_tree.push(match[0]);
+                }
+                else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
+                    parse_tree.push('%');
+                }
+                else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
+                    if (match[2]) {
+                        arg_names |= 1;
+                        var field_list = [], replacement_field = match[2], field_match = [];
+                        if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+                            field_list.push(field_match[1]);
+                            while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+                                if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+                                    field_list.push(field_match[1]);
+                                }
+                                else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
+                                    field_list.push(field_match[1]);
+                                }
+                                else {
+                                    throw('[sprintf] huh?');
+                                }
+                            }
+                        }
+                        else {
+                            throw('[sprintf] huh?');
+                        }
+                        match[2] = field_list;
+                    }
+                    else {
+                        arg_names |= 2;
+                    }
+                    if (arg_names === 3) {
+                        throw('[sprintf] mixing positional and named placeholders is not (yet) supported');
+                    }
+                    parse_tree.push(match);
+                }
+                else {
+                    throw('[sprintf] huh?');
+                }
+                _fmt = _fmt.substring(match[0].length);
+            }
+            return parse_tree;
+        };
+
+        return str_format;
+    })();
+
+    var vsprintf = function(fmt, argv) {
+        argv.unshift(fmt);
+        return sprintf.apply(null, argv);
+    };
+    return {
+        'url': function(route_name, params) {
+            var result = route_name;
+            if (typeof(params) != 'object'){
+            	params = {};
+            }
+            if (matchlist.hasOwnProperty(route_name)) {
+                var route = matchlist[route_name];
+                // param substitution
+                for(var i=0; i < route[1].length; i++) {
+
+                   if (!params.hasOwnProperty(route[1][i]))
+                        throw new Error(route[1][i] + ' missing in "' + route_name + '" route generation');
+                }
+                result = sprintf(route[0], params);
+                
+                var ret = [];
+                //extra params => GET
+                for(param in params){
+                	if (route[1].indexOf(param) == -1){
+                		ret.push(encodeURIComponent(param) + "=" + encodeURIComponent(params[param]));	
+                	}
+                }
+                var _parts = ret.join("&");
+                if(_parts){
+                	result = result +'?'+ _parts
+                }
+            }
+
+            return result;
+        },
+    	'register': function(route_name, route_tmpl, req_params) {
+    		if (typeof(req_params) != 'object') {
+    			req_params = [];
+    		}
+    		//fix escape
+    		route_tmpl = unescape(route_tmpl);
+    		keys = [];
+    		for (o in req_params){
+    			keys.push(req_params[o])
+    		}
+    		matchlist[route_name] = [
+    		    route_tmpl,
+    		    keys
+    		]
+    	},
+    	'_routes': function(){
+    		return matchlist;
+    	}
+    }
+})();
 
 
 
@@ -257,7 +425,9 @@ var ajaxGET = function(url,success) {
     var callback = {
         success: success,
         failure: function (o) {
-            alert("error");
+            if (o.status != 0) {
+                alert("error: " + o.statusText);
+            };
         },
     };
 
@@ -333,14 +503,15 @@ var show_changeset_tooltip = function(){
 			YUD.setAttribute(target,'id',ttid);
 			YUD.setAttribute(target, 'title',_TM['loading...']);
 			YAHOO.yuitip.main.set_listeners(target);
-			YAHOO.yuitip.main.show_yuitip(e, target);			
-			ajaxGET(LAZY_CS_URL.replace('__NAME__',repo_name).replace('__REV__', rid), success)
+			YAHOO.yuitip.main.show_yuitip(e, target);
+			var url = pyroutes.url('changeset_info', {"repo_name":repo_name, "revision": rid});
+			ajaxGET(url, success)
 		}
 	});
 };
 
 var onSuccessFollow = function(target){
-    var f = YUD.get(target.id);
+    var f = YUD.get(target);
     var f_cnt = YUD.get('current_followers_count');
 
     if(YUD.hasClass(f, 'follow')){
@@ -391,6 +562,21 @@ var toggleFollowingRepo = function(target,fallows_repo_id,token,user_id){
     return false;
 }
 
+var showRepoSize = function(target, repo_name, token){
+    var args= 'auth_token='+token;
+    
+    if(!YUD.hasClass(target, 'loaded')){
+        YUD.get(target).innerHTML = _TM['Loading ...'];
+        var url = pyroutes.url('repo_size', {"repo_name":repo_name});
+        YUC.asyncRequest('POST',url,{
+            success:function(o){
+            	YUD.get(target).innerHTML = JSON.parse(o.responseText);
+            	YUD.addClass(target, 'loaded');
+            }
+        },args);    	
+    }
+    return false;	
+}
 
 /**
  * TOOLTIP IMPL.
@@ -512,10 +698,6 @@ var q_filter = function(target,nodes,display_element){
 	var nodes = nodes;
 	var q_filter_field = YUD.get(target);
 	var F = YAHOO.namespace(target);
-
-	YUE.on(q_filter_field,'click',function(){
-	   q_filter_field.value = '';
-	});
 
 	YUE.on(q_filter_field,'keyup',function(e){
 	    clearTimeout(F.filterTimeout); 
@@ -710,27 +892,9 @@ var deleteComment = function(comment_id){
     ajaxPOST(url,postData,success);
 }
 
-var updateReviewers = function(reviewers_ids){
-	if (reviewers_ids === undefined){
-  	  var reviewers_ids = [];
-	  var ids = YUQ('#review_members input');
-	  for(var i=0; i<ids.length;i++){
-		  var id = ids[i].value
-		  reviewers_ids.push(id);
-	  }		
-	}
-	var url = AJAX_UPDATE_PULLREQUEST;
-	var postData = {'_method':'put',
-			        'reviewers_ids': reviewers_ids};
-	var success = function(o){
-		window.location.reload();
-	}
-	ajaxPOST(url,postData,success);
-}
-
 var createInlineAddButton = function(tr){
 
-	var label = TRANSLATION_MAP['add another comment'];
+	var label = TRANSLATION_MAP['Add another comment'];
 	
 	var html_el = document.createElement('div');
 	YUD.addClass(html_el, 'add-comment');
@@ -854,14 +1018,6 @@ var renderInlineComments = function(file_comments){
     }	
 }
 
-var removeReviewer = function(reviewer_id){
-	var el = YUD.get('reviewer_{0}'.format(reviewer_id));
-	if (el.parentNode !== undefined){
-		el.parentNode.removeChild(el);
-	}
-	updateReviewers();
-}
-
 var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	var current_url_branch = +"?branch=__BRANCH__";
 
@@ -934,7 +1090,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	                    match.push('<tr><td><a class="browser-{0}" href="{1}">{2}</a></td><td colspan="5"></td></tr>'.format(t,new_url,n_hl));
 	                }
 	                if(match.length >= matches_max){
-	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['search truncated']));
+	                    match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['Search truncated']));
 	                }
 	            }                       
 	        }
@@ -943,7 +1099,7 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 	            YUD.setStyle('tbody_filtered','display','');
 	            
 	            if (match.length==0){
-	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['no matching files']));
+	              match.push('<tr><td>{0}</td><td colspan="5"></td></tr>'.format(_TM['No matching files']));
 	            }                           
 	            
 	            YUD.get('tbody_filtered').innerHTML = match.join("");   
@@ -1130,7 +1286,7 @@ var MembersAutoComplete = function (divid, cont, users_list, groups_list) {
             return matches;
         };
 
-    // Define a custom search function for the DataSource of usersGroups
+    // Define a custom search function for the DataSource of userGroups
     var matchGroups = function (sQuery) {
             // Case insensitive matching
             var query = sQuery.toLowerCase();
@@ -1473,6 +1629,56 @@ var MentionsAutoComplete = function (divid, cont, users_list, groups_list) {
     };
 }
 
+var addReviewMember = function(id,fname,lname,nname,gravatar_link){
+	var members  = YUD.get('review_members');
+	var tmpl = '<li id="reviewer_{2}">'+
+    '<div class="reviewers_member">'+
+      '<div class="gravatar"><img alt="gravatar" src="{0}"/> </div>'+
+      '<div style="float:left">{1}</div>'+
+      '<input type="hidden" value="{2}" name="review_members" />'+
+      '<span class="delete_icon action_button" onclick="removeReviewMember({2})"></span>'+
+    '</div>'+
+    '</li>'	;
+    var displayname = "{0} {1} ({2})".format(fname,lname,nname);
+	var element = tmpl.format(gravatar_link,displayname,id);
+	// check if we don't have this ID already in
+	var ids = [];
+	var _els = YUQ('#review_members li');
+	for (el in _els){
+		ids.push(_els[el].id)
+	}
+	if(ids.indexOf('reviewer_'+id) == -1){
+		//only add if it's not there
+		members.innerHTML += element;
+	}
+	    
+}
+
+var removeReviewMember = function(reviewer_id, repo_name, pull_request_id){
+	var el = YUD.get('reviewer_{0}'.format(reviewer_id));
+	if (el.parentNode !== undefined){
+		el.parentNode.removeChild(el);
+	}
+}
+
+var updateReviewers = function(reviewers_ids, repo_name, pull_request_id){
+	if (reviewers_ids === undefined){
+  	  var reviewers_ids = [];
+	  var ids = YUQ('#review_members input');
+	  for(var i=0; i<ids.length;i++){
+		  var id = ids[i].value
+		  reviewers_ids.push(id);
+	  }		
+	}
+	var url = pyroutes.url('pullrequest_update', {"repo_name":repo_name,
+												  "pull_request_id": pull_request_id});
+	var postData = {'_method':'put',
+			        'reviewers_ids': reviewers_ids};
+	var success = function(o){
+		window.location.reload();
+	}
+	ajaxPOST(url,postData,success);
+}
 
 var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
     var myUsers = users_list;
@@ -1498,7 +1704,7 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
             return matches;
         };
 
-    // Define a custom search function for the DataSource of usersGroups
+    // Define a custom search function for the DataSource of userGroups
     var matchGroups = function (sQuery) {
             // Case insensitive matching
             var query = sQuery.toLowerCase();
@@ -1605,26 +1811,12 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
             var myAC = aArgs[0]; // reference back to the AC instance
             var elLI = aArgs[1]; // reference to the selected LI element
             var oData = aArgs[2]; // object literal of selected item's result data
-            var members  = YUD.get('review_members');
+            
             //fill the autocomplete with value
 
             if (oData.nname != undefined) {
-            	if (myAC.dataSource.cache.indexOf(oData.id) != -1){
-            		return
-            	}
-
-            	var tmpl = '<li id="reviewer_{2}">'+
-		                      '<div class="reviewers_member">'+
-		                        '<div class="gravatar"><img alt="gravatar" src="{0}"/> </div>'+
-		                        '<div style="float:left">{1}</div>'+
-		                        '<input type="hidden" value="{2}" name="review_members" />'+
-		                        '<span class="delete_icon action_button" onclick="removeReviewer({2})"></span>'+
-		                      '</div>'+
-		                   '</li>'
-
-		        var displayname = "{0} {1} ({2})".format(oData.fname,oData.lname,oData.nname);
-            	var element = tmpl.format(oData.gravatar_lnk,displayname,oData.id);
-            	members.innerHTML += element;
+            	addReviewMember(oData.id, oData.fname, oData.lname, oData.nname,
+            					oData.gravatar_lnk);
             	myAC.dataSource.cache.push(oData.id);
             	YUD.get('user').value = '' 
             }
@@ -1635,7 +1827,6 @@ var PullRequestAutoComplete = function (divid, cont, users_list, groups_list) {
         reviewerAC: reviewerAC,
     };
 }
-
 
 /**
  * QUICK REPO MENU
@@ -1787,14 +1978,13 @@ var dateSort = function(a, b, desc, field) {
     return compState;
 };
 
-var linkSort = function(a, b, desc, field) {
+var usernamelinkSort = function(a, b, desc, field) {
 	  var a_ = fromHTML(a.getData(field));
-	  var b_ = fromHTML(a.getData(field));
+	  var b_ = fromHTML(b.getData(field));
 	  
 	  // extract url text from string nodes 
 	  a_ = get_link(a_)
 	  b_ = get_link(b_)
-
 	  var comp = YAHOO.util.Sort.compare;
 	  var compState = comp(a_, b_, desc);
 	  return compState;
@@ -1849,7 +2039,7 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	        av_cache.push(node);
 	}
 	
-	//fill available only with those not in choosen
+	//fill available only with those not in chosen
 	ac.options.length=0;
 	tmp_cache = new Array();
 	
@@ -1872,7 +2062,7 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	
 	function prompts_action_callback(e){
 	
-	    var choosen = YUD.get(selected_container);
+	    var chosen = YUD.get(selected_container);
 	    var available = YUD.get(available_container);
 	
 	    //get checked and unchecked options from field
@@ -1915,30 +2105,30 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	    // add action
 	    if (this.id=='add_element'){
 	        var c = get_checked(available);
-	        add_to(choosen,c[0]);
+	        add_to(chosen,c[0]);
 	        fill_with(available,c[1]);
 	    }
 	    // remove action
 	    if (this.id=='remove_element'){
-	        var c = get_checked(choosen);
+	        var c = get_checked(chosen);
 	        add_to(available,c[0]);
-	        fill_with(choosen,c[1]);
+	        fill_with(chosen,c[1]);
 	    }
 	    // add all elements
 	    if(this.id=='add_all_elements'){
 	        for(var i=0; node = available.options[i];i++){
-	                choosen.appendChild(new Option(node.text,
+	                chosen.appendChild(new Option(node.text,
 	                        node.value, false, false));
 	        }
 	        available.options.length = 0;
 	    }
 	    //remove all elements
 	    if(this.id=='remove_all_elements'){
-	        for(var i=0; node = choosen.options[i];i++){
+	        for(var i=0; node = chosen.options[i];i++){
 	            available.appendChild(new Option(node.text,
 	                    node.value, false, false));
 	        }
-	        choosen.options.length = 0;
+	        chosen.options.length = 0;
 	    }
 	
 	}
@@ -1948,10 +2138,33 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 	               prompts_action_callback)
 	if (form_id !== undefined) {
 		YUE.addListener(form_id,'submit',function(){
-		    var choosen = YUD.get(selected_container);
-		    for (var i = 0; i < choosen.options.length; i++) {
-		        choosen.options[i].selected = 'selected';
+		    var chosen = YUD.get(selected_container);
+		    for (var i = 0; i < chosen.options.length; i++) {
+		        chosen.options[i].selected = 'selected';
 		    }
 		});
 	}
 }
+
+
+// global hooks after DOM is loaded
+
+YUE.onDOMReady(function(){
+	YUE.on(YUQ('.diff-collapse-button'), 'click', function(e){
+		var button = e.currentTarget;
+		var t = YUD.get(button).getAttribute('target');
+	    console.log(t);
+		if(YUD.hasClass(t, 'hidden')){
+			YUD.removeClass(t, 'hidden');
+			YUD.get(button).innerHTML = "&uarr; {0} &uarr;".format(_TM['Collapse diff']);
+		}
+		else if(!YUD.hasClass(t, 'hidden')){
+			YUD.addClass(t, 'hidden');
+			YUD.get(button).innerHTML = "&darr; {0} &darr;".format(_TM['Expand diff']);
+		}
+	});
+	
+	
+	
+});
+

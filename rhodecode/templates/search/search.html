@@ -1,64 +1,66 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
+
 <%def name="title()">
-   %if c.cur_query:
-	%if c.repo_name:
-		${_('Search "%s" in repository: %s') % (c.cur_query, c.repo_name)}
-	%else:
-		${_('Search "%s" in all repositories') % c.cur_query}
-	%endif
-   %else:
-	%if c.repo_name:
-		${_('Search in repository: %s') % c.repo_name}
-	%else:
-		${_('Search in all repositories')}
-	%endif
-   %endif
-	- ${c.rhodecode_name}
+  %if c.repo_name:
+    ${_('Search repository')} ${c.repo_name} &middot; ${c.rhodecode_name}
+  %else:
+    ${_('Search in all repositories')}
+  %endif
 </%def>
-<%def name="breadcrumbs()">
-	${c.rhodecode_name}
+
+<%def name="breadcrumbs_links()">
+  %if c.repo_name:
+    ${_('Search')}
+  %else:
+    ${_('Search in all repositories')}
+  %endif
+  %if c.cur_query:
+    &raquo;
+    ${c.cur_query}
+  %endif
 </%def>
+
 <%def name="page_nav()">
-	${self.menu('home')}
+    %if c.repo_name:
+    ${self.menu('repositories')}
+    %else:
+    ${self.menu('search')}
+    %endif
 </%def>
 <%def name="main()">
-
+%if c.repo_name:
+${self.context_bar('options')}
+%endif
 <div class="box">
-	<!-- box / title -->
-	<div class="title">
-		<h5>
-		%if c.repo_name:
-			${_('Search in repository: %s') % c.repo_name}
-		%else:
-			${_('Search in all repositories')}
-		%endif
-		</h5>
-	</div>
-	<!-- end box / title -->
-	%if c.repo_name:
-		${h.form(h.url('search_repo',search_repo=c.repo_name),method='get')}
-	%else:
-		${h.form(h.url('search'),method='get')}
-	%endif
-	<div class="form">
-		<div class="fields">
-			<div class="field field-first field-noborder">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+    <!-- end box / title -->
+    %if c.repo_name:
+        ${h.form(h.url('search_repo',repo_name=c.repo_name),method='get')}
+    %else:
+        ${h.form(h.url('search'),method='get')}
+    %endif
+    <div class="form">
+        <div class="fields">
+            <div class="field field-first field-noborder">
              <div class="label">
                  <label for="q">${_('Search term')}</label>
              </div>
-				<div class="input">${h.text('q',c.cur_query,class_="small")}
-					<div class="button highlight">
-						<input type="submit" value="${_('Search')}" class="ui-button"/>
-					</div>
-				</div>
-				<div style="font-weight: bold;clear:Both;margin-left:200px">${c.runtime}</div>
-			</div>
+                <div class="input">${h.text('q',c.cur_query,class_="small")}
+                    <div class="button highlight">
+                        <input type="submit" value="${_('Search')}" class="ui-button"/>
+                    </div>
+                </div>
+                <div style="font-weight: bold;clear:Both;margin-left:200px">${c.runtime}</div>
+            </div>
 
-			<div class="field">
-	            <div class="label">
-	                <label for="type">${_('Search in')}</label>
-	            </div>
+            <div class="field">
+                <div class="label">
+                    <label for="type">${_('Search in')}</label>
+                </div>
                 <div class="select">
                     ${h.select('type',c.cur_type,[('content',_('File contents')),
                         ('commit',_('Commit messages')),
@@ -68,9 +70,9 @@
                 </div>
              </div>
 
-		</div>
-	</div>
-	${h.end_form()}
+        </div>
+    </div>
+    ${h.end_form()}
     <div class="search">
     %if c.cur_type == 'content':
         <%include file='search_content.html'/>

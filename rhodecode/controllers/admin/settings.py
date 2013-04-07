@@ -37,7 +37,8 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
-    HasPermissionAnyDecorator, NotAnonymous
+    HasPermissionAnyDecorator, NotAnonymous, HasPermissionAny,\
+    HasReposGroupPermissionAll, HasReposGroupPermissionAny, AuthUser
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
 from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
@@ -46,7 +47,7 @@ from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
     RhodeCodeSetting, PullRequest, PullRequestReviewers
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm, ApplicationVisualisationForm
-from rhodecode.model.scm import ScmModel
+from rhodecode.model.scm import ScmModel, GroupList
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
@@ -54,6 +55,7 @@ from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.compat import json
+from webob.exc import HTTPForbidden
 log = logging.getLogger(__name__)
 
 
@@ -165,7 +167,7 @@ class SettingsController(BaseController):
 
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during updating '
+                h.flash(_('Error occurred during updating '
                           'application settings'),
                           category='error')
 
@@ -204,6 +206,11 @@ class SettingsController(BaseController):
                     form_result['rhodecode_lightweight_dashboard']
                 Session().add(sett4)
 
+                sett4 = RhodeCodeSetting.get_by_name_or_create('repository_fields')
+                sett4.app_settings_value = \
+                    form_result['rhodecode_repository_fields']
+                Session().add(sett4)
+
                 Session().commit()
                 set_rhodecode_config(config)
                 h.flash(_('Updated visualisation settings'),
@@ -211,7 +218,7 @@ class SettingsController(BaseController):
 
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during updating '
+                h.flash(_('Error occurred during updating '
                           'visualisation settings'),
                         category='error')
 
@@ -229,9 +236,6 @@ class SettingsController(BaseController):
                 )
 
             try:
-                # fix namespaces for hooks and extensions
-                _f = lambda s: s.replace('.', '_')
-
                 sett = RhodeCodeUi.get_by_key('push_ssl')
                 sett.ui_value = form_result['web_push_ssl']
                 Session().add(sett)
@@ -242,23 +246,19 @@ class SettingsController(BaseController):
 
                 #HOOKS
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                RhodeCodeUi.HOOK_UPDATE)]
+                sett.ui_active = form_result['hooks_changegroup_update']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_REPO_SIZE)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                RhodeCodeUi.HOOK_REPO_SIZE)]
+                sett.ui_active = form_result['hooks_changegroup_repo_size']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_PUSH)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                RhodeCodeUi.HOOK_PUSH)]
+                sett.ui_active = form_result['hooks_changegroup_push_logger']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_PULL)
-                sett.ui_active = form_result[_f('hooks_%s' %
-                                                 RhodeCodeUi.HOOK_PULL)]
+                sett.ui_active = form_result['hooks_outgoing_pull_logger']
 
                 Session().add(sett)
 
@@ -269,7 +269,7 @@ class SettingsController(BaseController):
                     sett = RhodeCodeUi()
                     sett.ui_key = 'largefiles'
                     sett.ui_section = 'extensions'
-                sett.ui_active = form_result[_f('extensions_largefiles')]
+                sett.ui_active = form_result['extensions_largefiles']
                 Session().add(sett)
 
                 sett = RhodeCodeUi.get_by_key('hgsubversion')
@@ -279,7 +279,7 @@ class SettingsController(BaseController):
                     sett.ui_key = 'hgsubversion'
                     sett.ui_section = 'extensions'
 
-                sett.ui_active = form_result[_f('extensions_hgsubversion')]
+                sett.ui_active = form_result['extensions_hgsubversion']
                 Session().add(sett)
 
 #                sett = RhodeCodeUi.get_by_key('hggit')
@@ -289,7 +289,7 @@ class SettingsController(BaseController):
 #                    sett.ui_key = 'hggit'
 #                    sett.ui_section = 'extensions'
 #
-#                sett.ui_active = form_result[_f('extensions_hggit')]
+#                sett.ui_active = form_result['extensions_hggit']
 #                Session().add(sett)
 
                 Session().commit()
@@ -298,7 +298,7 @@ class SettingsController(BaseController):
 
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during updating '
+                h.flash(_('Error occurred during updating '
                           'application settings'), category='error')
 
         if setting_id == 'hooks':
@@ -324,7 +324,7 @@ class SettingsController(BaseController):
                 Session().commit()
             except Exception:
                 log.error(traceback.format_exc())
-                h.flash(_('error occurred during hook creation'),
+                h.flash(_('Error occurred during hook creation'),
                         category='error')
 
             return redirect(url('admin_edit_setting', setting_id='hooks'))
@@ -402,6 +402,8 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account')
 
         c.user = User.get(self.rhodecode_user.user_id)
+        c.perm_user = AuthUser(user_id=self.rhodecode_user.user_id,
+                               ip_addr=self.ip_addr)
         c.ldap_dn = c.user.ldap_dn
 
         if c.user.username == 'default':
@@ -433,6 +435,8 @@ class SettingsController(BaseController):
         # url('admin_settings_my_account_update', id=ID)
         uid = self.rhodecode_user.user_id
         c.user = User.get(self.rhodecode_user.user_id)
+        c.perm_user = AuthUser(user_id=self.rhodecode_user.user_id,
+                               ip_addr=self.ip_addr)
         c.ldap_dn = c.user.ldap_dn
         email = self.rhodecode_user.email
         _form = UserForm(edit=True,
@@ -460,45 +464,32 @@ class SettingsController(BaseController):
             return render('admin/users/user_edit_my_account.html')
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('error occurred during update of user %s') \
+            h.flash(_('Error occurred during update of user %s') \
                     % form_result.get('username'), category='error')
 
         return redirect(url('my_account'))
 
     @NotAnonymous()
     def my_account_my_pullrequests(self):
-        c.my_pull_requests = PullRequest.query()\
+        c.show_closed = request.GET.get('pr_show_closed')
+
+        def _filter(pr):
+            s = sorted(pr, key=lambda o: o.created_on, reverse=True)
+            if not c.show_closed:
+                s = filter(lambda p: p.status != PullRequest.STATUS_CLOSED, s)
+            return s
+
+        c.my_pull_requests = _filter(PullRequest.query()\
                                 .filter(PullRequest.user_id ==
                                         self.rhodecode_user.user_id)\
-                                .all()
-        c.participate_in_pull_requests = \
-            [x.pull_request for x in PullRequestReviewers.query()\
-                                    .filter(PullRequestReviewers.user_id ==
-                                            self.rhodecode_user.user_id)\
-                                    .all()]
+                                .all())
+
+        c.participate_in_pull_requests = _filter([
+                    x.pull_request for x in PullRequestReviewers.query()\
+                    .filter(PullRequestReviewers.user_id ==
+                            self.rhodecode_user.user_id).all()])
+
         return render('admin/users/user_edit_my_account_pullrequests.html')
-
-    @NotAnonymous()
-    @HasPermissionAnyDecorator('hg.admin', 'hg.create.repository')
-    def create_repository(self):
-        """GET /_admin/create_repository: Form to create a new item"""
-
-        c.repo_groups = RepoGroup.groups_choices(check_perms=True)
-        c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
-        choices, c.landing_revs = ScmModel().get_repo_landing_revs()
-
-        new_repo = request.GET.get('repo', '')
-        c.new_repo = repo_name_slug(new_repo)
-
-        ## apply the defaults from defaults page
-        defaults = RhodeCodeSetting.get_default_repo_settings(strip_prefix=True)
-        return htmlfill.render(
-            render('admin/repos/repo_add_create_repository.html'),
-            defaults=defaults,
-            errors={},
-            prefix_error=False,
-            encoding="UTF-8"
-        )
 
     def _get_hg_ui_settings(self):
         ret = RhodeCodeUi.query().all()

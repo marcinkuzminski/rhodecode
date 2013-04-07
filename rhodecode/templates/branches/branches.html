@@ -2,23 +2,20 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Branches') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Branches') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    <input class="q_filter_box" id="q_filter_branches" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
-    ${_('branches')}
+    <input class="q_filter_box" id="q_filter_branches" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value=""/>
+    ${_('Branches')}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('branches')}
+    ${self.menu('repositories')}
 </%def>
 
 <%def name="main()">
+${self.context_bar('switch-to')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -26,7 +23,7 @@
     </div>
     <!-- end box / title -->
     %if c.repo_branches:
-    <div class="info_box" id="compare_branches" style="clear: both;padding: 10px 19px;vertical-align: right;text-align: right;"><a href="#" class="ui-btn small">${_('Compare branches')}</a></div>
+    <div class="info_box" id="compare_branches" style="clear: both;padding: 10px 19px;text-align: right;"><a href="#" class="ui-btn small">${_('Compare branches')}</a></div>
     %endif
     <div class="table">
         <%include file='branches_data.html'/>
@@ -34,16 +31,16 @@
 </div>
 <script type="text/javascript">
 YUE.on('compare_branches','click',function(e){
-	YUE.preventDefault(e);
-	var org = YUQ('input[name=compare_org]:checked')[0];
-	var other = YUQ('input[name=compare_other]:checked')[0];
+    YUE.preventDefault(e);
+    var org = YUQ('input[name=compare_org]:checked')[0];
+    var other = YUQ('input[name=compare_other]:checked')[0];
 
-	if(org && other){
-	    var compare_url = "${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='__ORG__',other_ref_type='branch',other_ref='__OTHER__')}";
-		var u = compare_url.replace('__ORG__',org.value)
-		                   .replace('__OTHER__',other.value);
-		window.location=u;
-	}
+    if(org && other){
+        var compare_url = "${h.url('compare_url',repo_name=c.repo_name,org_ref_type='branch',org_ref='__ORG__',other_ref_type='branch',other_ref='__OTHER__')}";
+        var u = compare_url.replace('__ORG__',org.value)
+                           .replace('__OTHER__',other.value);
+        window.location=u;
+    }
 });
 // main table sorting
 var myColumnDefs = [

@@ -54,7 +54,6 @@ class TestCompareController(TestController):
                                     org_ref=tag1,
                                     other_ref_type="tag",
                                     other_ref=tag2,
-                                    bundle=False
                                     ))
         response.mustcontain('%s@%s -&gt; %s@%s' % (GIT_REPO, tag1, GIT_REPO, tag2))
 

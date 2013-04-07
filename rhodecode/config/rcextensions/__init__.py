@@ -6,6 +6,14 @@
 # build by pygments
 EXTRA_MAPPINGS = {}
 
+# additional lexer definitions for custom files
+# it's overrides pygments lexers, and uses defined name of lexer to colorize the
+# files. Format is {'ext': 'lexer_name'}
+# List of lexers can be printed running:
+# python -c "import pprint;from pygments import lexers;pprint.pprint([(x[0], x[1]) for x in lexers.get_all_lexers()]);"
+
+EXTRA_LEXERS = {}
+
 #==============================================================================
 # WHOOSH INDEX EXTENSIONS
 #==============================================================================

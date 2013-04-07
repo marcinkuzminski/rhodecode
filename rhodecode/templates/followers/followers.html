@@ -2,21 +2,18 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Followers') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Followers') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
-    ${_('followers')}
+    ${_('Followers')}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('followers')}
+    ${self.menu('repositories')}
 </%def>
 <%def name="main()">
+${self.context_bar('followers')}
 <div class="box">
     <!-- box / title -->
     <div class="title">

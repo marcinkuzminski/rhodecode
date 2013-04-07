@@ -207,7 +207,7 @@ class JournalController(BaseController):
             #filter
             try:
                 journal = _journal_filter(journal, c.search_term)
-            except:
+            except Exception:
                 # we want this to crash for now
                 raise
             journal = journal.filter(filtering_criterion)\
@@ -231,7 +231,7 @@ class JournalController(BaseController):
                                                 self.rhodecode_user.user_id)
                     Session.commit()
                     return 'ok'
-                except:
+                except Exception:
                     raise HTTPBadRequest()
 
             repo_id = request.POST.get('follows_repo_id')
@@ -241,7 +241,7 @@ class JournalController(BaseController):
                                                 self.rhodecode_user.user_id)
                     Session.commit()
                     return 'ok'
-                except:
+                except Exception:
                     raise HTTPBadRequest()
 
         log.debug('token mismatch %s vs %s' % (cur_token, token))

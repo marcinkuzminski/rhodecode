@@ -2,7 +2,7 @@ import os
 import unittest
 import functools
 from rhodecode.tests import *
-
+from rhodecode.tests.fixture import Fixture
 
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
@@ -13,23 +13,7 @@ from rhodecode.lib.auth import AuthUser
 from rhodecode.model.meta import Session
 
 
-def _make_group(path, desc='desc', parent_id=None,
-                 skip_if_exists=False):
-
-    gr = RepoGroup.get_by_group_name(path)
-    if gr and skip_if_exists:
-        return gr
-    if isinstance(parent_id, RepoGroup):
-        parent_id = parent_id.group_id
-    gr = ReposGroupModel().create(path, desc, parent_id)
-    return gr
-
-
-def _make_repo(name, repos_group=None, repo_type='hg', private=False):
-    return RepoModel().create_repo(name, repo_type, 'desc',
-                                   TEST_USER_ADMIN_LOGIN,
-                                   repos_group=repos_group,
-                                   private=private)
+fixture = Fixture()
 
 
 def _destroy_project_tree(test_u1_id):
@@ -75,19 +59,19 @@ def _create_project_tree():
         username=u'test_u1', password=u'qweqwe',
         email=u'test_u1@rhodecode.org', firstname=u'test_u1', lastname=u'test_u1'
     )
-    g0 = _make_group('g0')
-    g0_1 = _make_group('g0_1', parent_id=g0)
-    g0_1_1 = _make_group('g0_1_1', parent_id=g0_1)
-    g0_1_1_r1 = _make_repo('g0/g0_1/g0_1_1/g0_1_1_r1', repos_group=g0_1_1)
-    g0_1_1_r2 = _make_repo('g0/g0_1/g0_1_1/g0_1_1_r2', repos_group=g0_1_1)
-    g0_1_r1 = _make_repo('g0/g0_1/g0_1_r1', repos_group=g0_1)
-    g0_2 = _make_group('g0_2', parent_id=g0)
-    g0_2_r1 = _make_repo('g0/g0_2/g0_2_r1', repos_group=g0_2)
-    g0_2_r2 = _make_repo('g0/g0_2/g0_2_r2', repos_group=g0_2)
-    g0_3 = _make_group('g0_3', parent_id=g0)
-    g0_3_r1 = _make_repo('g0/g0_3/g0_3_r1', repos_group=g0_3)
-    g0_3_r2_private = _make_repo('g0/g0_3/g0_3_r1_private', repos_group=g0_3,
-                                 private=True)
+    g0 = fixture.create_group('g0')
+    g0_1 = fixture.create_group('g0_1', group_parent_id=g0)
+    g0_1_1 = fixture.create_group('g0_1_1', group_parent_id=g0_1)
+    g0_1_1_r1 = fixture.create_repo('g0/g0_1/g0_1_1/g0_1_1_r1', repos_group=g0_1_1)
+    g0_1_1_r2 = fixture.create_repo('g0/g0_1/g0_1_1/g0_1_1_r2', repos_group=g0_1_1)
+    g0_1_r1 = fixture.create_repo('g0/g0_1/g0_1_r1', repos_group=g0_1)
+    g0_2 = fixture.create_group('g0_2', group_parent_id=g0)
+    g0_2_r1 = fixture.create_repo('g0/g0_2/g0_2_r1', repos_group=g0_2)
+    g0_2_r2 = fixture.create_repo('g0/g0_2/g0_2_r2', repos_group=g0_2)
+    g0_3 = fixture.create_group('g0_3', group_parent_id=g0)
+    g0_3_r1 = fixture.create_repo('g0/g0_3/g0_3_r1', repos_group=g0_3)
+    g0_3_r2_private = fixture.create_repo('g0/g0_3/g0_3_r1_private',
+                                          repos_group=g0_3, repo_private=True)
     return test_u1
 
 

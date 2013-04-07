@@ -76,7 +76,7 @@ class LoginController(BaseController):
                 Session().commit()
 
                 # If they want to be remembered, update the cookie
-                if c.form_result['remember'] is not False:
+                if c.form_result['remember']:
                     _year = (datetime.datetime.now() +
                              datetime.timedelta(seconds=60 * 60 * 24 * 365))
                     session._set_cookie_expires(_year)

@@ -1,18 +1,21 @@
 import unittest
 from rhodecode.tests import *
 
-from rhodecode.model.db import User, UsersGroup, UsersGroupMember, UserEmailMap,\
+from rhodecode.model.db import User, UserGroup, UserGroupMember, UserEmailMap,\
     Permission
 from rhodecode.model.user import UserModel
 
 from rhodecode.model.meta import Session
-from rhodecode.model.users_group import UsersGroupModel
+from rhodecode.model.users_group import UserGroupModel
 
 
 class TestUser(unittest.TestCase):
     def __init__(self, methodName='runTest'):
         Session.remove()
         super(TestUser, self).__init__(methodName=methodName)
+
+    def tearDown(self):
+        Session.remove()
 
     def test_create_and_remove(self):
         usr = UserModel().create_or_update(username=u'test_user',
@@ -22,19 +25,19 @@ class TestUser(unittest.TestCase):
         Session().commit()
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
-        # make users group
-        users_group = UsersGroupModel().create('some_example_group')
+        # make user group
+        users_group = UserGroupModel().create('some_example_group')
         Session().commit()
 
-        UsersGroupModel().add_user_to_group(users_group, usr)
+        UserGroupModel().add_user_to_group(users_group, usr)
         Session().commit()
 
-        self.assertEqual(UsersGroup.get(users_group.users_group_id), users_group)
-        self.assertEqual(UsersGroupMember.query().count(), 1)
+        self.assertEqual(UserGroup.get(users_group.users_group_id), users_group)
+        self.assertEqual(UserGroupMember.query().count(), 1)
         UserModel().delete(usr.user_id)
         Session().commit()
 
-        self.assertEqual(UsersGroupMember.query().all(), [])
+        self.assertEqual(UserGroupMember.query().all(), [])
 
     def test_additonal_email_as_main(self):
         usr = UserModel().create_or_update(username=u'test_user',
@@ -99,6 +102,7 @@ class TestUsers(unittest.TestCase):
 
         UserModel().delete(self.u1)
         Session().commit()
+        Session.remove()
 
     def test_add_perm(self):
         perm = Permission.query().all()[0]

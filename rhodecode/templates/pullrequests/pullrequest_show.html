@@ -1,39 +1,48 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Pull request #%s') % c.pull_request.pull_request_id}
+    ${_('%s Pull Request #%s') % (c.repo_name, c.pull_request.pull_request_id)} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('changelog_home',repo_name=c.repo_name))}
-    &raquo;
     ${_('Pull request #%s') % c.pull_request.pull_request_id}
 </%def>
 
-<%def name="main()">
+<%def name="page_nav()">
+    ${self.menu('repositories')}
+</%def>
 
+<%def name="main()">
+${self.context_bar('showpullrequest')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
     </div>
+
+    <h3 class="${'closed' if c.pull_request.is_closed() else ''}">
+        <img src="${h.url('/images/icons/flag_status_%s.png' % str(c.pull_request.last_review_status))}" />
+        ${_('Title')}: ${c.pull_request.title}
         %if c.pull_request.is_closed():
-        <div style="padding:10px; font-size:22px;width:100%;text-align: center; color:#88D882">${_('Closed %s') % (h.age(c.pull_request.updated_on))} ${_('with status %s') % h.changeset_status_lbl(c.current_changeset_status)}</div>
+            (${_('Closed')})
         %endif
-    <h3>${_('Title')}: ${c.pull_request.title}</h3>
+    </h3>
 
     <div class="form">
       <div id="summary" class="fields">
          <div class="field">
           <div class="label-summary">
-              <label>${_('Status')}:</label>
+              <label>${_('Review status')}:</label>
           </div>
           <div class="input">
             <div class="changeset-status-container" style="float:none;clear:both">
             %if c.current_changeset_status:
-              <div title="${_('Pull request status')}" class="changeset-status-lbl">[${h.changeset_status_lbl(c.current_changeset_status)}]</div>
+              <div title="${_('Pull request status')}" class="changeset-status-lbl">
+                %if c.pull_request.is_closed():
+                    ${_('Closed')},
+                %endif
+                ${h.changeset_status_lbl(c.current_changeset_status)}
+              </div>
               <div class="changeset-status-ico" style="padding:1px 4px"><img src="${h.url('/images/icons/flag_status_%s.png' % c.current_changeset_status)}" /></div>
             %endif
             </div>
@@ -47,7 +56,7 @@
             % if len(c.pull_request_pending_reviewers) > 0:
                 <div class="tooltip" title="${h.tooltip(','.join([x.username for x in c.pull_request_pending_reviewers]))}">${ungettext('%d reviewer', '%d reviewers',len(c.pull_request_pending_reviewers)) % len(c.pull_request_pending_reviewers)}</div>
             %else:
-                <div>${_('pull request was reviewed by all reviewers')}</div>
+                <div>${_('Pull request was reviewed by all reviewers')}</div>
             %endif
           </div>
          </div>
@@ -62,18 +71,28 @@
              ##%elif h.is_git(c.pull_request.org_repo):
              ##  <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
              ##%endif
-              <span class="spantag">${c.pull_request.org_ref_parts[0]}</span>
-              :
-              <span class="spantag">${c.pull_request.org_ref_parts[1]}</span>             
-              <span><a href="${h.url('summary_home', repo_name=c.pull_request.org_repo.repo_name)}">${c.pull_request.org_repo.clone_url()}</a></span> 
+              <span class="spantag">${c.pull_request.org_ref_parts[0]}: ${c.pull_request.org_ref_parts[1]}</span>
+              <span><a href="${h.url('summary_home', repo_name=c.pull_request.org_repo.repo_name)}">${c.pull_request.org_repo.clone_url()}</a></span>
               </div>
           </div>
-         </div>         
+         </div>
+         <div class="field">
+          <div class="label-summary">
+              <label>${_('Summary')}:</label>
+          </div>
+          <div class="input">
+              <div style="white-space:pre-wrap">${h.literal(c.pull_request.description)}</div>
+          </div>
+         </div>
+         <div class="field">
+          <div class="label-summary">
+              <label>${_('Created on')}:</label>
+          </div>
+          <div class="input">
+              <div>${h.fmt_date(c.pull_request.created_on)}</div>
+          </div>
+         </div>
       </div>
-    </div>
-    <div style="white-space:pre-wrap;padding:3px 3px 5px 20px">${h.literal(c.pull_request.description)}</div>
-    <div style="padding:4px 4px 10px 20px">
-      <div>${_('Created on')}: ${h.fmt_date(c.pull_request.created_on)}</div>
     </div>
 
     <div style="overflow: auto;">
@@ -109,7 +128,7 @@
                 %endfor
               </div>
               % if c.limited_diff:
-                <h5>${_('Changeset was too big and was cut off...')}</h5>
+                <h5>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1, **request.GET.mixed())}" onclick="return confirm('${_("Showing a huge diff might take some time and resources")}')">${_('Show full diff')}</a></h5>
               % endif
           </div>
       </div>
@@ -130,7 +149,7 @@
                   <div style="float:left">${member.full_name} (${_('owner') if c.pull_request.user_id == member.user_id else _('reviewer')})</div>
                   <input type="hidden" value="${member.user_id}" name="review_members" />
                   %if not c.pull_request.is_closed() and (h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.user_id == c.rhodecode_user.user_id):
-                  <span class="delete_icon action_button" onclick="removeReviewer(${member.user_id})"></span>
+                  <span class="delete_icon action_button" onclick="removeReviewMember(${member.user_id})"></span>
                   %endif
                 </div>
               </li>
@@ -142,11 +161,11 @@
             %if h.HasPermissionAny('hg.admin', 'repository.admin')() or c.pull_request.author.user_id == c.rhodecode_user.user_id:
             <div class="reviewer_ac">
                ${h.text('user', class_='yui-ac-input')}
-               <span class="help-block">${_('Add reviewer to this pull request.')}</span>
+               <span class="help-block">${_('Add or remove reviewer to this pull request.')}</span>
                <div id="reviewers_container"></div>
             </div>
             <div style="padding:0px 10px">
-             <span id="update_pull_request" class="ui-btn xsmall">${_('save')}</span>
+             <span id="update_pull_request" class="ui-btn xsmall">${_('Save changes')}</span>
             </div>
             %endif
           </div>
@@ -157,9 +176,14 @@
     <script>
     var _USERS_AC_DATA = ${c.users_array|n};
     var _GROUPS_AC_DATA = ${c.users_groups_array|n};
+    // TODO: switch this to pyroutes
     AJAX_COMMENT_URL = "${url('pullrequest_comment',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}";
     AJAX_COMMENT_DELETE_URL = "${url('pullrequest_comment_delete',repo_name=c.repo_name,comment_id='__COMMENT_ID__')}";
-    AJAX_UPDATE_PULLREQUEST = "${url('pullrequest_update',repo_name=c.repo_name,pull_request_id=c.pull_request.pull_request_id)}"
+
+    pyroutes.register('pullrequest_comment', "${url('pullrequest_comment',repo_name='%(repo_name)s',pull_request_id='%(pull_request_id)s')}", ['repo_name', 'pull_request_id']);
+    pyroutes.register('pullrequest_comment_delete', "${url('pullrequest_comment_delete',repo_name='%(repo_name)s',comment_id='%(comment_id)s')}", ['repo_name', 'comment_id']);
+    pyroutes.register('pullrequest_update', "${url('pullrequest_update',repo_name='%(repo_name)s',pull_request_id='%(pull_request_id)s')}", ['repo_name', 'pull_request_id']);
+
     </script>
 
     ## diff block
@@ -168,7 +192,7 @@
       ${diff_block.diff_block_simple([c.changes[fid]])}
     %endfor
     % if c.limited_diff:
-      <h4>${_('Changeset was too big and was cut off...')}</h4>
+      <h4>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1, **request.GET.mixed())}" onclick="return confirm('${_("Showing a huge diff might take some time and resources")}')">${_('Show full diff')}</a></h4>
     % endif
 
 
@@ -177,7 +201,7 @@
     ${comment.comment_inline_form()}
 
     ## render comments and inlines
-    ${comment.generate_comments()}
+    ${comment.generate_comments(include_pr=True)}
 
     % if not c.pull_request.is_closed():
       ## main comment form and it status
@@ -189,7 +213,7 @@
 
     <script type="text/javascript">
       YUE.onDOMReady(function(){
-    	  PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
+          PullRequestAutoComplete('user', 'reviewers_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
           YUE.on(YUQ('.show-inline-comments'),'change',function(e){
               var show = 'none';
@@ -218,7 +242,7 @@
           renderInlineComments(file_comments);
 
           YUE.on(YUD.get('update_pull_request'),'click',function(e){
-        	  updateReviewers();
+              updateReviewers(undefined, "${c.repo_name}", "${c.pull_request.pull_request_id}");
           })
       })
     </script>

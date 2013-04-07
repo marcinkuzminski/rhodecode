@@ -50,7 +50,7 @@ class UserOwnsReposException(Exception):
     pass
 
 
-class UsersGroupsAssignedException(Exception):
+class UserGroupsAssignedException(Exception):
     pass
 
 
@@ -58,14 +58,23 @@ class StatusChangeOnClosedPullRequestError(Exception):
     pass
 
 
+class AttachedForksError(Exception):
+    pass
+
+
 class HTTPLockedRC(HTTPClientError):
     """
-    Special Exception For locked Repos in RhodeCode
+    Special Exception For locked Repos in RhodeCode, the return code can
+    be overwritten by _code keyword argument passed into constructors
     """
     code = 423
     title = explanation = 'Repository Locked'
 
     def __init__(self, reponame, username, *args, **kwargs):
+        from rhodecode import CONFIG
+        from rhodecode.lib.utils2 import safe_int
+        _code = CONFIG.get('lock_ret_code')
+        self.code = safe_int(_code, self.code)
         self.title = self.explanation = ('Repository `%s` locked by '
                                          'user `%s`' % (reponame, username))
         super(HTTPLockedRC, self).__init__(*args, **kwargs)

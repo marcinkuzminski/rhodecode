@@ -2,7 +2,7 @@
 ########################################
 #### THIS IS A DEBIAN INIT.D SCRIPT ####
 ########################################
-
+ 
 ### BEGIN INIT INFO
 # Provides:          rhodecode          
 # Required-Start:    $all
@@ -12,29 +12,29 @@
 # Short-Description: starts instance of rhodecode
 # Description:       starts instance of rhodecode using start-stop-daemon
 ### END INIT INFO
-
+ 
 APP_NAME="rhodecode"
-APP_HOMEDIR="marcink/python_workspace"
-APP_PATH="/home/$APP_HOMEDIR/$APP_NAME"
-
+APP_HOMEDIR="opt"
+APP_PATH="/$APP_HOMEDIR/$APP_NAME"
+ 
 CONF_NAME="production.ini"
-
+ 
 PID_PATH="$APP_PATH/$APP_NAME.pid"
 LOG_PATH="$APP_PATH/$APP_NAME.log"
-
-PYTHON_PATH="/home/$APP_HOMEDIR/v-env"
-
-RUN_AS="marcink"
-
+ 
+PYTHON_PATH="/$APP_HOMEDIR/$APP_NAME-venv"
+ 
+RUN_AS="root"
+ 
 DAEMON="$PYTHON_PATH/bin/paster"
-
+ 
 DAEMON_OPTS="serve --daemon \
-  --user=$RUN_AS \
-  --group=$RUN_AS \
-  --pid-file=$PID_PATH \
-  --log-file=$LOG_PATH  $APP_PATH/$CONF_NAME"
-
-
+ --user=$RUN_AS \
+ --group=$RUN_AS \
+ --pid-file=$PID_PATH \
+ --log-file=$LOG_PATH  $APP_PATH/$CONF_NAME"
+ 
+ 
 start() {
   echo "Starting $APP_NAME"
   PYTHON_EGG_CACHE="/tmp" start-stop-daemon -d $APP_PATH \
@@ -43,19 +43,33 @@ start() {
       --user $RUN_AS \
       --exec $DAEMON -- $DAEMON_OPTS
 }
-
+ 
 stop() {
   echo "Stopping $APP_NAME"
   start-stop-daemon -d $APP_PATH \
       --stop --quiet \
       --pidfile $PID_PATH || echo "$APP_NAME - Not running!"
-  
+ 
   if [ -f $PID_PATH ]; then
     rm $PID_PATH
   fi
 }
-
+ 
+status() {
+  echo -n "Checking status of $APP_NAME ... "
+  pid=`cat $PID_PATH`
+  status=`ps ax | grep $pid | grep -ve grep`
+  if [ "$?" -eq 0 ]; then
+    echo "running"
+  else
+    echo "NOT running"
+  fi
+}
+ 
 case "$1" in
+  status)
+   status
+    ;;
   start)
     start
     ;;

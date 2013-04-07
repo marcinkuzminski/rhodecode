@@ -2,6 +2,7 @@ import re
 from itertools import chain
 from dulwich import objects
 from subprocess import Popen, PIPE
+import rhodecode
 from rhodecode.lib.vcs.conf import settings
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.exceptions import ChangesetError
@@ -16,6 +17,7 @@ from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.utils2 import safe_int
 
 
 class GitChangeset(BaseChangeset):
@@ -40,7 +42,7 @@ class GitChangeset(BaseChangeset):
         self._commit = commit
 
         self._tree_id = commit.tree
-        self._commiter_property = 'committer'
+        self._committer_property = 'committer'
         self._author_property = 'author'
         self._date_property = 'commit_time'
         self._date_tz_property = 'commit_timezone'
@@ -52,8 +54,8 @@ class GitChangeset(BaseChangeset):
         self._paths = {}
 
     @LazyProperty
-    def commiter(self):
-        return safe_unicode(getattr(self._commit, self._commiter_property))
+    def committer(self):
+        return safe_unicode(getattr(self._commit, self._committer_property))
 
     @LazyProperty
     def author(self):
@@ -151,7 +153,7 @@ class GitChangeset(BaseChangeset):
                     self._stat_modes[name] = stat
             if not path in self._paths:
                 raise NodeDoesNotExistError("There is no file nor directory "
-                    "at the given path %r at revision %r"
+                    "at the given path '%s' at revision %s"
                     % (path, self.short_id))
         return self._paths[path]
 
@@ -165,8 +167,8 @@ class GitChangeset(BaseChangeset):
     def _get_filectx(self, path):
         path = self._fix_path(path)
         if self._get_kind(path) != NodeKind.FILE:
-            raise ChangesetError("File does not exist for revision %r at "
-                " %r" % (self.raw_id, path))
+            raise ChangesetError("File does not exist for revision %s at "
+                " '%s'" % (self.raw_id, path))
         return path
 
     def _get_file_nodes(self):
@@ -185,8 +187,10 @@ class GitChangeset(BaseChangeset):
         """
         Returns list of children changesets.
         """
+        rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
+                                              '--all').strip()
         so, se = self.repository.run_git_command(
-            "rev-list --all --children | grep '^%s'" % self.raw_id
+            "rev-list %s --children | grep '^%s'" % (rev_filter, self.raw_id)
         )
 
         children = []
@@ -274,10 +278,9 @@ class GitChangeset(BaseChangeset):
         """
         Returns last commit of the file at the given ``path``.
         """
-        node = self.get_node(path)
-        return node.history[0]
+        return self.get_file_history(path, limit=1)[0]
 
-    def get_file_history(self, path):
+    def get_file_history(self, path, limit=None):
         """
         Returns history of file as reversed list of ``Changeset`` objects for
         which file at given ``path`` has been modified.
@@ -286,11 +289,16 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
-        self._get_filectx(path)
 
-        cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
-                  self.id, path
-               )
+        self._get_filectx(path)
+        if limit:
+            cmd = 'log -n %s --pretty="format: %%H" -s -p %s -- "%s"' % (
+                      safe_int(limit, 0), self.id, path
+                   )
+        else:
+            cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
+                      self.id, path
+                   )
         so, se = self.repository.run_git_command(cmd)
         ids = re.findall(r'[0-9a-fA-F]{40}', so)
         return [self.repository.get_changeset(id) for id in ids]
@@ -362,8 +370,9 @@ class GitChangeset(BaseChangeset):
             frmt = 'zip'
         else:
             frmt = 'tar'
-        cmd = 'git archive --format=%s --prefix=%s/ %s' % (frmt, prefix,
-            self.raw_id)
+        _git_path = rhodecode.CONFIG.get('git_path', 'git')
+        cmd = '%s archive --format=%s --prefix=%s/ %s' % (_git_path,
+                                                frmt, prefix, self.raw_id)
         if kind == 'tgz':
             cmd += ' | gzip -9'
         elif kind == 'tbz2':
@@ -385,8 +394,8 @@ class GitChangeset(BaseChangeset):
 
     def get_nodes(self, path):
         if self._get_kind(path) != NodeKind.DIR:
-            raise ChangesetError("Directory does not exist for revision %r at "
-                " %r" % (self.revision, path))
+            raise ChangesetError("Directory does not exist for revision %s at "
+                " '%s'" % (self.revision, path))
         path = self._fix_path(path)
         id = self._get_id_for_path(path)
         tree = self.repository._repo[id]
@@ -449,7 +458,7 @@ class GitChangeset(BaseChangeset):
                     node._blob = obj
                 else:
                     raise NodeDoesNotExistError("There is no file nor directory "
-                        "at the given path %r at revision %r"
+                        "at the given path '%s' at revision %s"
                         % (path, self.short_id))
             # cache node
             self.nodes[path] = node

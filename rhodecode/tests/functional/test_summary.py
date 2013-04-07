@@ -1,9 +1,11 @@
 from rhodecode.tests import *
+from rhodecode.tests.fixture import Fixture
 from rhodecode.model.db import Repository
 from rhodecode.lib.utils import invalidate_cache
 from rhodecode.model.repo import RepoModel
-from rhodecode.tests.models.common import _make_repo
 from rhodecode.model.meta import Session
+
+fixture = Fixture()
 
 
 class TestSummaryController(TestController):
@@ -23,7 +25,7 @@ class TestSummaryController(TestController):
         )
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
-            """title="public repository" alt="public """
+            """title="Public repository" alt="Public """
             """repository" src="/images/icons/lock_open.png"/>"""
         )
 
@@ -44,8 +46,8 @@ class TestSummaryController(TestController):
         )
 
         # clone url...
-        response.mustcontain("""<input style="width:80%%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s"/>""" % HG_REPO)
-        response.mustcontain("""<input style="display:none;width:80%%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_%s"/>""" % ID)
+        response.mustcontain('''id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s"''' % HG_REPO)
+        response.mustcontain('''id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_%s"''' % ID)
 
     def test_index_git(self):
         self.log_user()
@@ -62,13 +64,13 @@ class TestSummaryController(TestController):
         )
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
-            """title="public repository" alt="public """
+            """title="Public repository" alt="Public """
             """repository" src="/images/icons/lock_open.png"/>"""
         )
 
         # clone url...
-        response.mustcontain("""<input style="width:80%%;margin-left:105px" type="text" id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s"/>""" % GIT_REPO)
-        response.mustcontain("""<input style="display:none;width:80%%;margin-left:105px" type="text" id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_%s"/>""" % ID)
+        response.mustcontain('''id="clone_url" readonly="readonly" value="http://test_admin@localhost:80/%s"''' % GIT_REPO)
+        response.mustcontain('''id="clone_url_id" readonly="readonly" value="http://test_admin@localhost:80/_%s"''' % ID)
 
     def test_index_by_id_hg(self):
         self.log_user()
@@ -82,19 +84,18 @@ class TestSummaryController(TestController):
                         """title="Mercurial repository" alt="Mercurial """
                         """repository" src="/images/icons/hgicon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
-                        """title="public repository" alt="public """
+                        """title="Public repository" alt="Public """
                         """repository" src="/images/icons/lock_open.png"/>""")
 
     def test_index_by_repo_having_id_path_in_name_hg(self):
         self.log_user()
-        _make_repo(name='repo_1')
-        Session().commit()
+        fixture.create_repo(name='repo_1')
         response = self.app.get(url(controller='summary',
                                     action='index',
                                     repo_name='repo_1'))
 
         try:
-            response.mustcontain("""repo_1""")
+            response.mustcontain("repo_1")
         finally:
             RepoModel().delete(Repository.get_by_repo_name('repo_1'))
             Session().commit()
@@ -111,7 +112,7 @@ class TestSummaryController(TestController):
                         """title="Git repository" alt="Git """
                         """repository" src="/images/icons/giticon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
-                        """title="public repository" alt="public """
+                        """title="Public repository" alt="Public """
                         """repository" src="/images/icons/lock_open.png"/>""")
 
     def _enable_stats(self):

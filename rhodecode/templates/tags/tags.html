@@ -2,23 +2,20 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('%s Tags') % c.repo_name} - ${c.rhodecode_name}
+    ${_('%s Tags') % c.repo_name} &middot; ${c.rhodecode_name}
 </%def>
 
-
 <%def name="breadcrumbs_links()">
-    <input class="q_filter_box" id="q_filter_tags" size="15" type="text" name="filter" value="${_('quick filter...')}"/>
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
-    ${_('tags')}
+    <input class="q_filter_box" id="q_filter_tags" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value=""/>
+    ${_('Tags')}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('tags')}
+    ${self.menu('repositories')}
 </%def>
+
 <%def name="main()">
+${self.context_bar('switch-to')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -26,7 +23,7 @@
     </div>
     <!-- end box / title -->
     %if c.repo_tags:
-    <div class="info_box" id="compare_tags" style="clear: both;padding: 10px 19px;vertical-align: right;text-align: right;"><a href="#" class="ui-btn small">${_('Compare tags')}</a></div>
+    <div class="info_box" id="compare_tags" style="clear: both;padding: 10px 19px;text-align: right;"><a href="#" class="ui-btn small">${_('Compare tags')}</a></div>
     %endif
     <div class="table">
         <%include file='tags_data.html'/>

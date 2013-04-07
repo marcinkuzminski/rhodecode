@@ -2,16 +2,16 @@
    <div id="table_wrap" class="yui-skin-sam">
     <table id="tags_data">
       <thead>
-    	<tr>
+        <tr>
             <th class="left">${_('Name')}</th>
             <th class="left">${_('Date')}</th>
             <th class="left">${_('Author')}</th>
             <th class="left">${_('Revision')}</th>
             <th class="left">${_('Compare')}</th>
-    	</tr>
+        </tr>
       </thead>
-		%for cnt,tag in enumerate(c.repo_tags.items()):
-		<tr class="parity${cnt%2}">
+        %for cnt,tag in enumerate(c.repo_tags.items()):
+        <tr class="parity${cnt%2}">
             <td>
                 <span class="logtags">
                     <span class="tagtag">${h.link_to(tag[0],
@@ -20,8 +20,8 @@
                 </span>
             </td>
             <td><span class="tooltip" title="${h.tooltip(h.age(tag[1].date))}">${h.fmt_date(tag[1].date)}</span></td>
-	        <td title="${tag[1].author}">${h.person(tag[1].author)}</td>
-	        <td>
+            <td title="${tag[1].author}">${h.person(tag[1].author)}</td>
+            <td>
                 <div>
                     <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=tag[1].raw_id)}">r${tag[1].revision}:${h.short_id(tag[1].raw_id)}</a></pre>
                 </div>
@@ -30,10 +30,10 @@
                 <input class="branch-compare" type="radio" name="compare_org" value="${tag[0]}"/>
                 <input class="branch-compare" type="radio" name="compare_other" value="${tag[0]}"/>
             </td>
-		</tr>
-		%endfor
+        </tr>
+        %endfor
     </table>
    </div>
 %else:
-	${_('There are no tags yet')}
+    ${_('There are no tags yet')}
 %endif

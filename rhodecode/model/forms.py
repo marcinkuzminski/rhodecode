@@ -94,14 +94,14 @@ def UserForm(edit=False, old_data={}):
     return _UserForm
 
 
-def UsersGroupForm(edit=False, old_data={}, available_members=[]):
-    class _UsersGroupForm(formencode.Schema):
+def UserGroupForm(edit=False, old_data={}, available_members=[]):
+    class _UserGroupForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
 
         users_group_name = All(
             v.UnicodeString(strip=True, min=1, not_empty=True),
-            v.ValidUsersGroup(edit, old_data)
+            v.ValidUserGroup(edit, old_data)
         )
 
         users_group_active = v.StringBoolean(if_missing=False)
@@ -112,10 +112,11 @@ def UsersGroupForm(edit=False, old_data={}, available_members=[]):
                 if_missing=None, not_empty=False
             )
 
-    return _UsersGroupForm
+    return _UserGroupForm
 
 
-def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
+def ReposGroupForm(edit=False, old_data={}, available_groups=[],
+                   can_create_in_root=False):
     class _ReposGroupForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
@@ -123,10 +124,15 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[]):
         group_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
                                v.SlugifyName())
         group_description = v.UnicodeString(strip=True, min=1,
-                                                not_empty=True)
-        group_parent_id = v.OneOf(available_groups, hideList=False,
-                                        testValueList=True,
-                                        if_missing=None, not_empty=False)
+                                                not_empty=False)
+        if edit:
+            #FIXME: do a special check that we cannot move a group to one of
+            #it's children
+            pass
+        group_parent_id = All(v.CanCreateGroup(can_create_in_root),
+                              v.OneOf(available_groups, hideList=False,
+                                      testValueList=True,
+                                      if_missing=None, not_empty=True))
         enable_locking = v.StringBoolean(if_missing=False)
         recursive = v.StringBoolean(if_missing=False)
         chained_validators = [v.ValidReposGroup(edit, old_data),
@@ -193,30 +199,32 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
             user = All(v.UnicodeString(not_empty=True), v.ValidRepoUser())
 
         chained_validators = [v.ValidCloneUri(),
-                              v.ValidRepoName(edit, old_data),
-                              v.ValidPerms()]
+                              v.ValidRepoName(edit, old_data)]
     return _RepoForm
 
 
-def RepoSettingsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
-                     repo_groups=[], landing_revs=[]):
-    class _RepoForm(formencode.Schema):
+def RepoPermsForm():
+    class _RepoPermsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        repo_name = All(v.UnicodeString(strip=True, min=1, not_empty=True),
-                        v.SlugifyName())
-        repo_group = All(v.CanWriteGroup(old_data),
-                         v.OneOf(repo_groups, hideList=True))
-        repo_description = v.UnicodeString(strip=True, min=1, not_empty=False)
-        repo_private = v.StringBoolean(if_missing=False)
-        repo_landing_rev = v.OneOf(landing_revs, hideList=True)
-        clone_uri = All(v.UnicodeString(strip=True, min=1, not_empty=False))
+        chained_validators = [v.ValidPerms()]
+    return _RepoPermsForm
 
-        chained_validators = [v.ValidCloneUri(),
-                              v.ValidRepoName(edit, old_data),
-                              v.ValidPerms(),
-                              v.ValidSettings()]
-    return _RepoForm
+
+def RepoFieldForm():
+    class _RepoFieldForm(formencode.Schema):
+        filter_extra_fields = True
+        allow_extra_fields = True
+
+        new_field_key = All(v.FieldKey(),
+                            v.UnicodeString(strip=True, min=3, not_empty=True))
+        new_field_value = v.UnicodeString(not_empty=False, if_missing='')
+        new_field_type = v.OneOf(['str', 'unicode', 'list', 'tuple'],
+                                 if_missing='str')
+        new_field_label = v.UnicodeString(not_empty=False)
+        new_field_desc = v.UnicodeString(not_empty=False)
+
+    return _RepoFieldForm
 
 
 def RepoForkForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
@@ -260,6 +268,7 @@ def ApplicationVisualisationForm():
         rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
 
         rhodecode_lightweight_dashboard = v.StringBoolean(if_missing=False)
+        rhodecode_repository_fields = v.StringBoolean(if_missing=False)
         rhodecode_lightweight_journal = v.StringBoolean(if_missing=False)
 
     return _ApplicationVisualisationForm
@@ -332,10 +341,7 @@ def LdapSettingsForm(tls_reqcert_choices, search_scope_choices,
         ldap_base_dn = v.UnicodeString(strip=True,)
         ldap_filter = v.UnicodeString(strip=True,)
         ldap_search_scope = v.OneOf(search_scope_choices)
-        ldap_attr_login = All(
-            v.AttrLoginValidator(),
-            v.UnicodeString(strip=True,)
-        )
+        ldap_attr_login = v.AttrLoginValidator()(not_empty=True)
         ldap_attr_firstname = v.UnicodeString(strip=True,)
         ldap_attr_lastname = v.UnicodeString(strip=True,)
         ldap_attr_email = v.UnicodeString(strip=True,)
@@ -371,5 +377,8 @@ def PullRequestForm(repo_id):
 
         pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)
         pullrequest_desc = v.UnicodeString(strip=True, required=False)
+
+        ancestor_rev = v.UnicodeString(strip=True, required=True)
+        merge_rev = v.UnicodeString(strip=True, required=True)
 
     return _PullRequestForm

@@ -3,7 +3,7 @@
     rhodecode.model.user_group
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    users groups model for RhodeCode
+    repo group model for RhodeCode
 
     :created_on: Jan 25, 2011
     :author: marcink
@@ -33,7 +33,7 @@ from rhodecode.lib.utils2 import LazyProperty
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import RepoGroup, RhodeCodeUi, UserRepoGroupToPerm, \
-    User, Permission, UsersGroupRepoGroupToPerm, UsersGroup, Repository
+    User, Permission, UserGroupRepoGroupToPerm, UserGroup, Repository
 
 log = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ class ReposGroupModel(BaseModel):
     cls = RepoGroup
 
     def __get_users_group(self, users_group):
-        return self._get_instance(UsersGroup, users_group,
-                                  callback=UsersGroup.get_by_group_name)
+        return self._get_instance(UserGroup, users_group,
+                                  callback=UserGroup.get_by_group_name)
 
     def _get_repos_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
@@ -79,7 +79,7 @@ class ReposGroupModel(BaseModel):
 
     def __create_group(self, group_name):
         """
-        makes repositories group on filesystem
+        makes repository group on filesystem
 
         :param repo_name:
         :param parent_id:
@@ -104,7 +104,7 @@ class ReposGroupModel(BaseModel):
             log.debug('skipping group rename')
             return
 
-        log.debug('renaming repos group from %s to %s' % (old, new))
+        log.debug('renaming repository group from %s to %s' % (old, new))
 
         old_path = os.path.join(self.repos_path, old)
         new_path = os.path.join(self.repos_path, new)
@@ -140,15 +140,20 @@ class ReposGroupModel(BaseModel):
                                           group.name)
                 shutil.move(rm_path, os.path.join(self.repos_path, _d))
 
-    def create(self, group_name, group_description, parent=None, just_db=False):
+    def create(self, group_name, group_description, owner, parent=None, just_db=False):
         try:
             new_repos_group = RepoGroup()
-            new_repos_group.group_description = group_description
+            new_repos_group.group_description = group_description or group_name
             new_repos_group.parent_group = self._get_repos_group(parent)
             new_repos_group.group_name = new_repos_group.get_new_name(group_name)
 
             self.sa.add(new_repos_group)
             self._create_default_perms(new_repos_group)
+
+            #create an ADMIN permission for owner, later owner should go into
+            #the owner field of groups
+            self.grant_user_permission(repos_group=new_repos_group,
+                                       user=owner, perm='group.admin')
 
             if not just_db:
                 # we need to flush here, in order to check if database won't
@@ -157,7 +162,7 @@ class ReposGroupModel(BaseModel):
                 self.__create_group(new_repos_group.group_name)
 
             return new_repos_group
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -213,7 +218,7 @@ class ReposGroupModel(BaseModel):
                 if member_type == 'user':
                     # this updates also current one if found
                     _set_perm_user(obj, user=member, perm=perm)
-                ## set for users group
+                ## set for user group
                 else:
                     _set_perm_group(obj, users_group=member, perm=perm)
             # set new permissions
@@ -229,10 +234,10 @@ class ReposGroupModel(BaseModel):
                 break
         return updates
 
-    def update(self, repos_group_id, form_data):
+    def update(self, repos_group, form_data):
 
         try:
-            repos_group = RepoGroup.get(repos_group_id)
+            repos_group = self._get_repos_group(repos_group)
             recursive = form_data['recursive']
             # iterate over all members(if in recursive mode) of this groups and
             # set the permissions !
@@ -278,7 +283,7 @@ class ReposGroupModel(BaseModel):
             self.__rename_group(old_path, new_path)
 
             return repos_group
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -287,18 +292,18 @@ class ReposGroupModel(BaseModel):
         try:
             self.sa.delete(repos_group)
             self.__delete_group(repos_group, force_delete)
-        except:
+        except Exception:
             log.error('Error removing repos_group %s' % repos_group)
             raise
 
     def delete_permission(self, repos_group, obj, obj_type, recursive):
         """
         Revokes permission for repos_group for given obj(user or users_group),
-        obj_type can be user or users group
+        obj_type can be user or user group
 
         :param repos_group:
-        :param obj: user or users group id
-        :param obj_type: user or users group type
+        :param obj: user or user group id
+        :param obj_type: user or user group type
         :param recursive: recurse to all children of group
         """
         from rhodecode.model.repo import RepoModel
@@ -332,7 +337,7 @@ class ReposGroupModel(BaseModel):
 
     def grant_user_permission(self, repos_group, user, perm):
         """
-        Grant permission for user on given repositories group, or update
+        Grant permission for user on given repository group, or update
         existing one if found
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
@@ -361,7 +366,7 @@ class ReposGroupModel(BaseModel):
 
     def revoke_user_permission(self, repos_group, user):
         """
-        Revoke permission for user on given repositories group
+        Revoke permission for user on given repository group
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name
@@ -381,13 +386,13 @@ class ReposGroupModel(BaseModel):
 
     def grant_users_group_permission(self, repos_group, group_name, perm):
         """
-        Grant permission for users group on given repositories group, or update
+        Grant permission for user group on given repository group, or update
         existing one if found
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         :param perm: Instance of Permission, or permission_name
         """
         repos_group = self._get_repos_group(repos_group)
@@ -395,14 +400,14 @@ class ReposGroupModel(BaseModel):
         permission = self._get_perm(perm)
 
         # check if we have that permission already
-        obj = self.sa.query(UsersGroupRepoGroupToPerm)\
-            .filter(UsersGroupRepoGroupToPerm.group == repos_group)\
-            .filter(UsersGroupRepoGroupToPerm.users_group == group_name)\
+        obj = self.sa.query(UserGroupRepoGroupToPerm)\
+            .filter(UserGroupRepoGroupToPerm.group == repos_group)\
+            .filter(UserGroupRepoGroupToPerm.users_group == group_name)\
             .scalar()
 
         if obj is None:
             # create new
-            obj = UsersGroupRepoGroupToPerm()
+            obj = UserGroupRepoGroupToPerm()
 
         obj.group = repos_group
         obj.users_group = group_name
@@ -412,19 +417,19 @@ class ReposGroupModel(BaseModel):
 
     def revoke_users_group_permission(self, repos_group, group_name):
         """
-        Revoke permission for users group on given repositories group
+        Revoke permission for user group on given repository group
 
         :param repos_group: Instance of ReposGroup, repositories_group_id,
             or repositories_group name
         :param group_name: Instance of UserGroup, users_group_id,
-            or users group name
+            or user group name
         """
         repos_group = self._get_repos_group(repos_group)
         group_name = self.__get_users_group(group_name)
 
-        obj = self.sa.query(UsersGroupRepoGroupToPerm)\
-            .filter(UsersGroupRepoGroupToPerm.group == repos_group)\
-            .filter(UsersGroupRepoGroupToPerm.users_group == group_name)\
+        obj = self.sa.query(UserGroupRepoGroupToPerm)\
+            .filter(UserGroupRepoGroupToPerm.group == repos_group)\
+            .filter(UserGroupRepoGroupToPerm.users_group == group_name)\
             .scalar()
         if obj:
             self.sa.delete(obj)

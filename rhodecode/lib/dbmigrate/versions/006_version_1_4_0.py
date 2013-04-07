@@ -74,8 +74,8 @@ def upgrade(migrate_engine):
     #==========================================================================
     # USERS GROUP TABLE
     #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import UsersGroup
-    tbl = UsersGroup.__table__
+    from rhodecode.lib.dbmigrate.schema.db_1_3_0 import UserGroup
+    tbl = UserGroup.__table__
     # add inherit_default_permission column
     gr_inherit_default_permissions = Column(
                                     "users_group_inherit_default_permissions",

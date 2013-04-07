@@ -92,7 +92,7 @@ def parameterized_expand_helper(func_name, func, args):
         if self != ():
             self = (self,)
         return func(*(self + args))
-    parameterized_expand_helper_helper.__name__ = func_name
+    parameterized_expand_helper_helper.__name__ = str(func_name)
     return parameterized_expand_helper_helper
 
 

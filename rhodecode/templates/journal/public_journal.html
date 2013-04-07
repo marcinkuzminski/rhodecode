@@ -1,13 +1,13 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
 <%def name="title()">
-    ${_('Journal')} - ${c.rhodecode_name}
+    ${_('Public Journal')} &middot; ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
-	${c.rhodecode_name}
+    ${c.rhodecode_name}
 </%def>
 <%def name="page_nav()">
-	${self.menu('home')}
+    ${self.menu('journal')}
 </%def>
 <%def name="head_extra()">
 <link href="${h.url('public_journal_atom')}" rel="alternate" title="${_('ATOM public journal feed')}" type="application/atom+xml" />
@@ -20,9 +20,6 @@
   <div class="title">
     <h5>${_('Public Journal')}</h5>
       <ul class="links">
-      <li>
-       <span><a href="${h.url('public_journal_rss')}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
-     </li>
      <li>
        <span><a href="${h.url('public_journal_atom')}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
      </li>

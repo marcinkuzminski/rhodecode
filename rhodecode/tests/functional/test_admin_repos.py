@@ -1,18 +1,30 @@
 # -*- coding: utf-8 -*-
 
 import os
-from rhodecode.lib import vcs
+import urllib
 
-from rhodecode.model.db import Repository, RepoGroup
+from rhodecode.lib import vcs
+from rhodecode.model.db import Repository, RepoGroup, UserRepoToPerm, User,\
+    Permission
 from rhodecode.tests import *
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.meta import Session
+from rhodecode.tests.fixture import Fixture
+
+fixture = Fixture()
+
+
+def _get_permission_for_user(user, repo):
+    perm = UserRepoToPerm.query()\
+                .filter(UserRepoToPerm.repository ==
+                        Repository.get_by_repo_name(repo))\
+                .filter(UserRepoToPerm.user == User.get_by_username(user))\
+                .all()
+    return perm
 
 
 class TestAdminReposController(TestController):
-
-    def __make_repo(self):
-        pass
 
     def test_index(self):
         self.log_user()
@@ -27,11 +39,12 @@ class TestAdminReposController(TestController):
         repo_name = NEW_HG_REPO
         description = 'description for newly created repo'
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
+                               'Created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
 
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -48,7 +61,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_hg_non_ascii(self):
@@ -60,12 +73,12 @@ class TestAdminReposController(TestController):
         description_unicode = description.decode('utf8')
         private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name_unicode))
-
+                               u'Created repository <a href="/%s">%s</a>'
+                               % (urllib.quote(repo_name), repo_name_unicode))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_unicode).one()
@@ -81,7 +94,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_hg_in_group(self):
@@ -90,21 +103,22 @@ class TestAdminReposController(TestController):
         ## create GROUP
         group_name = 'sometest'
         gr = ReposGroupModel().create(group_name=group_name,
-                                      group_description='test',)
+                                      group_description='test',
+                                      owner=TEST_USER_ADMIN_LOGIN)
         self.Session().commit()
 
         repo_name = 'ingroup'
         repo_name_full = RepoGroup.url_sep().join([group_name, repo_name])
         description = 'description for newly created repo'
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_name=repo_name,
                                                 repo_description=description,
                                                 repo_group=gr.group_id,))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
-
+                               'Created repository <a href="/%s">%s</a>'
+                               % (repo_name_full, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name_full).one()
@@ -120,7 +134,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name_full))
-        except:
+        except Exception:
             ReposGroupModel().delete(group_name)
             self.Session().commit()
             self.fail('no repo %s in filesystem' % repo_name)
@@ -135,12 +149,13 @@ class TestAdminReposController(TestController):
         description = 'description for newly created repo'
 
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,
                                                 repo_description=description))
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
+                               'Created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
 
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -157,7 +172,7 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
     def test_create_git_non_ascii(self):
@@ -169,13 +184,14 @@ class TestAdminReposController(TestController):
         description_unicode = description.decode('utf8')
         private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name_unicode))
+                               u'Created repository <a href="/%s">%s</a>'
+                               % (urllib.quote(repo_name), repo_name_unicode))
 
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
@@ -192,15 +208,8 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
-
-    def test_new(self):
-        self.log_user()
-        response = self.app.get(url('new_repo'))
-
-    def test_new_as_xml(self):
-        response = self.app.get(url('formatted_new_repo', format='xml'))
 
     def test_update(self):
         response = self.app.put(url('repo', repo_name=HG_REPO))
@@ -213,16 +222,15 @@ class TestAdminReposController(TestController):
         self.log_user()
         repo_name = 'vcs_test_new_to_delete'
         description = 'description for newly created repo'
-        private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='hg',
                                                 repo_name=repo_name,
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
-
+                               'Created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
@@ -238,13 +246,12 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        self.assertTrue('''deleted repository %s''' % (repo_name) in
-                        response.session['flash'][0])
+        self.checkSessionFlash(response, 'Deleted repository %s' % (repo_name))
 
         response.follow()
 
@@ -263,14 +270,14 @@ class TestAdminReposController(TestController):
         description = 'description for newly created repo'
         private = False
         response = self.app.post(url('repos'),
-                        _get_repo_create_params(repo_private=False,
+                        fixture._get_repo_create_params(repo_private=False,
                                                 repo_type='git',
                                                 repo_name=repo_name,
                                                 repo_description=description))
 
         self.checkSessionFlash(response,
-                               'created repository %s' % (repo_name))
-
+                               'Created repository <a href="/%s">%s</a>'
+                               % (repo_name, repo_name))
         #test if the repo was created in the database
         new_repo = self.Session().query(Repository)\
             .filter(Repository.repo_name == repo_name).one()
@@ -286,13 +293,12 @@ class TestAdminReposController(TestController):
         #test if repository was created on filesystem
         try:
             vcs.get_repo(os.path.join(TESTS_TMP_PATH, repo_name))
-        except:
+        except Exception:
             self.fail('no repo %s in filesystem' % repo_name)
 
         response = self.app.delete(url('repo', repo_name=repo_name))
 
-        self.assertTrue('''deleted repository %s''' % (repo_name) in
-                        response.session['flash'][0])
+        self.checkSessionFlash(response, 'Deleted repository %s' % (repo_name))
 
         response.follow()
 
@@ -324,3 +330,42 @@ class TestAdminReposController(TestController):
 
     def test_edit(self):
         response = self.app.get(url('edit_repo', repo_name=HG_REPO))
+
+    def test_set_private_flag_sets_default_to_none(self):
+        self.log_user()
+        #initially repository perm should be read
+        perm = _get_permission_for_user(user='default', repo=HG_REPO)
+        self.assertTrue(len(perm), 1)
+        self.assertEqual(perm[0].permission.permission_name, 'repository.read')
+        self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, False)
+
+        response = self.app.put(url('repo', repo_name=HG_REPO),
+                        fixture._get_repo_create_params(repo_private=1,
+                                                repo_name=HG_REPO,
+                                                user=TEST_USER_ADMIN_LOGIN))
+        self.checkSessionFlash(response,
+                               msg='Repository %s updated successfully' % (HG_REPO))
+        self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, True)
+
+        #now the repo default permission should be None
+        perm = _get_permission_for_user(user='default', repo=HG_REPO)
+        self.assertTrue(len(perm), 1)
+        self.assertEqual(perm[0].permission.permission_name, 'repository.none')
+
+        response = self.app.put(url('repo', repo_name=HG_REPO),
+                        fixture._get_repo_create_params(repo_private=False,
+                                                repo_name=HG_REPO,
+                                                user=TEST_USER_ADMIN_LOGIN))
+        self.checkSessionFlash(response,
+                               msg='Repository %s updated successfully' % (HG_REPO))
+        self.assertEqual(Repository.get_by_repo_name(HG_REPO).private, False)
+
+        #we turn off private now the repo default permission should stay None
+        perm = _get_permission_for_user(user='default', repo=HG_REPO)
+        self.assertTrue(len(perm), 1)
+        self.assertEqual(perm[0].permission.permission_name, 'repository.none')
+
+        #update this permission back
+        perm[0].permission = Permission.get_by_key('repository.read')
+        Session().add(perm[0])
+        Session().commit()

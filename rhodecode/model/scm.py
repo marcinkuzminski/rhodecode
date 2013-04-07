@@ -44,13 +44,15 @@ from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
-from rhodecode.lib.utils2 import safe_str, safe_unicode
+from rhodecode.lib.utils2 import safe_str, safe_unicode, get_server_url,\
+    _set_extras
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
 from rhodecode.lib.utils import get_filesystem_repos, make_ui, \
     action_logger, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup, PullRequest
+from rhodecode.lib.hooks import log_push_action
 
 log = logging.getLogger(__name__)
 
@@ -77,11 +79,15 @@ class CachedRepoList(object):
     super fast
     """
 
-    def __init__(self, db_repo_list, repos_path, order_by=None):
+    def __init__(self, db_repo_list, repos_path, order_by=None, perm_set=None):
         self.db_repo_list = db_repo_list
         self.repos_path = repos_path
         self.order_by = order_by
         self.reversed = (order_by or '').startswith('-')
+        if not perm_set:
+            perm_set = ['repository.read', 'repository.write',
+                        'repository.admin']
+        self.perm_set = perm_set
 
     def __len__(self):
         return len(self.db_repo_list)
@@ -98,19 +104,20 @@ class CachedRepoList(object):
             scmr = dbr.scm_instance_cached(cache_map)
             # check permission at this level
             if not HasRepoPermissionAny(
-                'repository.read', 'repository.write', 'repository.admin'
+                *self.perm_set
             )(dbr.repo_name, 'get repo check'):
                 continue
 
-            if scmr is None:
+            try:
+                last_change = scmr.last_change
+                tip = h.get_changeset_safe(scmr, 'tip')
+            except Exception:
                 log.error(
                     '%s this repository is present in database but it '
-                    'cannot be created as an scm instance' % dbr.repo_name
+                    'cannot be created as an scm instance, org_exc:%s'
+                    % (dbr.repo_name, traceback.format_exc())
                 )
                 continue
-
-            last_change = scmr.last_change
-            tip = h.get_changeset_safe(scmr, 'tip')
 
             tmp_d = {}
             tmp_d['name'] = dbr.repo_name
@@ -143,7 +150,7 @@ class SimpleCachedRepoList(CachedRepoList):
         for dbr in self.db_repo_list:
             # check permission at this level
             if not HasRepoPermissionAny(
-                'repository.read', 'repository.write', 'repository.admin'
+                *self.perm_set
             )(dbr.repo_name, 'get repo check'):
                 continue
 
@@ -160,8 +167,18 @@ class SimpleCachedRepoList(CachedRepoList):
 
 class GroupList(object):
 
-    def __init__(self, db_repo_group_list):
+    def __init__(self, db_repo_group_list, perm_set=None):
+        """
+        Creates iterator from given list of group objects, additionally
+        checking permission for them from perm_set var
+
+        :param db_repo_group_list:
+        :param perm_set: list of permissons to check
+        """
         self.db_repo_group_list = db_repo_group_list
+        if not perm_set:
+            perm_set = ['group.read', 'group.write', 'group.admin']
+        self.perm_set = perm_set
 
     def __len__(self):
         return len(self.db_repo_group_list)
@@ -173,7 +190,7 @@ class GroupList(object):
         for dbgr in self.db_repo_group_list:
             # check permission at this level
             if not HasReposGroupPermissionAny(
-                'group.read', 'group.write', 'group.admin'
+                *self.perm_set
             )(dbgr.group_name, 'get group repo check'):
                 continue
 
@@ -276,9 +293,7 @@ class ScmModel(BaseModel):
         if all_groups is None:
             all_groups = RepoGroup.query()\
                 .filter(RepoGroup.group_parent_id == None).all()
-        group_iter = GroupList(all_groups)
-
-        return group_iter
+        return [x for x in GroupList(all_groups)]
 
     def mark_for_invalidation(self, repo_name):
         """
@@ -287,10 +302,11 @@ class ScmModel(BaseModel):
 
         :param repo_name: this repo that should invalidation take place
         """
-        CacheInvalidation.set_invalidate(repo_name=repo_name)
+        invalidated_keys = CacheInvalidation.set_invalidate(repo_name=repo_name)
         repo = Repository.get_by_repo_name(repo_name)
         if repo:
             repo.update_changeset_cache()
+        return invalidated_keys
 
     def toggle_following_repo(self, follow_repo_id, user_id):
 
@@ -305,7 +321,7 @@ class ScmModel(BaseModel):
                               'stopped_following_repo',
                               RepoTemp(follow_repo_id))
                 return
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
 
@@ -318,7 +334,7 @@ class ScmModel(BaseModel):
             action_logger(UserTemp(user_id),
                           'started_following_repo',
                           RepoTemp(follow_repo_id))
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -331,7 +347,7 @@ class ScmModel(BaseModel):
             try:
                 self.sa.delete(f)
                 return
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 raise
 
@@ -340,7 +356,7 @@ class ScmModel(BaseModel):
             f.user_id = user_id
             f.follows_user_id = follow_user_id
             self.sa.add(f)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -377,7 +393,8 @@ class ScmModel(BaseModel):
     def get_pull_requests(self, repo):
         repo = self._get_repo(repo)
         return self.sa.query(PullRequest)\
-                .filter(PullRequest.other_repo == repo).count()
+                .filter(PullRequest.other_repo == repo)\
+                .filter(PullRequest.status != PullRequest.STATUS_CLOSED).count()
 
     def mark_as_fork(self, repo, fork, user):
         repo = self.__get_repo(repo)
@@ -388,6 +405,60 @@ class ScmModel(BaseModel):
         self.sa.add(repo)
         return repo
 
+    def _handle_push(self, repo, username, action, repo_name, revisions):
+        """
+        Triggers push action hooks
+
+        :param repo: SCM repo
+        :param username: username who pushes
+        :param action: push/push_loca/push_remote
+        :param repo_name: name of repo
+        :param revisions: list of revisions that we pushed
+        """
+        from rhodecode import CONFIG
+        from rhodecode.lib.base import _get_ip_addr
+        try:
+            from pylons import request
+            environ = request.environ
+        except TypeError:
+            # we might use this outside of request context, let's fake the
+            # environ data
+            from webob import Request
+            environ = Request.blank('').environ
+
+        #trigger push hook
+        extras = {
+            'ip': _get_ip_addr(environ),
+            'username': username,
+            'action': 'push_local',
+            'repository': repo_name,
+            'scm': repo.alias,
+            'config': CONFIG['__file__'],
+            'server_url': get_server_url(environ),
+            'make_lock': None,
+            'locked_by': [None, None]
+        }
+        _scm_repo = repo._repo
+        _set_extras(extras)
+        if repo.alias == 'hg':
+            log_push_action(_scm_repo.ui, _scm_repo, node=revisions[0])
+        elif repo.alias == 'git':
+            log_push_action(None, _scm_repo, _git_revs=revisions)
+
+    def _get_IMC_module(self, scm_type):
+        """
+        Returns InMemoryCommit class based on scm_type
+
+        :param scm_type:
+        """
+        if scm_type == 'hg':
+            from rhodecode.lib.vcs.backends.hg import \
+                MercurialInMemoryChangeset as IMC
+        elif scm_type == 'git':
+            from rhodecode.lib.vcs.backends.git import \
+                GitInMemoryChangeset as IMC
+        return IMC
+
     def pull_changes(self, repo, username):
         dbrepo = self.__get_repo(repo)
         clone_uri = dbrepo.clone_uri
@@ -395,27 +466,14 @@ class ScmModel(BaseModel):
             raise Exception("This repository doesn't have a clone uri")
 
         repo = dbrepo.scm_instance
-        from rhodecode import CONFIG
+        repo_name = dbrepo.repo_name
         try:
-            extras = {
-                'ip': '',
-                'username': username,
-                'action': 'push_remote',
-                'repository': dbrepo.repo_name,
-                'scm': repo.alias,
-                'config': CONFIG['__file__'],
-                'make_lock': None,
-                'locked_by': [None, None]
-            }
-
-            Repository.inject_ui(repo, extras=extras)
-
             if repo.alias == 'git':
                 repo.fetch(clone_uri)
             else:
                 repo.pull(clone_uri)
-            self.mark_for_invalidation(dbrepo.repo_name)
-        except:
+            self.mark_for_invalidation(repo_name)
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -427,13 +485,8 @@ class ScmModel(BaseModel):
         :param repo: SCM instance
 
         """
-
-        if repo.alias == 'hg':
-            from rhodecode.lib.vcs.backends.hg import \
-                MercurialInMemoryChangeset as IMC
-        elif repo.alias == 'git':
-            from rhodecode.lib.vcs.backends.git import \
-                GitInMemoryChangeset as IMC
+        user = self._get_user(user)
+        IMC = self._get_IMC_module(repo.alias)
 
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
@@ -449,20 +502,21 @@ class ScmModel(BaseModel):
                        author=author,
                        parents=[cs], branch=cs.branch)
 
-        action = 'push_local:%s' % tip.raw_id
-        action_logger(user, action, repo_name)
         self.mark_for_invalidation(repo_name)
+        self._handle_push(repo,
+                          username=user.username,
+                          action='push_local',
+                          repo_name=repo_name,
+                          revisions=[tip.raw_id])
         return tip
 
     def create_node(self, repo, repo_name, cs, user, author, message, content,
                       f_path):
-        if repo.alias == 'hg':
-            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset as IMC
-        elif repo.alias == 'git':
-            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset as IMC
+        user = self._get_user(user)
+        IMC = self._get_IMC_module(repo.alias)
+
         # decoding here will force that we have proper encoded values
         # in any other case this will throw exceptions and deny commit
-
         if isinstance(content, (basestring,)):
             content = safe_str(content)
         elif isinstance(content, (file, cStringIO.OutputType,)):
@@ -488,9 +542,12 @@ class ScmModel(BaseModel):
                        author=author,
                        parents=parents, branch=cs.branch)
 
-        action = 'push_local:%s' % tip.raw_id
-        action_logger(user, action, repo_name)
         self.mark_for_invalidation(repo_name)
+        self._handle_push(repo,
+                          username=user.username,
+                          action='push_local',
+                          repo_name=repo_name,
+                          revisions=[tip.raw_id])
         return tip
 
     def get_nodes(self, repo_name, revision, root_path='/', flat=True):
@@ -601,7 +658,7 @@ class ScmModel(BaseModel):
                             ver = matches.groups()[0]
                             log.debug('got %s it is rhodecode' % (ver))
                             _rhodecode_hook = True
-                        except:
+                        except Exception:
                             log.error(traceback.format_exc())
             else:
                 # there is no hook in this dir, so we want to create one

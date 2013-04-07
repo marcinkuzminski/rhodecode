@@ -2,27 +2,33 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Add repository')} - ${c.rhodecode_name}
+    ${_('Add repository')} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
+    %if c.rhodecode_user.is_admin:
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
     ${h.link_to(_('Repositories'),h.url('repos'))}
+    %else:
+    ${_('Admin')}
     &raquo;
-    ${_('add new')}
+    ${_('Repositories')}
+    %endif
+    &raquo;
+    ${_('Add new')}
 </%def>
 
 <%def name="page_nav()">
-	${self.menu('admin')}
+    ${self.menu('admin')}
 </%def>
 
 <%def name="main()">
-	<div class="box">
-	    <!-- box / title -->
-	    <div class="title">
-	        ${self.breadcrumbs()}
-	    </div>
+    <div class="box">
+        <!-- box / title -->
+        <div class="title">
+            ${self.breadcrumbs()}
+        </div>
         <%include file="repo_add_base.html"/>
     </div>
 </%def>

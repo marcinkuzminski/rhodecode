@@ -119,7 +119,11 @@ class InputStreamChunker(Thread):
         kr = self.keep_reading
         da = self.data_added
         go = self.go
-        b = s.read(cs)
+
+        try:
+            b = s.read(cs)
+        except ValueError:
+            b = ''
 
         while b and go.is_set():
             if len(t) > ccm:
@@ -372,7 +376,9 @@ class SubprocessIOChunker(object):
             bg_out.stop()
             bg_err.stop()
             err = '%s' % ''.join(bg_err)
-            raise EnvironmentError("Subprocess exited due to an error:\n" + err)
+            if err:
+                raise EnvironmentError("Subprocess exited due to an error:\n" + err)
+            raise EnvironmentError("Subprocess exited with non 0 ret code:%s" % _returncode)
 
         self.process = _p
         self.output = bg_out

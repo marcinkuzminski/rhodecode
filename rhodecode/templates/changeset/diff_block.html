@@ -4,7 +4,10 @@
 ## ${diff_block.diff_block(change)}
 ##
 <%def name="diff_block(change)">
-
+<div class="diff-collapse">
+    <span target="${'diff-container-%s' % (id(change))}" class="diff-collapse-button">&uarr; ${_('Collapse diff')} &uarr;</span>
+</div>
+<div class="diff-container" id="${'diff-container-%s' % (id(change))}">
 %for FID,(cs1, cs2, change, path, diff, stats) in change.iteritems():
     ##%if op !='removed':
     <div id="${FID}_target" style="clear:both;margin-top:25px"></div>
@@ -16,15 +19,15 @@
                     revision=cs2,f_path=h.safe_unicode(path)))}
                 </div>
                 <div class="diff-actions">
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('show full diff for this file'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='raw')}" class="tooltip" title="${h.tooltip(_('raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
-                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='download')}" class="tooltip" title="${h.tooltip(_('download diff'))}"><img class="icon" src="${h.url('/images/icons/page_save.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('Show full diff for this file'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='raw')}" class="tooltip" title="${h.tooltip(_('Raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
+                  <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='download')}" class="tooltip" title="${h.tooltip(_('Download diff'))}"><img class="icon" src="${h.url('/images/icons/page_save.png')}"/></a>
                   ${c.ignorews_url(request.GET, h.FID(cs2,path))}
                   ${c.context_url(request.GET, h.FID(cs2,path))}
                 </div>
                 <span style="float:right;margin-top:-3px">
                   <label>
-                  ${_('show inline comments')}
+                  ${_('Show inline comments')}
                   ${h.checkbox('',checked="checked",class_="show-inline-comments",id_for=h.FID(cs2,path))}
                   </label>
                 </span>
@@ -37,7 +40,7 @@
     </div>
     ##%endif
 %endfor
-
+</div>
 </%def>
 
 <%def name="diff_block_simple(change)">
@@ -48,7 +51,9 @@
       <div class="code-header">
           <div class="changeset_header">
               <div class="changeset_file">
-                  <a href="#">${h.safe_unicode(filenode_path)}</a>
+                  ${h.safe_unicode(filenode_path)} |
+                  <a class="spantag" href="${h.url('files_home', repo_name=c.other_repo.repo_name, f_path=filenode_path, revision=c.org_ref)}" title="${_('Show file at latest version in this repo')}">${c.org_ref_type}@${h.short_id(c.org_ref) if c.org_ref_type=='rev' else c.org_ref}</a> -&gt;
+                  <a class="spantag" href="${h.url('files_home', repo_name=c.repo_name, f_path=filenode_path, revision=c.other_ref)}" title="${_('Show file at initial version in this repo')}">${c.other_ref_type}@${h.short_id(c.other_ref) if c.other_ref_type=='rev' else c.other_ref}</a>
               </div>
           </div>
       </div>

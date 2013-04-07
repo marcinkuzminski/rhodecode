@@ -13,10 +13,10 @@ with JSON protocol both ways. An url to send API request to RhodeCode is
 API ACCESS FOR WEB VIEWS
 ++++++++++++++++++++++++
 
-API access can also be turned on for each web view in RhodeCode that is 
-decorated with `@LoginRequired` decorator. To enable API access simple change 
-the standard login decorator to `@LoginRequired(api_access=True)`. 
-After this change, a rhodecode view can be accessed without login by adding a 
+API access can also be turned on for each web view in RhodeCode that is
+decorated with `@LoginRequired` decorator. To enable API access simple change
+the standard login decorator to `@LoginRequired(api_access=True)`.
+After this change, a rhodecode view can be accessed without login by adding a
 GET parameter `?api_key=<api_key>` to url. By default this is only
 enabled on RSS/ATOM feed views.
 
@@ -26,7 +26,7 @@ API ACCESS
 
 All clients are required to send JSON-RPC spec JSON data::
 
-    {   
+    {
         "id:"<id>",
         "api_key":"<api_key>",
         "method":"<method_name>",
@@ -49,7 +49,7 @@ Simply provide
 
 RhodeCode API will return always a JSON-RPC response::
 
-    {   
+    {
         "id":<id>, # matching id sent by request
         "result": "<result>"|null, # JSON formatted result, null if any errors
         "error": "null"|<error_message> # JSON formatted error (if any)
@@ -70,14 +70,14 @@ will be available.
 To get started quickly simply run::
 
   rhodecode-api _create_config --apikey=<youapikey> --apihost=<rhodecode host>
- 
+
 This will create a file named .config in the directory you executed it storing
 json config file with credentials. You can skip this step and always provide
 both of the arguments to be able to communicate with server
 
 
 after that simply run any api command for example get_repo::
- 
+
  rhodecode-api get_repo
 
  calling {"api_key": "<apikey>", "id": 75, "args": {}, "method": "get_repo"} to http://127.0.0.1:5000
@@ -90,8 +90,8 @@ Ups looks like we forgot to add an argument
 
 Let's try again now giving the repoid as parameters::
 
-    rhodecode-api get_repo repoid:rhodecode   
- 
+    rhodecode-api get_repo repoid:rhodecode
+
     calling {"api_key": "<apikey>", "id": 39, "args": {"repoid": "rhodecode"}, "method": "get_repo"} to http://127.0.0.1:5000
     rhodecode said:
     {'error': None,
@@ -132,7 +132,7 @@ rescan_repos
 
 Dispatch rescan repositories action. If remove_obsolete is set
 RhodeCode will delete repos that are in database but not in the filesystem.
-This command can be executed only using api_key belonging to user with admin 
+This command can be executed only using api_key belonging to user with admin
 rights.
 
 INPUT::
@@ -147,17 +147,40 @@ INPUT::
 OUTPUT::
 
     id : <id_given_in_input>
-    result : "{'added': [<list of names of added repos>], 
+    result : "{'added': [<list of names of added repos>],
                'removed': [<list of names of removed repos>]}"
     error :  null
 
+
+invalidate_cache
+----------------
+
+Invalidate cache for repository.
+This command can be executed only using api_key belonging to user with admin
+rights or regular user that have write or admin or write access to repository.
+
+INPUT::
+
+    id : <id_for_response>
+    api_key : "<api_key>"
+    method :  "invalidate_cache"
+    args :    {
+                "repoid" : "<reponame or repo_id>"
+              }
+
+OUTPUT::
+
+    id : <id_given_in_input>
+    result : "Cache for repository `<reponame>` was invalidated: invalidated cache keys: <list_of_cache_keys>"
+    error :  null
 
 lock
 ----
 
 Set locking state on given repository by given user. If userid param is skipped
-, then it is set to id of user whos calling this method.
-This command can be executed only using api_key belonging to user with admin 
+, then it is set to id of user whos calling this method. If locked param is skipped
+then function shows current lock state of given repo.
+This command can be executed only using api_key belonging to user with admin
 rights or regular user that have admin or write access to repository.
 
 INPUT::
@@ -168,7 +191,7 @@ INPUT::
     args :    {
                 "repoid" : "<reponame or repo_id>"
                 "userid" : "<user_id or username = Optional(=apiuser)>",
-                "locked" : "<bool true|false>"
+                "locked" : "<bool true|false = Optional(=None)>"
               }
 
 OUTPUT::
@@ -183,7 +206,7 @@ show_ip
 
 Shows IP address as seen from RhodeCode server, together with all
 defined IP addresses for given user.
-This command can be executed only using api_key belonging to user with admin 
+This command can be executed only using api_key belonging to user with admin
 rights.
 
 INPUT::
@@ -208,7 +231,7 @@ OUTPUT::
                                 ...
                              ]
              }
-    
+
     error :  null
 
 
@@ -217,7 +240,7 @@ get_user
 
 Get's an user by username or user_id, Returns empty result if user is not found.
 If userid param is skipped it is set to id of user who is calling this method.
-This command can be executed only using api_key belonging to user with admin 
+This command can be executed only using api_key belonging to user with admin
 rights, or regular users that cannot specify different userid than theirs
 
 
@@ -226,16 +249,17 @@ INPUT::
     id : <id_for_response>
     api_key : "<api_key>"
     method :  "get_user"
-    args :    { 
+    args :    {
                 "userid" : "<username or user_id Optional(=apiuser)>"
               }
 
 OUTPUT::
 
     id : <id_given_in_input>
-    result: None if user does not exist or 
+    result: None if user does not exist or
             {
                 "user_id" :     "<user_id>",
+                "api_key" :     "<api_key>",
                 "username" :    "<username>",
                 "firstname":    "<firstname>",
                 "lastname" :    "<lastname>",
@@ -289,7 +313,7 @@ OUTPUT::
                 "ldap_dn" :     "<ldap_dn>",
                 "last_login":   "<last_login>",
               },
-    	      …
+              …
             ]
     error:  null
 
@@ -297,7 +321,7 @@ OUTPUT::
 create_user
 -----------
 
-Creates new user. This command can 
+Creates new user. This command can
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -341,7 +365,7 @@ OUTPUT::
 update_user
 -----------
 
-updates given user if such user exists. This command can 
+updates given user if such user exists. This command can
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -378,7 +402,7 @@ OUTPUT::
                 "admin" :    "<bool>",
                 "ldap_dn" :  "<ldap_dn>",
                 "last_login": "<last_login>",
-              },              
+              },
             }
     error:  null
 
@@ -387,7 +411,7 @@ delete_user
 -----------
 
 
-deletes givenuser if such user exists. This command can 
+deletes givenuser if such user exists. This command can
 be executed only using api_key belonging to user with admin rights.
 
 
@@ -413,7 +437,7 @@ OUTPUT::
 get_users_group
 ---------------
 
-Gets an existing users group. This command can be executed only using api_key
+Gets an existing user group. This command can be executed only using api_key
 belonging to user with admin rights.
 
 
@@ -423,7 +447,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "get_users_group"
     args :    {
-                "usersgroupid" : "<users group id or name>"
+                "usersgroupid" : "<user group id or name>"
               }
 
 OUTPUT::
@@ -435,7 +459,7 @@ OUTPUT::
                "group_name" :     "<groupname>",
                "active":          "<bool>",
                "members" :  [
-                              { 
+                              {
                                 "user_id" :  "<user_id>",
                                 "username" : "<username>",
                                 "firstname": "<firstname>",
@@ -456,7 +480,7 @@ OUTPUT::
 get_users_groups
 ----------------
 
-Lists all existing users groups. This command can be executed only using 
+Lists all existing user groups. This command can be executed only using
 api_key belonging to user with admin rights.
 
 
@@ -484,7 +508,7 @@ OUTPUT::
 create_users_group
 ------------------
 
-Creates new users group. This command can be executed only using api_key
+Creates new user group. This command can be executed only using api_key
 belonging to user with admin rights
 
 
@@ -502,7 +526,7 @@ OUTPUT::
 
     id : <id_given_in_input>
     result: {
-              "msg": "created new users group `<groupname>`",
+              "msg": "created new user group `<groupname>`",
               "users_group": {
                      "users_group_id" : "<id>",
                      "group_name" :     "<groupname>",
@@ -515,7 +539,7 @@ OUTPUT::
 add_user_to_users_group
 -----------------------
 
-Adds a user to a users group. If user exists in that group success will be 
+Adds a user to a user group. If user exists in that group success will be
 `false`. This command can be executed only using api_key
 belonging to user with admin rights
 
@@ -526,7 +550,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "add_user_users_group"
     args:     {
-                "usersgroupid" : "<users group id or name>",
+                "usersgroupid" : "<user group id or name>",
                 "userid" : "<user_id or username>",
               }
 
@@ -535,7 +559,7 @@ OUTPUT::
     id : <id_given_in_input>
     result: {
               "success": True|False # depends on if member is in group
-              "msg": "added member `<username>` to users group `<groupname>` | 
+              "msg": "added member `<username>` to user group `<groupname>` |
                       User is already in that group"
             }
     error:  null
@@ -544,8 +568,8 @@ OUTPUT::
 remove_user_from_users_group
 ----------------------------
 
-Removes a user from a users group. If user is not in given group success will
-be `false`. This command can be executed only 
+Removes a user from a user group. If user is not in given group success will
+be `false`. This command can be executed only
 using api_key belonging to user with admin rights
 
 
@@ -555,7 +579,7 @@ INPUT::
     api_key : "<api_key>"
     method :  "remove_user_from_users_group"
     args:     {
-                "usersgroupid" : "<users group id or name>",
+                "usersgroupid" : "<user group id or name>",
                 "userid" : "<user_id or username>",
               }
 
@@ -564,7 +588,7 @@ OUTPUT::
     id : <id_given_in_input>
     result: {
               "success":  True|False,  # depends on if member is in group
-              "msg": "removed member <username> from users group <groupname> | 
+              "msg": "removed member <username> from user group <groupname> |
                       User wasn't in group"
             }
     error:  null
@@ -574,8 +598,8 @@ get_repo
 --------
 
 Gets an existing repository by it's name or repository_id. Members will return
-either users_group or user associated to that repository. This command can be 
-executed only using api_key belonging to user with admin 
+either users_group or user associated to that repository. This command can be
+executed only using api_key belonging to user with admin
 rights or regular user that have at least read access to repository.
 
 
@@ -599,9 +623,9 @@ OUTPUT::
                 "clone_uri" :        "<clone_uri>",
                 "enable_downloads":  "<bool>",
                 "enable_locking":    "<bool>",
-                "enable_statistics": "<bool>",                
+                "enable_statistics": "<bool>",
                 "private":           "<bool>",
-                "created_on" :       "<date_time_created>",                
+                "created_on" :       "<date_time_created>",
                 "description" :      "<description>",
                 "landing_rev":       "<landing_rev>",
                 "last_changeset":    {
@@ -615,8 +639,8 @@ OUTPUT::
                 "owner":             "<repo_owner>",
                 "fork_of":           "<name_of_fork_parent>",
                 "members" :     [
-                                  { 
-                                    "type": "user",
+                                  {
+                                    "type":        "user",
                                     "user_id" :    "<user_id>",
                                     "username" :   "<username>",
                                     "firstname":   "<firstname>",
@@ -630,8 +654,8 @@ OUTPUT::
                                     "permission" : "repository.(read|write|admin)"
                                   },
                                   …
-                                  { 
-                                    "type": "users_group",
+                                  {
+                                    "type":      "users_group",
                                     "id" :       "<usersgroupid>",
                                     "name" :     "<usersgroupname>",
                                     "active":    "<bool>",
@@ -639,6 +663,22 @@ OUTPUT::
                                   },
                                   …
                                 ]
+                 "followers":   [
+                                  {
+                                    "user_id" :     "<user_id>",
+                                    "username" :    "<username>",
+                                    "firstname":    "<firstname>",
+                                    "lastname" :    "<lastname>",
+                                    "email" :       "<email>",
+                                    "emails":       "<list_of_all_additional_emails>",
+                                    "ip_addresses": "<list_of_ip_addresses_for_user>",
+                                    "active" :      "<bool>",
+                                    "admin" :       "<bool>",
+                                    "ldap_dn" :     "<ldap_dn>",
+                                    "last_login":   "<last_login>",
+                                  },
+                                  …
+                 ]
             }
     error:  null
 
@@ -646,8 +686,8 @@ OUTPUT::
 get_repos
 ---------
 
-Lists all existing repositories. This command can be executed only using 
-api_key belonging to user with admin rights or regular user that have 
+Lists all existing repositories. This command can be executed only using
+api_key belonging to user with admin rights or regular user that have
 admin, write or read access to repository.
 
 
@@ -668,14 +708,14 @@ OUTPUT::
                 "repo_type" :        "<repo_type>",
                 "clone_uri" :        "<clone_uri>",
                 "private": :         "<bool>",
-                "created_on" :       "<datetimecreated>",                
+                "created_on" :       "<datetimecreated>",
                 "description" :      "<description>",
                 "landing_rev":       "<landing_rev>",
                 "owner":             "<repo_owner>",
                 "fork_of":           "<name_of_fork_parent>",
                 "enable_downloads":  "<bool>",
                 "enable_locking":    "<bool>",
-                "enable_statistics": "<bool>",                   
+                "enable_statistics": "<bool>",
               },
               …
             ]
@@ -685,9 +725,9 @@ OUTPUT::
 get_repo_nodes
 --------------
 
-returns a list of nodes and it's children in a flat list for a given path 
-at given revision. It's possible to specify ret_type to show only `files` or 
-`dirs`. This command can be executed only using api_key belonging to user 
+returns a list of nodes and it's children in a flat list for a given path
+at given revision. It's possible to specify ret_type to show only `files` or
+`dirs`. This command can be executed only using api_key belonging to user
 with admin rights
 
 
@@ -720,9 +760,9 @@ create_repo
 -----------
 
 Creates a repository. If repository name contains "/", all needed repository
-groups will be created. For example "foo/bar/baz" will create groups 
-"foo", "bar" (with "foo" as parent), and create "baz" repository with 
-"bar" as group. This command can be executed only using api_key belonging to user with admin 
+groups will be created. For example "foo/bar/baz" will create groups
+"foo", "bar" (with "foo" as parent), and create "baz" repository with
+"bar" as group. This command can be executed only using api_key belonging to user with admin
 rights or regular user that have create repository permission. Regular users
 cannot specify owner parameter
 
@@ -756,14 +796,14 @@ OUTPUT::
                 "repo_type" :        "<repo_type>",
                 "clone_uri" :        "<clone_uri>",
                 "private": :         "<bool>",
-                "created_on" :       "<datetimecreated>",                
+                "created_on" :       "<datetimecreated>",
                 "description" :      "<description>",
                 "landing_rev":       "<landing_rev>",
                 "owner":             "<username or user_id>",
                 "fork_of":           "<name_of_fork_parent>",
                 "enable_downloads":  "<bool>",
                 "enable_locking":    "<bool>",
-                "enable_statistics": "<bool>",                     
+                "enable_statistics": "<bool>",
               },
             }
     error:  null
@@ -792,7 +832,7 @@ INPUT::
                 "copy_permissions": "<bool>",
                 "private":          "<bool>",
                 "landing_rev":      "<landing_rev>"
-                                
+
               }
 
 OUTPUT::
@@ -808,8 +848,10 @@ OUTPUT::
 delete_repo
 -----------
 
-Deletes a repository. This command can be executed only using api_key belonging to user with admin 
-rights or regular user that have admin access to repository.
+Deletes a repository. This command can be executed only using api_key belonging
+to user with admin rights or regular user that have admin access to repository.
+When `forks` param is set it's possible to detach or delete forks of deleting
+repository
 
 
 INPUT::
@@ -818,7 +860,8 @@ INPUT::
     api_key : "<api_key>"
     method :  "delete_repo"
     args:     {
-                "repoid" : "<reponame or repo_id>"
+                "repoid" : "<reponame or repo_id>",
+                "forks"  : "`delete` or `detach` = Optional(None)"
               }
 
 OUTPUT::
@@ -835,7 +878,7 @@ grant_user_permission
 ---------------------
 
 Grant permission for user on given repository, or update existing one
-if found. This command can be executed only using api_key belonging to user 
+if found. This command can be executed only using api_key belonging to user
 with admin rights.
 
 
@@ -863,7 +906,7 @@ OUTPUT::
 revoke_user_permission
 ----------------------
 
-Revoke permission for user on given repository. This command can be executed 
+Revoke permission for user on given repository. This command can be executed
 only using api_key belonging to user with admin rights.
 
 
@@ -890,8 +933,8 @@ OUTPUT::
 grant_users_group_permission
 ----------------------------
 
-Grant permission for users group on given repository, or update
-existing one if found. This command can be executed only using 
+Grant permission for user group on given repository, or update
+existing one if found. This command can be executed only using
 api_key belonging to user with admin rights.
 
 
@@ -902,7 +945,7 @@ INPUT::
     method :  "grant_users_group_permission"
     args:     {
                 "repoid" : "<reponame or repo_id>"
-                "usersgroupid" : "<users group id or name>"
+                "usersgroupid" : "<user group id or name>"
                 "perm" : "(repository.(none|read|write|admin))",
               }
 
@@ -914,12 +957,12 @@ OUTPUT::
               "success": true
             }
     error:  null
-    
-    
+
+
 revoke_users_group_permission
 -----------------------------
 
-Revoke permission for users group on given repository.This command can be 
+Revoke permission for user group on given repository.This command can be
 executed only using api_key belonging to user with admin rights.
 
 INPUT::
@@ -929,7 +972,7 @@ INPUT::
     method  : "revoke_users_group_permission"
     args:     {
                 "repoid" : "<reponame or repo_id>"
-                "usersgroupid" : "<users group id or name>"
+                "usersgroupid" : "<user group id or name>"
               }
 
 OUTPUT::

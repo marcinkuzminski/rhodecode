@@ -37,8 +37,8 @@ from rhodecode.lib.utils2 import safe_unicode, generate_api_key
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
-    UserToPerm, UsersGroupRepoToPerm, UsersGroupToPerm, UsersGroupMember, \
-    Notification, RepoGroup, UserRepoGroupToPerm, UsersGroupRepoGroupToPerm, \
+    UserToPerm, UserGroupRepoToPerm, UserGroupToPerm, UserGroupMember, \
+    Notification, RepoGroup, UserRepoGroupToPerm, UserGroupRepoGroupToPerm, \
     UserEmailMap, UserIpMap
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
@@ -95,7 +95,7 @@ class UserModel(BaseModel):
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
             return new_user
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -132,7 +132,7 @@ class UserModel(BaseModel):
             new_user.username = username
             new_user.admin = admin
             # set password only if creating an user or password is changed
-            if edit is False or user.password != password:
+            if not edit or user.password != password:
                 new_user.password = get_crypt_password(password)
                 new_user.api_key = generate_api_key(username)
             new_user.email = email
@@ -229,7 +229,7 @@ class UserModel(BaseModel):
             self.sa.flush()
 
             # notification to admins
-            subject = _('new user registration')
+            subject = _('New user registration')
             body = ('New user registration\n'
                     '---------------------\n'
                     '- Username: %s\n'
@@ -244,7 +244,7 @@ class UserModel(BaseModel):
                                        type_=Notification.TYPE_REGISTRATION,
                                        email_kwargs=kw)
 
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -268,7 +268,7 @@ class UserModel(BaseModel):
                         k = 'name'
                     setattr(user, k, v)
             self.sa.add(user)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -290,7 +290,7 @@ class UserModel(BaseModel):
                 setattr(user, k, v)
             self.sa.add(user)
             return user
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -311,7 +311,7 @@ class UserModel(BaseModel):
                     % (user.username, len(repos), ', '.join(repos))
                 )
             self.sa.delete(user)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             raise
 
@@ -331,11 +331,11 @@ class UserModel(BaseModel):
                                                        'reset_url': link})
                 log.debug('sending email')
                 run_task(tasks.send_email, user_email,
-                         _("password reset link"), body, body)
+                         _("Password reset link"), body, body)
                 log.info('send new password mail to %s' % user_email)
             else:
                 log.debug("password reset email %s not found" % user_email)
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             return False
 
@@ -358,7 +358,7 @@ class UserModel(BaseModel):
                     log.info('change password for %s' % user_email)
                 if new_passwd is None:
                     raise Exception('unable to generate new password')
-            except:
+            except Exception:
                 log.error(traceback.format_exc())
                 Session().rollback()
 
@@ -367,7 +367,7 @@ class UserModel(BaseModel):
                      _('Your new RhodeCode password:%s') % (new_passwd))
             log.info('send new password mail to %s' % user_email)
 
-        except:
+        except Exception:
             log.error('Failed to update user password')
             log.error(traceback.format_exc())
 
@@ -400,7 +400,7 @@ class UserModel(BaseModel):
             else:
                 return False
 
-        except:
+        except Exception:
             log.error(traceback.format_exc())
             auth_user.is_authenticated = False
             return False
@@ -464,7 +464,7 @@ class UserModel(BaseModel):
                 p = 'repository.admin'
                 user.permissions[RK][r_k] = p
 
-            # repositories groups
+            # repository groups
             for perm in default_repo_groups_perms:
                 rg_k = perm.UserRepoGroupToPerm.group.group_name
                 p = 'group.admin'
@@ -472,7 +472,7 @@ class UserModel(BaseModel):
             return user
 
         #==================================================================
-        # SET DEFAULTS GLOBAL, REPOS, REPOS GROUPS
+        # SET DEFAULTS GLOBAL, REPOS, REPOSITORY GROUPS
         #==================================================================
         uid = user.user_id
 
@@ -497,7 +497,7 @@ class UserModel(BaseModel):
 
             user.permissions[RK][r_k] = p
 
-        # defaults for repositories groups taken from default user permission
+        # defaults for repository groups taken from default user permission
         # on given group
         for perm in default_repo_groups_perms:
             rg_k = perm.UserRepoGroupToPerm.group.group_name
@@ -512,13 +512,13 @@ class UserModel(BaseModel):
                              'hg.create.none', 'hg.create.repository'])
 
         # USER GROUPS comes first
-        # users group global permissions
-        user_perms_from_users_groups = self.sa.query(UsersGroupToPerm)\
-            .options(joinedload(UsersGroupToPerm.permission))\
-            .join((UsersGroupMember, UsersGroupToPerm.users_group_id ==
-                   UsersGroupMember.users_group_id))\
-            .filter(UsersGroupMember.user_id == uid)\
-            .order_by(UsersGroupToPerm.users_group_id)\
+        # user group global permissions
+        user_perms_from_users_groups = self.sa.query(UserGroupToPerm)\
+            .options(joinedload(UserGroupToPerm.permission))\
+            .join((UserGroupMember, UserGroupToPerm.users_group_id ==
+                   UserGroupMember.users_group_id))\
+            .filter(UserGroupMember.user_id == uid)\
+            .order_by(UserGroupToPerm.users_group_id)\
             .all()
         #need to group here by groups since user can be in more than one group
         _grouped = [[x, list(y)] for x, y in
@@ -559,21 +559,21 @@ class UserModel(BaseModel):
         # permission should be selected based on selected method
         #======================================================================
 
-        # users group for repositories permissions
+        # user group for repositories permissions
         user_repo_perms_from_users_groups = \
-         self.sa.query(UsersGroupRepoToPerm, Permission, Repository,)\
-            .join((Repository, UsersGroupRepoToPerm.repository_id ==
+         self.sa.query(UserGroupRepoToPerm, Permission, Repository,)\
+            .join((Repository, UserGroupRepoToPerm.repository_id ==
                    Repository.repo_id))\
-            .join((Permission, UsersGroupRepoToPerm.permission_id ==
+            .join((Permission, UserGroupRepoToPerm.permission_id ==
                    Permission.permission_id))\
-            .join((UsersGroupMember, UsersGroupRepoToPerm.users_group_id ==
-                   UsersGroupMember.users_group_id))\
-            .filter(UsersGroupMember.user_id == uid)\
+            .join((UserGroupMember, UserGroupRepoToPerm.users_group_id ==
+                   UserGroupMember.users_group_id))\
+            .filter(UserGroupMember.user_id == uid)\
             .all()
 
         multiple_counter = collections.defaultdict(int)
         for perm in user_repo_perms_from_users_groups:
-            r_k = perm.UsersGroupRepoToPerm.repository.repo_name
+            r_k = perm.UserGroupRepoToPerm.repository.repo_name
             multiple_counter[r_k] += 1
             p = perm.Permission.permission_name
             cur_perm = user.permissions[RK][r_k]
@@ -610,27 +610,27 @@ class UserModel(BaseModel):
             user.permissions[RK][r_k] = p
 
         #======================================================================
-        # !! PERMISSIONS FOR REPOSITORIES GROUPS !!
+        # !! PERMISSIONS FOR REPOSITORY GROUPS !!
         #======================================================================
         #======================================================================
         # check if user is part of user groups for this repository groups and
         # fill in his permission from it. _choose_perm decides of which
         # permission should be selected based on selected method
         #======================================================================
-        # users group for repo groups permissions
+        # user group for repo groups permissions
         user_repo_group_perms_from_users_groups = \
-         self.sa.query(UsersGroupRepoGroupToPerm, Permission, RepoGroup)\
-         .join((RepoGroup, UsersGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\
-         .join((Permission, UsersGroupRepoGroupToPerm.permission_id
+         self.sa.query(UserGroupRepoGroupToPerm, Permission, RepoGroup)\
+         .join((RepoGroup, UserGroupRepoGroupToPerm.group_id == RepoGroup.group_id))\
+         .join((Permission, UserGroupRepoGroupToPerm.permission_id
                 == Permission.permission_id))\
-         .join((UsersGroupMember, UsersGroupRepoGroupToPerm.users_group_id
-                == UsersGroupMember.users_group_id))\
-         .filter(UsersGroupMember.user_id == uid)\
+         .join((UserGroupMember, UserGroupRepoGroupToPerm.users_group_id
+                == UserGroupMember.users_group_id))\
+         .filter(UserGroupMember.user_id == uid)\
          .all()
 
         multiple_counter = collections.defaultdict(int)
         for perm in user_repo_group_perms_from_users_groups:
-            g_k = perm.UsersGroupRepoGroupToPerm.group.group_name
+            g_k = perm.UserGroupRepoGroupToPerm.group.group_name
             multiple_counter[g_k] += 1
             p = perm.Permission.permission_name
             cur_perm = user.permissions[GK][g_k]

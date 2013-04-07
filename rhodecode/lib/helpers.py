@@ -41,9 +41,10 @@ from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven, _make_safe_id_component
 
 from rhodecode.lib.annotate import annotate_highlight
-from rhodecode.lib.utils import repo_name_slug
+from rhodecode.lib.utils import repo_name_slug, get_custom_lexer
 from rhodecode.lib.utils2 import str2bool, safe_unicode, safe_str, \
-    get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict
+    get_changeset_safe, datetime_to_time, time_to_datetime, AttributeDict,\
+    safe_int
 from rhodecode.lib.markup_renderer import MarkupRenderer
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
@@ -253,13 +254,14 @@ class CodeHtmlFormatter(HtmlFormatter):
 
 
 def pygmentize(filenode, **kwargs):
-    """pygmentize function using pygments
+    """
+    pygmentize function using pygments
 
     :param filenode:
     """
-
-    return literal(code_highlight(filenode.content,
-                                  filenode.lexer, CodeHtmlFormatter(**kwargs)))
+    lexer = get_custom_lexer(filenode.extension) or filenode.lexer
+    return literal(code_highlight(filenode.content, lexer,
+                                  CodeHtmlFormatter(**kwargs)))
 
 
 def pygmentize_annotation(repo_name, filenode, **kwargs):
@@ -362,11 +364,29 @@ from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.utils2 import credentials_filter, age as _age
 from rhodecode.model.db import User, ChangesetStatus
 
-age = lambda  x: _age(x)
+age = lambda  x, y=False: _age(x, y)
 capitalize = lambda x: x.capitalize()
 email = author_email
 short_id = lambda x: x[:12]
 hide_credentials = lambda x: ''.join(credentials_filter(x))
+
+
+def show_id(cs):
+    """
+    Configurable function that shows ID
+    by default it's r123:fffeeefffeee
+
+    :param cs: changeset instance
+    """
+    from rhodecode import CONFIG
+    def_len = safe_int(CONFIG.get('show_sha_length', 12))
+    show_rev = str2bool(CONFIG.get('show_revision_number', True))
+
+    raw_id = cs.raw_id[:def_len]
+    if show_rev:
+        return 'r%s:%s' % (cs.revision, raw_id)
+    else:
+        return '%s' % (raw_id)
 
 
 def fmt_date(date):
@@ -474,22 +494,19 @@ def desc_stylize(value):
     return value
 
 
-def bool2icon(value):
-    """Returns True/False values represented as small html image of true/false
+def boolicon(value):
+    """Returns boolean value of a value, represented as small html image of true/false
     icons
 
-    :param value: bool value
+    :param value: value
     """
 
-    if value is True:
+    if value:
         return HTML.tag('img', src=url("/images/icons/accept.png"),
                         alt=_('True'))
-
-    if value is False:
+    else:
         return HTML.tag('img', src=url("/images/icons/cancel.png"),
                         alt=_('False'))
-
-    return value
 
 
 def action_parser(user_log, feed=False, parse_cs=False):
@@ -549,13 +566,18 @@ def action_parser(user_log, feed=False, parse_cs=False):
             return link_to(lbl, _url, raw_id=rev.raw_id, repo_name=repo_name,
                            class_='lazy-cs' if lazy_cs else '')
 
+        def _get_op(rev_txt):
+            _op = None
+            _name = rev_txt
+            if len(rev_txt.split('=>')) == 2:
+                _op, _name = rev_txt.split('=>')
+            return _op, _name
+
         revs = []
         if len(filter(lambda v: v != '', revs_ids)) > 0:
             repo = None
             for rev in revs_ids[:revs_top_limit]:
-                _op = _name = None
-                if len(rev.split('=>')) == 2:
-                    _op, _name = rev.split('=>')
+                _op, _name = _get_op(rev)
 
                 # we want parsed changesets, or new log store format is bad
                 if parse_cs:
@@ -582,6 +604,10 @@ def action_parser(user_log, feed=False, parse_cs=False):
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
             )
         )
+        _op1, _name1 = _get_op(revs_ids[0])
+        _op2, _name2 = _get_op(revs_ids[-1])
+
+        _rev = '%s...%s' % (_name1, _name2)
 
         compare_view = (
             ' <div class="compare_view tooltip" title="%s">'
@@ -590,7 +616,7 @@ def action_parser(user_log, feed=False, parse_cs=False):
                     revs_ids[0][:12], revs_ids[-1][:12]
                 ),
                 url('changeset_home', repo_name=repo_name,
-                    revision='%s...%s' % (revs_ids[0], revs_ids[-1])
+                    revision=_rev
                 ),
                 _('compare view')
             )
@@ -683,9 +709,9 @@ def action_parser(user_log, feed=False, parse_cs=False):
                                     get_user_name, 'user_add.png'),
     'admin_updated_user':          (_('[updated] user'),
                                     get_user_name, 'user_edit.png'),
-    'admin_created_users_group':   (_('[created] users group'),
+    'admin_created_users_group':   (_('[created] user group'),
                                     get_users_group, 'group_add.png'),
-    'admin_updated_users_group':   (_('[updated] users group'),
+    'admin_updated_users_group':   (_('[updated] user group'),
                                     get_users_group, 'group_edit.png'),
     'user_commented_revision':     (_('[commented] on revision in repository'),
                                     get_cs_links, 'comment_add.png'),
@@ -741,7 +767,8 @@ def action_parser(user_log, feed=False, parse_cs=False):
 # PERMS
 #==============================================================================
 from rhodecode.lib.auth import HasPermissionAny, HasPermissionAll, \
-HasRepoPermissionAny, HasRepoPermissionAll
+HasRepoPermissionAny, HasRepoPermissionAll, HasReposGroupPermissionAll, \
+HasReposGroupPermissionAny
 
 
 #==============================================================================
@@ -887,7 +914,7 @@ def changed_tooltip(nodes):
         return ': ' + _('No Files')
 
 
-def repo_link(groups_and_repos, last_url=None):
+def repo_link(groups_and_repos):
     """
     Makes a breadcrumbs link to repo within a group
     joins &raquo; on each group to create a fancy link
@@ -898,18 +925,14 @@ def repo_link(groups_and_repos, last_url=None):
     :param groups_and_repos:
     :param last_url:
     """
-    groups, repo_name = groups_and_repos
-    last_link = link_to(repo_name, last_url) if last_url else repo_name
+    groups, just_name, repo_name = groups_and_repos
+    last_url = url('summary_home', repo_name=repo_name)
+    last_link = link_to(just_name, last_url)
 
-    if not groups:
-        if last_url:
-            return last_link
-        return repo_name
-    else:
-        def make_link(group):
-            return link_to(group.name,
-                           url('repos_group_home', group_name=group.group_name))
-        return literal(' &raquo; '.join(map(make_link, groups) + [last_link]))
+    def make_link(group):
+        return link_to(group.name,
+                       url('repos_group_home', group_name=group.group_name))
+    return literal(' &raquo; '.join(map(make_link, groups) + ['<span>%s</span>' % last_link]))
 
 
 def fancy_file_stats(stats):
@@ -975,7 +998,12 @@ def fancy_file_stats(stats):
     return literal('<div style="width:%spx">%s%s</div>' % (width, d_a, d_d))
 
 
-def urlify_text(text_):
+def urlify_text(text_, safe=True):
+    """
+    Extrac urls from text and make html links out of them
+
+    :param text_:
+    """
 
     url_pat = re.compile(r'''(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]'''
                          '''|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)''')
@@ -983,8 +1011,10 @@ def urlify_text(text_):
     def url_func(match_obj):
         url_full = match_obj.groups()[0]
         return '<a href="%(url)s">%(url)s</a>' % ({'url': url_full})
-
-    return literal(url_pat.sub(url_func, text_))
+    _newtext = url_pat.sub(url_func, text_)
+    if safe:
+        return literal(_newtext)
+    return _newtext
 
 
 def urlify_changesets(text_, repository):
@@ -992,26 +1022,26 @@ def urlify_changesets(text_, repository):
     Extract revision ids from changeset and make link from them
 
     :param text_:
-    :param repository:
+    :param repository: repo name to build the URL with
     """
-
-    URL_PAT = re.compile(r'([0-9a-fA-F]{12,})')
+    from pylons import url  # doh, we need to re-import url to mock it later
+    URL_PAT = re.compile(r'(^|\s)([0-9a-fA-F]{12,40})($|\s)')
 
     def url_func(match_obj):
-        rev = match_obj.groups()[0]
-        pref = ''
-        if match_obj.group().startswith(' '):
-            pref = ' '
+        rev = match_obj.groups()[1]
+        pref = match_obj.groups()[0]
+        suf = match_obj.groups()[2]
+
         tmpl = (
         '%(pref)s<a class="%(cls)s" href="%(url)s">'
-        '%(rev)s'
-        '</a>'
+        '%(rev)s</a>%(suf)s'
         )
         return tmpl % {
          'pref': pref,
          'cls': 'revision-link',
          'url': url('changeset_home', repo_name=repository, revision=rev),
          'rev': rev,
+         'suf': suf
         }
 
     newtext = URL_PAT.sub(url_func, text_)
@@ -1030,6 +1060,7 @@ def urlify_commit(text_, repository=None, link_=None):
     :param link_: changeset link
     """
     import traceback
+    from pylons import url  # doh, we need to re-import url to mock it later
 
     def escaper(string):
         return string.replace('<', '&lt;').replace('>', '&gt;')
@@ -1048,8 +1079,12 @@ def urlify_commit(text_, repository=None, link_=None):
     # urlify changesets - extrac revisions and make link out of them
     newtext = urlify_changesets(escaper(text_), repository)
 
+    # extract http/https links and make them real urls
+    newtext = urlify_text(newtext, safe=False)
+
     try:
-        conf = config['app_conf']
+        from rhodecode import CONFIG
+        conf = CONFIG
 
         # allow multiple issue servers to be used
         valid_indices = [
@@ -1105,7 +1140,7 @@ def urlify_commit(text_, repository=None, link_=None):
         if link_:
             # wrap not links into final link => link_
             newtext = linkify_others(newtext, link_)
-    except:
+    except Exception:
         log.error(traceback.format_exc())
         pass
 

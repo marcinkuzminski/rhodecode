@@ -6,6 +6,16 @@ command.
 
 This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
+
+nosetests -x - fail on first error
+nosetests rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
+nosetests --pdb --pdb-failures
+nosetests --with-coverage --cover-package=rhodecode.model.validators rhodecode.tests.test_validators
+
+optional FLAGS:
+    RC_WHOOSH_TEST_DISABLE=1 - skip whoosh index building and tests
+    RC_NO_TMP_PATH=1 - disable new temp path for tests, used mostly for test_vcs_operations
+
 """
 import os
 import time
@@ -23,6 +33,7 @@ from paste.script.appinstall import SetupCommand
 from pylons import config, url
 from routes.util import URLGenerator
 from webtest import TestApp
+from nose.plugins.skip import SkipTest
 
 from rhodecode import is_windows
 from rhodecode.model.meta import Session
@@ -30,6 +41,7 @@ from rhodecode.model.db import User
 from rhodecode.tests.nose_parametrized import parameterized
 
 import pylons.test
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 
 
 os.environ['TZ'] = 'UTC'
@@ -40,6 +52,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     'parameterized', 'environ', 'url', 'get_new_dir', 'TestController',
+    'SkipTest', 'ldap_lib_installed',
     'TESTS_TMP_PATH', 'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO',
     'HG_FORK', 'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS',
     'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',
@@ -47,17 +60,12 @@ __all__ = [
     'TEST_USER_REGULAR2_PASS', 'TEST_USER_REGULAR2_EMAIL', 'TEST_HG_REPO',
     'TEST_HG_REPO_CLONE', 'TEST_HG_REPO_PULL', 'TEST_GIT_REPO',
     'TEST_GIT_REPO_CLONE', 'TEST_GIT_REPO_PULL', 'HG_REMOTE_REPO',
-    'GIT_REMOTE_REPO', 'SCM_TESTS', '_get_repo_create_params',
-    '_get_group_create_params'
+    'GIT_REMOTE_REPO', 'SCM_TESTS',
 ]
 
 # Invoke websetup with the current config file
 # SetupCommand('setup-app').run([config_file])
 
-##RUNNING DESIRED TESTS
-# nosetests -x rhodecode.tests.functional.test_admin_settings:TestSettingsController.test_my_account
-# nosetests --pdb --pdb-failures
-# nosetests --with-coverage --cover-package=rhodecode.model.validators rhodecode.tests.test_validators
 environ = {}
 
 #SOME GLOBALS FOR TESTS
@@ -109,6 +117,15 @@ TEST_REPO_PREFIX = 'vcs-test'
 GIT_REMOTE_REPO = jn(TESTS_TMP_PATH, GIT_REPO)
 HG_REMOTE_REPO = jn(TESTS_TMP_PATH, HG_REPO)
 
+#skip ldap tests if LDAP lib is not installed
+ldap_lib_installed = False
+try:
+    import ldap
+    ldap_lib_installed = True
+except ImportError:
+    # means that python-ldap is not installed
+    pass
+
 
 def get_new_dir(title):
     """
@@ -158,43 +175,10 @@ class TestController(TestCase):
         return User.get_by_username(self._logged_username)
 
     def checkSessionFlash(self, response, msg):
-        self.assertTrue('flash' in response.session)
+        self.assertTrue('flash' in response.session,
+                        msg='Response session:%r have no flash'
+                        % response.session)
         if not msg in response.session['flash'][0][1]:
-            self.fail(
-                'msg `%s` not found in session flash: got `%s` instead' % (
-                      msg, response.session['flash'])
-            )
-
-
-## HELPERS ##
-
-def _get_repo_create_params(**custom):
-    defs = {
-        'repo_name': None,
-        'repo_type': 'hg',
-        'clone_uri': '',
-        'repo_group': '',
-        'repo_description': 'DESC',
-        'repo_private': False,
-        'repo_landing_rev': 'tip'
-    }
-    defs.update(custom)
-    if 'repo_name_full' not in custom:
-        defs.update({'repo_name_full': defs['repo_name']})
-
-    return defs
-
-
-def _get_group_create_params(**custom):
-    defs = dict(
-        group_name=None,
-        group_description='DESC',
-        group_parent_id=None,
-        perms_updates=[],
-        perms_new=[],
-        enable_locking=False,
-        recursive=False
-    )
-    defs.update(custom)
-
-    return defs
+            msg = u'msg `%s` not found in session flash: got `%s` instead' % (
+                      msg, response.session['flash'][0][1])
+            self.fail(safe_str(msg))

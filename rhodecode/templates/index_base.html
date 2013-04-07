@@ -3,20 +3,31 @@
         <!-- box / title -->
         <div class="title">
             <h5>
-            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}"/> ${parent.breadcrumbs()} <span id="repo_count">0</span> ${_('repositories')}
+            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value=""/> ${parent.breadcrumbs()} <span id="repo_count">0</span> ${_('repositories')}
             </h5>
             %if c.rhodecode_user.username != 'default':
-                %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-                <ul class="links">
+              <ul class="links">
+                %if h.HasPermissionAny('hg.admin','hg.create.repository')() or h.HasReposGroupPermissionAny('group.write', 'group.admin')(c.group.group_name if c.group else None):
                   <li>
                   %if c.group:
-                    <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository',parent_group=c.group.group_id))}</span>
+                        <span>${h.link_to(_('Add repository'),h.url('new_repo',parent_group=c.group.group_id))}</span>
+                        %if h.HasPermissionAny('hg.admin')() or h.HasReposGroupPermissionAny('group.admin')(c.group.group_name):
+                         <span>${h.link_to(_(u'Add group'),h.url('new_repos_group', parent_group=c.group.group_id))}</span>
+                        %endif
                   %else:
-                    <span>${h.link_to(_('ADD REPOSITORY'),h.url('admin_settings_create_repository'))}</span>
+                    <span>${h.link_to(_('Add repository'),h.url('new_repo'))}</span>
+                    %if h.HasPermissionAny('hg.admin')():
+                     <span>${h.link_to(_(u'Add group'),h.url('new_repos_group'))}</span>
+                    %endif
                   %endif
                   </li>
-                </ul>
                 %endif
+                %if c.group and h.HasReposGroupPermissionAny('group.admin')(c.group.group_name):
+                <li>
+                    <span>${h.link_to(_('Edit group'),h.url('edit_repos_group',group_name=c.group.group_name), title=_('You have admin right to this group, and can edit it'))}</span>
+                </li>
+                %endif
+              </ul>
             %endif
         </div>
         <!-- end box / title -->
@@ -37,7 +48,7 @@
                     <tr>
                         <td>
                             <div style="white-space: nowrap">
-                            <img class="icon" alt="${_('Repositories group')}" src="${h.url('/images/icons/database_link.png')}"/>
+                            <img class="icon" alt="${_('Repository group')}" src="${h.url('/images/icons/database_link.png')}"/>
                             ${h.link_to(gr.name,url('repos_group_home',group_name=gr.group_name))}
                             </div>
                         </td>
@@ -61,7 +72,7 @@
             </div>
              <%cnt=0%>
              <%namespace name="dt" file="/data_table/_dt_elements.html"/>
-            % if c.visual.lightweight_dashboard is False:
+            % if not c.visual.lightweight_dashboard:
               ## old full detailed version
             <div id='repos_list_wrap' class="yui-skin-sam">
             <table id="repos_list">
@@ -73,7 +84,6 @@
                     <th class="left">${_('Last change')}</th>
                     <th class="left">${_('Tip')}</th>
                     <th class="left">${_('Owner')}</th>
-                    <th class="left">${_('RSS')}</th>
                     <th class="left">${_('Atom')}</th>
                 </tr>
             </thead>
@@ -107,9 +117,6 @@
                     ##
                     <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
                     <td>
-                      ${dt.rss(repo['name'])}
-                    </td>
-                    <td>
                       ${dt.atom(repo['name'])}
                     </td>
                 </tr>
@@ -124,7 +131,7 @@
             % endif
         </div>
     </div>
-    % if c.visual.lightweight_dashboard is False:
+    % if not c.visual.lightweight_dashboard:
     <script>
       YUD.get('repo_count').innerHTML = ${cnt+1 if cnt else 0};
 
@@ -174,9 +181,8 @@
           {key:"last_change",label:"${_('Last Change')}",sortable:true,
               sortOptions: { sortFunction: ageSort }},
           {key:"tip",label:"${_('Tip')}",sortable:true,
-        	  sortOptions: { sortFunction: revisionSort }},
+              sortOptions: { sortFunction: revisionSort }},
           {key:"owner",label:"${_('Owner')}",sortable:true},
-          {key:"rss",label:"",sortable:false},
           {key:"atom",label:"",sortable:false},
       ];
 
@@ -193,14 +199,13 @@
               {key:"last_change"},
               {key:"tip"},
               {key:"owner"},
-              {key:"rss"},
               {key:"atom"},
           ]
       };
 
       var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
               {
-    	       sortedBy:{key:"name",dir:"asc"},
+               sortedBy:{key:"name",dir:"asc"},
                MSG_SORTASC:"${_('Click to sort ascending')}",
                MSG_SORTDESC:"${_('Click to sort descending')}",
                MSG_EMPTY:"${_('No records found.')}",
@@ -234,7 +239,6 @@
                {key:"last_change"},
                {key:"last_changeset"},
                {key:"owner"},
-               {key:"rss"},
                {key:"atom"},
             ]
          };
@@ -269,7 +273,6 @@
             {key:"last_changeset",label:"${_('Tip')}",sortable:true,
                 sortOptions: { sortFunction: revisionSort }},
             {key:"owner",label:"${_('Owner')}",sortable:true},
-            {key:"rss",label:"",sortable:false},
             {key:"atom",label:"",sortable:false},
         ];
 
@@ -292,7 +295,7 @@
 
           MSG_SORTASC:"${_('Click to sort ascending')}",
           MSG_SORTDESC:"${_('Click to sort descending')}",
-          MSG_EMPTY:"${_('No records found.')}",
+          MSG_EMPTY:"${_('No repositories found.')}",
           MSG_ERROR:"${_('Data error.')}",
           MSG_LOADING:"${_('Loading...')}",
         }
@@ -323,7 +326,6 @@
         };
         YUE.on('q_filter','click',function(){
             if(!YUD.hasClass('q_filter', 'loaded')){
-                YUD.get('q_filter').value = '';
                 //TODO: load here full list later to do search within groups
                 YUD.addClass('q_filter', 'loaded');
             }

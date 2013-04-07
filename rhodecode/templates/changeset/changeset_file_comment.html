@@ -6,35 +6,45 @@
 <%def name="comment_block(co)">
   <div class="comment" id="comment-${co.comment_id}" line="${co.line_no}">
     <div class="comment-wrapp">
-  	<div class="meta">
+      <div class="meta">
         <div style="float:left"> <img src="${h.gravatar_url(co.author.email, 20)}" /> </div>
-  		<div class="user">
-  			${co.author.username}
-  		</div>
-  		<div class="date">
-  			${h.age(co.modified_at)} <a class="permalink" href="#comment-${co.comment_id}">&para;</a>
-  		</div>
+          <div class="user">
+              ${co.author.username}
+          </div>
+          <div class="date">
+              ${h.age(co.modified_at)} <a class="permalink" href="#comment-${co.comment_id}">&para;</a>
+          </div>
         %if co.status_change:
            <div  style="float:left" class="changeset-status-container">
              <div style="float:left;padding:0px 2px 0px 2px"><span style="font-size: 18px;">&rsaquo;</span></div>
              <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change[0].status_lbl}</div>
              <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change[0].status))}" /></div>
-             <div style="float:left;padding:3px 0px 0px 5px"> <span class="">
-             %if co.pull_request:
-                <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">${_('Status from pull request %s') % co.pull_request.pull_request_id}</a>   
-             %endif
-             </span> </div>
            </div>
         %endif
+
+       <div style="float:left;padding:3px 0px 0px 5px">
+        <span class="">
+         %if co.pull_request:
+            <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">
+            %if co.status_change:
+              ${_('Status change on pull request #%s') % co.pull_request.pull_request_id}
+            %else:
+              ${_('Comment on pull request #%s') % co.pull_request.pull_request_id}
+            %endif
+            </a>
+         %endif
+        </span>
+       </div>
+
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
         <div class="buttons">
           <span onClick="deleteComment(${co.comment_id})" class="delete-comment ui-btn">${_('Delete')}</span>
         </div>
       %endif
-  	</div>
-  	<div class="text">
-  		${h.rst_w_mentions(co.text)|n}
-  	</div>
+      </div>
+      <div class="text">
+          ${h.rst_w_mentions(co.text)|n}
+      </div>
     </div>
   </div>
 </%def>
@@ -50,7 +60,7 @@
           <div class="comment-help">${_('Commenting on line {1}.')}
           ${(_('Comments parsed using %s syntax with %s support.') % (
                  ('<a href="%s">RST</a>' % h.url('rst_help')),
-          	     ('<span style="color:#003367" class="tooltip" title="%s">@mention</span>' % _('Use @username inside this text to send notification to this RhodeCode user'))
+                   ('<span style="color:#003367" class="tooltip" title="%s">@mention</span>' % _('Use @username inside this text to send notification to this RhodeCode user'))
                )
             )|n
            }
@@ -62,7 +72,7 @@
       <input type="hidden" name="f_path" value="{0}">
       <input type="hidden" name="line" value="{1}">
       ${h.submit('save', _('Comment'), class_='ui-btn save-inline-form')}
-      ${h.reset('hide-inline-form', _('Hide'), class_='ui-btn hide-inline-form')}
+      ${h.reset('hide-inline-form', _('Cancel'), class_='ui-btn hide-inline-form')}
       </div>
       ${h.end_form()}
   %else:
@@ -98,7 +108,7 @@
 </%def>
 
 ## generate inline comments and the main ones
-<%def name="generate_comments()">
+<%def name="generate_comments(include_pr=False)">
 <div class="comments">
     <div id="inline-comments-container">
     ## generate inlines for this changeset
@@ -107,7 +117,11 @@
 
     %for co in c.comments:
         <div id="comment-tr-${co.comment_id}">
+          ## only render comments that are not from pull request, or from
+          ## pull request and a status change
+          %if not co.pull_request or (co.pull_request and co.status_change) or include_pr:
           ${comment_block(co)}
+          %endif
         </div>
     %endfor
 </div>
@@ -120,15 +134,14 @@
     %if c.rhodecode_user.username != 'default':
     <div class="comment-form ac">
         ${h.form(post_url)}
-        <strong>${_('Leave a comment')}</strong>
         <div class="clearfix">
             <div class="comment-help">
                 ${(_('Comments parsed using %s syntax with %s support.') % (('<a href="%s">RST</a>' % h.url('rst_help')),
-          		'<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
-          		_('Use @username inside this text to send notification to this RhodeCode user')))|n}
+                  '<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
+                  _('Use @username inside this text to send notification to this RhodeCode user')))|n}
               %if change_status:
-                | <label for="show_changeset_status_box" class="tooltip" title="${_('Check this to change current status of code-review for this changeset')}"> ${_('change status')}</label>
-                  <input style="vertical-align: bottom;margin-bottom:-2px" id="show_changeset_status_box" type="checkbox" name="change_changeset_status" />
+                | <a id="show_changeset_link" onClick="change_status_show();"> ${_('Change status')}</a>
+                  <input id="show_changeset_status_box" type="checkbox" name="change_changeset_status" style="display: none;" />
               %endif
             </div>
             %if change_status:
@@ -155,25 +168,22 @@
     %endif
 </div>
 <script>
+var change_status_show = function(){
+    var show = ! YUD.get('show_changeset_status_box').checked;
+    YUD.get('show_changeset_status_box').checked = show;
+    YUD.setStyle('status_block_container', 'display', show?'':'none');
+};
+
 YUE.onDOMReady(function () {
    MentionsAutoComplete('text', 'mentions_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
-   // changeset status box listener
-   YUE.on(YUD.get('show_changeset_status_box'),'change',function(e){
-       if(e.currentTarget.checked){
-           YUD.setStyle('status_block_container','display','');
-       }
-       else{
-           YUD.setStyle('status_block_container','display','none');
-       }
-   })
    YUE.on(YUQ('.status_change_radio'), 'change',function(e){
-	   var val = e.currentTarget.value;
-	   if (val == 'approved' || val == 'rejected') {
-		   YUD.removeClass('save_close', 'hidden');
-	   }else{
-		   YUD.addClass('save_close', 'hidden');
-	   }
+       var val = e.currentTarget.value;
+       if (val == 'approved' || val == 'rejected') {
+           YUD.removeClass('save_close', 'hidden');
+       }else{
+           YUD.addClass('save_close', 'hidden');
+       }
    })
 
 });

@@ -2,22 +2,19 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${c.repo_name} ${_('Compare')} ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}
+    ${_('%s Compare') % c.repo_name} - ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${h.link_to(_(u'Home'),h.url('/'))}
-    &raquo;
-    ${h.link_to(c.repo_name,h.url('summary_home',repo_name=c.repo_name))}
-    &raquo;
-    ${_('Compare')}
+  ${_('Compare revisions')}
 </%def>
 
 <%def name="page_nav()">
-    ${self.menu('changelog')}
+    ${self.menu('repositories')}
 </%def>
 
 <%def name="main()">
+${self.context_bar('changelog')}
 <div class="box">
     <!-- box / title -->
     <div class="title">
@@ -25,8 +22,7 @@
     </div>
     <div class="table">
         <div id="body" class="diffblock">
-            <div class="code-header cv">
-                <h3 class="code-header-title">${_('Compare View')}</h3>
+            <div class="code-header">
                 <div>
                 ${'%s@%s' % (c.org_repo.repo_name, c.org_ref)} -&gt; ${'%s@%s' % (c.other_repo.repo_name, c.other_ref)}  <a href="${c.swap_url}">[swap]</a>
                 </div>
@@ -53,13 +49,13 @@
               %endif
               %for fid, change, f, stat in c.files:
                   <div class="cs_${change}">
-                    <div class="node">${h.link_to(h.safe_unicode(f),h.url.current(anchor=fid))}</div>
+                    <div class="node">${h.link_to(h.safe_unicode(f),h.url.current(anchor=fid, **request.GET.mixed()))}</div>
                     <div class="changes">${h.fancy_file_stats(stat)}</div>
                   </div>
               %endfor
             </div>
             % if c.limited_diff:
-              <h5>${_('Changeset was too big and was cut off...')}</h5>
+              <h5>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1, **request.GET.mixed())}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h5>
             % endif
         </div>
     </div>
@@ -70,7 +66,7 @@
       ${diff_block.diff_block_simple([c.changes[fid]])}
     %endfor
     % if c.limited_diff:
-      <h4>${_('Changeset was too big and was cut off...')}</h4>
+      <h4>${_('Changeset was too big and was cut off...')} <a href="${h.url.current(fulldiff=1, **request.GET.mixed())}" onclick="return confirm('${_("confirm to show potentially huge diff")}')">${_('Show full diff')}</a></h4>
     % endif
      <script type="text/javascript">
 

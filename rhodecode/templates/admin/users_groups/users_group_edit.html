@@ -2,15 +2,15 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-    ${_('Edit users group')} ${c.users_group.users_group_name} - ${c.rhodecode_name}
+    ${_('Edit user group')} ${c.users_group.users_group_name} &middot; ${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
     ${h.link_to(_('Admin'),h.url('admin_home'))}
     &raquo;
-    ${h.link_to(_('UsersGroups'),h.url('users_groups'))}
+    ${h.link_to(_('UserGroups'),h.url('users_groups'))}
     &raquo;
-    ${_('edit')} "${c.users_group.users_group_name}"
+    ${_('Edit %s') % c.users_group.users_group_name}
 </%def>
 
 <%def name="page_nav()">
@@ -27,67 +27,67 @@
     ${h.form(url('users_group', id=c.users_group.users_group_id),method='put', id='edit_users_group')}
     <div class="form">
         <!-- fields -->
-	        <div class="fields">
-	             <div class="field">
-	                <div class="label">
-	                    <label for="users_group_name">${_('Group name')}:</label>
-	                </div>
-	                <div class="input">
-	                    ${h.text('users_group_name',class_='small')}
-	                </div>
-	             </div>
+            <div class="fields">
+                 <div class="field">
+                    <div class="label">
+                        <label for="users_group_name">${_('Group name')}:</label>
+                    </div>
+                    <div class="input">
+                        ${h.text('users_group_name',class_='small')}
+                    </div>
+                 </div>
 
-	             <div class="field">
-	                <div class="label label-checkbox">
-	                    <label for="users_group_active">${_('Active')}:</label>
-	                </div>
-	                <div class="checkboxes">
-	                    ${h.checkbox('users_group_active',value=True)}
-	                </div>
-	             </div>
-	            <div class="field">
+                 <div class="field">
+                    <div class="label label-checkbox">
+                        <label for="users_group_active">${_('Active')}:</label>
+                    </div>
+                    <div class="checkboxes">
+                        ${h.checkbox('users_group_active',value=True)}
+                    </div>
+                 </div>
+                <div class="field">
                     <div class="label">
                         <label for="users_group_active">${_('Members')}:</label>
                     </div>
                     <div class="select">
-	                    <table>
-	                            <tr>
-	                                <td>
-	                                    <div>
-	                                        <div style="float:left">
-	                                            <div class="text" style="padding: 0px 0px 6px;">${_('Choosen group members')}</div>
-	                                            ${h.select('users_group_members',[x[0] for x in c.group_members],c.group_members,multiple=True,size=8,style="min-width:210px")}
-	                                           <div  id="remove_all_elements" style="cursor:pointer;text-align:center">
-	                                               ${_('Remove all elements')}
-	                                               <img alt="remove" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_right.png')}"/>
-	                                           </div>
-	                                        </div>
-	                                        <div style="float:left;width:20px;padding-top:50px">
-	                                            <img alt="add" id="add_element"
-	                                                style="padding:2px;cursor:pointer"
-	                                                src="${h.url('/images/icons/arrow_left.png')}"/>
-	                                            <br />
-	                                            <img alt="remove" id="remove_element"
-	                                                style="padding:2px;cursor:pointer"
-	                                                src="${h.url('/images/icons/arrow_right.png')}"/>
-	                                        </div>
-	                                        <div style="float:left">
-	                                             <div class="text" style="padding: 0px 0px 6px;">${_('Available members')}</div>
-	                                             ${h.select('available_members',[],c.available_members,multiple=True,size=8,style="min-width:210px")}
-	                                             <div id="add_all_elements" style="cursor:pointer;text-align:center">
-	                                                   <img alt="add" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_left.png')}"/>
-	                                                    ${_('Add all elements')}
-	                                             </div>
-	                                        </div>
-	                                    </div>
-	                                </td>
-	                            </tr>
-	                    </table>
+                        <table>
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <div style="float:left">
+                                                <div class="text" style="padding: 0px 0px 6px;">${_('Chosen group members')}</div>
+                                                ${h.select('users_group_members',[x[0] for x in c.group_members],c.group_members,multiple=True,size=8,style="min-width:210px")}
+                                               <div id="remove_all_elements" style="cursor:pointer;text-align:center">
+                                                   ${_('Remove all elements')}
+                                                   <img alt="remove" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_right.png')}"/>
+                                               </div>
+                                            </div>
+                                            <div style="float:left;width:20px;padding-top:50px">
+                                                <img alt="add" id="add_element"
+                                                    style="padding:2px;cursor:pointer"
+                                                    src="${h.url('/images/icons/arrow_left.png')}"/>
+                                                <br />
+                                                <img alt="remove" id="remove_element"
+                                                    style="padding:2px;cursor:pointer"
+                                                    src="${h.url('/images/icons/arrow_right.png')}"/>
+                                            </div>
+                                            <div style="float:left">
+                                                 <div class="text" style="padding: 0px 0px 6px;">${_('Available members')}</div>
+                                                 ${h.select('available_members',[],c.available_members,multiple=True,size=8,style="min-width:210px")}
+                                                 <div id="add_all_elements" style="cursor:pointer;text-align:center">
+                                                       <img alt="add" style="vertical-align:text-bottom" src="${h.url('/images/icons/arrow_left.png')}"/>
+                                                        ${_('Add all elements')}
+                                                 </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                        </table>
                     </div>
 
                 </div>
                 <div class="buttons">
-                  ${h.submit('save',_('save'),class_="ui-btn large")}
+                  ${h.submit('Save',_('Save'),class_="ui-btn large")}
                 </div>
             </div>
     </div>
@@ -138,9 +138,13 @@ ${h.end_form()}
         </div>
     </div>
     ${h.end_form()}
+
+    ## permissions overview
+    <%namespace name="p" file="/base/perms_summary.html"/>
+    ${p.perms_summary(c.users_group.permissions)}
 </div>
 
-<div class="box box-right">
+<div class="box box-right" style="clear:right">
     <!-- box / title -->
     <div class="title">
         <h5>${_('Group members')}</h5>
@@ -164,63 +168,6 @@ ${h.end_form()}
       %endif
     </div>
 </div>
-
-<div class="box box-left">
-    <!-- box / title -->
-    <div class="title">
-        <h5>${_('Permissions defined for this group')}</h5>
-    </div>
- ## permissions overview
-    <div id="perms" class="table">
-       %for section in sorted(c.users_group.permissions.keys()):
-          <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
-          %if not c.users_group.permissions:
-              <span class="empty_data">${_('No permissions set yet')}</span>
-          %else:
-          <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
-           <table id="tbl_list_repository">
-            <thead>
-                <tr>
-                <th class="left">${_('Name')}</th>
-                <th class="left">${_('Permission')}</th>
-                <th class="left">${_('Edit Permission')}</th>
-            </thead>
-            <tbody>
-            %for k in c.users_group.permissions[section]:
-                 <%
-                     section_perm = c.users_group.permissions[section].get(k)
-                     _perm = section_perm.split('.')[-1]
-                 %>
-                <tr>
-                    <td>
-                        %if section == 'repositories':
-                            <a href="${h.url('summary_home',repo_name=k)}">${k}</a>
-                        %elif section == 'repositories_groups':
-                            <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
-                        %endif
-                    </td>
-                    <td>
-                         <span class="perm_tag ${_perm}">${section_perm}</span>
-                    </td>
-                    <td>
-                        %if section == 'repositories':
-                            <a href="${h.url('edit_repo',repo_name=k,anchor='permissions_manage')}">${_('edit')}</a>
-                        %elif section == 'repositories_groups':
-                            <a href="${h.url('edit_repos_group',id=k,anchor='permissions_manage')}">${_('edit')}</a>
-                        %else:
-                            --
-                        %endif
-                    </td>
-                </tr>
-            %endfor
-            </tbody>
-           </table>
-          </div>
-          %endif
-       %endfor
-    </div>
-</div>
-
 
 <script type="text/javascript">
   MultiSelectWidget('users_group_members','available_members','edit_users_group');

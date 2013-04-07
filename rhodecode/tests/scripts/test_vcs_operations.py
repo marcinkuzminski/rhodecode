@@ -4,9 +4,10 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Test suite for making push/pull operations.
-    Run using::
-
+    Run using after doing paster serve test.ini::
      RC_WHOOSH_TEST_DISABLE=1 RC_NO_TMP_PATH=1 nosetests rhodecode/tests/scripts/test_vcs_operations.py
+
+    You must have git > 1.8.1 for tests to work fine
 
     :created_on: Dec 30, 2010
     :author: marcink
@@ -37,7 +38,8 @@ from tempfile import _RandomNameSequence
 from subprocess import Popen, PIPE
 
 from rhodecode.tests import *
-from rhodecode.model.db import User, Repository, UserLog, UserIpMap
+from rhodecode.model.db import User, Repository, UserLog, UserIpMap,\
+    CacheInvalidation
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
@@ -104,16 +106,17 @@ def _add_files_and_push(vcs, DEST, **kwargs):
     Command(cwd).execute('touch %s' % added_file)
     Command(cwd).execute('%s add %s' % (vcs, added_file))
 
-    for i in xrange(3):
+    for i in xrange(kwargs.get('files_no', 3)):
         cmd = """echo 'added_line%s' >> %s""" % (i, added_file)
         Command(cwd).execute(cmd)
+        author_str = 'Marcin Kuźminski <me@email.com>'
         if vcs == 'hg':
             cmd = """hg commit -m 'commited new %s' -u '%s' %s """ % (
-                i, 'Marcin Kuźminski <marcin@python-blog.com>', added_file
+                i, author_str, added_file
             )
         elif vcs == 'git':
             cmd = """git commit -m 'commited new %s' --author '%s' %s """ % (
-                i, 'Marcin Kuźminski <marcin@python-blog.com>', added_file
+                i, author_str, added_file
             )
         Command(cwd).execute(cmd)
     # PUSH it back
@@ -129,7 +132,7 @@ def _add_files_and_push(vcs, DEST, **kwargs):
     if vcs == 'hg':
         stdout, stderr = Command(cwd).execute('hg push --verbose', clone_url)
     elif vcs == 'git':
-        stdout, stderr = Command(cwd).execute('git push', clone_url + " master")
+        stdout, stderr = Command(cwd).execute('git push --verbose', clone_url + " master")
 
     return stdout, stderr
 
@@ -238,6 +241,40 @@ class TestVCSOperations(unittest.TestCase):
         #WTF git stderr ?!
         assert 'master -> master' in stderr
 
+    def test_push_invalidates_cache_hg(self):
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==HG_REPO).one()
+        key.cache_active = True
+        Session().add(key)
+        Session().commit()
+
+        DEST = _get_tmp_dir()
+        clone_url = _construct_url(HG_REPO, dest=DEST)
+        stdout, stderr = Command('/tmp').execute('hg clone', clone_url)
+
+        stdout, stderr = _add_files_and_push('hg', DEST, files_no=1)
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==HG_REPO).one()
+        self.assertEqual(key.cache_active, False)
+
+    def test_push_invalidates_cache_git(self):
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==GIT_REPO).one()
+        key.cache_active = True
+        Session().add(key)
+        Session().commit()
+
+        DEST = _get_tmp_dir()
+        clone_url = _construct_url(GIT_REPO, dest=DEST)
+        stdout, stderr = Command('/tmp').execute('git clone', clone_url)
+
+        # commit some stuff into this repo
+        stdout, stderr = _add_files_and_push('git', DEST, files_no=1)
+
+        key = CacheInvalidation.query().filter(CacheInvalidation.cache_key
+                                               ==GIT_REPO).one()
+        self.assertEqual(key.cache_active, False)
+
     def test_push_wrong_credentials_hg(self):
         DEST = _get_tmp_dir()
         clone_url = _construct_url(HG_REPO, dest=DEST)
@@ -324,8 +361,7 @@ class TestVCSOperations(unittest.TestCase):
         #pull fails since repo is locked
         clone_url = _construct_url(GIT_REPO)
         stdout, stderr = Command('/tmp').execute('git clone', clone_url)
-        msg = ("""423 Repository `%s` locked by user `%s`"""
-                % (GIT_REPO, TEST_USER_ADMIN_LOGIN))
+        msg = ("""The requested URL returned error: 423""")
         assert msg in stderr
 
     def test_push_on_locked_repo_by_other_user_hg(self):
@@ -455,7 +491,8 @@ class TestVCSOperations(unittest.TestCase):
             Session().commit()
             clone_url = _construct_url(GIT_REPO)
             stdout, stderr = Command('/tmp').execute('git clone', clone_url)
-            assert 'error: The requested URL returned error: 403 Forbidden' in stderr
+            msg = ("""The requested URL returned error: 403""")
+            assert msg in stderr
         finally:
             #release IP restrictions
             for ip in UserIpMap.getAll():

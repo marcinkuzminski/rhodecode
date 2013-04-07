@@ -26,7 +26,7 @@
 
 import logging
 from rhodecode.model import BaseModel
-from rhodecode.model.db import UserRepoToPerm, UsersGroupRepoToPerm, \
+from rhodecode.model.db import UserRepoToPerm, UserGroupRepoToPerm, \
     Permission
 
 log = logging.getLogger(__name__)
@@ -64,9 +64,9 @@ class RepositoryPermissionModel(BaseModel):
             self.sa.delete(current)
 
     def get_users_group_permission(self, repository, users_group):
-        return UsersGroupRepoToPerm.query() \
-                .filter(UsersGroupRepoToPerm.users_group == users_group) \
-                .filter(UsersGroupRepoToPerm.repository == repository) \
+        return UserGroupRepoToPerm.query() \
+                .filter(UserGroupRepoToPerm.users_group == users_group) \
+                .filter(UserGroupRepoToPerm.repository == repository) \
                 .scalar()
 
     def update_users_group_permission(self, repository, users_group,
@@ -77,7 +77,7 @@ class RepositoryPermissionModel(BaseModel):
             if not current.permission is permission:
                 current.permission = permission
         else:
-            p = UsersGroupRepoToPerm()
+            p = UserGroupRepoToPerm()
             p.users_group = users_group
             p.repository = repository
             p.permission = permission

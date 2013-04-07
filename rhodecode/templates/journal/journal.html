@@ -1,7 +1,7 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="/base/base.html"/>
 <%def name="title()">
-    ${_('Journal')} - ${c.rhodecode_name}
+    ${_('Journal')} &middot; ${c.rhodecode_name}
 </%def>
 <%def name="breadcrumbs()">
     <h5>
@@ -15,7 +15,7 @@
     </h5>
 </%def>
 <%def name="page_nav()">
-	${self.menu('home')}
+    ${self.menu('journal')}
 </%def>
 <%def name="head_extra()">
 <link href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}" rel="alternate" title="${_('ATOM journal feed')}" type="application/atom+xml" />
@@ -24,30 +24,27 @@
 <%def name="main()">
 
     <div class="box box-left">
-	    <!-- box / title -->
-	    <div class="title">
+        <!-- box / title -->
+        <div class="title">
          ${self.breadcrumbs()}
          <ul class="links">
            <li>
              <span><a id="refresh" href="${h.url('journal')}"><img class="icon" title="${_('Refresh')}" alt="${_('Refresh')}" src="${h.url('/images/icons/arrow_refresh.png')}"/></a></span>
            </li>
            <li>
-             <span><a href="${h.url('journal_rss', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('RSS feed')}" alt="${_('RSS feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
-           </li>
-           <li>
-             <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/atom.png')}"/></a></span>
+             <span><a href="${h.url('journal_atom', api_key=c.rhodecode_user.api_key)}"><img class="icon" title="${_('ATOM feed')}" alt="${_('ATOM feed')}" src="${h.url('/images/icons/rss_16.png')}"/></a></span>
            </li>
          </ul>
-	    </div>
-	    <div id="journal">${c.journal_data}</div>
+        </div>
+        <div id="journal">${c.journal_data}</div>
     </div>
     <div class="box box-right">
         <!-- box / title -->
 
         <div class="title">
             <h5>
-            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
-            <input class="q_filter_box" id="q_filter_watched" size="15" type="text" name="filter" value="${_('quick filter...')}" style="display: none"/>
+            <input class="q_filter_box" id="q_filter" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value="" style="display: none"/>
+            <input class="q_filter_box" id="q_filter_watched" size="15" type="text" name="filter" placeholder="${_('quick filter...')}" value="" style="display: none"/>
             </h5>
              <ul class="links" style="color:#DADADA">
                <li>
@@ -56,11 +53,6 @@
                <li>
                  <span><a id="show_my" class="link-white" href="#my">${_('My repos')}</a> </span>
                </li>
-               %if h.HasPermissionAny('hg.admin','hg.create.repository')():
-                 <li>
-                   <span>${h.link_to(_('Add repo'),h.url('admin_settings_create_repository'))}</span>
-                 </li>
-               %endif
              </ul>
         </div>
 
@@ -124,7 +116,7 @@
         show_my(e);
     })
     var show_watched = function(e){
-    	YUD.setStyle('my_container','display','none');
+        YUD.setStyle('my_container','display','none');
         YUD.setStyle('watched_container','display','');
         YUD.setStyle('q_filter_watched','display','');
         YUD.setStyle('q_filter','display','none');
@@ -132,7 +124,7 @@
         YUD.addClass('show_watched', 'current');
         YUD.removeClass('show_my','current');
         if(!YUD.hasClass('show_watched', 'loaded')){
-        	watched_renderer(${c.watched_data |n});
+            watched_renderer(${c.watched_data |n});
             YUD.addClass('show_watched', 'loaded');
         }
 
@@ -160,7 +152,7 @@
         var tabHash = url[1];
         var func = tabs[tabHash]
         if (func){
-        	func();
+            func();
         }
     }
     function watched_renderer(data){
@@ -255,7 +247,6 @@
         };
         YUE.on('q_filter_watched','click',function(){
             if(!YUD.hasClass('q_filter_watched', 'loaded')){
-                YUD.get('q_filter_watched').value = '';
                 //TODO: load here full list later to do search within groups
                 YUD.addClass('q_filter_watched', 'loaded');
             }
@@ -359,7 +350,6 @@
         };
         YUE.on('q_filter','click',function(){
             if(!YUD.hasClass('q_filter', 'loaded')){
-                YUD.get('q_filter').value = '';
                 //TODO: load here full list later to do search within groups
                 YUD.addClass('q_filter', 'loaded');
             }
