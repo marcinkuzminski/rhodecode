@@ -368,6 +368,20 @@ var _run_callbacks = function(callbacks){
 }
 
 /**
+ * turns objects into GET query string
+ */
+var toQueryString = function(o) {
+    if(typeof o !== 'object') {
+        return false;
+    }
+    var _p, _qs = [];
+    for(_p in o) {
+        _qs.push(encodeURIComponent(_p) + '=' + encodeURIComponent(o[_p]));
+    }
+    return _qs.join('&');
+};
+
+/**
  * Partial Ajax Implementation
  *
  * @param url: defines url to make partial request
@@ -440,17 +454,6 @@ var ajaxGET = function(url,success) {
 var ajaxPOST = function(url,postData,success) {
     // Set special header for ajax == HTTP_X_PARTIAL_XHR
     YUC.initHeader('X-PARTIAL-XHR',true);
-
-    var toQueryString = function(o) {
-        if(typeof o !== 'object') {
-            return false;
-        }
-        var _p, _qs = [];
-        for(_p in o) {
-            _qs.push(encodeURIComponent(_p) + '=' + encodeURIComponent(o[_p]));
-        }
-        return _qs.join('&');
-    };
 
     var sUrl = url;
     var callback = {
@@ -2035,7 +2038,38 @@ var addPermAction = function(_html, users_list, groups_list){
        YUD.insertAfter(el, last_node);
     }
 }
+function ajaxActionRevokePermission(url, obj_id, obj_type, field_id, extra_data) {
+    var callback = {
+        success: function (o) {
+            var tr = YUD.get(String(field_id));
+            tr.parentNode.removeChild(tr);
+        },
+        failure: function (o) {
+            alert(_TM['Failed to remoke permission'] + ": " + o.status);
+        },
+    };
+    query_params = {
+        '_method': 'delete'
+    }
+    // put extra data into POST
+    if (extra_data !== undefined && (typeof extra_data === 'object')){
+        for(k in extra_data){
+            query_params[k] = extra_data[k];
+        }
+    }
 
+    if (obj_type=='user'){
+        query_params['user_id'] = obj_id;
+        query_params['obj_type'] = 'user';
+    }
+    else if (obj_type=='user_group'){
+        query_params['user_group_id'] = obj_id;
+        query_params['obj_type'] = 'user_group';
+    }
+
+    var request = YAHOO.util.Connect.asyncRequest('POST', url, callback,
+            toQueryString(query_params));
+};
 /* Multi selectors */
 
 var MultiSelectWidget = function(selected_id, available_id, form_id){

@@ -122,19 +122,15 @@ def make_map(config):
              action="show", conditions=dict(method=["GET"],
                                             function=check_repo))
         #add repo perm member
-        m.connect('set_repo_perm_member', "/set_repo_perm_member/{repo_name:.*?}",
-             action="set_repo_perm_member",
-             conditions=dict(method=["POST"], function=check_repo))
+        m.connect('set_repo_perm_member',
+                  "/repos/{repo_name:.*?}/grant_perm",
+                  action="set_repo_perm_member",
+                  conditions=dict(method=["POST"], function=check_repo))
 
         #ajax delete repo perm user
-        m.connect('delete_repo_user', "/repos_delete_user/{repo_name:.*?}",
-             action="delete_perm_user",
-             conditions=dict(method=["DELETE"], function=check_repo))
-
-        #ajax delete repo perm users_group
-        m.connect('delete_repo_users_group',
-                  "/repos_delete_users_group/{repo_name:.*?}",
-                  action="delete_perm_users_group",
+        m.connect('delete_repo_perm_member',
+                  "/repos/{repo_name:.*?}/revoke_perm",
+                  action="delete_repo_perm_member",
                   conditions=dict(method=["DELETE"], function=check_repo))
 
         #settings actions
@@ -184,6 +180,18 @@ def make_map(config):
         m.connect("update_repos_group", "/repos_groups/{group_name:.*?}",
                   action="update", conditions=dict(method=["PUT"],
                                                    function=check_group))
+        #add repo group perm member
+        m.connect('set_repo_group_perm_member',
+                  "/repos_groups/{group_name:.*?}/grant_perm",
+                  action="set_repo_group_perm_member",
+                  conditions=dict(method=["POST"], function=check_group))
+
+        #ajax delete repo group perm
+        m.connect('delete_repo_group_perm_member',
+                  "/repos_groups/{group_name:.*?}/revoke_perm",
+                  action="delete_repo_group_perm_member",
+                  conditions=dict(method=["DELETE"], function=check_group))
+
         m.connect("delete_repos_group", "/repos_groups/{group_name:.*?}",
                   action="delete", conditions=dict(method=["DELETE"],
                                                    function=check_group_skip_path))
@@ -200,24 +208,6 @@ def make_map(config):
         m.connect("formatted_repos_group", "/repos_groups/{group_name:.*?}.{format}",
                   action="show", conditions=dict(method=["GET"],
                                                  function=check_group))
-
-        #add repo perm member
-        m.connect('set_repo_group_perm_member',
-                  "/set_repo_group_perm_member/{group_name:.*?}",
-             action="set_repo_group_perm_member",
-             conditions=dict(method=["POST"], function=check_group))
-
-        # ajax delete repository group perm user
-        m.connect('delete_repos_group_user_perm',
-                  "/delete_repos_group_user_perm/{group_name:.*?}",
-             action="delete_repos_group_user_perm",
-             conditions=dict(method=["DELETE"], function=check_group))
-
-        # ajax delete repository group perm users_group
-        m.connect('delete_repos_group_users_group_perm',
-                  "/delete_repos_group_users_group_perm/{group_name:.*?}",
-                  action="delete_repos_group_users_group_perm",
-                  conditions=dict(method=["DELETE"], function=check_group))
 
     #ADMIN USER REST ROUTES
     with rmap.submapper(path_prefix=ADMIN_PREFIX,

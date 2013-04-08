@@ -90,28 +90,9 @@
 </table>
 <script type="text/javascript">
 function ajaxActionRevoke(obj_id, obj_type, field_id) {
-    var callback = {
-        success: function (o) {
-            var tr = YUD.get(String(field_id));
-            tr.parentNode.removeChild(tr);
-        },
-        failure: function (o) {
-            alert(_TM['Failed to remoke permission'] + ": " + o.status);
-        },
-    };
-    var recursive = YUD.get('recursive').checked;
-
-    if (obj_type=='user'){
-        var sUrl = "${h.url('delete_repos_group_user_perm',group_name=c.repos_group.group_name)}";
-        var postData = '_method=delete&recursive={0}&user_id={1}&obj_type=user'.format(recursive,obj_id);
-    }
-    else if (obj_type=='user_group'){
-        var sUrl = "${h.url('delete_repos_group_users_group_perm',group_name=c.repos_group.group_name)}";
-        var postData = '_method=delete&recursive={0}&users_group_id={0}&obj_type=user_group'.format(recursive,obj_id);
-    }
-    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+    url = "${h.url('delete_repo_group_perm_member', group_name=c.repos_group.group_name)}";
+    ajaxActionRevokePermission(url, obj_id, obj_type, field_id, {recursive:YUD.get('recursive').checked});
 };
-
 
 YUE.onDOMReady(function () {
     if (!YUD.hasClass('perm_new_member_name', 'error')) {

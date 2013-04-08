@@ -294,49 +294,41 @@ class ReposGroupsController(BaseController):
         return redirect(url('edit_repos_group', group_name=group_name))
 
     @HasReposGroupPermissionAnyDecorator('group.admin')
-    def delete_repos_group_user_perm(self, group_name):
+    def delete_repo_group_perm_member(self, group_name):
         """
         DELETE an existing repository group permission user
 
         :param group_name:
         """
         try:
+            obj_type = request.POST.get('obj_type')
+            obj_id = None
+            if obj_type == 'user':
+                obj_id = safe_int(request.POST.get('user_id'))
+            elif obj_type == 'user_group':
+                obj_id = safe_int(request.POST.get('user_group_id'))
+
             if not c.rhodecode_user.is_admin:
-                if c.rhodecode_user.user_id == safe_int(request.POST['user_id']):
+                if obj_type == 'user' and c.rhodecode_user.user_id == obj_id:
                     msg = _('Cannot revoke permission for yourself as admin')
                     h.flash(msg, category='warning')
                     raise Exception('revoke admin permission on self')
             recursive = str2bool(request.POST.get('recursive', False))
-            ReposGroupModel().delete_permission(
-                repos_group=group_name, obj=request.POST['user_id'],
-                obj_type='user', recursive=recursive
-            )
+            if obj_type == 'user':
+                ReposGroupModel().delete_permission(
+                    repos_group=group_name, obj=obj_id,
+                    obj_type='user', recursive=recursive
+                )
+            elif obj_type == 'user_group':
+                ReposGroupModel().delete_permission(
+                    repos_group=group_name, obj=obj_id,
+                    obj_type='users_group', recursive=recursive
+                )
+
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of group user'),
-                    category='error')
-            raise HTTPInternalServerError()
-
-    @HasReposGroupPermissionAnyDecorator('group.admin')
-    def delete_repos_group_users_group_perm(self, group_name):
-        """
-        DELETE an existing repository group permission user group
-
-        :param group_name:
-        """
-
-        try:
-            recursive = str2bool(request.POST.get('recursive', False))
-            ReposGroupModel().delete_permission(
-                repos_group=group_name, obj=request.POST['users_group_id'],
-                obj_type='users_group', recursive=recursive
-            )
-            Session().commit()
-        except Exception:
-            log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of group'
-                      ' user groups'),
+            h.flash(_('An error occurred during revoking of permission'),
                     category='error')
             raise HTTPInternalServerError()
 

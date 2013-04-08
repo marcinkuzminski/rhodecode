@@ -295,7 +295,7 @@ class UsersGroupsController(BaseController):
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of group user'),
+            h.flash(_('An error occurred during revoking of permission'),
                     category='error')
             raise HTTPInternalServerError()
 

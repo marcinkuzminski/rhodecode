@@ -51,6 +51,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
 from sqlalchemy.sql.expression import func
 from rhodecode.lib.exceptions import AttachedForksError
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -340,42 +341,33 @@ class ReposController(BaseRepoController):
         return redirect(url('edit_repo', repo_name=repo_name))
 
     @HasRepoPermissionAllDecorator('repository.admin')
-    def delete_perm_user(self, repo_name):
+    def delete_repo_perm_member(self, repo_name):
         """
         DELETE an existing repository permission user
 
         :param repo_name:
         """
         try:
-            RepoModel().revoke_user_permission(repo=repo_name,
-                                               user=request.POST['user_id'])
+            obj_type = request.POST.get('obj_type')
+            obj_id = None
+            if obj_type == 'user':
+                obj_id = safe_int(request.POST.get('user_id'))
+            elif obj_type == 'user_group':
+                obj_id = safe_int(request.POST.get('user_group_id'))
+
+            if obj_type == 'user':
+                RepoModel().revoke_user_permission(repo=repo_name, user=obj_id)
+            elif obj_type == 'user_group':
+                RepoModel().revoke_users_group_permission(
+                    repo=repo_name, group_name=obj_id
+                )
             #TODO: implement this
             #action_logger(self.rhodecode_user, 'admin_revoked_repo_permissions',
             #              repo_name, self.ip_addr, self.sa)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of repository user'),
-                    category='error')
-            raise HTTPInternalServerError()
-
-    @HasRepoPermissionAllDecorator('repository.admin')
-    def delete_perm_users_group(self, repo_name):
-        """
-        DELETE an existing repository permission user group
-
-        :param repo_name:
-        """
-
-        try:
-            RepoModel().revoke_users_group_permission(
-                repo=repo_name, group_name=request.POST['users_group_id']
-            )
-            Session().commit()
-        except Exception:
-            log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of repository'
-                      ' user groups'),
+            h.flash(_('An error occurred during revoking of permission'),
                     category='error')
             raise HTTPInternalServerError()
 
