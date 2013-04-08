@@ -70,7 +70,10 @@ class PullrequestsController(BaseRepoController):
 
     def _get_repo_refs(self, repo, rev=None, branch_rev=None):
         """return a structure with repo's interesting changesets, suitable for
-        the selectors in pullrequest.html"""
+        the selectors in pullrequest.html
+
+        rev: a revision that must be in the list and selected by default
+        branch_rev: a revision of which peers should be preferred and available."""
         # list named branches that has been merged to this named branch - it should probably merge back
         peers = []
 
@@ -81,29 +84,32 @@ class PullrequestsController(BaseRepoController):
             branch_rev = safe_str(branch_rev)
             # not restricting to merge() would also get branch point and be better
             # (especially because it would get the branch point) ... but is currently too expensive
-            revs = ["sort(parents(branch(id('%s')) and merge()) - branch(id('%s')))" %
-                    (branch_rev, branch_rev)]
             otherbranches = {}
-            for i in scmutil.revrange(repo._repo, revs):
+            for i in repo._repo.revs(
+                "sort(parents(branch(id(%s)) and merge()) - branch(id(%s)))",
+                branch_rev, branch_rev):
                 cs = repo.get_changeset(i)
                 otherbranches[cs.branch] = cs.raw_id
-            for branch, node in otherbranches.iteritems():
-                selected = 'branch:%s:%s' % (branch, node)
-                peers.append((selected, branch))
+            for abranch, node in otherbranches.iteritems():
+                selected = 'branch:%s:%s' % (abranch, node)
+                peers.append((selected, abranch))
 
         selected = None
+
         branches = []
-        for branch, branchrev in repo.branches.iteritems():
-            n = 'branch:%s:%s' % (branch, branchrev)
-            branches.append((n, branch))
+        for abranch, branchrev in repo.branches.iteritems():
+            n = 'branch:%s:%s' % (abranch, branchrev)
+            branches.append((n, abranch))
             if rev == branchrev:
                 selected = n
+
         bookmarks = []
         for bookmark, bookmarkrev in repo.bookmarks.iteritems():
             n = 'book:%s:%s' % (bookmark, bookmarkrev)
             bookmarks.append((n, bookmark))
             if rev == bookmarkrev:
                 selected = n
+
         tags = []
         for tag, tagrev in repo.tags.iteritems():
             n = 'tag:%s:%s' % (tag, tagrev)

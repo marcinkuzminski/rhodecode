@@ -105,14 +105,12 @@ class CompareController(BaseRepoController):
                     'rev': 'id',
                 }
 
-            org_rev_spec = "max(%s('%s'))" % (_revset_predicates[org_ref[0]],
-                                              safe_str(org_ref[1]))
-            org_revs = scmutil.revrange(org_repo._repo, [org_rev_spec])
+            org_rev_spec = "max(%s(%%s))" % _revset_predicates[org_ref[0]]
+            org_revs = org_repo._repo.revs(org_rev_spec, safe_str(org_ref[1]))
             org_rev = org_repo._repo[org_revs[-1] if org_revs else -1].hex()
 
-            other_rev_spec = "max(%s('%s'))" % (_revset_predicates[other_ref[0]],
-                                                safe_str(other_ref[1]))
-            other_revs = scmutil.revrange(other_repo._repo, [other_rev_spec])
+            other_revs_spec = "max(%s(%%s))" % _revset_predicates[other_ref[0]]
+            other_revs = other_repo._repo.revs(other_revs_spec, safe_str(other_ref[1]))
             other_rev = other_repo._repo[other_revs[-1] if other_revs else -1].hex()
 
             #case two independent repos
@@ -128,21 +126,19 @@ class CompareController(BaseRepoController):
                 hgrepo = other_repo._repo
 
             if merge:
-                revs = ["ancestors(id('%s')) and not ancestors(id('%s')) and not id('%s')" %
-                        (other_rev, org_rev, org_rev)]
+                revs = hgrepo.revs("ancestors(id(%s)) and not ancestors(id(%s)) and not id(%s)",
+                                   other_rev, org_rev, org_rev)
 
-                ancestors = scmutil.revrange(hgrepo,
-                     ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
+                ancestors = hgrepo.revs("ancestor(id(%s), id(%s))", org_rev, other_rev)
                 if ancestors:
                     # pick arbitrary ancestor - but there is usually only one
                     ancestor = hgrepo[ancestors[0]].hex()
             else:
                 # TODO: have both + and - changesets
-                revs = ["id('%s') :: id('%s') - id('%s')" %
-                        (org_rev, other_rev, org_rev)]
+                revs = hgrepo.revs("id(%s) :: id(%s) - id(%s)",
+                                   org_rev, other_rev, org_rev)
 
-            changesets = [other_repo.get_changeset(cs)
-                          for cs in scmutil.revrange(hgrepo, revs)]
+            changesets = [other_repo.get_changeset(rev) for rev in revs]
 
         elif alias == 'git':
             if org_repo != other_repo:
