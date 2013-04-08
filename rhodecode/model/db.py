@@ -1569,6 +1569,9 @@ class UserToPerm(Base, BaseModel):
     user = relationship('User')
     permission = relationship('Permission', lazy='joined')
 
+    def __unicode__(self):
+        return u'<%s => %s >' % (self.user, self.permission)
+
 
 class UserGroupRepoToPerm(Base, BaseModel):
     __tablename__ = 'users_group_repo_to_perm'
