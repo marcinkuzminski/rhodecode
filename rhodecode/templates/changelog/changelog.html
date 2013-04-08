@@ -149,7 +149,6 @@ ${self.context_bar('changelog')}
                 //ranges
                 var checkboxes = YUD.getElementsByClassName('changeset_range');
                 var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
-                var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
 
                 var checkbox_checker = function(e){
                     var checked_checkboxes = [];
@@ -188,14 +187,17 @@ ${self.context_bar('changelog')}
                         YUD.setStyle('rev_range_container','display','');
                         YUD.setStyle('rev_range_clear','display','');
 
-                        YUD.get('open_new_pr').href = pr_tmpl + '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
+                        var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name,rev_start='{0}',rev_end='{1}')}";
+                        YUD.get('open_new_pr').href = pr_tmpl.format(rev_start,rev_end);
                         YUD.setStyle('compare_fork','display','none');
                     }else{
                         YUD.setStyle('rev_range_container','display','none');
                         YUD.setStyle('rev_range_clear','display','none');
-                        if (checkboxes){
-                            YUD.get('open_new_pr').href = pr_tmpl + '?rev_end={0}'.format(checkboxes[0].name);
-                        }
+                        %if c.branch_name:
+                            YUD.get('open_new_pr').href = "${h.url('pullrequest_home',repo_name=c.repo_name,branch=c.branch_name)}";
+                        %else:
+                            YUD.get('open_new_pr').href = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
+                        %endif
                         YUD.setStyle('compare_fork','display','');
                     }
                 };

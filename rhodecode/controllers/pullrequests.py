@@ -68,17 +68,21 @@ class PullrequestsController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    def _get_repo_refs(self, repo, rev=None, branch_rev=None):
+    def _get_repo_refs(self, repo, rev=None, branch=None, branch_rev=None):
         """return a structure with repo's interesting changesets, suitable for
         the selectors in pullrequest.html
 
-        rev: a revision that must be in the list and selected by default
+        rev: a revision that must be in the list somehow and selected by default
+        branch: a branch that must be in the list and selected by default - even if closed
         branch_rev: a revision of which peers should be preferred and available."""
         # list named branches that has been merged to this named branch - it should probably merge back
         peers = []
 
         if rev:
             rev = safe_str(rev)
+
+        if branch:
+            branch = safe_str(branch)
 
         if branch_rev:
             branch_rev = safe_str(branch_rev)
@@ -102,6 +106,15 @@ class PullrequestsController(BaseRepoController):
             branches.append((n, abranch))
             if rev == branchrev:
                 selected = n
+            if branch == abranch:
+                selected = n
+                branch = None
+        if branch: # branch not in list - it is probably closed
+            revs = repo._repo.revs('max(branch(%s))', branch)
+            if revs:
+                cs = repo.get_changeset(revs[0])
+                selected = 'branch:%s:%s' % (branch, cs.raw_id)
+                branches.append((selected, branch))
 
         bookmarks = []
         for bookmark, bookmarkrev in repo.bookmarks.iteritems():
@@ -252,11 +265,12 @@ class PullrequestsController(BaseRepoController):
         # rev_start is not directly useful - its parent could however be used
         # as default for other and thus give a simple compare view
         #other_rev = request.POST.get('rev_start')
+        branch = request.GET.get('branch')
 
         c.org_repos = []
         c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
         c.default_org_repo = org_repo.repo_name
-        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, org_rev)
+        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, rev=org_rev, branch=branch)
 
         c.other_repos = []
         other_repos_info = {}
