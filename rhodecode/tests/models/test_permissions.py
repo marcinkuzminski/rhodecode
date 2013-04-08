@@ -126,9 +126,7 @@ class TestPermissions(unittest.TestCase):
 
     def test_propagated_permission_from_users_group_by_explicit_perms_exist(self):
         # make group
-        self.ug1 = UserGroupModel().create('G1')
-        # add user to group
-
+        self.ug1 = fixture.create_user_group('G1')
         UserGroupModel().add_user_to_group(self.ug1, self.u1)
 
         # set permission to lower
@@ -160,9 +158,7 @@ class TestPermissions(unittest.TestCase):
 
     def test_propagated_permission_from_users_group(self):
         # make group
-        self.ug1 = UserGroupModel().create('G1')
-        # add user to group
-
+        self.ug1 = fixture.create_user_group('G1')
         UserGroupModel().add_user_to_group(self.ug1, self.u3)
 
         # grant perm for group this should override default permission from user
@@ -185,7 +181,7 @@ class TestPermissions(unittest.TestCase):
 
     def test_propagated_permission_from_users_group_lower_weight(self):
         # make group
-        self.ug1 = UserGroupModel().create('G1')
+        self.ug1 = fixture.create_user_group('G1')
         # add user to group
         UserGroupModel().add_user_to_group(self.ug1, self.u1)
 
@@ -295,7 +291,7 @@ class TestPermissions(unittest.TestCase):
                                                 user=self.anon,
                                                 perm='group.none')
         # make group
-        self.ug1 = UserGroupModel().create('G1')
+        self.ug1 = fixture.create_user_group('G1')
         # add user to group
         UserGroupModel().add_user_to_group(self.ug1, self.u1)
         Session().commit()
@@ -434,8 +430,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
                          'repository.admin')
         #set his permission as user group, he should still be admin
-        self.ug1 = UserGroupModel().create('G1')
-        # add user to group
+        self.ug1 = fixture.create_user_group('G1')
         UserGroupModel().add_user_to_group(self.ug1, self.u1)
         RepoModel().grant_users_group_permission(self.test_repo,
                                                  group_name=self.ug1,

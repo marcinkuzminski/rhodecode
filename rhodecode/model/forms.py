@@ -134,9 +134,7 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[],
                                       testValueList=True,
                                       if_missing=None, not_empty=True))
         enable_locking = v.StringBoolean(if_missing=False)
-        recursive = v.StringBoolean(if_missing=False)
-        chained_validators = [v.ValidReposGroup(edit, old_data),
-                              v.ValidPerms('group')]
+        chained_validators = [v.ValidReposGroup(edit, old_data)]
 
     return _ReposGroupForm
 
@@ -207,8 +205,25 @@ def RepoPermsForm():
     class _RepoPermsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        chained_validators = [v.ValidPerms()]
+        chained_validators = [v.ValidPerms(type_='repo')]
     return _RepoPermsForm
+
+
+def RepoGroupPermsForm():
+    class _RepoGroupPermsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        recursive = v.StringBoolean(if_missing=False)
+        chained_validators = [v.ValidPerms(type_='repo_group')]
+    return _RepoGroupPermsForm
+
+
+def UserGroupPermsForm():
+    class _UserPermsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        chained_validators = [v.ValidPerms(type_='user_group')]
+    return _UserPermsForm
 
 
 def RepoFieldForm():

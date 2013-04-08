@@ -518,8 +518,9 @@ INPUT::
     api_key : "<api_key>"
     method :  "create_users_group"
     args:     {
-                "group_name":  "<groupname>",
-                "active":"<bool> = Optional(True)"
+                "group_name": "<groupname>",
+                "owner" :     "<onwer_name_or_id = Optional(=apiuser)>",
+                "active":     "<bool> = Optional(True)"
               }
 
 OUTPUT::

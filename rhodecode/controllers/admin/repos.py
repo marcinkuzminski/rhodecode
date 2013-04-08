@@ -46,7 +46,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
     RhodeCodeSetting, RepositoryField
 from rhodecode.model.forms import RepoForm, RepoFieldForm, RepoPermsForm
-from rhodecode.model.scm import ScmModel, GroupList
+from rhodecode.model.scm import ScmModel, RepoGroupList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
 from sqlalchemy.sql.expression import func
@@ -67,7 +67,7 @@ class ReposController(BaseRepoController):
         super(ReposController, self).__before__()
 
     def __load_defaults(self):
-        acl_groups = GroupList(RepoGroup.query().all(),
+        acl_groups = RepoGroupList(RepoGroup.query().all(),
                                perm_set=['group.write', 'group.admin'])
         c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
@@ -214,7 +214,7 @@ class ReposController(BaseRepoController):
             if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
                 raise HTTPForbidden
 
-        acl_groups = GroupList(RepoGroup.query().all(),
+        acl_groups = RepoGroupList(RepoGroup.query().all(),
                                perm_set=['group.write', 'group.admin'])
         c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
@@ -330,32 +330,8 @@ class ReposController(BaseRepoController):
     @HasRepoPermissionAllDecorator('repository.admin')
     def set_repo_perm_member(self, repo_name):
         form = RepoPermsForm()().to_python(request.POST)
-
-        perms_new = form['perms_new']
-        perms_updates = form['perms_updates']
-        cur_repo = repo_name
-
-        # update permissions
-        for member, perm, member_type in perms_updates:
-            if member_type == 'user':
-                # this updates existing one
-                RepoModel().grant_user_permission(
-                    repo=cur_repo, user=member, perm=perm
-                )
-            else:
-                RepoModel().grant_users_group_permission(
-                    repo=cur_repo, group_name=member, perm=perm
-                )
-        # set new permissions
-        for member, perm, member_type in perms_new:
-            if member_type == 'user':
-                RepoModel().grant_user_permission(
-                    repo=cur_repo, user=member, perm=perm
-                )
-            else:
-                RepoModel().grant_users_group_permission(
-                    repo=cur_repo, group_name=member, perm=perm
-                )
+        RepoModel()._update_permissions(repo_name, form['perms_new'],
+                                        form['perms_updates'])
         #TODO: implement this
         #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
         #              repo_name, self.ip_addr, self.sa)

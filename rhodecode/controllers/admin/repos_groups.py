@@ -43,14 +43,15 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAnyDecorator,\
     HasPermissionAll
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import RepoGroup, Repository
+from rhodecode.model.scm import RepoGroupList
 from rhodecode.model.repos_group import ReposGroupModel
-from rhodecode.model.forms import ReposGroupForm
+from rhodecode.model.forms import ReposGroupForm, RepoGroupPermsForm
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from webob.exc import HTTPInternalServerError, HTTPNotFound
 from rhodecode.lib.utils2 import str2bool, safe_int
 from sqlalchemy.sql.expression import func
-from rhodecode.model.scm import GroupList
+
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ class ReposGroupsController(BaseController):
 
         #override the choices for this form, we need to filter choices
         #and display only those we have ADMIN right
-        groups_with_admin_rights = GroupList(RepoGroup.query().all(),
+        groups_with_admin_rights = RepoGroupList(RepoGroup.query().all(),
                                              perm_set=['group.admin'])
         c.repo_groups = RepoGroup.groups_choices(groups=groups_with_admin_rights,
                                                  show_empty_group=allow_empty_group)
@@ -94,12 +95,12 @@ class ReposGroupsController(BaseController):
         data = repo_group.get_dict()
         data['group_name'] = repo_group.name
 
-        # fill repository users
+        # fill repository group users
         for p in repo_group.repo_group_to_perm:
             data.update({'u_perm_%s' % p.user.username:
                              p.permission.permission_name})
 
-        # fill repository groups
+        # fill repository group groups
         for p in repo_group.users_group_to_perm:
             data.update({'g_perm_%s' % p.users_group.users_group_name:
                              p.permission.permission_name})
@@ -118,7 +119,8 @@ class ReposGroupsController(BaseController):
     def index(self, format='html'):
         """GET /repos_groups: All items in the collection"""
         # url('repos_groups')
-        group_iter = GroupList(RepoGroup.query().all(), perm_set=['group.admin'])
+        group_iter = RepoGroupList(RepoGroup.query().all(),
+                                   perm_set=['group.admin'])
         sk = lambda g: g.parents[0].group_name if g.parents else g.group_name
         c.groups = sorted(group_iter, key=sk)
         return render('admin/repos_groups/repos_groups_show.html')
@@ -190,7 +192,7 @@ class ReposGroupsController(BaseController):
         #           method='put')
         # url('repos_group', group_name=GROUP_NAME)
 
-        c.repos_group = ReposGroupModel()._get_repos_group(group_name)
+        c.repos_group = ReposGroupModel()._get_repo_group(group_name)
         if HasPermissionAll('hg.admin')('group edit'):
             #we're global admin, we're ok and we can create TOP level groups
             allow_empty_group = True
@@ -247,7 +249,7 @@ class ReposGroupsController(BaseController):
         #           method='delete')
         # url('repos_group', group_name=GROUP_NAME)
 
-        gr = c.repos_group = ReposGroupModel()._get_repos_group(group_name)
+        gr = c.repos_group = ReposGroupModel()._get_repo_group(group_name)
         repos = gr.repositories.all()
         if repos:
             h.flash(_('This group contains %s repositores and cannot be '
@@ -272,6 +274,24 @@ class ReposGroupsController(BaseController):
                       'group %s') % group_name, category='error')
 
         return redirect(url('repos_groups'))
+
+    @HasReposGroupPermissionAnyDecorator('group.admin')
+    def set_repo_group_perm_member(self, group_name):
+        c.repos_group = ReposGroupModel()._get_repo_group(group_name)
+        form = RepoGroupPermsForm()().to_python(request.POST)
+
+        recursive = form['recursive']
+        # iterate over all members(if in recursive mode) of this groups and
+        # set the permissions !
+        # this can be potentially heavy operation
+        ReposGroupModel()._update_permissions(c.repos_group, form['perms_new'],
+                                              form['perms_updates'], recursive)
+        #TODO: implement this
+        #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
+        #              repo_name, self.ip_addr, self.sa)
+        Session().commit()
+        h.flash(_('Repository Group permissions updated'), category='success')
+        return redirect(url('edit_repos_group', group_name=group_name))
 
     @HasReposGroupPermissionAnyDecorator('group.admin')
     def delete_repos_group_user_perm(self, group_name):
@@ -337,7 +357,7 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/group_name: Show a specific item"""
         # url('repos_group', group_name=GROUP_NAME)
 
-        c.group = c.repos_group = ReposGroupModel()._get_repos_group(group_name)
+        c.group = c.repos_group = ReposGroupModel()._get_repo_group(group_name)
         c.group_repos = c.group.repositories.all()
 
         #overwrite our cached list with current filter
@@ -369,7 +389,7 @@ class ReposGroupsController(BaseController):
         """GET /repos_groups/group_name/edit: Form to edit an existing item"""
         # url('edit_repos_group', group_name=GROUP_NAME)
 
-        c.repos_group = ReposGroupModel()._get_repos_group(group_name)
+        c.repos_group = ReposGroupModel()._get_repo_group(group_name)
         #we can only allow moving empty group if it's already a top-level
         #group, ie has no parents, or we're admin
         if HasPermissionAll('hg.admin')('group edit'):

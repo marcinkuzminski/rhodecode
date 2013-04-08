@@ -89,7 +89,7 @@ class DbManage(object):
         else:
             destroy = ask_ok('Are you sure to destroy old database ? [y/n]')
         if not destroy:
-            sys.exit('Nothing done')
+            sys.exit('Nothing tables created')
         if destroy:
             Base.metadata.drop_all()
 
@@ -127,7 +127,7 @@ class DbManage(object):
                          'sure You backed up your database before. '
                          'Continue ? [y/n]')
         if not upgrade:
-            sys.exit('Nothing done')
+            sys.exit('No upgrade performed')
 
         repository_path = jn(dn(dn(dn(os.path.realpath(__file__)))),
                              'rhodecode/lib/dbmigrate')
@@ -291,6 +291,10 @@ class DbManage(object):
 
             def step_11(self):
                 self.klass.update_repo_info()
+
+            def step_12(self):
+                self.klass.create_permissions()
+                self.klass.populate_default_permissions()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
@@ -528,7 +532,8 @@ class DbManage(object):
 
             if default is None:
                 log.debug('missing default permission for group %s adding' % g)
-                ReposGroupModel()._create_default_perms(g)
+                perm_obj = ReposGroupModel()._create_default_perms(g)
+                self.sa.add(perm_obj)
 
     def reset_permissions(self, username):
         """

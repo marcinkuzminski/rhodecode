@@ -546,10 +546,12 @@ def CanCreateGroup(can_create_in_root=False):
 
 
 def ValidPerms(type_='repo'):
-    if type_ == 'group':
+    if type_ == 'repo_group':
         EMPTY_PERM = 'group.none'
     elif type_ == 'repo':
         EMPTY_PERM = 'repository.none'
+    elif type_ == 'user_group':
+        EMPTY_PERM = 'usergroup.none'
 
     class _validator(formencode.validators.FancyValidator):
         messages = {

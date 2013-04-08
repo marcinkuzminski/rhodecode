@@ -46,7 +46,8 @@ from rhodecode import BACKENDS
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils2 import safe_str, safe_unicode, get_server_url,\
     _set_extras
-from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny
+from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny,\
+    HasUserGroupPermissionAnyDecorator, HasUserGroupPermissionAny
 from rhodecode.lib.utils import get_filesystem_repos, make_ui, \
     action_logger, REMOVED_REPO_PAT
 from rhodecode.model import BaseModel
@@ -165,36 +166,58 @@ class SimpleCachedRepoList(CachedRepoList):
             yield tmp_d
 
 
-class GroupList(object):
-
-    def __init__(self, db_repo_group_list, perm_set=None):
+class _PermCheckIterator(object):
+    def __init__(self, obj_list, obj_attr, perm_set, perm_checker):
         """
-        Creates iterator from given list of group objects, additionally
+        Creates iterator from given list of objects, additionally
         checking permission for them from perm_set var
 
-        :param db_repo_group_list:
-        :param perm_set: list of permissons to check
+        :param obj_list: list of db objects
+        :param obj_attr: attribute of object to pass into perm_checker
+        :param perm_set: list of permissions to check
+        :param perm_checker: callable to check permissions against
         """
-        self.db_repo_group_list = db_repo_group_list
-        if not perm_set:
-            perm_set = ['group.read', 'group.write', 'group.admin']
+        self.obj_list = obj_list
+        self.obj_attr = obj_attr
         self.perm_set = perm_set
+        self.perm_checker = perm_checker
 
     def __len__(self):
-        return len(self.db_repo_group_list)
+        return len(self.obj_list)
 
     def __repr__(self):
         return '<%s (%s)>' % (self.__class__.__name__, self.__len__())
 
     def __iter__(self):
-        for dbgr in self.db_repo_group_list:
+        for db_obj in self.obj_list:
             # check permission at this level
-            if not HasReposGroupPermissionAny(
-                *self.perm_set
-            )(dbgr.group_name, 'get group repo check'):
+            name = getattr(db_obj, self.obj_attr, None)
+            if not self.perm_checker(*self.perm_set)(name, self.__class__.__name__):
                 continue
 
-            yield dbgr
+            yield db_obj
+
+
+class RepoGroupList(_PermCheckIterator):
+
+    def __init__(self, db_repo_group_list, perm_set=None):
+        if not perm_set:
+            perm_set = ['group.read', 'group.write', 'group.admin']
+
+        super(RepoGroupList, self).__init__(obj_list=db_repo_group_list,
+                    obj_attr='group_name', perm_set=perm_set,
+                    perm_checker=HasReposGroupPermissionAny)
+
+
+class UserGroupList(_PermCheckIterator):
+
+    def __init__(self, db_user_group_list, perm_set=None):
+        if not perm_set:
+            perm_set = ['usergroup.read', 'usergroup.write', 'usergroup.admin']
+
+        super(UserGroupList, self).__init__(obj_list=db_user_group_list,
+                    obj_attr='users_group_name', perm_set=perm_set,
+                    perm_checker=HasUserGroupPermissionAny)
 
 
 class ScmModel(BaseModel):
@@ -293,7 +316,7 @@ class ScmModel(BaseModel):
         if all_groups is None:
             all_groups = RepoGroup.query()\
                 .filter(RepoGroup.group_parent_id == None).all()
-        return [x for x in GroupList(all_groups)]
+        return [x for x in RepoGroupList(all_groups)]
 
     def mark_for_invalidation(self, repo_name):
         """

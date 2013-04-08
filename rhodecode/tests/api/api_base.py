@@ -50,9 +50,9 @@ def api_call(test_obj, params):
 
 ## helpers
 def make_users_group(name=TEST_USER_GROUP):
-    gr = UserGroupModel().create(name=name)
+    gr = fixture.create_user_group(name, cur_user=TEST_USER_ADMIN_LOGIN)
     UserGroupModel().add_user_to_group(users_group=gr,
-                                        user=TEST_USER_ADMIN_LOGIN)
+                                       user=TEST_USER_ADMIN_LOGIN)
     Session().commit()
     return gr
 
@@ -1084,8 +1084,7 @@ class BaseTestApi(object):
 
     def test_api_add_user_to_users_group(self):
         gr_name = 'test_group'
-        UserGroupModel().create(gr_name)
-        Session().commit()
+        fixture.create_user_group(gr_name)
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -1113,8 +1112,7 @@ class BaseTestApi(object):
     @mock.patch.object(UserGroupModel, 'add_user_to_group', crash)
     def test_api_add_user_to_users_group_exception_occurred(self):
         gr_name = 'test_group'
-        UserGroupModel().create(gr_name)
-        Session().commit()
+        fixture.create_user_group(gr_name)
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -1128,7 +1126,7 @@ class BaseTestApi(object):
 
     def test_api_remove_user_from_users_group(self):
         gr_name = 'test_group_3'
-        gr = UserGroupModel().create(gr_name)
+        gr = fixture.create_user_group(gr_name)
         UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
@@ -1149,7 +1147,7 @@ class BaseTestApi(object):
     @mock.patch.object(UserGroupModel, 'remove_user_from_group', crash)
     def test_api_remove_user_from_users_group_exception_occurred(self):
         gr_name = 'test_group_3'
-        gr = UserGroupModel().create(gr_name)
+        gr = fixture.create_user_group(gr_name)
         UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',

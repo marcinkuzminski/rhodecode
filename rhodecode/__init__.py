@@ -38,7 +38,7 @@ except ImportError:
 
 __version__ = ('.'.join((str(each) for each in VERSION[:3])) +
                '.'.join(VERSION[3:]))
-__dbversion__ = 11  # defines current db version for migrations
+__dbversion__ = 12  # defines current db version for migrations
 __platform__ = platform.system()
 __license__ = 'GPLv3'
 __py_version__ = sys.version_info

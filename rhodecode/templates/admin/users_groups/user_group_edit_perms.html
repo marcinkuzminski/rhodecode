@@ -1,0 +1,100 @@
+<table id="permissions_manage" class="noborder">
+    <tr>
+        <td>${_('none')}</td>
+        <td>${_('read')}</td>
+        <td>${_('write')}</td>
+        <td>${_('admin')}</td>
+        <td>${_('member')}</td>
+        <td></td>
+    </tr>
+    ## USERS
+    %for r2p in c.users_group.user_user_group_to_perm:
+        ##forbid revoking permission from yourself
+        <tr id="id${id(r2p.user.username)}">
+            %if c.rhodecode_user.user_id != r2p.user.user_id or c.rhodecode_user.is_admin:
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.none')}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.read')}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.write')}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.admin')}</td>
+            <td style="white-space: nowrap;">
+                <img class="perm-gravatar" src="${h.gravatar_url(r2p.user.email,14)}"/>${r2p.user.username if r2p.user.username != 'default' else _('default')}
+            </td>
+            <td>
+              %if r2p.user.username !='default':
+                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${r2p.user.user_id}, 'user', '${'id%s'%id(r2p.user.username)}')">
+                ${_('revoke')}
+                </span>
+              %endif
+            </td>
+            %else:
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.none', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.read', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.write', disabled="disabled")}</td>
+            <td>${h.radio('u_perm_%s' % r2p.user.username,'usergroup.admin', disabled="disabled")}</td>
+            <td style="white-space: nowrap;">
+                <img class="perm-gravatar" src="${h.gravatar_url(r2p.user.email,14)}"/>${r2p.user.username if r2p.user.username != 'default' else _('default')}
+            </td>
+            <td>
+            </td>
+            %endif
+        </tr>
+    %endfor
+
+    <%
+    _tmpl = h.literal("""' \
+        <td><input type="radio" value="usergroup.none" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td><input type="radio" value="usergroup.read" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td><input type="radio" value="usergroup.write" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td><input type="radio" value="usergroup.admin" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \
+        <td class="ac"> \
+            <div class="perm_ac" id="perm_ac_{0}"> \
+                <input class="yui-ac-input" id="perm_new_member_name_{0}" name="perm_new_member_name_{0}" value="" type="text"> \
+                <input id="perm_new_member_type_{0}" name="perm_new_member_type_{0}" value="" type="hidden">  \
+                <div id="perm_container_{0}"></div> \
+            </div> \
+        </td> \
+        <td></td>'""")
+    %>
+    ## ADD HERE DYNAMICALLY NEW INPUTS FROM THE '_tmpl'
+    <tr class="new_members last_new_member" id="add_perm_input"></tr>
+    <tr>
+        <td colspan="6">
+            <span id="add_perm" class="add_icon" style="cursor: pointer;">
+            ${_('Add another member')}
+            </span>
+        </td>
+    </tr>
+</table>
+<script type="text/javascript">
+function ajaxActionRevoke(obj_id, obj_type, field_id) {
+    var callback = {
+        success: function (o) {
+            var tr = YUD.get(String(field_id));
+            tr.parentNode.removeChild(tr);
+        },
+        failure: function (o) {
+            alert(_TM['Failed to remoke permission'] + ": " + o.status);
+        },
+    };
+    var sUrl = "${h.url('delete_user_group_perm_member', id=c.users_group.users_group_id)}";
+    if (obj_type=='user'){
+        var postData = '_method=delete&user_id={0}&obj_type=user'.format(obj_id);
+    }
+    else if (obj_type=='user_group'){
+        var postData = '_method=delete&user_group_id={0}&obj_type=user_group'.format(obj_id);
+    }
+
+    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+};
+
+
+YUE.onDOMReady(function () {
+    if (!YUD.hasClass('perm_new_member_name', 'error')) {
+        YUD.setStyle('add_perm_input', 'display', 'none');
+    }
+    YAHOO.util.Event.addListener('add_perm', 'click', function () {
+        addPermAction(${_tmpl}, ${c.users_array|n}, ${c.users_groups_array|n});
+    });
+});
+
+</script>

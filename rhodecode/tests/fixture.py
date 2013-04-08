@@ -2,10 +2,11 @@
 Helpers for fixture generation
 """
 from rhodecode.tests import *
-from rhodecode.model.db import Repository, User, RepoGroup
+from rhodecode.model.db import Repository, User, RepoGroup, UserGroup
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.repos_group import ReposGroupModel
+from rhodecode.model.users_group import UserGroupModel
 
 
 class Fixture(object):
@@ -38,6 +39,15 @@ class Fixture(object):
             perms_new=[],
             enable_locking=False,
             recursive=False
+        )
+        defs.update(custom)
+
+        return defs
+
+    def _get_user_group_create_params(self, name, **custom):
+        defs = dict(
+            users_group_name=name,
+            users_group_active=True,
         )
         defs.update(custom)
 
@@ -100,3 +110,17 @@ class Fixture(object):
         Session().commit()
         gr = RepoGroup.get_by_group_name(gr.group_name)
         return gr
+
+    def create_user_group(self, name, **kwargs):
+        if 'skip_if_exists' in kwargs:
+            del kwargs['skip_if_exists']
+            gr = UserGroup.get_by_group_name(group_name=name)
+            if gr:
+                return gr
+        form_data = self._get_user_group_create_params(name, **kwargs)
+        owner = kwargs.get('cur_user', TEST_USER_ADMIN_LOGIN)
+        user_group = UserGroupModel().create(name=form_data['users_group_name'],
+                        owner=owner, active=form_data['users_group_active'])
+        Session().commit()
+        user_group = UserGroup.get_by_group_name(user_group.users_group_name)
+        return user_group

@@ -537,12 +537,15 @@ class ApiController(JSONRPCController):
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_users_group(self, apiuser, group_name, active=Optional(True)):
+    def create_users_group(self, apiuser, group_name,
+                           owner=Optional(OAttr('apiuser')),
+                           active=Optional(True)):
         """
         Creates an new usergroup
 
         :param apiuser:
         :param group_name:
+        :param owner:
         :param active:
         """
 
@@ -550,8 +553,14 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user group `%s` already exist" % group_name)
 
         try:
+            if isinstance(owner, Optional):
+                owner = apiuser.user_id
+
+            owner = get_user_or_error(owner)
             active = Optional.extract(active)
-            ug = UserGroupModel().create(name=group_name, active=active)
+            ug = UserGroupModel().create(name=group_name,
+                                         owner=owner,
+                                         active=active)
             Session().commit()
             return dict(
                 msg='created new user group `%s`' % group_name,

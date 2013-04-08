@@ -425,9 +425,11 @@ class UserModel(BaseModel):
         """
         RK = 'repositories'
         GK = 'repositories_groups'
+        UK = 'user_groups'
         GLOBAL = 'global'
         user.permissions[RK] = {}
         user.permissions[GK] = {}
+        user.permissions[UK] = {}
         user.permissions[GLOBAL] = set()
 
         def _choose_perm(new_perm, cur_perm):
@@ -450,6 +452,7 @@ class UserModel(BaseModel):
 
         default_repo_perms = Permission.get_default_perms(default_user_id)
         default_repo_groups_perms = Permission.get_default_group_perms(default_user_id)
+        default_user_group_perms = Permission.get_default_user_group_perms(default_user_id)
 
         if user.is_admin:
             #==================================================================
@@ -469,6 +472,12 @@ class UserModel(BaseModel):
                 rg_k = perm.UserRepoGroupToPerm.group.group_name
                 p = 'group.admin'
                 user.permissions[GK][rg_k] = p
+
+            # user groups
+            for perm in default_user_group_perms:
+                u_k = perm.UserUserGroupToPerm.user_group.users_group_name
+                p = 'usergroup.admin'
+                user.permissions[UK][u_k] = p
             return user
 
         #==================================================================
@@ -503,6 +512,13 @@ class UserModel(BaseModel):
             rg_k = perm.UserRepoGroupToPerm.group.group_name
             p = perm.Permission.permission_name
             user.permissions[GK][rg_k] = p
+
+        # defaults for user groups taken from default user permission
+        # on given user group
+        for perm in default_user_group_perms:
+            u_k = perm.UserUserGroupToPerm.user_group.users_group_name
+            p = perm.Permission.permission_name
+            user.permissions[UK][u_k] = p
 
         #======================================================================
         # !! OVERRIDE GLOBALS !! with user permissions if any found
@@ -588,15 +604,7 @@ class UserModel(BaseModel):
 
         # user explicit permissions for repositories, overrides any specified
         # by the group permission
-        user_repo_perms = \
-         self.sa.query(UserRepoToPerm, Permission, Repository)\
-            .join((Repository, UserRepoToPerm.repository_id ==
-                   Repository.repo_id))\
-            .join((Permission, UserRepoToPerm.permission_id ==
-                   Permission.permission_id))\
-            .filter(UserRepoToPerm.user_id == uid)\
-            .all()
-
+        user_repo_perms = Permission.get_default_perms(uid)
         for perm in user_repo_perms:
             r_k = perm.UserRepoToPerm.repository.repo_name
             cur_perm = user.permissions[RK][r_k]
@@ -639,14 +647,7 @@ class UserModel(BaseModel):
             user.permissions[GK][g_k] = p
 
         # user explicit permissions for repository groups
-        user_repo_groups_perms = \
-         self.sa.query(UserRepoGroupToPerm, Permission, RepoGroup)\
-         .join((RepoGroup, UserRepoGroupToPerm.group_id == RepoGroup.group_id))\
-         .join((Permission, UserRepoGroupToPerm.permission_id
-                == Permission.permission_id))\
-         .filter(UserRepoGroupToPerm.user_id == uid)\
-         .all()
-
+        user_repo_groups_perms = Permission.get_default_group_perms(uid)
         for perm in user_repo_groups_perms:
             rg_k = perm.UserRepoGroupToPerm.group.group_name
             p = perm.Permission.permission_name
@@ -654,6 +655,19 @@ class UserModel(BaseModel):
             if not explicit:
                 p = _choose_perm(p, cur_perm)
             user.permissions[GK][rg_k] = p
+
+        #======================================================================
+        # !! PERMISSIONS FOR USER GROUPS !!
+        #======================================================================
+        #user explicit permission for user groups
+        user_user_groups_perms = Permission.get_default_user_group_perms(uid)
+        for perm in user_user_groups_perms:
+            u_k = perm.UserUserGroupToPerm.user_group.users_group_name
+            p = perm.Permission.permission_name
+            cur_perm = user.permissions[UK][u_k]
+            if not explicit:
+                p = _choose_perm(p, cur_perm)
+            user.permissions[UK][u_k] = p
 
         return user
 

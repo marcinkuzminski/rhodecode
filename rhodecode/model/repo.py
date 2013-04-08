@@ -52,13 +52,32 @@ class RepoModel(BaseModel):
     cls = Repository
     URL_SEPARATOR = Repository.url_sep()
 
-    def __get_users_group(self, users_group):
+    def _get_user_group(self, users_group):
         return self._get_instance(UserGroup, users_group,
                                   callback=UserGroup.get_by_group_name)
 
-    def _get_repos_group(self, repos_group):
+    def _get_repo_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
+
+    def _create_default_perms(self, repository, private):
+        # create default permission
+        default = 'repository.read'
+        def_user = User.get_by_username('default')
+        for p in def_user.user_perms:
+            if p.permission.permission_name.startswith('repository.'):
+                default = p.permission.permission_name
+                break
+
+        default_perm = 'repository.none' if private else default
+
+        repo_to_perm = UserRepoToPerm()
+        repo_to_perm.permission = Permission.get_by_key(default_perm)
+
+        repo_to_perm.repository = repository
+        repo_to_perm.user_id = def_user.user_id
+
+        return repo_to_perm
 
     @LazyProperty
     def repos_path(self):
@@ -336,7 +355,7 @@ class RepoModel(BaseModel):
 
         owner = self._get_user(owner)
         fork_of = self._get_repo(fork_of)
-        repos_group = self._get_repos_group(repos_group)
+        repos_group = self._get_repo_group(repos_group)
         try:
 
             # repo name is just a name of repository
@@ -369,26 +388,6 @@ class RepoModel(BaseModel):
 
             self.sa.add(new_repo)
 
-            def _create_default_perms():
-                # create default permission
-                repo_to_perm = UserRepoToPerm()
-                default = 'repository.read'
-                for p in User.get_by_username('default').user_perms:
-                    if p.permission.permission_name.startswith('repository.'):
-                        default = p.permission.permission_name
-                        break
-
-                default_perm = 'repository.none' if private else default
-
-                repo_to_perm.permission_id = self.sa.query(Permission)\
-                        .filter(Permission.permission_name == default_perm)\
-                        .one().permission_id
-
-                repo_to_perm.repository = new_repo
-                repo_to_perm.user_id = User.get_by_username('default').user_id
-
-                self.sa.add(repo_to_perm)
-
             if fork_of:
                 if copy_fork_permissions:
                     repo = fork_of
@@ -405,9 +404,11 @@ class RepoModel(BaseModel):
                         UserGroupRepoToPerm.create(perm.users_group, new_repo,
                                                     perm.permission)
                 else:
-                    _create_default_perms()
+                    perm_obj = self._create_default_perms(new_repo, private)
+                    self.sa.add(perm_obj)
             else:
-                _create_default_perms()
+                perm_obj = self._create_default_perms(new_repo, private)
+                self.sa.add(perm_obj)
 
             if not just_db:
                 self.__create_repo(repo_name, repo_type,
@@ -455,6 +456,35 @@ class RepoModel(BaseModel):
             repos_group, landing_rev, just_db, fork_of, copy_fork_permissions,
             enable_statistics, enable_locking, enable_downloads
         )
+
+    def _update_permissions(self, repo, perms_new=None,
+                            perms_updates=None):
+        if not perms_new:
+            perms_new = []
+        if not perms_updates:
+            perms_updates = []
+
+        # update permissions
+        for member, perm, member_type in perms_updates:
+            if member_type == 'user':
+                # this updates existing one
+                self.grant_user_permission(
+                    repo=repo, user=member, perm=perm
+                )
+            else:
+                self.grant_users_group_permission(
+                    repo=repo, group_name=member, perm=perm
+                )
+        # set new permissions
+        for member, perm, member_type in perms_new:
+            if member_type == 'user':
+                self.grant_user_permission(
+                    repo=repo, user=member, perm=perm
+                )
+            else:
+                self.grant_users_group_permission(
+                    repo=repo, group_name=member, perm=perm
+                )
 
     def create_fork(self, form_data, cur_user):
         """
@@ -559,7 +589,7 @@ class RepoModel(BaseModel):
         :param perm: Instance of Permission, or permission_name
         """
         repo = self._get_repo(repo)
-        group_name = self.__get_users_group(group_name)
+        group_name = self._get_user_group(group_name)
         permission = self._get_perm(perm)
 
         # check if we have that permission already
@@ -587,7 +617,7 @@ class RepoModel(BaseModel):
             or user group name
         """
         repo = self._get_repo(repo)
-        group_name = self.__get_users_group(group_name)
+        group_name = self._get_user_group(group_name)
 
         obj = self.sa.query(UserGroupRepoToPerm)\
             .filter(UserGroupRepoToPerm.repository == repo)\

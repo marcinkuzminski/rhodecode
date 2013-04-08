@@ -131,6 +131,11 @@ class BaseModel(object):
 
     @classmethod
     def getAll(cls):
+        # deprecated and left for backward compatibility
+        return cls.get_all()
+
+    @classmethod
+    def get_all(cls):
         return cls.query().all()
 
     @classmethod
@@ -490,6 +495,13 @@ class User(Base, BaseModel):
         Session().add(self)
         log.debug('updated user %s lastlogin' % self.username)
 
+    @classmethod
+    def get_first_admin(cls):
+        user = User.query().filter(User.admin == True).first()
+        if user is None:
+            raise Exception('Missing administrative account!')
+        return user
+
     def get_api_data(self):
         """
         Common function for generating user related data for API
@@ -616,13 +628,18 @@ class UserGroup(Base, BaseModel):
     users_group_name = Column("users_group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
     inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
 
     members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
     users_group_to_perm = relationship('UserGroupToPerm', cascade='all')
     users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
+    user_user_group_to_perm = relationship('UserUserGroupToPerm ', cascade='all')
+    user = relationship('User')
 
     def __unicode__(self):
-        return u'<userGroup(%s)>' % (self.users_group_name)
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                      self.users_group_id,
+                                      self.users_group_name)
 
     @classmethod
     def get_by_group_name(cls, group_name, cache=False,
@@ -1229,19 +1246,20 @@ class RepoGroup(Base, BaseModel):
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
     group_description = Column("group_description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
     users_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
-
     parent_group = relationship('RepoGroup', remote_side=group_id)
+    user = relationship('User')
 
     def __init__(self, group_name='', parent_group=None):
         self.group_name = group_name
         self.parent_group = parent_group
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
-                                  self.group_name)
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__, self.group_id,
+                                      self.group_name)
 
     @classmethod
     def groups_choices(cls, groups=None, show_empty_group=True):
@@ -1397,6 +1415,11 @@ class Permission(Base, BaseModel):
         ('group.write', _('Repository group write access')),
         ('group.admin', _('Repository group admin access')),
 
+        ('usergroup.none', _('User group no access')),
+        ('usergroup.read', _('User group read access')),
+        ('usergroup.write', _('User group write access')),
+        ('usergroup.admin', _('User group admin access')),
+
         ('hg.admin', _('RhodeCode Administrator')),
         ('hg.create.none', _('Repository creation disabled')),
         ('hg.create.repository', _('Repository creation enabled')),
@@ -1422,10 +1445,15 @@ class Permission(Base, BaseModel):
         'group.write': 3,
         'group.admin': 4,
 
+        'usergroup.none': 0,
+        'usergroup.read': 1,
+        'usergroup.write': 3,
+        'usergroup.admin': 4,
+
         'hg.fork.none': 0,
         'hg.fork.repository': 1,
         'hg.create.none': 0,
-        'hg.create.repository':1
+        'hg.create.repository': 1
     }
 
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -1459,6 +1487,15 @@ class Permission(Base, BaseModel):
 
         return q.all()
 
+    @classmethod
+    def get_default_user_group_perms(cls, default_user_id):
+        q = Session().query(UserUserGroupToPerm, UserGroup, cls)\
+         .join((UserGroup, UserUserGroupToPerm.user_group_id == UserGroup.users_group_id))\
+         .join((cls, UserUserGroupToPerm.permission_id == cls.permission_id))\
+         .filter(UserUserGroupToPerm.user_id == default_user_id)
+
+        return q.all()
+
 
 class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
@@ -1486,7 +1523,36 @@ class UserRepoToPerm(Base, BaseModel):
         return n
 
     def __unicode__(self):
-        return u'<user:%s => %s >' % (self.user, self.repository)
+        return u'<%s => %s >' % (self.user, self.repository)
+
+
+class UserUserGroupToPerm(Base, BaseModel):
+    __tablename__ = 'user_user_group_to_perm'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'user_group_id', 'permission_id'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    user_user_group_to_perm_id = Column("user_user_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+
+    user = relationship('User')
+    user_group = relationship('UserGroup')
+    permission = relationship('Permission')
+
+    @classmethod
+    def create(cls, user, user_group, permission):
+        n = cls()
+        n.user = user
+        n.user_group = user_group
+        n.permission = permission
+        Session().add(n)
+        return n
+
+    def __unicode__(self):
+        return u'<%s => %s >' % (self.user, self.user_group)
 
 
 class UserToPerm(Base, BaseModel):
@@ -1531,6 +1597,36 @@ class UserGroupRepoToPerm(Base, BaseModel):
 
     def __unicode__(self):
         return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
+
+
+#TODO; not sure if this will be ever used
+class UserGroupUserGroupToPerm(Base, BaseModel):
+    __tablename__ = 'user_group_user_group_to_perm'
+    __table_args__ = (
+        UniqueConstraint('user_group_id', 'user_group_id', 'permission_id'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    user_user_group_to_perm_id = Column("user_user_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    target_user_group_id = Column("target_users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+
+    target_user_group = relationship('UserGroup', remote_side=target_user_group_id, primaryjoin='UserGroupUserGroupToPerm.target_user_group_id==UserGroup.users_group_id')
+    user_group = relationship('UserGroup', remote_side=user_group_id, primaryjoin='UserGroupUserGroupToPerm.user_group_id==UserGroup.users_group_id')
+    permission = relationship('Permission')
+
+    @classmethod
+    def create(cls, target_user_group, user_group, permission):
+        n = cls()
+        n.target_user_group = target_user_group
+        n.user_group = user_group
+        n.permission = permission
+        Session().add(n)
+        return n
+
+    def __unicode__(self):
+        return u'<UserGroup:%s => %s >' % (self.target_user_group, self.user_group)
 
 
 class UserGroupToPerm(Base, BaseModel):

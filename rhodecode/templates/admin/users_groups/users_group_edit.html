@@ -18,7 +18,7 @@
 </%def>
 
 <%def name="main()">
-<div class="box box-left">
+<div class="box box-left" style="clear:left">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
@@ -92,12 +92,54 @@
             </div>
     </div>
 ${h.end_form()}
+    <div class="group_members_wrap">
+    % if c.group_members_obj:
+      <ul class="group_members">
+      %for user in c.group_members_obj:
+        <li>
+          <div class="group_member">
+            <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/> </div>
+            <div>${h.link_to(user.username, h.url('edit_user',id=user.user_id))}</div>
+            <div>${user.full_name}</div>
+          </div>
+        </li>
+      %endfor
+      </ul>
+      %else:
+        <span class="empty_data">${_('No members yet')}</span>
+      %endif
+    </div>
+</div>
+
+
+<div class="box box-right">
+    <div class="title">
+        <h5>${_('Permissions')}</h5>
+    </div>
+    ${h.form(url('set_user_group_perm_member', id=c.users_group.users_group_id),method='post')}
+    <div class="form">
+       <div class="fields">
+            <div class="field">
+                <div class="label">
+                    <label for="input">${_('Permissions')}:</label>
+                </div>
+                <div class="input">
+                    <%include file="user_group_edit_perms.html"/>
+                </div>
+            </div>
+            <div class="buttons">
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            </div>
+       </div>
+    </div>
+    ${h.end_form()}
 </div>
 
 <div class="box box-right">
     <!-- box / title -->
     <div class="title">
-        <h5>${_('Permissions')}</h5>
+        <h5>${_('Permissions summary')}</h5>
     </div>
     ${h.form(url('users_group_perm', id=c.users_group.users_group_id), method='put')}
     <div class="form">
@@ -138,35 +180,6 @@ ${h.end_form()}
         </div>
     </div>
     ${h.end_form()}
-
-    ## permissions overview
-    <%namespace name="p" file="/base/perms_summary.html"/>
-    ${p.perms_summary(c.users_group.permissions)}
-</div>
-
-<div class="box box-right" style="clear:right">
-    <!-- box / title -->
-    <div class="title">
-        <h5>${_('Group members')}</h5>
-    </div>
-
-    <div class="group_members_wrap">
-    % if c.group_members_obj:
-      <ul class="group_members">
-      %for user in c.group_members_obj:
-        <li>
-          <div class="group_member">
-            <div class="gravatar"><img alt="gravatar" src="${h.gravatar_url(user.email,24)}"/> </div>
-            <div>${h.link_to(user.username, h.url('edit_user',id=user.user_id))}</div>
-            <div>${user.full_name}</div>
-          </div>
-        </li>
-      %endfor
-      </ul>
-      %else:
-        <span class="empty_data">${_('No members yet')}</span>
-      %endif
-    </div>
 </div>
 
 <script type="text/javascript">
