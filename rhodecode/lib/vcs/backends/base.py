@@ -84,6 +84,9 @@ class BaseRepository(object):
         same_instance = isinstance(other, self.__class__)
         return same_instance and getattr(other, 'path', None) == self.path
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     @LazyProperty
     def alias(self):
         for k, v in settings.BACKENDS.items():
