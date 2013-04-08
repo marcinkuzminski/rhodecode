@@ -102,15 +102,22 @@ ${self.context_bar('changelog')}
                  %if len(c.changeset.parents)>1:
                  <span class="merge">${_('merge')}</span>
                  %endif
-                     %if c.changeset.branch:
-                     <span class="branchtag" title="${_('Branch %s') % c.changeset.branch}">
-                     ${h.link_to(c.changeset.branch,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}
-                     </span>
-                     %endif
+                    %if h.is_hg(c.rhodecode_repo):
+                      %for book in c.changeset.bookmarks:
+                      <span class="booktag" title="${_('Bookmark %s') % book}">
+                         ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}
+                      </span>
+                      %endfor
+                    %endif
                      %for tag in c.changeset.tags:
                          <span class="tagtag"  title="${_('Tag %s') % tag}">
                          ${h.link_to(tag,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}</span>
                      %endfor
+                     %if c.changeset.branch:
+                         <span class="branchtag" title="${_('Branch %s') % c.changeset.branch}">
+                         ${h.link_to(c.changeset.branch,h.url('files_home',repo_name=c.repo_name,revision=c.changeset.raw_id))}
+                         </span>
+                     %endif
                  </span>
                     </div>
             </div>

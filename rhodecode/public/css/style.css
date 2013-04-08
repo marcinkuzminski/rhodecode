@@ -2781,7 +2781,8 @@ h3.files_location {
 }
 
 .right .logtags .branchtag,
-.logtags .tagtag,
+.right .logtags .tagtag,
+.right .logtags .booktag,
 .right .merge {
     float: right;
     line-height: 1em;
