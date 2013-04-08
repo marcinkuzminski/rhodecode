@@ -198,11 +198,6 @@ class SettingsController(BaseController):
                     form_result['rhodecode_stylify_metatags']
                 Session().add(sett3)
 
-                sett4 = RhodeCodeSetting.get_by_name_or_create('lightweight_dashboard')
-                sett4.app_settings_value = \
-                    form_result['rhodecode_lightweight_dashboard']
-                Session().add(sett4)
-
                 sett4 = RhodeCodeSetting.get_by_name_or_create('repository_fields')
                 sett4.app_settings_value = \
                     form_result['rhodecode_repository_fields']

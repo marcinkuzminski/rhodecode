@@ -70,160 +70,13 @@
             <div id="welcome" style="display:none;text-align:center">
                 <h1><a href="${h.url('home')}">${c.rhodecode_name} ${c.rhodecode_version}</a></h1>
             </div>
-             <%cnt=0%>
-             <%namespace name="dt" file="/data_table/_dt_elements.html"/>
-            % if not c.visual.lightweight_dashboard:
-              ## old full detailed version
-            <div id='repos_list_wrap' class="yui-skin-sam">
-            <table id="repos_list">
-            <thead>
-                <tr>
-                    <th class="left"></th>
-                    <th class="left">${_('Name')}</th>
-                    <th class="left">${_('Description')}</th>
-                    <th class="left">${_('Last change')}</th>
-                    <th class="left">${_('Tip')}</th>
-                    <th class="left">${_('Owner')}</th>
-                    <th class="left">${_('Atom')}</th>
-                </tr>
-            </thead>
-            <tbody>
-            %for cnt,repo in enumerate(c.repos_list):
-                <tr class="parity${(cnt+1)%2}">
-                    ##QUICK MENU
-                    <td class="quick_repo_menu">
-                      ${dt.quick_menu(repo['name'])}
-                    </td>
-                    ##REPO NAME AND ICONS
-                    <td class="reponame">
-                      ${dt.repo_name(repo['name'],repo['dbrepo']['repo_type'],repo['dbrepo']['private'],h.AttributeDict(repo['dbrepo_fork']),pageargs.get('short_repo_names'))}
-                    </td>
-                    ##DESCRIPTION
-                    <td><span class="tooltip" title="${h.tooltip(repo['description'])}">
-                       %if c.visual.stylify_metatags:
-                       ${h.urlify_text(h.desc_stylize(h.truncate(repo['description'],60)))}</span>
-                       %else:
-                       ${h.truncate(repo['description'],60)}</span>
-                       %endif
-                    </td>
-                    ##LAST CHANGE DATE
-                    <td>
-                      ${dt.last_change(repo['last_change'])}
-                    </td>
-                    ##LAST REVISION
-                    <td>
-                        ${dt.revision(repo['name'],repo['rev'],repo['tip'],repo['author'],repo['last_msg'])}
-                    </td>
-                    ##
-                    <td title="${repo['contact']}">${h.person(repo['contact'])}</td>
-                    <td>
-                      ${dt.atom(repo['name'])}
-                    </td>
-                </tr>
-            %endfor
-            </tbody>
-            </table>
-            </div>
-            % else:
-              ## lightweight version
-                <div class="yui-skin-sam" id="repos_list_wrap"></div>
-                <div id="user-paginator" style="padding: 0px 0px 0px 0px"></div>
-            % endif
+            <%cnt=0%>
+            <%namespace name="dt" file="/data_table/_dt_elements.html"/>
+            <div class="yui-skin-sam" id="repos_list_wrap"></div>
+            <div id="user-paginator" style="padding: 0px 0px 0px 0px"></div>
         </div>
     </div>
-    % if not c.visual.lightweight_dashboard:
-    <script>
-      YUD.get('repo_count').innerHTML = ${cnt+1 if cnt else 0};
 
-      // groups table sorting
-      var myColumnDefs = [
-          {key:"name",label:"${_('Group name')}",sortable:true,
-              sortOptions: { sortFunction: groupNameSort }},
-          {key:"desc",label:"${_('Description')}",sortable:true},
-      ];
-
-      var myDataSource = new YAHOO.util.DataSource(YUD.get("groups_list"));
-
-      myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-      myDataSource.responseSchema = {
-          fields: [
-              {key:"name"},
-              {key:"desc"},
-          ]
-      };
-
-      var myDataTable = new YAHOO.widget.DataTable("groups_list_wrap", myColumnDefs, myDataSource,{
-          sortedBy:{key:"name",dir:"asc"},
-          paginator: new YAHOO.widget.Paginator({
-              rowsPerPage: 50,
-              alwaysVisible: false,
-              template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
-              pageLinks: 5,
-              containerClass: 'pagination-wh',
-              currentPageClass: 'pager_curpage',
-              pageLinkClass: 'pager_link',
-              nextPageLinkLabel: '&gt;',
-              previousPageLinkLabel: '&lt;',
-              firstPageLinkLabel: '&lt;&lt;',
-              lastPageLinkLabel: '&gt;&gt;',
-              containers:['group-user-paginator']
-          }),
-          MSG_SORTASC:"${_('Click to sort ascending')}",
-          MSG_SORTDESC:"${_('Click to sort descending')}"
-      });
-
-      // main table sorting
-      var myColumnDefs = [
-          {key:"menu",label:"",sortable:false,className:"quick_repo_menu hidden"},
-          {key:"name",label:"${_('Name')}",sortable:true,
-              sortOptions: { sortFunction: nameSort }},
-          {key:"desc",label:"${_('Description')}",sortable:true},
-          {key:"last_change",label:"${_('Last Change')}",sortable:true,
-              sortOptions: { sortFunction: ageSort }},
-          {key:"tip",label:"${_('Tip')}",sortable:true,
-              sortOptions: { sortFunction: revisionSort }},
-          {key:"owner",label:"${_('Owner')}",sortable:true},
-          {key:"atom",label:"",sortable:false},
-      ];
-
-      var myDataSource = new YAHOO.util.DataSource(YUD.get("repos_list"));
-
-      myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-
-      myDataSource.responseSchema = {
-          fields: [
-              {key:"menu"},
-              //{key:"raw_name"},
-              {key:"name"},
-              {key:"desc"},
-              {key:"last_change"},
-              {key:"tip"},
-              {key:"owner"},
-              {key:"atom"},
-          ]
-      };
-
-      var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,
-              {
-               sortedBy:{key:"name",dir:"asc"},
-               MSG_SORTASC:"${_('Click to sort ascending')}",
-               MSG_SORTDESC:"${_('Click to sort descending')}",
-               MSG_EMPTY:"${_('No records found.')}",
-               MSG_ERROR:"${_('Data error.')}",
-               MSG_LOADING:"${_('Loading...')}",
-              }
-      );
-      myDataTable.subscribe('postRenderEvent',function(oArgs) {
-          tooltip_activate();
-          quick_repo_menu();
-          var func = function(node){
-              return node.parentNode.parentNode.parentNode.parentNode;
-          }
-          q_filter('q_filter',YUQ('div.table tr td a.repo_name'),func);
-      });
-
-    </script>
-    % else:
       <script>
         var data = ${c.data|n};
         var myDataSource = new YAHOO.util.DataSource(data);
@@ -279,7 +132,7 @@
         var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
           sortedBy:{key:"name",dir:"asc"},
           paginator: new YAHOO.widget.Paginator({
-              rowsPerPage: ${c.visual.lightweight_dashboard_items},
+              rowsPerPage: ${c.visual.dashboard_items},
               alwaysVisible: false,
               template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
               pageLinks: 5,
@@ -336,4 +189,3 @@
             filterTimeout = setTimeout(updateFilter,600);
         });
       </script>
-    % endif

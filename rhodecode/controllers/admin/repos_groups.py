@@ -360,19 +360,15 @@ class ReposGroupsController(BaseController):
             .filter(RepoGroup.group_parent_id == c.group.group_id).all()
         c.groups = self.scm_model.get_repos_groups(groups)
 
-        if not c.visual.lightweight_dashboard:
-            c.repos_list = self.scm_model.get_repos(all_repos=gr_filter)
-        ## lightweight version of dashboard
-        else:
-            c.repos_list = Repository.query()\
-                            .filter(Repository.group_id == c.group.group_id)\
-                            .order_by(func.lower(Repository.repo_name))\
-                            .all()
+        c.repos_list = Repository.query()\
+                        .filter(Repository.group_id == c.group.group_id)\
+                        .order_by(func.lower(Repository.repo_name))\
+                        .all()
 
-            repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
-                                                       admin=False)
-            #json used to render the grid
-            c.data = json.dumps(repos_data)
+        repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
+                                                   admin=False)
+        #json used to render the grid
+        c.data = json.dumps(repos_data)
 
         return render('admin/repos_groups/repos_groups.html')
 

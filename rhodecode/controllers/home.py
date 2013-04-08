@@ -52,19 +52,15 @@ class HomeController(BaseController):
         c.groups = self.scm_model.get_repos_groups()
         c.group = None
 
-        if not c.visual.lightweight_dashboard:
-            c.repos_list = self.scm_model.get_repos()
-        ## lightweight version of dashboard
-        else:
-            c.repos_list = Repository.query()\
-                            .filter(Repository.group_id == None)\
-                            .order_by(func.lower(Repository.repo_name))\
-                            .all()
+        c.repos_list = Repository.query()\
+                        .filter(Repository.group_id == None)\
+                        .order_by(func.lower(Repository.repo_name))\
+                        .all()
 
-            repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
-                                                       admin=False)
-            #json used to render the grid
-            c.data = json.dumps(repos_data)
+        repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
+                                                   admin=False)
+        #json used to render the grid
+        c.data = json.dumps(repos_data)
 
         return render('/index.html')
 

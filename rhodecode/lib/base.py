@@ -271,8 +271,7 @@ class BaseController(WSGIController):
         c.visual.show_public_icon = str2bool(rc_config.get('rhodecode_show_public_icon'))
         c.visual.show_private_icon = str2bool(rc_config.get('rhodecode_show_private_icon'))
         c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
-        c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
-        c.visual.lightweight_dashboard_items = safe_int(config.get('dashboard_items', 100))
+        c.visual.dashboard_items = safe_int(config.get('dashboard_items', 100))
         c.visual.repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
         c.repo_name = get_repo_slug(request)  # can be empty
         c.backends = BACKENDS.keys()
