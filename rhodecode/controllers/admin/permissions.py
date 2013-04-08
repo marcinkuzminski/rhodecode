@@ -53,8 +53,6 @@ class PermissionsController(BaseController):
     @LoginRequired()
     @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
         super(PermissionsController, self).__before__()
 
         self.repo_perms_choices = [('repository.none', _('None'),),

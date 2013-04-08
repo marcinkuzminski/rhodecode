@@ -64,8 +64,6 @@ class ReposController(BaseRepoController):
 
     @LoginRequired()
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
         super(ReposController, self).__before__()
 
     def __load_defaults(self):

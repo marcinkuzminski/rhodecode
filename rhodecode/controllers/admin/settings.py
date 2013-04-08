@@ -67,15 +67,13 @@ class SettingsController(BaseController):
 
     @LoginRequired()
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
+        super(SettingsController, self).__before__()
         c.modules = sorted([(p.project_name, p.version)
                             for p in pkg_resources.working_set]
                            + [('git', check_git_version())],
                            key=lambda k: k[0].lower())
         c.py_version = platform.python_version()
         c.platform = platform.platform()
-        super(SettingsController, self).__before__()
 
     @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
