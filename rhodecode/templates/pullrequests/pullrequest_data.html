@@ -16,23 +16,9 @@
   </div>
 % endfor
 
-<div class="pagination-wh pagination-left">
-<script type="text/javascript">
-YUE.onDOMReady(function(){
-    YUE.delegate("pullrequests","click",function(e, matchedEl, container){
-        ypjax(e.target.href,"pullrequests",function(){
-            show_more_event();
-            tooltip_activate();
-            show_changeset_tooltip();
-        });
-        YUE.preventDefault(e);
-    },'.pager_link');
-});
-</script>
+
 <div class="notification-paginator">
   <div class="pagination-wh pagination-left">
   ${c.pullrequests_pager.pager('$link_previous ~2~ $link_next')}
   </div>
-</div>
-
 </div>
