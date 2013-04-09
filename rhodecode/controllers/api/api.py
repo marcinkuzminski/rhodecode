@@ -40,8 +40,8 @@ from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UserGroupModel
-from rhodecode.model.permission import PermissionModel
-from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap
+from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap,\
+    Permission
 from rhodecode.lib.compat import json
 
 log = logging.getLogger(__name__)
@@ -139,7 +139,7 @@ def get_perm_or_error(permid):
 
     :param userid:
     """
-    perm = PermissionModel().get_permission_by_name(permid)
+    perm = Permission.get_by_key(permid)
     if perm is None:
         raise JSONRPCError('permission `%s` does not exist' % (permid))
     return perm
