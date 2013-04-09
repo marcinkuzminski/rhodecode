@@ -221,6 +221,7 @@ class UsersController(BaseController):
     def show(self, id, format='html'):
         """GET /users/id: Show a specific item"""
         # url('user', id=ID)
+        User.get_or_404(-1)
 
     def edit(self, id, format='html'):
         """GET /users/id/edit: Form to edit an existing item"""

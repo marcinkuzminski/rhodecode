@@ -38,7 +38,7 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.forms import DefaultPermissionsForm
 from rhodecode.model.permission import PermissionModel
-from rhodecode.model.db import User, UserIpMap
+from rhodecode.model.db import User, UserIpMap, Permission
 from rhodecode.model.meta import Session
 
 log = logging.getLogger(__name__)
@@ -154,6 +154,7 @@ class PermissionsController(BaseController):
     def show(self, id, format='html'):
         """GET /permissions/id: Show a specific item"""
         # url('permission', id=ID)
+        Permission.get_or_404(-1)
 
     def edit(self, id, format='html'):
         """GET /permissions/id/edit: Form to edit an existing item"""
