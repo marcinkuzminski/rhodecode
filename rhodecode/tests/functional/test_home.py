@@ -33,7 +33,7 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
 )
 
     def test_repo_summary_with_anonymous_access_disabled(self):
-        anon = User.get_by_username('default')
+        anon = User.get_default_user()
         anon.active = False
         Session().add(anon)
         Session().commit()
@@ -45,13 +45,13 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
             assert 'login' in response.location
 
         finally:
-            anon = User.get_by_username('default')
+            anon = User.get_default_user()
             anon.active = True
             Session().add(anon)
             Session().commit()
 
     def test_index_with_anonymous_access_disabled(self):
-        anon = User.get_by_username('default')
+        anon = User.get_default_user()
         anon.active = False
         Session().add(anon)
         Session().commit()
@@ -61,7 +61,7 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
                                     status=302)
             assert 'login' in response.location
         finally:
-            anon = User.get_by_username('default')
+            anon = User.get_default_user()
             anon.active = True
             Session().add(anon)
             Session().commit()

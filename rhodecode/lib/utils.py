@@ -58,6 +58,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.lib.utils2 import safe_str, safe_unicode
 from rhodecode.lib.vcs.utils.fakemod import create_module
+from rhodecode.model.users_group import UserGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +101,9 @@ def repo_name_slug(value):
     return slug
 
 
+#==============================================================================
+# PERM DECORATOR HELPERS FOR EXTRACTING NAMES FOR PERM CHECKS
+#==============================================================================
 def get_repo_slug(request):
     _repo = request.environ['pylons.routes_dict'].get('repo_name')
     if _repo:
@@ -116,9 +120,15 @@ def get_repos_group_slug(request):
 
 def get_user_group_slug(request):
     _group = request.environ['pylons.routes_dict'].get('id')
-    _group = UserGroup.get(_group)
-    if _group:
-        _group = _group.users_group_name
+    try:
+        _group = UserGroup.get(_group)
+        if _group:
+            _group = _group.users_group_name
+    except Exception:
+        log.debug(traceback.format_exc())
+        #catch all failures here
+        pass
+
     return _group
 
 

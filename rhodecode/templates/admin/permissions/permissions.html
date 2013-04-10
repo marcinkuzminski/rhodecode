@@ -66,18 +66,32 @@
             </div>
             <div class="field">
                 <div class="label">
-                    <label for="default_register">${_('Registration')}:</label>
+                    <label for="default_group_perm">${_('User group')}:</label>
                 </div>
                 <div class="select">
-                    ${h.select('default_register','',c.register_choices)}
+                    ${h.select('default_user_group_perm','',c.user_group_perms_choices)}
+                    ${h.checkbox('overwrite_default_user_group','true')}
+                    <label for="overwrite_default_user_group">
+                    <span class="tooltip"
+                    title="${h.tooltip(_('All default permissions on each user group will be reset to chosen permission, note that all custom default permission on repository groups will be lost'))}">
+                    ${_('Overwrite existing settings')}</span> </label>
+
                 </div>
             </div>
              <div class="field">
                 <div class="label">
-                    <label for="default_create">${_('Repository creation')}:</label>
+                    <label for="default_repo_create">${_('Repository creation')}:</label>
                 </div>
                 <div class="select">
-                    ${h.select('default_create','',c.create_choices)}
+                    ${h.select('default_repo_create','',c.repo_create_choices)}
+                </div>
+             </div>
+             <div class="field">
+                <div class="label">
+                    <label for="default_user_group_create">${_('User group creation')}:</label>
+                </div>
+                <div class="select">
+                    ${h.select('default_user_group_create','',c.user_group_create_choices)}
                 </div>
              </div>
              <div class="field">
@@ -86,6 +100,14 @@
                 </div>
                 <div class="select">
                     ${h.select('default_fork','',c.fork_choices)}
+                </div>
+             </div>
+             <div class="field">
+                <div class="label">
+                    <label for="default_register">${_('Registration')}:</label>
+                </div>
+                <div class="select">
+                    ${h.select('default_register','',c.register_choices)}
                 </div>
              </div>
             <div class="buttons">
@@ -104,7 +126,8 @@
     </div>
 
     ## permissions overview
-    <%include file="/base/perms_summary.html"/>
+    <%namespace name="p" file="/base/perms_summary.html"/>
+    ${p.perms_summary(c.perm_user.permissions)}
 
 </div>
 <div class="box box-left" style="clear:left">

@@ -521,7 +521,7 @@ class DbManage(object):
             self.sa.add(setting)
 
     def fixup_groups(self):
-        def_usr = User.get_by_username('default')
+        def_usr = User.get_default_user()
         for g in RepoGroup.query().all():
             g.group_name = g.get_new_name(g.name)
             self.sa.add(g)
@@ -688,13 +688,8 @@ class DbManage(object):
         """
         # module.(access|create|change|delete)_[name]
         # module.(none|read|write|admin)
-
-        for p in Permission.PERMS:
-            if not Permission.get_by_key(p[0]):
-                new_perm = Permission()
-                new_perm.permission_name = p[0]
-                new_perm.permission_longname = p[0]
-                self.sa.add(new_perm)
+        log.info('creating permissions')
+        PermissionModel(self.sa).create_permissions()
 
     def populate_default_permissions(self):
         """

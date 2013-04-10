@@ -229,7 +229,7 @@ def authenticate(username, password):
                  'lastname': safe_unicode(get_ldap_attr('ldap_attr_lastname')),
                  'email': get_ldap_attr('ldap_attr_email'),
                  'active': 'hg.register.auto_activate' in User\
-                    .get_by_username('default').AuthUser.permissions['global']
+                    .get_default_user().AuthUser.permissions['global']
                 }
 
                 # don't store LDAP password since we don't need it. Override
@@ -259,7 +259,7 @@ def login_container_auth(username):
             'lastname': None,
             'email': None,
             'active': 'hg.register.auto_activate' in User\
-               .get_by_username('default').AuthUser.permissions['global']
+               .get_default_user().AuthUser.permissions['global']
         }
         user = UserModel().create_for_container_auth(username, user_attrs)
         if not user:

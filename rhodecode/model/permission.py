@@ -43,6 +43,17 @@ class PermissionModel(BaseModel):
 
     cls = Permission
 
+    def create_permissions(self):
+        """
+        Create permissions for whole system
+        """
+        for p in Permission.PERMS:
+            if not Permission.get_by_key(p[0]):
+                new_perm = Permission()
+                new_perm.permission_name = p[0]
+                new_perm.permission_longname = p[0]  #translation err with p[1]
+                self.sa.add(new_perm)
+
     def create_default_permissions(self, user):
         """
         Creates only missing default permissions for user
@@ -87,6 +98,7 @@ class PermissionModel(BaseModel):
 
             # stage 2 reset defaults and set them from form data
             def _make_new(usr, perm_name):
+                log.debug('Creating new permission:%s' % (perm_name))
                 new = UserToPerm()
                 new.user = usr
                 new.permission = Permission.get_by_key(perm_name)
@@ -101,8 +113,11 @@ class PermissionModel(BaseModel):
                 self.sa.delete(p)
             #create fresh set of permissions
             for def_perm_key in ['default_repo_perm', 'default_group_perm',
-                                 'default_register', 'default_create',
-                                 'default_fork']:
+                                 'default_user_group_perm',
+                                 'default_repo_create',
+                                 #'default_repo_group_create', #not implemented yet
+                                 'default_user_group_create',
+                                 'default_fork', 'default_register']:
                 p = _make_new(perm_user, form_result[def_perm_key])
                 self.sa.add(p)
 

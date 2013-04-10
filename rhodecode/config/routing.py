@@ -68,6 +68,15 @@ def make_map(config):
         return is_valid_repos_group(repos_group_name, config['base_path'],
                                     skip_path_check=True)
 
+    def check_user_group(environ, match_dict):
+        """
+        check for valid user group for proper 404 handling
+
+        :param environ:
+        :param match_dict:
+        """
+        return True
+
     def check_int(environ, match_dict):
         return match_dict.get('id').isdigit()
 
@@ -266,7 +275,8 @@ def make_map(config):
         m.connect("delete_users_group", "/users_groups/{id}",
                   action="delete", conditions=dict(method=["DELETE"]))
         m.connect("edit_users_group", "/users_groups/{id}/edit",
-                  action="edit", conditions=dict(method=["GET"]))
+                  action="edit", conditions=dict(method=["GET"]),
+                  function=check_user_group)
         m.connect("formatted_edit_users_group",
                   "/users_groups/{id}.{format}/edit",
                   action="edit", conditions=dict(method=["GET"]))

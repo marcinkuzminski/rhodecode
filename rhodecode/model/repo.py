@@ -63,7 +63,7 @@ class RepoModel(BaseModel):
     def _create_default_perms(self, repository, private):
         # create default permission
         default = 'repository.read'
-        def_user = User.get_by_username('default')
+        def_user = User.get_default_user()
         for p in def_user.user_perms:
             if p.permission.permission_name.startswith('repository.'):
                 default = p.permission.permission_name

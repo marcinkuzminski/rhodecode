@@ -28,7 +28,9 @@
         </ul>
     </div>
     <!-- end box / title -->
+
     <div class="table">
+    %if c.users_groups_list:
         <table class="table_disp">
         <tr class="header">
             <th class="left">${_('Group name')}</th>
@@ -55,6 +57,9 @@
                 </tr>
             %endfor
         </table>
+    %else:
+        ${_('There are no user groups yet')}
+    %endif
     </div>
 </div>
 </%def>

@@ -98,7 +98,7 @@ class ReposController(BaseRepoController):
         choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
         c.landing_revs_choices = choices
 
-        c.default_user_id = User.get_by_username('default').user_id
+        c.default_user_id = User.get_default_user().user_id
         c.in_public_journal = UserFollowing.query()\
             .filter(UserFollowing.user_id == c.default_user_id)\
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
@@ -466,7 +466,7 @@ class ReposController(BaseRepoController):
         if cur_token == token:
             try:
                 repo_id = Repository.get_by_repo_name(repo_name).repo_id
-                user_id = User.get_by_username('default').user_id
+                user_id = User.get_default_user().user_id
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')

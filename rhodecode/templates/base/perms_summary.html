@@ -9,28 +9,32 @@
         %else:
         <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
          <table id="tbl_list_${section}">
-          <thead>
-              <tr>
-              <th class="left">${_('Name')}</th>
-              <th class="left">${_('Permission')}</th>
-              <th class="left">${_('Edit Permission')}</th>
-          </thead>
-          <tbody>
           %if section == 'global':
+              <thead>
+                  <tr>
+                  <th colspan="2" class="left">${_('Permission')}</th>
+                  <th class="left">${_('Edit Permission')}</th>
+              </thead>
+              <tbody>
               %for k in sorted(permissions[section], key=lambda s: s.lower()):
                   <tr>
-                      <td>
+                      <td colspan="2">
                           ${h.get_permission_name(k)}
-                      </td>
-                      <td>
-                           ${h.boolicon(k.split('.')[-1] != 'none')}
                       </td>
                       <td>
                            <a href="${h.url('edit_permission', id='default')}">${_('edit')}</a>
                       </td>
                   </tr>
               %endfor
+              </tbody>
           %else:
+              <thead>
+                  <tr>
+                  <th class="left">${_('Name')}</th>
+                  <th class="left">${_('Permission')}</th>
+                  <th class="left">${_('Edit Permission')}</th>
+              </thead>
+              <tbody>
               %for k, section_perm in sorted(permissions[section].items(), key=lambda s: s[1]+s[0].lower()):
                   <tr>
                       <td>
@@ -38,6 +42,9 @@
                               <a href="${h.url('summary_home',repo_name=k)}">${k}</a>
                           %elif section == 'repositories_groups':
                               <a href="${h.url('repos_group_home',group_name=k)}">${k}</a>
+                          %elif section == 'user_groups':
+                              ##<a href="${h.url('edit_users_group',id=k)}">${k}</a>
+                              ${k}
                           %endif
                       </td>
                       <td>
@@ -48,13 +55,14 @@
                               <a href="${h.url('edit_repo',repo_name=k,anchor='permissions_manage')}">${_('edit')}</a>
                           %elif section == 'repositories_groups':
                               <a href="${h.url('edit_repos_group',group_name=k,anchor='permissions_manage')}">${_('edit')}</a>
+                          %elif section == 'user_groups':
+                              ##<a href="${h.url('edit_users_group',id=k)}">${_('edit')}</a>
                           %endif
                       </td>
                   </tr>
               %endfor
+              </tbody>
           %endif
-
-          </tbody>
          </table>
         </div>
         %endif

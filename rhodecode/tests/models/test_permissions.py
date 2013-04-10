@@ -34,7 +34,7 @@ class TestPermissions(unittest.TestCase):
             username=u'u3', password=u'qweqwe',
             email=u'u3@rhodecode.org', firstname=u'u3', lastname=u'u3'
         )
-        self.anon = User.get_by_username('default')
+        self.anon = User.get_default_user()
         self.a1 = UserModel().create_or_update(
             username=u'a1', password=u'qweqwe',
             email=u'a1@rhodecode.org', firstname=u'a1', lastname=u'a1', admin=True

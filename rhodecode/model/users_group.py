@@ -46,7 +46,7 @@ class UserGroupModel(BaseModel):
     def _create_default_perms(self, user_group):
         # create default permission
         default_perm = 'usergroup.read'
-        def_user = User.get_by_username('default')
+        def_user = User.get_default_user()
         for p in def_user.user_perms:
             if p.permission.permission_name.startswith('usergroup.'):
                 default_perm = p.permission.permission_name

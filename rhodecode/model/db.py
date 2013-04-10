@@ -637,6 +637,7 @@ class UserGroup(Base, BaseModel):
     members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
     users_group_to_perm = relationship('UserGroupToPerm', cascade='all')
     users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
+    users_group_repo_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
     user_user_group_to_perm = relationship('UserUserGroupToPerm ', cascade='all')
     user = relationship('User')
 
@@ -1426,6 +1427,12 @@ class Permission(Base, BaseModel):
         ('usergroup.write', _('User group write access')),
         ('usergroup.admin', _('User group admin access')),
 
+        ('hg.repogroup.create.false', _('Repository Group creation disabled')),
+        ('hg.repogroup.create.true', _('Repository Group creation enabled')),
+
+        ('hg.usergroup.create.false', _('User Group creation disabled')),
+        ('hg.usergroup.create.true', _('User Group creation enabled')),
+
         ('hg.create.none', _('Repository creation disabled')),
         ('hg.create.repository', _('Repository creation enabled')),
 
@@ -1451,6 +1458,8 @@ class Permission(Base, BaseModel):
     ]
 
     # defines which permissions are more important higher the more important
+    # Weight defines which permissions are more important.
+    # The higher number the more important.
     PERM_WEIGHTS = {
         'repository.none': 0,
         'repository.read': 1,
@@ -1466,6 +1475,11 @@ class Permission(Base, BaseModel):
         'usergroup.read': 1,
         'usergroup.write': 3,
         'usergroup.admin': 4,
+        'hg.repogroup.create.false': 0,
+        'hg.repogroup.create.true': 1,
+
+        'hg.usergroup.create.false': 0,
+        'hg.usergroup.create.true': 1,
 
         'hg.fork.none': 0,
         'hg.fork.repository': 1,
