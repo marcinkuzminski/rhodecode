@@ -85,17 +85,17 @@ ${self.context_bar('summary')}
                   ##FORK
                   %if c.dbrepo.fork:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}"><img class="icon" alt="${_('Public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
-                        ${_('Fork of')} ${c.dbrepo.fork.repo_name}
-                    </a>
+                        <img class="icon" alt="${_('Public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
+                        ${_('Fork of')}
+                        <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}">${c.dbrepo.fork.repo_name}</a>
                     </div>
                   %endif
                   ##REMOTE
                   %if c.dbrepo.clone_uri:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}"><img class="icon" alt="${_('Remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
-                        ${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}
-                    </a>
+                        ${_('Clone from')}
+                        <img class="icon" alt="${_('Remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
+                        <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}">${h.hide_credentials(c.dbrepo.clone_uri)}</a>
                     </div>
                   %endif
               </div>
