@@ -358,39 +358,43 @@ class DiffProcessor(object):
 
             op = None
             stats = None
-            msg = None
+            msgs = []
 
             if not head['a_file'] and head['b_file']:
                 op = 'A'
+                stats = ['b', NEW_FILENODE]
+                msgs.append('new file')
             elif head['a_file'] and head['b_file']:
                 op = 'M'
+                stats = ['b', MOD_FILENODE]
             elif head['a_file'] and not head['b_file']:
                 op = 'D'
+                stats = ['b', DEL_FILENODE]
+                msgs.append('deleted file')
             else:
                 if head['deleted_file_mode']:
                     op = 'D'
                     stats = ['b', DEL_FILENODE]
-                    msg = 'deleted file'
+                    msgs.append('deleted file')
                 elif head['new_file_mode']:
                     op = 'A'
                     stats = ['b', NEW_FILENODE]
-                    msg = 'new file %s' % head['new_file_mode']
+                    msgs.append('new file %s' % head['new_file_mode'])
                 else:
                     if head['new_mode'] and head['old_mode']:
+                        op = 'M'
                         stats = ['b', CHMOD_FILENODE]
-                        op = 'M'
-                        msg = ('modified file chmod %s => %s'
+                        msgs.append('modified file chmod %s => %s'
                                       % (head['old_mode'], head['new_mode']))
-                    elif (head['rename_from'] and head['rename_to']
+                    if (head['rename_from'] and head['rename_to']
                           and head['rename_from'] != head['rename_to']):
-                        stats = ['b', RENAMED_FILENODE]
                         op = 'M'
-                        msg = ('file renamed from %s to %s'
+                        stats = ['b', RENAMED_FILENODE] # might overwrite CHMOD_FILENODE
+                        msgs.append('file renamed from %s to %s'
                                       % (head['rename_from'], head['rename_to']))
-                    else:
-                        stats = ['b', MOD_FILENODE]
+                    if op is None:
                         op = 'M'
-                        msg = 'modified file'
+                        stats = ['b', MOD_FILENODE]
 
             if head['a_file'] or head['b_file']: # a real diff
                 try:
@@ -403,16 +407,15 @@ class DiffProcessor(object):
                     break
             else: # GIT binary patch (or empty diff)
                 chunks = []
-                if not msg: # don't overwrite more important message
-                    msg = 'binary diff not shown'
+                msgs.append('binary diff not shown') # or no diff because it was a rename or chmod or add/remove of empty file
 
-            if msg:
+            if msgs:
                 chunks.insert(0, [{
                     'old_lineno': '',
                     'new_lineno': '',
                     'action':     'binary',
                     'line':       msg,
-                }])
+                    } for msg in msgs])
 
             _files.append({
                 'filename':         head['b_path'],
