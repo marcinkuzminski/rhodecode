@@ -43,11 +43,49 @@ class PermissionModel(BaseModel):
 
     cls = Permission
 
+    def create_default_permissions(self, user):
+        """
+        Creates only missing default permissions for user
+
+        :param user:
+        """
+        user = self._get_user(user)
+
+        def _make_perm(perm):
+            new_perm = UserToPerm()
+            new_perm.user = user
+            new_perm.permission = Permission.get_by_key(perm)
+            return new_perm
+
+        def _get_group(perm_name):
+            return '.'.join(perm_name.split('.')[:1])
+
+        perms = UserToPerm.query().filter(UserToPerm.user == user).all()
+        defined_perms_groups = map(_get_group,
+                                (x.permission.permission_name for x in perms))
+        log.debug('GOT ALREADY DEFINED:%s' % perms)
+        DEFAULT_PERMS = Permission.DEFAULT_USER_PERMISSIONS
+
+        # for every default permission that needs to be created, we check if
+        # it's group is already defined, if it's not we create default perm
+        for perm_name in DEFAULT_PERMS:
+            gr = _get_group(perm_name)
+            if gr not in defined_perms_groups:
+                log.debug('GR:%s not found, creating permission %s'
+                          % (gr, perm_name))
+                new_perm = _make_perm(perm_name)
+                self.sa.add(new_perm)
+
     def update(self, form_result):
         perm_user = User.get_by_username(username=form_result['perm_user_name'])
-        u2p = self.sa.query(UserToPerm).filter(UserToPerm.user == perm_user).all()
 
         try:
+            # stage 1 set anonymous access
+            if perm_user.username == 'default':
+                perm_user.active = str2bool(form_result['anonymous'])
+                self.sa.add(perm_user)
+
+            # stage 2 reset defaults and set them from form data
             def _make_new(usr, perm_name):
                 new = UserToPerm()
                 new.user = usr
@@ -56,6 +94,9 @@ class PermissionModel(BaseModel):
             # clear current entries, to make this function idempotent
             # it will fix even if we define more permissions or permissions
             # are somehow missing
+            u2p = self.sa.query(UserToPerm)\
+                .filter(UserToPerm.user == perm_user)\
+                .all()
             for p in u2p:
                 self.sa.delete(p)
             #create fresh set of permissions
@@ -65,7 +106,7 @@ class PermissionModel(BaseModel):
                 p = _make_new(perm_user, form_result[def_perm_key])
                 self.sa.add(p)
 
-            #stage 2 update all default permissions for repos if checked
+            #stage 3 update all default permissions for repos if checked
             if form_result['overwrite_default_repo'] == True:
                 _def_name = form_result['default_repo_perm'].split('repository.')[-1]
                 _def = Permission.get_by_key('repository.' + _def_name)
@@ -88,11 +129,6 @@ class PermissionModel(BaseModel):
                                .all():
                     g2p.permission = _def
                     self.sa.add(g2p)
-
-            # stage 3 set anonymous access
-            if perm_user.username == 'default':
-                perm_user.active = str2bool(form_result['anonymous'])
-                self.sa.add(perm_user)
 
             self.sa.commit()
         except (DatabaseError,):

@@ -4,12 +4,14 @@ from rhodecode.tests import *
 from rhodecode.tests.fixture import Fixture
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.repo import RepoModel
-from rhodecode.model.db import RepoGroup, User, UserGroupRepoGroupToPerm
+from rhodecode.model.db import RepoGroup, User, UserGroupRepoGroupToPerm,\
+    Permission, UserToPerm
 from rhodecode.model.user import UserModel
 
 from rhodecode.model.meta import Session
 from rhodecode.model.users_group import UserGroupModel
 from rhodecode.lib.auth import AuthUser
+from rhodecode.model.permission import PermissionModel
 
 
 fixture = Fixture()
@@ -101,13 +103,15 @@ class TestPermissions(unittest.TestCase):
         u1_auth = AuthUser(user_id=self.u1.user_id)
         perms = {
             'repositories_groups': {u'test1': 'group.read', u'test2': 'group.read'},
-            'global': set([u'hg.create.repository', u'repository.read', u'hg.register.manual_activate']),
+            'global': set(Permission.DEFAULT_USER_PERMISSIONS),
             'repositories': {u'vcs_test_hg': u'repository.read'}
         }
         self.assertEqual(u1_auth.permissions['repositories'][HG_REPO],
                          perms['repositories'][HG_REPO])
         self.assertEqual(u1_auth.permissions['repositories_groups'],
                          perms['repositories_groups'])
+        self.assertEqual(u1_auth.permissions['global'],
+                         perms['global'])
 
     def test_default_admin_group_perms(self):
         self.g1 = fixture.create_group('test1', skip_if_exists=True)
@@ -347,7 +351,8 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
-                              'repository.read', 'group.read']))
+                              'repository.read', 'group.read',
+                              'usergroup.read']))
 
     def test_inherited_permissions_from_default_on_user_disabled(self):
         user_model = UserModel()
@@ -365,7 +370,8 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.none', 'hg.fork.none',
                               'hg.register.manual_activate',
-                              'repository.read', 'group.read']))
+                              'repository.read', 'group.read',
+                              'usergroup.read']))
 
     def test_non_inherited_permissions_from_default_on_user_enabled(self):
         user_model = UserModel()
@@ -391,7 +397,8 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.none', 'hg.fork.none',
                               'hg.register.manual_activate',
-                              'repository.read', 'group.read']))
+                              'repository.read', 'group.read',
+                              'usergroup.read']))
 
     def test_non_inherited_permissions_from_default_on_user_disabled(self):
         user_model = UserModel()
@@ -417,7 +424,8 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
-                              'repository.read', 'group.read']))
+                              'repository.read', 'group.read',
+                              'usergroup.read']))
 
     def test_owner_permissions_doesnot_get_overwritten_by_group(self):
         #create repo as USER,
@@ -458,3 +466,60 @@ class TestPermissions(unittest.TestCase):
         u1_auth = AuthUser(user_id=self.u1.user_id)
         self.assertEqual(u1_auth.permissions['repositories']['myownrepo'],
                          'repository.admin')
+
+    def _test_def_perm_equal(self, user, change_factor=0):
+        perms = UserToPerm.query()\
+                .filter(UserToPerm.user == user)\
+                .all()
+        self.assertEqual(len(perms),
+                         len(Permission.DEFAULT_USER_PERMISSIONS,)+change_factor,
+                         msg=perms)
+
+    def test_set_default_permissions(self):
+        PermissionModel().create_default_permissions(user=self.u1)
+        self._test_def_perm_equal(user=self.u1)
+
+    def test_set_default_permissions_after_one_is_missing(self):
+        PermissionModel().create_default_permissions(user=self.u1)
+        self._test_def_perm_equal(user=self.u1)
+        #now we delete one, it should be re-created after another call
+        perms = UserToPerm.query()\
+                .filter(UserToPerm.user == self.u1)\
+                .all()
+        Session().delete(perms[0])
+        Session().commit()
+
+        self._test_def_perm_equal(user=self.u1, change_factor=-1)
+
+        #create missing one !
+        PermissionModel().create_default_permissions(user=self.u1)
+        self._test_def_perm_equal(user=self.u1)
+
+    @parameterized.expand([
+        ('repository.read', 'repository.none'),
+        ('group.read', 'group.none'),
+        ('usergroup.read', 'usergroup.none'),
+        ('hg.create.repository', 'hg.create.none'),
+        ('hg.fork.repository', 'hg.fork.none'),
+        ('hg.register.manual_activate', 'hg.register.auto_activate',)
+    ])
+    def test_set_default_permissions_after_modification(self, perm, modify_to):
+        PermissionModel().create_default_permissions(user=self.u1)
+        self._test_def_perm_equal(user=self.u1)
+
+        old = Permission.get_by_key(perm)
+        new = Permission.get_by_key(modify_to)
+        self.assertNotEqual(old, None)
+        self.assertNotEqual(new, None)
+
+        #now modify permissions
+        p = UserToPerm.query()\
+                .filter(UserToPerm.user == self.u1)\
+                .filter(UserToPerm.permission == old)\
+                .one()
+        p.permission = new
+        Session().add(p)
+        Session().commit()
+
+        PermissionModel().create_default_permissions(user=self.u1)
+        self._test_def_perm_equal(user=self.u1)

@@ -44,6 +44,7 @@ from rhodecode.model.repos_group import ReposGroupModel
 #from rhodecode.model import meta
 from rhodecode.model.meta import Session, Base
 from rhodecode.model.repo import RepoModel
+from rhodecode.model.permission import PermissionModel
 
 
 log = logging.getLogger(__name__)
@@ -550,7 +551,7 @@ class DbManage(object):
         u2p = UserToPerm.query()\
             .filter(UserToPerm.user == default_user).all()
         fixed = False
-        if len(u2p) != len(User.DEFAULT_PERMISSIONS):
+        if len(u2p) != len(Permission.DEFAULT_USER_PERMISSIONS):
             for p in u2p:
                 Session().delete(p)
             fixed = True
@@ -682,6 +683,9 @@ class DbManage(object):
                               firstname='Anonymous', lastname='User')
 
     def create_permissions(self):
+        """
+        Creates all permissions defined in the system
+        """
         # module.(access|create|change|delete)_[name]
         # module.(none|read|write|admin)
 
@@ -693,27 +697,12 @@ class DbManage(object):
                 self.sa.add(new_perm)
 
     def populate_default_permissions(self):
+        """
+        Populate default permissions. It will create only the default
+        permissions that are missing, and not alter already defined ones
+        """
         log.info('creating default user permissions')
-
-        default_user = User.get_by_username('default')
-
-        for def_perm in User.DEFAULT_PERMISSIONS:
-
-            perm = self.sa.query(Permission)\
-             .filter(Permission.permission_name == def_perm)\
-             .scalar()
-            if not perm:
-                raise Exception(
-                  'CRITICAL: permission %s not found inside database !!'
-                  % def_perm
-                )
-            if not UserToPerm.query()\
-                .filter(UserToPerm.permission == perm)\
-                .filter(UserToPerm.user == default_user).scalar():
-                reg_perm = UserToPerm()
-                reg_perm.user = default_user
-                reg_perm.permission = perm
-                self.sa.add(reg_perm)
+        PermissionModel(self.sa).create_default_permissions(user=User.DEFAULT_USER)
 
     @staticmethod
     def check_waitress():

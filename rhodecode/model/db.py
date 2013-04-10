@@ -320,10 +320,7 @@ class User(Base, BaseModel):
          'mysql_charset': 'utf8'}
     )
     DEFAULT_USER = 'default'
-    DEFAULT_PERMISSIONS = [
-        'hg.register.manual_activate', 'hg.create.repository',
-        'hg.fork.repository', 'repository.read', 'group.read'
-    ]
+
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -500,6 +497,13 @@ class User(Base, BaseModel):
         user = User.query().filter(User.admin == True).first()
         if user is None:
             raise Exception('Missing administrative account!')
+        return user
+
+    @classmethod
+    def get_default_user(cls, cache=False):
+        user = User.get_by_username(User.DEFAULT_USER, cache=cache)
+        if user is None:
+            raise Exception('Missing default account!')
         return user
 
     def get_api_data(self):
@@ -1405,6 +1409,8 @@ class Permission(Base, BaseModel):
          'mysql_charset': 'utf8'},
     )
     PERMS = [
+        ('hg.admin', _('RhodeCode Administrator')),
+
         ('repository.none', _('Repository no access')),
         ('repository.read', _('Repository read access')),
         ('repository.write', _('Repository write access')),
@@ -1420,17 +1426,28 @@ class Permission(Base, BaseModel):
         ('usergroup.write', _('User group write access')),
         ('usergroup.admin', _('User group admin access')),
 
-        ('hg.admin', _('RhodeCode Administrator')),
         ('hg.create.none', _('Repository creation disabled')),
         ('hg.create.repository', _('Repository creation enabled')),
+
         ('hg.fork.none', _('Repository forking disabled')),
         ('hg.fork.repository', _('Repository forking enabled')),
+
         ('hg.register.none', _('Register disabled')),
         ('hg.register.manual_activate', _('Register new user with RhodeCode '
                                           'with manual activation')),
 
         ('hg.register.auto_activate', _('Register new user with RhodeCode '
                                         'with auto activation')),
+    ]
+
+    #definition of system default permissions for DEFAULT user
+    DEFAULT_USER_PERMISSIONS = [
+        'repository.read',
+        'group.read',
+        'usergroup.read',
+        'hg.create.repository',
+        'hg.fork.repository',
+        'hg.register.manual_activate',
     ]
 
     # defines which permissions are more important higher the more important
