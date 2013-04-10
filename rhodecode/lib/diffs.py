@@ -360,41 +360,38 @@ class DiffProcessor(object):
             stats = None
             msgs = []
 
-            if not head['a_file'] and head['b_file']:
-                op = 'A'
-                stats = ['b', NEW_FILENODE]
-                msgs.append('new file')
-            elif head['a_file'] and head['b_file']:
-                op = 'M'
-                stats = ['b', MOD_FILENODE]
-            elif head['a_file'] and not head['b_file']:
+            if head['deleted_file_mode']:
                 op = 'D'
                 stats = ['b', DEL_FILENODE]
                 msgs.append('deleted file')
+            elif head['new_file_mode']:
+                op = 'A'
+                stats = ['b', NEW_FILENODE]
+                msgs.append('new file %s' % head['new_file_mode'])
             else:
-                if head['deleted_file_mode']:
-                    op = 'D'
-                    stats = ['b', DEL_FILENODE]
-                    msgs.append('deleted file')
-                elif head['new_file_mode']:
-                    op = 'A'
-                    stats = ['b', NEW_FILENODE]
-                    msgs.append('new file %s' % head['new_file_mode'])
-                else:
-                    if head['new_mode'] and head['old_mode']:
-                        op = 'M'
-                        stats = ['b', CHMOD_FILENODE]
-                        msgs.append('modified file chmod %s => %s'
-                                      % (head['old_mode'], head['new_mode']))
-                    if (head['rename_from'] and head['rename_to']
-                          and head['rename_from'] != head['rename_to']):
-                        op = 'M'
-                        stats = ['b', RENAMED_FILENODE] # might overwrite CHMOD_FILENODE
-                        msgs.append('file renamed from %s to %s'
-                                      % (head['rename_from'], head['rename_to']))
-                    if op is None:
-                        op = 'M'
-                        stats = ['b', MOD_FILENODE]
+                if head['new_mode'] and head['old_mode']:
+                    op = 'M'
+                    stats = ['b', CHMOD_FILENODE]
+                    msgs.append('modified file chmod %s => %s'
+                                  % (head['old_mode'], head['new_mode']))
+                if (head['rename_from'] and head['rename_to']
+                      and head['rename_from'] != head['rename_to']):
+                    op = 'M'
+                    stats = ['b', RENAMED_FILENODE] # might overwrite CHMOD_FILENODE
+                    msgs.append('file renamed from %s to %s'
+                                  % (head['rename_from'], head['rename_to']))
+                if op is None: # fall back: detect missed old style add or remove
+                    if not head['a_file'] and head['b_file']:
+                        op = 'A'
+                        stats = ['b', NEW_FILENODE]
+                        msgs.append('new file')
+                    elif head['a_file'] and not head['b_file']:
+                        op = 'D'
+                        stats = ['b', DEL_FILENODE]
+                        msgs.append('deleted file')
+                if op is None:
+                    op = 'M'
+                    stats = ['b', MOD_FILENODE]
 
             if head['a_file'] or head['b_file']: # a real diff
                 try:
