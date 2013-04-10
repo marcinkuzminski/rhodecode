@@ -524,8 +524,11 @@ class UserModel(BaseModel):
         # !! OVERRIDE GLOBALS !! with user permissions if any found
         #======================================================================
         # those can be configured from groups or users explicitly
-        _configurable = set(['hg.fork.none', 'hg.fork.repository',
-                             'hg.create.none', 'hg.create.repository'])
+        _configurable = set([
+            'hg.fork.none', 'hg.fork.repository',
+            'hg.create.none', 'hg.create.repository',
+            'hg.usergroup.create.false', 'hg.usergroup.create.true'
+        ])
 
         # USER GROUPS comes first
         # user group global permissions
@@ -565,6 +568,8 @@ class UserModel(BaseModel):
 
             for perm in user_perms:
                 user.permissions[GLOBAL].add(perm.permission.permission_name)
+        ## END GLOBAL PERMISSIONS
+
 
         #======================================================================
         # !! PERMISSIONS FOR REPOSITORIES !!

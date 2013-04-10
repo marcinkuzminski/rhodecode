@@ -1,4 +1,7 @@
 ## snippet for displaying permissions overview for users
+## usage:
+##    <%namespace name="p" file="/base/perms_summary.html"/>
+##    ${p.perms_summary(c.perm_user.permissions)}
 
 <%def name="perms_summary(permissions)">
 <div id="perms" class="table">
@@ -16,7 +19,7 @@
                   <th class="left">${_('Edit Permission')}</th>
               </thead>
               <tbody>
-              %for k in sorted(permissions[section], key=lambda s: s.lower()):
+              %for k in permissions[section]:
                   <tr>
                       <td colspan="2">
                           ${h.get_permission_name(k)}

@@ -41,8 +41,8 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     AuthUser
 from rhodecode.lib.base import BaseController, render
 
-from rhodecode.model.db import User, UserEmailMap, UserIpMap
-from rhodecode.model.forms import UserForm
+from rhodecode.model.db import User, UserEmailMap, UserIpMap, UserToPerm
+from rhodecode.model.forms import UserForm, CustomDefaultPermissionsForm
 from rhodecode.model.user import UserModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
@@ -240,12 +240,13 @@ class UsersController(BaseController):
                         .filter(UserEmailMap.user == c.user).all()
         c.user_ip_map = UserIpMap.query()\
                         .filter(UserIpMap.user == c.user).all()
-        user_model = UserModel()
+        umodel = UserModel()
         c.ldap_dn = c.user.ldap_dn
         defaults = c.user.get_dict()
         defaults.update({
-            'create_repo_perm': user_model.has_perm(id, 'hg.create.repository'),
-            'fork_repo_perm': user_model.has_perm(id, 'hg.fork.repository'),
+         'create_repo_perm': umodel.has_perm(c.user, 'hg.create.repository'),
+         'create_user_group_perm': umodel.has_perm(c.user, 'hg.usergroup.create.true'),
+         'fork_repo_perm': umodel.has_perm(c.user, 'hg.fork.repository'),
         })
 
         return htmlfill.render(
@@ -258,39 +259,36 @@ class UsersController(BaseController):
     def update_perm(self, id):
         """PUT /users_perm/id: Update an existing item"""
         # url('user_perm', id=ID, method='put')
-        usr = User.get_or_404(id)
-        grant_create_perm = str2bool(request.POST.get('create_repo_perm'))
-        grant_fork_perm = str2bool(request.POST.get('fork_repo_perm'))
-        inherit_perms = str2bool(request.POST.get('inherit_default_permissions'))
-
-        user_model = UserModel()
+        user = User.get_or_404(id)
 
         try:
-            usr.inherit_default_permissions = inherit_perms
-            Session().add(usr)
+            form = CustomDefaultPermissionsForm()()
+            form_result = form.to_python(request.POST)
 
-            if grant_create_perm:
-                user_model.revoke_perm(usr, 'hg.create.none')
-                user_model.grant_perm(usr, 'hg.create.repository')
-                h.flash(_("Granted 'repository create' permission to user"),
-                        category='success')
+            inherit_perms = form_result['inherit_default_permissions']
+            user.inherit_default_permissions = inherit_perms
+            Session().add(user)
+            user_model = UserModel()
+
+            defs = UserToPerm.query()\
+                .filter(UserToPerm.user == user)\
+                .all()
+            for ug in defs:
+                Session().delete(ug)
+
+            if form_result['create_repo_perm']:
+                user_model.grant_perm(id, 'hg.create.repository')
             else:
-                user_model.revoke_perm(usr, 'hg.create.repository')
-                user_model.grant_perm(usr, 'hg.create.none')
-                h.flash(_("Revoked 'repository create' permission to user"),
-                        category='success')
-
-            if grant_fork_perm:
-                user_model.revoke_perm(usr, 'hg.fork.none')
-                user_model.grant_perm(usr, 'hg.fork.repository')
-                h.flash(_("Granted 'repository fork' permission to user"),
-                        category='success')
+                user_model.grant_perm(id, 'hg.create.none')
+            if form_result['create_user_group_perm']:
+                user_model.grant_perm(id, 'hg.usergroup.create.true')
             else:
-                user_model.revoke_perm(usr, 'hg.fork.repository')
-                user_model.grant_perm(usr, 'hg.fork.none')
-                h.flash(_("Revoked 'repository fork' permission to user"),
-                        category='success')
-
+                user_model.grant_perm(id, 'hg.usergroup.create.false')
+            if form_result['fork_repo_perm']:
+                user_model.grant_perm(id, 'hg.fork.repository')
+            else:
+                user_model.grant_perm(id, 'hg.fork.none')
+            h.flash(_("Updated permissions"), category='success')
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())

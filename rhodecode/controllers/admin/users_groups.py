@@ -43,7 +43,8 @@ from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User, UserGroup, UserGroupToPerm,\
     UserGroupRepoToPerm, UserGroupRepoGroupToPerm
-from rhodecode.model.forms import UserGroupForm, UserGroupPermsForm
+from rhodecode.model.forms import UserGroupForm, UserGroupPermsForm,\
+    CustomDefaultPermissionsForm
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
 from sqlalchemy.orm import joinedload
@@ -113,6 +114,8 @@ class UsersGroupsController(BaseController):
         data.update({
             'create_repo_perm': ug_model.has_perm(user_group,
                                                   'hg.create.repository'),
+            'create_user_group_perm': ug_model.has_perm(user_group,
+                                                  'hg.usergroup.create.true'),
             'fork_repo_perm': ug_model.has_perm(user_group,
                                                 'hg.fork.repository'),
         })
@@ -326,38 +329,36 @@ class UsersGroupsController(BaseController):
         # url('users_group_perm', id=ID, method='put')
 
         users_group = UserGroup.get_or_404(id)
-        grant_create_perm = str2bool(request.POST.get('create_repo_perm'))
-        grant_fork_perm = str2bool(request.POST.get('fork_repo_perm'))
-        inherit_perms = str2bool(request.POST.get('inherit_default_permissions'))
-
-        usergroup_model = UserGroupModel()
 
         try:
+            form = CustomDefaultPermissionsForm()()
+            form_result = form.to_python(request.POST)
+
+            inherit_perms = form_result['inherit_default_permissions']
             users_group.inherit_default_permissions = inherit_perms
             Session().add(users_group)
+            usergroup_model = UserGroupModel()
 
-            if grant_create_perm:
-                usergroup_model.revoke_perm(id, 'hg.create.none')
+            defs = UserGroupToPerm.query()\
+                .filter(UserGroupToPerm.users_group == users_group)\
+                .all()
+            for ug in defs:
+                Session().delete(ug)
+
+            if form_result['create_repo_perm']:
                 usergroup_model.grant_perm(id, 'hg.create.repository')
-                h.flash(_("Granted 'repository create' permission to user group"),
-                        category='success')
             else:
-                usergroup_model.revoke_perm(id, 'hg.create.repository')
                 usergroup_model.grant_perm(id, 'hg.create.none')
-                h.flash(_("Revoked 'repository create' permission to user group"),
-                        category='success')
-
-            if grant_fork_perm:
-                usergroup_model.revoke_perm(id, 'hg.fork.none')
-                usergroup_model.grant_perm(id, 'hg.fork.repository')
-                h.flash(_("Granted 'repository fork' permission to user group"),
-                        category='success')
+            if form_result['create_user_group_perm']:
+                usergroup_model.grant_perm(id, 'hg.usergroup.create.true')
             else:
-                usergroup_model.revoke_perm(id, 'hg.fork.repository')
+                usergroup_model.grant_perm(id, 'hg.usergroup.create.false')
+            if form_result['fork_repo_perm']:
+                usergroup_model.grant_perm(id, 'hg.fork.repository')
+            else:
                 usergroup_model.grant_perm(id, 'hg.fork.none')
-                h.flash(_("Revoked 'repository fork' permission to user group"),
-                        category='success')
 
+            h.flash(_("Updated permissions"), category='success')
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())

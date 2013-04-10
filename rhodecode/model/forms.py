@@ -334,6 +334,21 @@ def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
     return _DefaultPermissionsForm
 
 
+def CustomDefaultPermissionsForm():
+    class _CustomDefaultPermissionsForm(formencode.Schema):
+        filter_extra_fields = True
+        allow_extra_fields = True
+        inherit_default_permissions = v.StringBoolean(if_missing=False)
+
+        create_repo_perm = v.StringBoolean(if_missing=False)
+        create_user_group_perm = v.StringBoolean(if_missing=False)
+        #create_repo_group_perm Impl. later
+
+        fork_repo_perm = v.StringBoolean(if_missing=False)
+
+    return _CustomDefaultPermissionsForm
+
+
 def DefaultsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
     class _DefaultsForm(formencode.Schema):
         allow_extra_fields = True
