@@ -89,8 +89,6 @@ class PullRequestModel(BaseModel):
         revision_data = [(x.raw_id, x.message)
                          for x in map(org_repo.get_changeset, revisions)]
         #notification to reviewers
-        notif = NotificationModel()
-
         pr_url = h.url('pullrequest_show', repo_name=other_repo.repo_name,
                        pull_request_id=new.pull_request_id,
                        qualified=True,
@@ -114,9 +112,9 @@ class PullRequestModel(BaseModel):
             'pr_revisions': revision_data
         }
 
-        notif.create(created_by=created_by_user, subject=subject, body=body,
-                     recipients=reviewers,
-                     type_=Notification.TYPE_PULL_REQUEST, email_kwargs=kwargs)
+        NotificationModel().create(created_by=created_by_user, subject=subject, body=body,
+                                   recipients=reviewers,
+                                   type_=Notification.TYPE_PULL_REQUEST, email_kwargs=kwargs)
         return new
 
     def update_reviewers(self, pull_request, reviewers_ids):

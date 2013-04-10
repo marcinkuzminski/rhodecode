@@ -85,6 +85,9 @@ class NotificationModel(BaseModel):
                 obj = self._get_user(u)
                 if obj:
                     recipients_objs.append(obj)
+                else:
+                    # TODO: inform user that requested operation couldn't be completed
+                    log.error('cannot email unknown user %r', u)
             recipients_objs = set(recipients_objs)
             log.debug('sending notifications %s to %s' % (
                 type_, recipients_objs)
@@ -95,6 +98,7 @@ class NotificationModel(BaseModel):
             log.debug('sending notifications %s to admins: %s' % (
                 type_, recipients_objs)
             )
+        # TODO: inform user who are notified
         notif = Notification.create(
             created_by=created_by_obj, subject=subject,
             body=body, recipients=recipients_objs, type_=type_
