@@ -354,9 +354,11 @@ class DiffProcessor(object):
 
         ##split the diff in chunks of separate --git a/file b/file chunks
         for raw_diff in ('\n' + self._diff).split('\ndiff --git')[1:]:
-            binary = False
-            binary_msg = 'unknown binary'
             head, diff = self._get_header(raw_diff)
+
+            op = None
+            stats = None
+            msg = None
 
             if not head['a_file'] and head['b_file']:
                 op = 'A'
@@ -365,34 +367,32 @@ class DiffProcessor(object):
             elif head['a_file'] and not head['b_file']:
                 op = 'D'
             else:
-                #probably we're dealing with a binary file 1
-                binary = True
                 if head['deleted_file_mode']:
                     op = 'D'
                     stats = ['b', DEL_FILENODE]
-                    binary_msg = 'deleted binary file'
+                    msg = 'deleted file'
                 elif head['new_file_mode']:
                     op = 'A'
                     stats = ['b', NEW_FILENODE]
-                    binary_msg = 'new binary file %s' % head['new_file_mode']
+                    msg = 'new file %s' % head['new_file_mode']
                 else:
                     if head['new_mode'] and head['old_mode']:
                         stats = ['b', CHMOD_FILENODE]
                         op = 'M'
-                        binary_msg = ('modified binary file chmod %s => %s'
+                        msg = ('modified file chmod %s => %s'
                                       % (head['old_mode'], head['new_mode']))
                     elif (head['rename_from'] and head['rename_to']
                           and head['rename_from'] != head['rename_to']):
                         stats = ['b', RENAMED_FILENODE]
                         op = 'M'
-                        binary_msg = ('file renamed from %s to %s'
+                        msg = ('file renamed from %s to %s'
                                       % (head['rename_from'], head['rename_to']))
                     else:
                         stats = ['b', MOD_FILENODE]
                         op = 'M'
-                        binary_msg = 'modified binary file'
+                        msg = 'modified file'
 
-            if not binary:
+            if head['a_file'] or head['b_file']: # a real diff
                 try:
                     chunks, stats = self._parse_lines(diff)
                 except DiffLimitExceeded:
@@ -401,13 +401,17 @@ class DiffProcessor(object):
                                                 self.cur_diff_size,
                                                 _diff)
                     break
-            else:
+            else: # GIT binary patch (or empty diff)
                 chunks = []
-                chunks.append([{
+                if not msg: # don't overwrite more important message
+                    msg = 'binary diff not shown'
+
+            if msg:
+                chunks.insert(0, [{
                     'old_lineno': '',
                     'new_lineno': '',
                     'action':     'binary',
-                    'line':       binary_msg,
+                    'line':       msg,
                 }])
 
             _files.append({
