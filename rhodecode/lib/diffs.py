@@ -172,11 +172,11 @@ class DiffProcessor(object):
     _hg_header_re = re.compile(r"""
         #^diff[ ]--git
             [ ]a/(?P<a_path>.+?)[ ]b/(?P<b_path>.+?)\n
+        (?:^old[ ]mode[ ](?P<old_mode>\d+)\n
+           ^new[ ]mode[ ](?P<new_mode>\d+)(?:\n|$))?
         (?:^similarity[ ]index[ ](?P<similarity_index>\d+)%(?:\n|$))?
         (?:^rename[ ]from[ ](?P<rename_from>\S+)\n
            ^rename[ ]to[ ](?P<rename_to>\S+)(?:\n|$))?
-        (?:^old[ ]mode[ ](?P<old_mode>\d+)\n
-           ^new[ ]mode[ ](?P<new_mode>\d+)(?:\n|$))?
         (?:^new[ ]file[ ]mode[ ](?P<new_file_mode>.+)(?:\n|$))?
         (?:^deleted[ ]file[ ]mode[ ](?P<deleted_file_mode>.+)(?:\n|$))?
         (?:^index[ ](?P<a_blob_id>[0-9A-Fa-f]+)
