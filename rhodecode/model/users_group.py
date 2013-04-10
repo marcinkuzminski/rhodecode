@@ -106,6 +106,10 @@ class UserGroupModel(BaseModel):
             self.sa.add(new_user_group)
             perm_obj = self._create_default_perms(new_user_group)
             self.sa.add(perm_obj)
+
+            self.grant_user_permission(user_group=new_user_group,
+                                       user=owner, perm='usergroup.admin')
+
             return new_user_group
         except Exception:
             log.error(traceback.format_exc())

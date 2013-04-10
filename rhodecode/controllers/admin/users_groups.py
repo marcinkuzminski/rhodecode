@@ -36,7 +36,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.exceptions import UserGroupsAssignedException
 from rhodecode.lib.utils2 import safe_unicode, str2bool, safe_int
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
-    HasUserGroupPermissionAnyDecorator
+    HasUserGroupPermissionAnyDecorator, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.scm import UserGroupList
 from rhodecode.model.users_group import UserGroupModel
@@ -137,7 +137,7 @@ class UsersGroupsController(BaseController):
         c.users_groups_list = sorted(group_iter, key=sk)
         return render('admin/users_groups/users_groups.html')
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasPermissionAnyDecorator('hg.admin', 'hg.usergroup.create.true')
     def create(self):
         """POST /users_groups: Create a new item"""
         # url('users_groups')
@@ -169,7 +169,7 @@ class UsersGroupsController(BaseController):
 
         return redirect(url('users_groups'))
 
-    @HasPermissionAllDecorator('hg.admin')
+    @HasPermissionAnyDecorator('hg.admin', 'hg.usergroup.create.true')
     def new(self, format='html'):
         """GET /users_groups/new: Form to create a new item"""
         # url('new_users_group')
