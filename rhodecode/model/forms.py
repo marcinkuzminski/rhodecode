@@ -319,6 +319,7 @@ def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
         filter_extra_fields = True
         overwrite_default_repo = v.StringBoolean(if_missing=False)
         overwrite_default_group = v.StringBoolean(if_missing=False)
+        overwrite_default_user_group = v.StringBoolean(if_missing=False)
         anonymous = v.StringBoolean(if_missing=False)
         default_repo_perm = v.OneOf(repo_perms_choices)
         default_group_perm = v.OneOf(group_perms_choices)

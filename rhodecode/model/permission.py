@@ -30,7 +30,7 @@ from sqlalchemy.exc import DatabaseError
 
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, Permission, UserToPerm, UserRepoToPerm,\
-    UserRepoGroupToPerm
+    UserRepoGroupToPerm, UserUserGroupToPerm
 from rhodecode.lib.utils2 import str2bool
 
 log = logging.getLogger(__name__)
@@ -141,6 +141,16 @@ class PermissionModel(BaseModel):
                 _def = Permission.get_by_key('group.' + _def_name)
                 for g2p in self.sa.query(UserRepoGroupToPerm)\
                                .filter(UserRepoGroupToPerm.user == perm_user)\
+                               .all():
+                    g2p.permission = _def
+                    self.sa.add(g2p)
+
+            if form_result['overwrite_default_user_group'] == True:
+                _def_name = form_result['default_user_group_perm'].split('usergroup.')[-1]
+                # groups
+                _def = Permission.get_by_key('usergroup.' + _def_name)
+                for g2p in self.sa.query(UserUserGroupToPerm)\
+                               .filter(UserUserGroupToPerm.user == perm_user)\
                                .all():
                     g2p.permission = _def
                     self.sa.add(g2p)
