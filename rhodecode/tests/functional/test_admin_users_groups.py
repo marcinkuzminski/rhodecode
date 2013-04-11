@@ -78,16 +78,18 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.repository')
-        p2 = Permission.get_by_key('hg.fork.none')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.none')
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
             .filter(UserGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         ## DISABLE REPO CREATE ON A GROUP
@@ -97,7 +99,9 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.none')
-        p2 = Permission.get_by_key('hg.fork.none')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.none')
+
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
@@ -106,7 +110,8 @@ class TestAdminUsersGroupsController(TestController):
         self.assertEqual(
             sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
             sorted([[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]])
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         # DELETE !
@@ -147,16 +152,18 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.none')
-        p2 = Permission.get_by_key('hg.fork.repository')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.repository')
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
             .filter(UserGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         ## DISABLE REPO CREATE ON A GROUP
@@ -166,16 +173,18 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.none')
-        p2 = Permission.get_by_key('hg.fork.none')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.none')
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
             .filter(UserGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         # DELETE !
