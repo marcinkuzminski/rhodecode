@@ -21,7 +21,7 @@
     <div class="title">
         ${self.breadcrumbs()}
         <ul class="links">
-        %if h.HasPermissionAny('hg.usergroup.create.true')():
+        %if h.HasPermissionAny('hg.admin', 'hg.usergroup.create.true')():
           <li>
             <span>${h.link_to(_(u'Add new user group'),h.url('new_users_group'))}</span>
           </li>
