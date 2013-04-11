@@ -448,7 +448,6 @@ def person(author, show_attr="username_and_name"):
         user = User.get_by_email(_email, case_insensitive=True, cache=True)
         if user is not None:
             return person_getter(user)
-        return _email
 
     # Maybe it's a username?
     _author = author_name(author)
