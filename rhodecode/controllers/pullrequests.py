@@ -332,11 +332,11 @@ class PullrequestsController(BaseRepoController):
 
         diff_limit = self.cut_off_limit if not fulldiff else None
 
-        #we swap org/other ref since we run a simple diff on one repo
+        # we swap org/other ref since we run a simple diff on one repo
         log.debug('running diff between %s@%s and %s@%s'
                   % (org_repo.scm_instance.path, org_ref,
                      other_repo.scm_instance.path, other_ref))
-        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]), rev2=safe_str(other_ref[1]))
+        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(other_ref[1]), rev2=safe_str(org_ref[1]))
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)
