@@ -186,12 +186,11 @@ class PullrequestsController(BaseRepoController):
         diff_limit = self.cut_off_limit if not fulldiff else None
 
         # we swap org/other ref since we run a simple diff on one repo
-        log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo.scm_instance.path, org_ref,
-                     other_repo.scm_instance.path, other_ref))
-        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(other_ref[1]), rev2=safe_str(org_ref[1]))
+        log.debug('running diff between %s and %s in %s'
+                  % (other_ref, org_ref, org_repo.scm_instance.path))
+        txtdiff = org_repo.scm_instance.get_diff(rev1=safe_str(other_ref[1]), rev2=safe_str(org_ref[1]))
 
-        diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
+        diff_processor = diffs.DiffProcessor(txtdiff or '', format='gitdiff',
                                              diff_limit=diff_limit)
         _parsed = diff_processor.prepare()
 
@@ -210,9 +209,9 @@ class PullrequestsController(BaseRepoController):
                 c.lines_deleted += st[1]
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
-            diff = diff_processor.as_html(enable_comments=enable_comments,
-                                          parsed_lines=[f])
-            c.changes[fid] = [f['operation'], f['filename'], diff]
+            htmldiff = diff_processor.as_html(enable_comments=enable_comments,
+                                              parsed_lines=[f])
+            c.changes[fid] = [f['operation'], f['filename'], htmldiff]
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',

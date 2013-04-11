@@ -240,13 +240,11 @@ class CompareController(BaseRepoController):
 
         diff_limit = self.cut_off_limit if not c.fulldiff else None
 
-        log.debug('running diff between %s@%s and %s@%s'
-                  % (org_repo.scm_instance.path, org_ref,
-                     other_repo.scm_instance.path, other_ref))
-        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]),
-                                               rev2=safe_str(other_ref[1]))
+        log.debug('running diff between %s and %s in %s'
+                  % (org_ref, other_ref, org_repo.scm_instance.path))
+        txtdiff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]), rev2=safe_str(other_ref[1]))
 
-        diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
+        diff_processor = diffs.DiffProcessor(txtdiff or '', format='gitdiff',
                                              diff_limit=diff_limit)
         _parsed = diff_processor.prepare()
 
@@ -265,7 +263,7 @@ class CompareController(BaseRepoController):
                 c.lines_deleted += st[1]
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
-            diff = diff_processor.as_html(enable_comments=False, parsed_lines=[f])
-            c.changes[fid] = [f['operation'], f['filename'], diff]
+            htmldiff = diff_processor.as_html(enable_comments=False, parsed_lines=[f])
+            c.changes[fid] = [f['operation'], f['filename'], htmldiff]
 
         return render('compare/compare_diff.html')
