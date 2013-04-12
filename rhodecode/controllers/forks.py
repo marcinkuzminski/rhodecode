@@ -61,6 +61,7 @@ class ForksController(BaseRepoController):
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
         choices, c.landing_revs = ScmModel().get_repo_landing_revs()
         c.landing_revs_choices = choices
+        c.can_update = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE).ui_active
 
     def __load_data(self, repo_name=None):
         """
@@ -95,8 +96,6 @@ class ForksController(BaseRepoController):
         else:
             c.stats_percentage = '%.2f' % ((float((last_rev)) /
                                             c.repo_last_rev) * 100)
-
-        c.can_update = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE).ui_active
 
         defaults = RepoModel()._get_defaults(repo_name)
         # alter the description to indicate a fork
