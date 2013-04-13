@@ -18,8 +18,9 @@ from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
 
-from rhodecode.lib.vcs.utils.hgcompat import ui, nullid, match, patch, diffopts, clone, \
-    get_contact, pull, localrepository, RepoLookupError, Abort, RepoError, hex
+from rhodecode.lib.vcs.utils.hgcompat import ui, nullid, match, patch, \
+    diffopts, clone, get_contact, pull, localrepository, RepoLookupError, \
+    Abort, RepoError, hex, scmutil
 
 
 class MercurialRepository(BaseRepository):
@@ -472,14 +473,19 @@ class MercurialRepository(BaseRepository):
                                   ' this repository' % branch_name)
         if end_pos is not None:
             end_pos += 1
+        #filter branches
 
-        slice_ = reversed(self.revisions[start_pos:end_pos]) if reverse else \
-            self.revisions[start_pos:end_pos]
+        if branch_name:
+            revisions = scmutil.revrange(self._repo,
+                                         ['branch("%s")' % (branch_name)])
+        else:
+            revisions = self.revisions
+
+        slice_ = reversed(revisions[start_pos:end_pos]) if reverse else \
+                revisions[start_pos:end_pos]
 
         for id_ in slice_:
             cs = self.get_changeset(id_)
-            if branch_name and cs.branch != branch_name:
-                continue
             if start_date and cs.date < start_date:
                 continue
             if end_date and cs.date > end_date:
