@@ -147,7 +147,7 @@ class PullrequestsController(BaseRepoController):
     def show_all(self, repo_name):
         c.pull_requests = PullRequestModel().get_all(repo_name)
         c.repo_name = repo_name
-        p = safe_int(request.params.get('page', 1), 1)
+        p = safe_int(request.GET.get('page', 1), 1)
 
         c.pullrequests_pager = Page(c.pull_requests, page=p, items_per_page=10)
 

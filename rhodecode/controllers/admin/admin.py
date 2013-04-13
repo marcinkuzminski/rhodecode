@@ -136,7 +136,7 @@ class AdminController(BaseController):
 
         users_log = users_log.order_by(UserLog.action_date.desc())
 
-        p = safe_int(request.params.get('page', 1), 1)
+        p = safe_int(request.GET.get('page', 1), 1)
 
         def url_generator(**kw):
             return url.current(filter=c.search_term, **kw)

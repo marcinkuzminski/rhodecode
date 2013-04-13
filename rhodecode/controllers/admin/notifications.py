@@ -64,7 +64,7 @@ class NotificationsController(BaseController):
         notif = NotificationModel().get_for_user(self.rhodecode_user.user_id,
                                             filter_=request.GET.getall('type'))
 
-        p = safe_int(request.params.get('page', 1), 1)
+        p = safe_int(request.GET.get('page', 1), 1)
         c.notifications = Page(notif, page=p, items_per_page=10)
         c.pull_request_type = Notification.TYPE_PULL_REQUEST
         c.comment_type = [Notification.TYPE_CHANGESET_COMMENT,
