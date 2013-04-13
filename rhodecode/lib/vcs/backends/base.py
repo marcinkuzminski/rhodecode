@@ -1002,3 +1002,27 @@ class EmptyChangeset(BaseChangeset):
 
     def get_file_size(self, path):
         return 0
+
+
+class CollectionGenerator(object):
+
+    def __init__(self, repo, revs):
+        self.repo = repo
+        self.revs = revs
+
+    def __len__(self):
+        return len(self.revs)
+
+    def __iter__(self):
+        for rev in self.revs:
+            yield self.repo.get_changeset(rev)
+
+    def __getslice__(self, i, j):
+        """
+        Returns a iterator of sliced repository
+        """
+        sliced_revs = self.revs[i:j]
+        return CollectionGenerator(self.repo, sliced_revs)
+
+    def __repr__(self):
+        return 'CollectionGenerator<%s>' % (len(self))

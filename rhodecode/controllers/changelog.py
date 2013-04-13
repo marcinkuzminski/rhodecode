@@ -69,19 +69,14 @@ class ChangelogController(BaseRepoController):
         p = safe_int(request.params.get('page', 1), 1)
         branch_name = request.params.get('branch', None)
         try:
-            if branch_name:
-                collection = [z for z in
-                              c.rhodecode_repo.get_changesets(start=0,
-                                                    branch_name=branch_name)]
-                c.total_cs = len(collection)
-            else:
-                collection = c.rhodecode_repo
-                c.total_cs = len(c.rhodecode_repo)
+            collection = c.rhodecode_repo.get_changesets(start=0,
+                                                    branch_name=branch_name)
+            c.total_cs = len(collection)
 
             c.pagination = RepoPage(collection, page=p, item_count=c.total_cs,
                                     items_per_page=c.size, branch=branch_name)
             collection = list(c.pagination)
-            page_revisions = [x.raw_id for x in collection]
+            page_revisions = [x.raw_id for x in c.pagination]
             c.comments = c.rhodecode_db_repo.get_comments(page_revisions)
             c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
@@ -89,11 +84,12 @@ class ChangelogController(BaseRepoController):
             h.flash(str(e), category='error')
             return redirect(url('changelog_home', repo_name=c.repo_name))
 
-        self._graph(c.rhodecode_repo, collection, c.total_cs, c.size, p)
-
         c.branch_name = branch_name
         c.branch_filters = [('', _('All Branches'))] + \
             [(k, k) for k in c.rhodecode_repo.branches.keys()]
+
+        self._graph(c.rhodecode_repo, [x.revision for x in c.pagination],
+                    c.total_cs, c.size, p)
 
         return render('changelog/changelog.html')
 
@@ -102,20 +98,22 @@ class ChangelogController(BaseRepoController):
             c.cs = c.rhodecode_repo.get_changeset(cs)
             return render('changelog/changelog_details.html')
 
-    def _graph(self, repo, collection, repo_size, size, p):
+    def _graph(self, repo, revs_int, repo_size, size, p):
         """
-        Generates a DAG graph for mercurial
+        Generates a DAG graph for repo
 
-        :param repo: repo instance
-        :param size: number of commits to show
-        :param p: page number
+        :param repo:
+        :param revs_int:
+        :param repo_size:
+        :param size:
+        :param p:
         """
-        if not collection:
+        if not revs_int:
             c.jsdata = json.dumps([])
             return
 
         data = []
-        revs = [x.revision for x in collection]
+        revs = revs_int
 
         dag = _dagwalker(repo, revs, repo.alias)
         dag = _colored(dag)

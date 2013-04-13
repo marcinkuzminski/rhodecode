@@ -4,7 +4,7 @@ import datetime
 import urllib
 import urllib2
 
-from rhodecode.lib.vcs.backends.base import BaseRepository
+from rhodecode.lib.vcs.backends.base import BaseRepository, CollectionGenerator
 from .workdir import MercurialWorkdir
 from .changeset import MercurialChangeset
 from .inmemory import MercurialInMemoryChangeset
@@ -474,24 +474,22 @@ class MercurialRepository(BaseRepository):
         if end_pos is not None:
             end_pos += 1
         #filter branches
-
+        filter_ = []
         if branch_name:
-            revisions = scmutil.revrange(self._repo,
-                                         ['branch("%s")' % (branch_name)])
+            filter_.append('branch("%s")' % (branch_name))
+
+        if start_date:
+            filter_.append('date(">%s")' % start_date)
+        if end_date:
+            filter_.append('date("<%s")' % end_date)
+        if filter_:
+            revisions = scmutil.revrange(self._repo, filter_)
         else:
             revisions = self.revisions
-
-        slice_ = reversed(revisions[start_pos:end_pos]) if reverse else \
+        revs = reversed(revisions[start_pos:end_pos]) if reverse else \
                 revisions[start_pos:end_pos]
 
-        for id_ in slice_:
-            cs = self.get_changeset(id_)
-            if start_date and cs.date < start_date:
-                continue
-            if end_date and cs.date > end_date:
-                continue
-
-            yield cs
+        return CollectionGenerator(self, revs)
 
     def pull(self, url):
         """

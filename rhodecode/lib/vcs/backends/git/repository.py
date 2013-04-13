@@ -22,7 +22,7 @@ from dulwich.objects import Tag
 from string import Template
 
 import rhodecode
-from rhodecode.lib.vcs.backends.base import BaseRepository
+from rhodecode.lib.vcs.backends.base import BaseRepository, CollectionGenerator
 from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
@@ -533,8 +533,7 @@ class GitRepository(BaseRepository):
         revs = revs[start_pos:end_pos]
         if reverse:
             revs = reversed(revs)
-        for rev in revs:
-            yield self.get_changeset(rev)
+        return CollectionGenerator(self, revs)
 
     def get_diff(self, rev1, rev2, path=None, ignore_whitespace=False,
                  context=3):
