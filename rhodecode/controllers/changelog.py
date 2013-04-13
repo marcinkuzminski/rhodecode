@@ -54,20 +54,16 @@ class ChangelogController(BaseRepoController):
     def index(self):
         limit = 100
         default = 20
-        if request.params.get('size'):
-            try:
-                int_size = int(request.params.get('size'))
-            except ValueError:
-                int_size = default
-            c.size = max(min(int_size, limit), 1)
+        if request.GET.get('size'):
+            c.size = max(min(safe_int(request.GET.get('size')), limit), 1)
             session['changelog_size'] = c.size
             session.save()
         else:
             c.size = int(session.get('changelog_size', default))
         # min size must be 1
         c.size = max(c.size, 1)
-        p = safe_int(request.params.get('page', 1), 1)
-        branch_name = request.params.get('branch', None)
+        p = safe_int(request.GET.get('page', 1), 1)
+        branch_name = request.GET.get('branch', None)
         try:
             if branch_name:
                 collection = [z for z in

@@ -44,7 +44,7 @@ class FollowersController(BaseRepoController):
         super(FollowersController, self).__before__()
 
     def followers(self, repo_name):
-        p = safe_int(request.params.get('page', 1), 1)
+        p = safe_int(request.GET.get('page', 1), 1)
         repo_id = c.rhodecode_db_repo.repo_id
         d = UserFollowing.get_repo_followers(repo_id)\
             .order_by(UserFollowing.follows_from)

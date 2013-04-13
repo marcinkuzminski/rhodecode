@@ -64,8 +64,8 @@ class ShortlogController(BaseRepoController):
             redirect(h.url('shortlog_home', repo_name=repo_name))
 
     def index(self, repo_name, revision=None, f_path=None):
-        p = safe_int(request.params.get('page', 1), 1)
-        size = safe_int(request.params.get('size', 20), 20)
+        p = safe_int(request.GET.get('page', 1), 1)
+        size = safe_int(request.GET.get('size', 20), 20)
         collection = c.rhodecode_repo
         c.file_history = f_path
 
