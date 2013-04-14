@@ -39,7 +39,7 @@ from sqlalchemy.orm.exc import ObjectDeletedError
 from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
 
-from rhodecode.lib.utils2 import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode, aslist
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError,\
     LdapImportError
 from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug,\
@@ -531,7 +531,12 @@ class LoginRequired(object):
         cls = fargs[0]
         user = cls.rhodecode_user
         loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
-
+        # defined whitelist of controllers which API access will be enabled
+        whitelist = aslist(config.get('api_access_controllers_whitelist'),
+                           sep=',')
+        api_access_whitelist = loc in whitelist
+        log.debug('loc:%s is in API whitelist:%s:%s' % (loc, whitelist,
+                                                        api_access_whitelist))
         #check IP
         ip_access_ok = True
         if not user.ip_allowed:
@@ -541,7 +546,7 @@ class LoginRequired(object):
             ip_access_ok = False
 
         api_access_ok = False
-        if self.api_access:
+        if self.api_access or api_access_whitelist:
             log.debug('Checking API KEY access for %s' % cls)
             if user.api_key == request.GET.get('api_key'):
                 api_access_ok = True
