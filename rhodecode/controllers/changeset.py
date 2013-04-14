@@ -177,10 +177,7 @@ class ChangesetController(BaseRepoController):
         c.users_array = repo_model.get_users_js()
         c.users_groups_array = repo_model.get_users_groups_js()
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
-    def index(self, revision, method='show'):
+    def _index(self, revision, method):
         c.anchor_url = anchor_url
         c.ignorews_url = _ignorews_url
         c.context_url = _context_url
@@ -315,20 +312,26 @@ class ChangesetController(BaseRepoController):
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
+    def index(self, revision, method='show'):
+        return self._index(revision, method=method)
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def changeset_raw(self, revision):
-        return self.index(revision, method='raw')
+        return self._index(revision, method='raw')
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def changeset_patch(self, revision):
-        return self.index(revision, method='patch')
+        return self._index(revision, method='patch')
 
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def changeset_download(self, revision):
-        return self.index(revision, method='download')
+        return self._index(revision, method='download')
 
     @LoginRequired()
     @NotAnonymous()
