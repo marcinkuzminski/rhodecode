@@ -44,13 +44,37 @@ log = logging.getLogger(__name__)
 
 class ChangelogController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(ChangelogController, self).__before__()
         c.affected_files_cut_off = 60
 
+    def _graph(self, repo, revs_int, repo_size, size, p):
+        """
+        Generates a DAG graph for repo
+
+        :param repo:
+        :param revs_int:
+        :param repo_size:
+        :param size:
+        :param p:
+        """
+        if not revs_int:
+            c.jsdata = json.dumps([])
+            return
+
+        data = []
+        revs = revs_int
+
+        dag = _dagwalker(repo, revs, repo.alias)
+        dag = _colored(dag)
+        for (id, type, ctx, vtx, edges) in dag:
+            data.append(['', vtx, edges])
+
+        c.jsdata = json.dumps(data)
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self):
         limit = 100
         default = 20
@@ -89,31 +113,10 @@ class ChangelogController(BaseRepoController):
 
         return render('changelog/changelog.html')
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def changelog_details(self, cs):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             c.cs = c.rhodecode_repo.get_changeset(cs)
             return render('changelog/changelog_details.html')
-
-    def _graph(self, repo, revs_int, repo_size, size, p):
-        """
-        Generates a DAG graph for repo
-
-        :param repo:
-        :param revs_int:
-        :param repo_size:
-        :param size:
-        :param p:
-        """
-        if not revs_int:
-            c.jsdata = json.dumps([])
-            return
-
-        data = []
-        revs = revs_int
-
-        dag = _dagwalker(repo, revs, repo.alias)
-        dag = _colored(dag)
-        for (id, type, ctx, vtx, edges) in dag:
-            data.append(['', vtx, edges])
-
-        c.jsdata = json.dumps(data)

@@ -65,12 +65,75 @@ README_FILES = [''.join([x[0][0], x[1][0]]) for x in
 
 class SummaryController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(SummaryController, self).__before__()
 
+    def _get_download_links(self, repo):
+
+        download_l = []
+
+        branches_group = ([], _("Branches"))
+        tags_group = ([], _("Tags"))
+
+        for name, chs in c.rhodecode_repo.branches.items():
+            #chs = chs.split(':')[-1]
+            branches_group[0].append((chs, name),)
+        download_l.append(branches_group)
+
+        for name, chs in c.rhodecode_repo.tags.items():
+            #chs = chs.split(':')[-1]
+            tags_group[0].append((chs, name),)
+        download_l.append(tags_group)
+
+        return download_l
+
+
+    def __get_readme_data(self, db_repo):
+        repo_name = db_repo.repo_name
+
+        @cache_region('long_term')
+        def _get_readme_from_cache(key):
+            readme_data = None
+            readme_file = None
+            log.debug('Looking for README file')
+            try:
+                # get's the landing revision! or tip if fails
+                cs = db_repo.get_landing_changeset()
+                if isinstance(cs, EmptyChangeset):
+                    raise EmptyRepositoryError()
+                renderer = MarkupRenderer()
+                for f in README_FILES:
+                    try:
+                        readme = cs.get_node(f)
+                        if not isinstance(readme, FileNode):
+                            continue
+                        readme_file = f
+                        log.debug('Found README file `%s` rendering...' %
+                                  readme_file)
+                        readme_data = renderer.render(readme.content, f)
+                        break
+                    except NodeDoesNotExistError:
+                        continue
+            except ChangesetError:
+                log.error(traceback.format_exc())
+                pass
+            except EmptyRepositoryError:
+                pass
+            except Exception:
+                log.error(traceback.format_exc())
+
+            return readme_data, readme_file
+
+        key = repo_name + '_README'
+        inv = CacheInvalidation.invalidate(key)
+        if inv is not None:
+            region_invalidate(_get_readme_from_cache, None, key)
+            CacheInvalidation.set_valid(inv.cache_key)
+        return _get_readme_from_cache(key)
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self, repo_name):
         c.dbrepo = dbrepo = c.rhodecode_db_repo
 
@@ -189,72 +252,13 @@ class SummaryController(BaseRepoController):
             self.__get_readme_data(c.rhodecode_db_repo)
         return render('summary/summary.html')
 
+    @LoginRequired()
     @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     @jsonify
     def repo_size(self, repo_name):
         if request.is_xhr:
             return c.rhodecode_db_repo._repo_size()
         else:
             raise HTTPBadRequest()
-
-    def __get_readme_data(self, db_repo):
-        repo_name = db_repo.repo_name
-
-        @cache_region('long_term')
-        def _get_readme_from_cache(key):
-            readme_data = None
-            readme_file = None
-            log.debug('Looking for README file')
-            try:
-                # get's the landing revision! or tip if fails
-                cs = db_repo.get_landing_changeset()
-                if isinstance(cs, EmptyChangeset):
-                    raise EmptyRepositoryError()
-                renderer = MarkupRenderer()
-                for f in README_FILES:
-                    try:
-                        readme = cs.get_node(f)
-                        if not isinstance(readme, FileNode):
-                            continue
-                        readme_file = f
-                        log.debug('Found README file `%s` rendering...' %
-                                  readme_file)
-                        readme_data = renderer.render(readme.content, f)
-                        break
-                    except NodeDoesNotExistError:
-                        continue
-            except ChangesetError:
-                log.error(traceback.format_exc())
-                pass
-            except EmptyRepositoryError:
-                pass
-            except Exception:
-                log.error(traceback.format_exc())
-
-            return readme_data, readme_file
-
-        key = repo_name + '_README'
-        inv = CacheInvalidation.invalidate(key)
-        if inv is not None:
-            region_invalidate(_get_readme_from_cache, None, key)
-            CacheInvalidation.set_valid(inv.cache_key)
-        return _get_readme_from_cache(key)
-
-    def _get_download_links(self, repo):
-
-        download_l = []
-
-        branches_group = ([], _("Branches"))
-        tags_group = ([], _("Tags"))
-
-        for name, chs in c.rhodecode_repo.branches.items():
-            #chs = chs.split(':')[-1]
-            branches_group[0].append((chs, name),)
-        download_l.append(branches_group)
-
-        for name, chs in c.rhodecode_repo.tags.items():
-            #chs = chs.split(':')[-1]
-            tags_group[0].append((chs, name),)
-        download_l.append(tags_group)
-
-        return download_l

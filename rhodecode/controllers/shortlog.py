@@ -42,9 +42,6 @@ log = logging.getLogger(__name__)
 
 class ShortlogController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(ShortlogController, self).__before__()
 
@@ -63,6 +60,9 @@ class ShortlogController(BaseRepoController):
             h.flash(str(e), category='warning')
             redirect(h.url('shortlog_home', repo_name=repo_name))
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self, repo_name, revision=None, f_path=None):
         p = safe_int(request.GET.get('page', 1), 1)
         size = safe_int(request.GET.get('size', 20), 20)

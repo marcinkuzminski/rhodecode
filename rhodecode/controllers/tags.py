@@ -35,12 +35,12 @@ log = logging.getLogger(__name__)
 
 class TagsController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(TagsController, self).__before__()
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self):
         c.repo_tags = OrderedDict()
 

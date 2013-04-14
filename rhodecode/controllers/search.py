@@ -48,10 +48,10 @@ log = logging.getLogger(__name__)
 
 class SearchController(BaseRepoController):
 
-    @LoginRequired()
     def __before__(self):
         super(SearchController, self).__before__()
 
+    @LoginRequired()
     def index(self, repo_name=None):
         c.repo_name = repo_name
         c.formated_results = []

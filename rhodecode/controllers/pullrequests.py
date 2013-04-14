@@ -62,9 +62,6 @@ log = logging.getLogger(__name__)
 
 class PullrequestsController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(PullrequestsController, self).__before__()
         repo_model = RepoModel()
@@ -144,156 +141,6 @@ class PullrequestsController(BaseRepoController):
                                                    pull_request.reviewers]
         return (self.rhodecode_user.admin or owner or reviewer)
 
-    def show_all(self, repo_name):
-        c.pull_requests = PullRequestModel().get_all(repo_name)
-        c.repo_name = repo_name
-        p = safe_int(request.GET.get('page', 1), 1)
-
-        c.pullrequests_pager = Page(c.pull_requests, page=p, items_per_page=10)
-
-        c.pullrequest_data = render('/pullrequests/pullrequest_data.html')
-
-        if request.environ.get('HTTP_X_PARTIAL_XHR'):
-            return c.pullrequest_data
-
-        return render('/pullrequests/pullrequest_show_all.html')
-
-    @NotAnonymous()
-    def index(self):
-        org_repo = c.rhodecode_db_repo
-
-        if org_repo.scm_instance.alias != 'hg':
-            log.error('Review not available for GIT REPOS')
-            raise HTTPNotFound
-
-        try:
-            org_repo.scm_instance.get_changeset()
-        except EmptyRepositoryError, e:
-            h.flash(h.literal(_('There are no changesets yet')),
-                    category='warning')
-            redirect(url('summary_home', repo_name=org_repo.repo_name))
-
-        org_rev = request.GET.get('rev_end')
-        # rev_start is not directly useful - its parent could however be used
-        # as default for other and thus give a simple compare view
-        #other_rev = request.POST.get('rev_start')
-
-        c.org_repos = []
-        c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
-        c.default_org_repo = org_repo.repo_name
-        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, org_rev)
-
-        c.other_repos = []
-        other_repos_info = {}
-
-        def add_other_repo(repo, branch_rev=None):
-            if repo.repo_name in other_repos_info: # shouldn't happen
-                return
-            c.other_repos.append((repo.repo_name, repo.repo_name))
-            other_refs, selected_other_ref = self._get_repo_refs(repo.scm_instance, branch_rev=branch_rev)
-            other_repos_info[repo.repo_name] = {
-                'user': dict(user_id=repo.user.user_id,
-                             username=repo.user.username,
-                             firstname=repo.user.firstname,
-                             lastname=repo.user.lastname,
-                             gravatar_link=h.gravatar_url(repo.user.email, 14)),
-                'description': repo.description.split('\n', 1)[0],
-                'revs': h.select('other_ref', selected_other_ref, other_refs, class_='refs')
-            }
-
-        # add org repo to other so we can open pull request against peer branches on itself
-        add_other_repo(org_repo, branch_rev=org_rev)
-        c.default_other_repo = org_repo.repo_name
-
-        # gather forks and add to this list ... even though it is rare to
-        # request forks to pull from their parent
-        for fork in org_repo.forks:
-            add_other_repo(fork)
-
-        # add parents of this fork also, but only if it's not empty
-        if org_repo.parent and org_repo.parent.scm_instance.revisions:
-            add_other_repo(org_repo.parent)
-            c.default_other_repo = org_repo.parent.repo_name
-
-        c.default_other_repo_info = other_repos_info[c.default_other_repo]
-        c.other_repos_info = json.dumps(other_repos_info)
-
-        return render('/pullrequests/pullrequest.html')
-
-    @NotAnonymous()
-    def create(self, repo_name):
-        repo = RepoModel()._get_repo(repo_name)
-        try:
-            _form = PullRequestForm(repo.repo_id)().to_python(request.POST)
-        except formencode.Invalid, errors:
-            log.error(traceback.format_exc())
-            if errors.error_dict.get('revisions'):
-                msg = 'Revisions: %s' % errors.error_dict['revisions']
-            elif errors.error_dict.get('pullrequest_title'):
-                msg = _('Pull request requires a title with min. 3 chars')
-            else:
-                msg = _('Error creating pull request')
-
-            h.flash(msg, 'error')
-            return redirect(url('pullrequest_home', repo_name=repo_name))
-
-        org_repo = _form['org_repo']
-        org_ref = 'rev:merge:%s' % _form['merge_rev']
-        other_repo = _form['other_repo']
-        other_ref = 'rev:ancestor:%s' % _form['ancestor_rev']
-        revisions = reversed(_form['revisions'])
-        reviewers = _form['review_members']
-
-        title = _form['pullrequest_title']
-        description = _form['pullrequest_desc']
-
-        try:
-            pull_request = PullRequestModel().create(
-                self.rhodecode_user.user_id, org_repo, org_ref, other_repo,
-                other_ref, revisions, reviewers, title, description
-            )
-            Session().commit()
-            h.flash(_('Successfully opened new pull request'),
-                    category='success')
-        except Exception:
-            h.flash(_('Error occurred during sending pull request'),
-                    category='error')
-            log.error(traceback.format_exc())
-            return redirect(url('pullrequest_home', repo_name=repo_name))
-
-        return redirect(url('pullrequest_show', repo_name=other_repo,
-                            pull_request_id=pull_request.pull_request_id))
-
-    @NotAnonymous()
-    @jsonify
-    def update(self, repo_name, pull_request_id):
-        pull_request = PullRequest.get_or_404(pull_request_id)
-        if pull_request.is_closed():
-            raise HTTPForbidden()
-        #only owner or admin can update it
-        owner = pull_request.author.user_id == c.rhodecode_user.user_id
-        if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
-            reviewers_ids = map(int, filter(lambda v: v not in [None, ''],
-                       request.POST.get('reviewers_ids', '').split(',')))
-
-            PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
-            Session().commit()
-            return True
-        raise HTTPForbidden()
-
-    @NotAnonymous()
-    @jsonify
-    def delete(self, repo_name, pull_request_id):
-        pull_request = PullRequest.get_or_404(pull_request_id)
-        #only owner can delete it !
-        if pull_request.author.user_id == c.rhodecode_user.user_id:
-            PullRequestModel().delete(pull_request)
-            Session().commit()
-            h.flash(_('Successfully deleted pull request'),
-                    category='success')
-            return redirect(url('admin_settings_my_account', anchor='pullrequests'))
-        raise HTTPForbidden()
-
     def _load_compare_data(self, pull_request, enable_comments=True):
         """
         Load context data needed for generating compare diff
@@ -361,6 +208,174 @@ class PullrequestsController(BaseRepoController):
                                           parsed_lines=[f])
             c.changes[fid] = [f['operation'], f['filename'], diff]
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    def show_all(self, repo_name):
+        c.pull_requests = PullRequestModel().get_all(repo_name)
+        c.repo_name = repo_name
+        p = safe_int(request.GET.get('page', 1), 1)
+
+        c.pullrequests_pager = Page(c.pull_requests, page=p, items_per_page=10)
+
+        c.pullrequest_data = render('/pullrequests/pullrequest_data.html')
+
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            return c.pullrequest_data
+
+        return render('/pullrequests/pullrequest_show_all.html')
+
+    @LoginRequired()
+    @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    def index(self):
+        org_repo = c.rhodecode_db_repo
+
+        if org_repo.scm_instance.alias != 'hg':
+            log.error('Review not available for GIT REPOS')
+            raise HTTPNotFound
+
+        try:
+            org_repo.scm_instance.get_changeset()
+        except EmptyRepositoryError, e:
+            h.flash(h.literal(_('There are no changesets yet')),
+                    category='warning')
+            redirect(url('summary_home', repo_name=org_repo.repo_name))
+
+        org_rev = request.GET.get('rev_end')
+        # rev_start is not directly useful - its parent could however be used
+        # as default for other and thus give a simple compare view
+        #other_rev = request.POST.get('rev_start')
+
+        c.org_repos = []
+        c.org_repos.append((org_repo.repo_name, org_repo.repo_name))
+        c.default_org_repo = org_repo.repo_name
+        c.org_refs, c.default_org_ref = self._get_repo_refs(org_repo.scm_instance, org_rev)
+
+        c.other_repos = []
+        other_repos_info = {}
+
+        def add_other_repo(repo, branch_rev=None):
+            if repo.repo_name in other_repos_info: # shouldn't happen
+                return
+            c.other_repos.append((repo.repo_name, repo.repo_name))
+            other_refs, selected_other_ref = self._get_repo_refs(repo.scm_instance, branch_rev=branch_rev)
+            other_repos_info[repo.repo_name] = {
+                'user': dict(user_id=repo.user.user_id,
+                             username=repo.user.username,
+                             firstname=repo.user.firstname,
+                             lastname=repo.user.lastname,
+                             gravatar_link=h.gravatar_url(repo.user.email, 14)),
+                'description': repo.description.split('\n', 1)[0],
+                'revs': h.select('other_ref', selected_other_ref, other_refs, class_='refs')
+            }
+
+        # add org repo to other so we can open pull request against peer branches on itself
+        add_other_repo(org_repo, branch_rev=org_rev)
+        c.default_other_repo = org_repo.repo_name
+
+        # gather forks and add to this list ... even though it is rare to
+        # request forks to pull from their parent
+        for fork in org_repo.forks:
+            add_other_repo(fork)
+
+        # add parents of this fork also, but only if it's not empty
+        if org_repo.parent and org_repo.parent.scm_instance.revisions:
+            add_other_repo(org_repo.parent)
+            c.default_other_repo = org_repo.parent.repo_name
+
+        c.default_other_repo_info = other_repos_info[c.default_other_repo]
+        c.other_repos_info = json.dumps(other_repos_info)
+
+        return render('/pullrequests/pullrequest.html')
+
+    @LoginRequired()
+    @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    def create(self, repo_name):
+        repo = RepoModel()._get_repo(repo_name)
+        try:
+            _form = PullRequestForm(repo.repo_id)().to_python(request.POST)
+        except formencode.Invalid, errors:
+            log.error(traceback.format_exc())
+            if errors.error_dict.get('revisions'):
+                msg = 'Revisions: %s' % errors.error_dict['revisions']
+            elif errors.error_dict.get('pullrequest_title'):
+                msg = _('Pull request requires a title with min. 3 chars')
+            else:
+                msg = _('Error creating pull request')
+
+            h.flash(msg, 'error')
+            return redirect(url('pullrequest_home', repo_name=repo_name))
+
+        org_repo = _form['org_repo']
+        org_ref = 'rev:merge:%s' % _form['merge_rev']
+        other_repo = _form['other_repo']
+        other_ref = 'rev:ancestor:%s' % _form['ancestor_rev']
+        revisions = reversed(_form['revisions'])
+        reviewers = _form['review_members']
+
+        title = _form['pullrequest_title']
+        description = _form['pullrequest_desc']
+
+        try:
+            pull_request = PullRequestModel().create(
+                self.rhodecode_user.user_id, org_repo, org_ref, other_repo,
+                other_ref, revisions, reviewers, title, description
+            )
+            Session().commit()
+            h.flash(_('Successfully opened new pull request'),
+                    category='success')
+        except Exception:
+            h.flash(_('Error occurred during sending pull request'),
+                    category='error')
+            log.error(traceback.format_exc())
+            return redirect(url('pullrequest_home', repo_name=repo_name))
+
+        return redirect(url('pullrequest_show', repo_name=other_repo,
+                            pull_request_id=pull_request.pull_request_id))
+
+    @LoginRequired()
+    @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    @jsonify
+    def update(self, repo_name, pull_request_id):
+        pull_request = PullRequest.get_or_404(pull_request_id)
+        if pull_request.is_closed():
+            raise HTTPForbidden()
+        #only owner or admin can update it
+        owner = pull_request.author.user_id == c.rhodecode_user.user_id
+        if h.HasPermissionAny('hg.admin', 'repository.admin')() or owner:
+            reviewers_ids = map(int, filter(lambda v: v not in [None, ''],
+                       request.POST.get('reviewers_ids', '').split(',')))
+
+            PullRequestModel().update_reviewers(pull_request_id, reviewers_ids)
+            Session().commit()
+            return True
+        raise HTTPForbidden()
+
+    @LoginRequired()
+    @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    @jsonify
+    def delete(self, repo_name, pull_request_id):
+        pull_request = PullRequest.get_or_404(pull_request_id)
+        #only owner can delete it !
+        if pull_request.author.user_id == c.rhodecode_user.user_id:
+            PullRequestModel().delete(pull_request)
+            Session().commit()
+            h.flash(_('Successfully deleted pull request'),
+                    category='success')
+            return redirect(url('admin_settings_my_account', anchor='pullrequests'))
+        raise HTTPForbidden()
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def show(self, repo_name, pull_request_id):
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
@@ -429,7 +444,10 @@ class PullrequestsController(BaseRepoController):
         c.ancestor = None # there is one - but right here we don't know which
         return render('/pullrequests/pullrequest_show.html')
 
+    @LoginRequired()
     @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     @jsonify
     def comment(self, repo_name, pull_request_id):
         pull_request = PullRequest.get_or_404(pull_request_id)
@@ -504,7 +522,10 @@ class PullrequestsController(BaseRepoController):
 
         return data
 
+    @LoginRequired()
     @NotAnonymous()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     @jsonify
     def delete_comment(self, repo_name, comment_id):
         co = ChangesetComment.get(comment_id)

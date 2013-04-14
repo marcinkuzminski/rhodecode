@@ -44,10 +44,10 @@ log = logging.getLogger(__name__)
 
 class HomeController(BaseController):
 
-    @LoginRequired()
     def __before__(self):
         super(HomeController, self).__before__()
 
+    @LoginRequired()
     def index(self):
         c.groups = self.scm_model.get_repos_groups()
         c.group = None
@@ -68,6 +68,7 @@ class HomeController(BaseController):
 
         return render('/index.html')
 
+    @LoginRequired()
     def repo_switcher(self):
         if request.is_xhr:
             all_repos = Repository.query().order_by(Repository.repo_name).all()
@@ -78,6 +79,7 @@ class HomeController(BaseController):
         else:
             raise HTTPBadRequest()
 
+    @LoginRequired()
     def branch_tag_switcher(self, repo_name):
         if request.is_xhr:
             c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)

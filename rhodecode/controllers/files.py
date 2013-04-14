@@ -182,6 +182,9 @@ class FilesController(BaseRepoController):
 
         return render('files/files.html')
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def history(self, repo_name, revision, f_path, annotate=False):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             c.changeset = self.__get_cs_or_redirect(revision, repo_name)

@@ -58,6 +58,137 @@ class JournalController(BaseController):
         self.feed_nr = 20
         c.search_term = request.GET.get('filter')
 
+    def _get_daily_aggregate(self, journal):
+        groups = []
+        for k, g in groupby(journal, lambda x: x.action_as_day):
+            user_group = []
+            #groupby username if it's a present value, else fallback to journal username
+            for _, g2 in groupby(list(g), lambda x: x.user.username if x.user else x.username):
+                l = list(g2)
+                user_group.append((l[0].user, l))
+
+            groups.append((k, user_group,))
+
+        return groups
+
+    def _get_journal_data(self, following_repos):
+        repo_ids = [x.follows_repository.repo_id for x in following_repos
+                    if x.follows_repository is not None]
+        user_ids = [x.follows_user.user_id for x in following_repos
+                    if x.follows_user is not None]
+
+        filtering_criterion = None
+
+        if repo_ids and user_ids:
+            filtering_criterion = or_(UserLog.repository_id.in_(repo_ids),
+                        UserLog.user_id.in_(user_ids))
+        if repo_ids and not user_ids:
+            filtering_criterion = UserLog.repository_id.in_(repo_ids)
+        if not repo_ids and user_ids:
+            filtering_criterion = UserLog.user_id.in_(user_ids)
+        if filtering_criterion is not None:
+            journal = self.sa.query(UserLog)\
+                .options(joinedload(UserLog.user))\
+                .options(joinedload(UserLog.repository))
+            #filter
+            try:
+                journal = _journal_filter(journal, c.search_term)
+            except Exception:
+                # we want this to crash for now
+                raise
+            journal = journal.filter(filtering_criterion)\
+                        .order_by(UserLog.action_date.desc())
+        else:
+            journal = []
+
+        return journal
+
+    def _atom_feed(self, repos, public=True):
+        journal = self._get_journal_data(repos)
+        if public:
+            _link = url('public_journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('public journal'),
+                                  'atom feed')
+        else:
+            _link = url('journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('journal'), 'atom feed')
+
+        feed = Atom1Feed(title=_desc,
+                         link=_link,
+                         description=_desc,
+                         language=self.language,
+                         ttl=self.ttl)
+
+        for entry in journal[:self.feed_nr]:
+            user = entry.user
+            if user is None:
+                #fix deleted users
+                user = AttributeDict({'short_contact': entry.username,
+                                      'email': '',
+                                      'full_contact': ''})
+            action, action_extra, ico = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (user.short_contact, action(),
+                                    entry.repository.repo_name)
+            desc = action_extra()
+            _url = None
+            if entry.repository is not None:
+                _url = url('changelog_home',
+                           repo_name=entry.repository.repo_name,
+                           qualified=True)
+
+            feed.add_item(title=title,
+                          pubdate=entry.action_date,
+                          link=_url or url('', qualified=True),
+                          author_email=user.email,
+                          author_name=user.full_contact,
+                          description=desc)
+
+        response.content_type = feed.mime_type
+        return feed.writeString('utf-8')
+
+    def _rss_feed(self, repos, public=True):
+        journal = self._get_journal_data(repos)
+        if public:
+            _link = url('public_journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('public journal'),
+                                  'rss feed')
+        else:
+            _link = url('journal_atom', qualified=True)
+            _desc = '%s %s %s' % (c.rhodecode_name, _('journal'), 'rss feed')
+
+        feed = Rss201rev2Feed(title=_desc,
+                         link=_link,
+                         description=_desc,
+                         language=self.language,
+                         ttl=self.ttl)
+
+        for entry in journal[:self.feed_nr]:
+            user = entry.user
+            if user is None:
+                #fix deleted users
+                user = AttributeDict({'short_contact': entry.username,
+                                      'email': '',
+                                      'full_contact': ''})
+            action, action_extra, ico = h.action_parser(entry, feed=True)
+            title = "%s - %s %s" % (user.short_contact, action(),
+                                    entry.repository.repo_name)
+            desc = action_extra()
+            _url = None
+            if entry.repository is not None:
+                _url = url('changelog_home',
+                           repo_name=entry.repository.repo_name,
+                           qualified=True)
+
+            feed.add_item(title=title,
+                          pubdate=entry.action_date,
+                          link=_url or url('', qualified=True),
+                          author_email=user.email,
+                          author_name=user.full_contact,
+                          description=desc)
+
+        response.content_type = feed.mime_type
+        return feed.writeString('utf-8')
+
     @LoginRequired()
     @NotAnonymous()
     def index(self):
@@ -172,51 +303,6 @@ class JournalController(BaseController):
             .all()
         return self._rss_feed(following, public=False)
 
-    def _get_daily_aggregate(self, journal):
-        groups = []
-        for k, g in groupby(journal, lambda x: x.action_as_day):
-            user_group = []
-            #groupby username if it's a present value, else fallback to journal username
-            for _, g2 in groupby(list(g), lambda x: x.user.username if x.user else x.username):
-                l = list(g2)
-                user_group.append((l[0].user, l))
-
-            groups.append((k, user_group,))
-
-        return groups
-
-    def _get_journal_data(self, following_repos):
-        repo_ids = [x.follows_repository.repo_id for x in following_repos
-                    if x.follows_repository is not None]
-        user_ids = [x.follows_user.user_id for x in following_repos
-                    if x.follows_user is not None]
-
-        filtering_criterion = None
-
-        if repo_ids and user_ids:
-            filtering_criterion = or_(UserLog.repository_id.in_(repo_ids),
-                        UserLog.user_id.in_(user_ids))
-        if repo_ids and not user_ids:
-            filtering_criterion = UserLog.repository_id.in_(repo_ids)
-        if not repo_ids and user_ids:
-            filtering_criterion = UserLog.user_id.in_(user_ids)
-        if filtering_criterion is not None:
-            journal = self.sa.query(UserLog)\
-                .options(joinedload(UserLog.user))\
-                .options(joinedload(UserLog.repository))
-            #filter
-            try:
-                journal = _journal_filter(journal, c.search_term)
-            except Exception:
-                # we want this to crash for now
-                raise
-            journal = journal.filter(filtering_criterion)\
-                        .order_by(UserLog.action_date.desc())
-        else:
-            journal = []
-
-        return journal
-
     @LoginRequired()
     @NotAnonymous()
     def toggle_following(self):
@@ -267,92 +353,6 @@ class JournalController(BaseController):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             return c.journal_data
         return render('journal/public_journal.html')
-
-    def _atom_feed(self, repos, public=True):
-        journal = self._get_journal_data(repos)
-        if public:
-            _link = url('public_journal_atom', qualified=True)
-            _desc = '%s %s %s' % (c.rhodecode_name, _('public journal'),
-                                  'atom feed')
-        else:
-            _link = url('journal_atom', qualified=True)
-            _desc = '%s %s %s' % (c.rhodecode_name, _('journal'), 'atom feed')
-
-        feed = Atom1Feed(title=_desc,
-                         link=_link,
-                         description=_desc,
-                         language=self.language,
-                         ttl=self.ttl)
-
-        for entry in journal[:self.feed_nr]:
-            user = entry.user
-            if user is None:
-                #fix deleted users
-                user = AttributeDict({'short_contact': entry.username,
-                                      'email': '',
-                                      'full_contact': ''})
-            action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (user.short_contact, action(),
-                                    entry.repository.repo_name)
-            desc = action_extra()
-            _url = None
-            if entry.repository is not None:
-                _url = url('changelog_home',
-                           repo_name=entry.repository.repo_name,
-                           qualified=True)
-
-            feed.add_item(title=title,
-                          pubdate=entry.action_date,
-                          link=_url or url('', qualified=True),
-                          author_email=user.email,
-                          author_name=user.full_contact,
-                          description=desc)
-
-        response.content_type = feed.mime_type
-        return feed.writeString('utf-8')
-
-    def _rss_feed(self, repos, public=True):
-        journal = self._get_journal_data(repos)
-        if public:
-            _link = url('public_journal_atom', qualified=True)
-            _desc = '%s %s %s' % (c.rhodecode_name, _('public journal'),
-                                  'rss feed')
-        else:
-            _link = url('journal_atom', qualified=True)
-            _desc = '%s %s %s' % (c.rhodecode_name, _('journal'), 'rss feed')
-
-        feed = Rss201rev2Feed(title=_desc,
-                         link=_link,
-                         description=_desc,
-                         language=self.language,
-                         ttl=self.ttl)
-
-        for entry in journal[:self.feed_nr]:
-            user = entry.user
-            if user is None:
-                #fix deleted users
-                user = AttributeDict({'short_contact': entry.username,
-                                      'email': '',
-                                      'full_contact': ''})
-            action, action_extra, ico = h.action_parser(entry, feed=True)
-            title = "%s - %s %s" % (user.short_contact, action(),
-                                    entry.repository.repo_name)
-            desc = action_extra()
-            _url = None
-            if entry.repository is not None:
-                _url = url('changelog_home',
-                           repo_name=entry.repository.repo_name,
-                           qualified=True)
-
-            feed.add_item(title=title,
-                          pubdate=entry.action_date,
-                          link=_url or url('', qualified=True),
-                          author_email=user.email,
-                          author_name=user.full_contact,
-                          description=desc)
-
-        response.content_type = feed.mime_type
-        return feed.writeString('utf-8')
 
     @LoginRequired(api_access=True)
     def public_journal_atom(self):

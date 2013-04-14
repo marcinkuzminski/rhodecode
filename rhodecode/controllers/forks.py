@@ -50,7 +50,6 @@ log = logging.getLogger(__name__)
 
 class ForksController(BaseRepoController):
 
-    @LoginRequired()
     def __before__(self):
         super(ForksController, self).__before__()
 
@@ -107,6 +106,7 @@ class ForksController(BaseRepoController):
 
         return defaults
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def forks(self, repo_name):
@@ -128,6 +128,7 @@ class ForksController(BaseRepoController):
 
         return render('/forks/forks.html')
 
+    @LoginRequired()
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -147,6 +148,7 @@ class ForksController(BaseRepoController):
             force_defaults=False
         )
 
+    @LoginRequired()
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',

@@ -38,12 +38,12 @@ log = logging.getLogger(__name__)
 
 class BranchesController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(BranchesController, self).__before__()
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self):
 
         def _branchtags(localrepo):
@@ -71,6 +71,5 @@ class BranchesController(BaseRepoController):
         c.repo_branches = OrderedDict(sorted(_branches,
                                              key=lambda ctx: ctx[0],
                                              reverse=False))
-
 
         return render('branches/branches.html')

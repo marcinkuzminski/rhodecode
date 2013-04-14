@@ -51,9 +51,6 @@ log = logging.getLogger(__name__)
 
 class CompareController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(CompareController, self).__before__()
 
@@ -85,6 +82,82 @@ class CompareController(BaseRepoController):
                 redirect(h.url('summary_home', repo_name=repo.repo_name))
             raise HTTPBadRequest()
 
+    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref, merge):
+        """
+        Returns a list of changesets that can be merged from org_repo@org_ref
+        to other_repo@other_ref ... and the ancestor that would be used for merge
+
+        :param org_repo:
+        :param org_ref:
+        :param other_repo:
+        :param other_ref:
+        :param tmp:
+        """
+
+        ancestor = None
+
+        if alias == 'hg':
+            # lookup up the exact node id
+            _revset_predicates = {
+                    'branch': 'branch',
+                    'book': 'bookmark',
+                    'tag': 'tag',
+                    'rev': 'id',
+                }
+
+            org_rev_spec = "max(%s('%s'))" % (_revset_predicates[org_ref[0]],
+                                              safe_str(org_ref[1]))
+            org_revs = scmutil.revrange(org_repo._repo, [org_rev_spec])
+            org_rev = org_repo._repo[org_revs[-1] if org_revs else -1].hex()
+
+            other_rev_spec = "max(%s('%s'))" % (_revset_predicates[other_ref[0]],
+                                                safe_str(other_ref[1]))
+            other_revs = scmutil.revrange(other_repo._repo, [other_rev_spec])
+            other_rev = other_repo._repo[other_revs[-1] if other_revs else -1].hex()
+
+            #case two independent repos
+            if org_repo != other_repo:
+                hgrepo = unionrepo.unionrepository(other_repo.baseui,
+                                                   other_repo.path,
+                                                   org_repo.path)
+                # all the changesets we are looking for will be in other_repo,
+                # so rev numbers from hgrepo can be used in other_repo
+
+            #no remote compare do it on the same repository
+            else:
+                hgrepo = other_repo._repo
+
+            if merge:
+                revs = ["ancestors(id('%s')) and not ancestors(id('%s')) and not id('%s')" %
+                        (other_rev, org_rev, org_rev)]
+
+                ancestors = scmutil.revrange(hgrepo,
+                     ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
+                if ancestors:
+                    # pick arbitrary ancestor - but there is usually only one
+                    ancestor = hgrepo[ancestors[0]].hex()
+            else:
+                # TODO: have both + and - changesets
+                revs = ["id('%s') :: id('%s') - id('%s')" %
+                        (org_rev, other_rev, org_rev)]
+
+            changesets = [other_repo.get_changeset(cs)
+                          for cs in scmutil.revrange(hgrepo, revs)]
+
+        elif alias == 'git':
+            assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
+            so, se = org_repo.run_git_command(
+                'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
+                                                                       other_ref[1])
+            )
+            changesets = [org_repo.get_changeset(cs)
+                          for cs in re.findall(r'[0-9a-fA-F]{40}', so)]
+
+        return changesets, ancestor
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self, org_ref_type, org_ref, other_ref_type, other_ref):
         # org_ref will be evaluated in org_repo
         org_repo = c.rhodecode_db_repo.repo_name
@@ -194,76 +267,3 @@ class CompareController(BaseRepoController):
             c.changes[fid] = [f['operation'], f['filename'], diff]
 
         return render('compare/compare_diff.html')
-
-    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref, merge):
-        """
-        Returns a list of changesets that can be merged from org_repo@org_ref
-        to other_repo@other_ref ... and the ancestor that would be used for merge
-
-        :param org_repo:
-        :param org_ref:
-        :param other_repo:
-        :param other_ref:
-        :param tmp:
-        """
-
-        ancestor = None
-
-        if alias == 'hg':
-            # lookup up the exact node id
-            _revset_predicates = {
-                    'branch': 'branch',
-                    'book': 'bookmark',
-                    'tag': 'tag',
-                    'rev': 'id',
-                }
-
-            org_rev_spec = "max(%s('%s'))" % (_revset_predicates[org_ref[0]],
-                                              safe_str(org_ref[1]))
-            org_revs = scmutil.revrange(org_repo._repo, [org_rev_spec])
-            org_rev = org_repo._repo[org_revs[-1] if org_revs else -1].hex()
-
-            other_rev_spec = "max(%s('%s'))" % (_revset_predicates[other_ref[0]],
-                                                safe_str(other_ref[1]))
-            other_revs = scmutil.revrange(other_repo._repo, [other_rev_spec])
-            other_rev = other_repo._repo[other_revs[-1] if other_revs else -1].hex()
-
-            #case two independent repos
-            if org_repo != other_repo:
-                hgrepo = unionrepo.unionrepository(other_repo.baseui,
-                                                   other_repo.path,
-                                                   org_repo.path)
-                # all the changesets we are looking for will be in other_repo,
-                # so rev numbers from hgrepo can be used in other_repo
-
-            #no remote compare do it on the same repository
-            else:
-                hgrepo = other_repo._repo
-
-            if merge:
-                revs = ["ancestors(id('%s')) and not ancestors(id('%s')) and not id('%s')" %
-                        (other_rev, org_rev, org_rev)]
-
-                ancestors = scmutil.revrange(hgrepo,
-                     ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
-                if ancestors:
-                    # pick arbitrary ancestor - but there is usually only one
-                    ancestor = hgrepo[ancestors[0]].hex()
-            else:
-                # TODO: have both + and - changesets
-                revs = ["id('%s') :: id('%s') - id('%s')" %
-                        (org_rev, other_rev, org_rev)]
-
-            changesets = [other_repo.get_changeset(cs)
-                          for cs in scmutil.revrange(hgrepo, revs)]
-
-        elif alias == 'git':
-            assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
-            so, se = org_repo.run_git_command(
-                'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
-                                                                       other_ref[1])
-            )
-            changesets = [org_repo.get_changeset(cs)
-                          for cs in re.findall(r'[0-9a-fA-F]{40}', so)]
-
-        return changesets, ancestor
