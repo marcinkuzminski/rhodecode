@@ -21,7 +21,6 @@
 #context-bar a.tags { background-image: url("../images/icons/tag_blue.png"); }
 #context-bar a.bookmarks { background-image: url("../images/icons/tag_green.png"); }
 #context-bar a.settings { background-image: url("../images/icons/cog.png"); }
-#context-bar a.shortlog { background-image: url("../images/icons/time.png"); }
 #context-bar a.search { background-image: url("../images/icons/search_16.png"); }
 #context-bar a.admin { background-image: url("../images/icons/cog_edit.png"); }
 

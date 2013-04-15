@@ -39,8 +39,27 @@ from rhodecode.lib.graphmod import _colored, _dagwalker
 from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError,\
     ChangesetError, NodeDoesNotExistError
 from rhodecode.lib.utils2 import safe_int
+from webob.exc import HTTPNotFound
 
 log = logging.getLogger(__name__)
+
+
+def _load_changelog_summary():
+    p = safe_int(request.GET.get('page'), 1)
+    size = safe_int(request.GET.get('size'), 10)
+
+    def url_generator(**kw):
+        return url('changelog_summary_home',
+                   repo_name=c.rhodecode_db_repo.repo_name, size=size, **kw)
+
+    collection = c.rhodecode_repo
+
+    c.repo_changesets = RepoPage(collection, page=p,
+                                 items_per_page=size,
+                                 url=url_generator)
+    page_revisions = [x.raw_id for x in list(c.repo_changesets)]
+    c.comments = c.rhodecode_db_repo.get_comments(page_revisions)
+    c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
 
 
 class ChangelogController(BaseRepoController):
@@ -140,3 +159,14 @@ class ChangelogController(BaseRepoController):
         if request.environ.get('HTTP_X_PARTIAL_XHR'):
             c.cs = c.rhodecode_repo.get_changeset(cs)
             return render('changelog/changelog_details.html')
+        raise HTTPNotFound()
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    def changelog_summary(self, repo_name):
+        if request.environ.get('HTTP_X_PARTIAL_XHR'):
+            _load_changelog_summary()
+
+            return render('changelog/changelog_summary_data.html')
+        raise HTTPNotFound()

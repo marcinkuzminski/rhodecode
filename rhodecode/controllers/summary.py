@@ -55,6 +55,7 @@ from rhodecode.lib.celerylib.tasks import get_commits_stats
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json, OrderedDict
 from rhodecode.lib.vcs.nodes import FileNode
+from rhodecode.controllers.changelog import _load_changelog_summary
 
 log = logging.getLogger(__name__)
 
@@ -136,15 +137,7 @@ class SummaryController(BaseRepoController):
                                    'repository.admin')
     def index(self, repo_name):
         c.dbrepo = dbrepo = c.rhodecode_db_repo
-
-        def url_generator(**kw):
-            return url('shortlog_home', repo_name=repo_name, size=10, **kw)
-
-        c.repo_changesets = RepoPage(c.rhodecode_repo, page=1,
-                                     items_per_page=10, url=url_generator)
-        page_revisions = [x.raw_id for x in list(c.repo_changesets)]
-        c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
-
+        _load_changelog_summary()
         if self.rhodecode_user.username == 'default':
             # for default(anonymous) user we don't need to pass credentials
             username = ''

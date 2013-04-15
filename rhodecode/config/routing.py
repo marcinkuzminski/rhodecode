@@ -586,9 +586,6 @@ def make_map(config):
     rmap.connect('summary_home_summary', '/{repo_name:.*?}/summary',
                 controller='summary', conditions=dict(function=check_repo))
 
-    rmap.connect('shortlog_home', '/{repo_name:.*?}/shortlog',
-                controller='shortlog', conditions=dict(function=check_repo))
-
     rmap.connect('branches_home', '/{repo_name:.*?}/branches',
                 controller='branches', conditions=dict(function=check_repo))
 
@@ -600,6 +597,10 @@ def make_map(config):
 
     rmap.connect('changelog_home', '/{repo_name:.*?}/changelog',
                 controller='changelog', conditions=dict(function=check_repo))
+
+    rmap.connect('changelog_summary_home', '/{repo_name:.*?}/changelog_summary',
+                controller='changelog', action='changelog_summary',
+                conditions=dict(function=check_repo))
 
     rmap.connect('changelog_file_home', '/{repo_name:.*?}/changelog/{revision}/{f_path:.*}',
                 controller='changelog', f_path=None,

@@ -544,10 +544,6 @@ div:hover > a.permalink {
     background-image: url("../images/icons/search_16.png");
 }
 
-#header #header-inner #quick li ul li a.shortlog, #header #header-inner #quick li ul li a.shortlog:hover {
-    background-image: url("../images/icons/clock_16.png");
-}
-
 #header #header-inner #quick li ul li a.delete, #header #header-inner #quick li ul li a.delete:hover {
     background-image: url("../images/icons/delete.png");
 }
@@ -2758,12 +2754,6 @@ h3.files_location {
     line-height: 2.2em;
 }
 .branchtag, .logtags .tagtag, .logtags .booktag {
-    margin: 0px 2px;
-}
-
-#shortlog_data .branchtag,
-#shortlog_data .booktag,
-#shortlog_data .tagtag {
     margin: 0px 2px;
 }
 
