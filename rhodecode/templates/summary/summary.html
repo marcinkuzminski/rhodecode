@@ -167,11 +167,11 @@ ${self.context_bar('summary')}
                         ${h.link_to(_('Enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                     %endif
                 %else:
+                    <span id="${'zip_link'}">${h.link_to(_('Download as zip'), h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
-                         <span id="${'zip_link'}">${h.link_to(_('Download as zip'), h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     <span style="vertical-align: bottom">
-                        <input id="archive_subrepos" type="checkbox" name="subrepos" />
-                        <label for="archive_subrepos" class="tooltip" title="${h.tooltip(_('Check this to download archive with subrepos'))}" >${_('with subrepos')}</label>
+                      <input id="archive_subrepos" type="checkbox" name="subrepos" />
+                      <label for="archive_subrepos" class="tooltip" title="${h.tooltip(_('Check this to download archive with subrepos'))}" >${_('with subrepos')}</label>
                     </span>
                 %endif
               </div>
