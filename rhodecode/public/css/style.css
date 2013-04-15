@@ -2590,6 +2590,7 @@ h3.files_location {
 }
 
 #graph_content .comments-container,
+#shortlog_data .comments-container,
 #graph_content .logtags {
     display: block;
     float: left;
@@ -2688,7 +2689,13 @@ h3.files_location {
     padding: 5px 0;
 }
 
-#graph_content .comments-cnt a {
+#shortlog_data .comments-cnt {
+    color: rgb(136, 136, 136);
+    padding: 3px 0;
+}
+
+#graph_content .comments-cnt a,
+#shortlog_data .comments-cnt a {
     background-image: url('../images/icons/comments.png');
     background-repeat: no-repeat;
     background-position: 100% 50%;

@@ -13,6 +13,15 @@
         <td>
           <div>
             <div class="changeset-status-container">
+              %if c.comments.get(cs.raw_id,[]):
+               <div class="comments-container">
+                   <div class="comments-cnt" title="${('comments')}">
+                       <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
+                           ${len(c.comments[cs.raw_id])}
+                       </a>
+                   </div>
+               </div>
+              %endif
               %if c.statuses.get(cs.raw_id):
                 <div class="changeset-status-ico">
                 %if c.statuses.get(cs.raw_id)[2]:

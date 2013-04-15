@@ -101,7 +101,7 @@ ${self.context_bar('changelog')}
                                 <div class="message">${h.urlify_commit(cs.message, c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
                                 <div class="expand"><span class="expandtext">&darr; ${_('Show more')} &darr;</span></div>
                                 <div class="extra-container">
-                                    %if c.comments.get(cs.raw_id,[]):
+                                    %if c.comments.get(cs.raw_id):
                                         <div class="comments-container">
                                             <div class="comments-cnt" title="${('comments')}">
                                                 <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
