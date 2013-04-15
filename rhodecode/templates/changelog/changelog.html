@@ -3,12 +3,20 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-${_('%s Changelog') % c.repo_name} &middot; ${c.rhodecode_name}
+${_('%s Changelog') % c.repo_name} &middot;
+%if c.changelog_for_path:
+  /${c.changelog_for_path} &middot;
+%endif
+${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
     <% size = c.size if c.size <= c.total_cs else c.total_cs %>
-    ${_('Changelog')} - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
+    ${_('Changelog')}
+    %if c.changelog_for_path:
+     - /${c.changelog_for_path}
+    %endif
+    - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
 </%def>
 
 <%def name="page_nav()">
