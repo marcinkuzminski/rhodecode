@@ -37,7 +37,7 @@ from rhodecode.lib.utils import ask_ok
 from rhodecode.model import init_model
 from rhodecode.model.db import User, Permission, RhodeCodeUi, \
     RhodeCodeSetting, UserToPerm, DbMigrateVersion, RepoGroup, \
-    UserRepoGroupToPerm, CacheInvalidation
+    UserRepoGroupToPerm, CacheInvalidation, UserGroup
 
 from sqlalchemy.engine import create_engine
 from rhodecode.model.repos_group import ReposGroupModel
@@ -45,6 +45,7 @@ from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.meta import Session, Base
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.permission import PermissionModel
+from rhodecode.model.users_group import UserGroupModel
 
 
 log = logging.getLogger(__name__)
@@ -277,6 +278,7 @@ class DbManage(object):
                            'in admin panel')
 
             def step_8(self):
+                self.klass.create_permissions()
                 self.klass.populate_default_permissions()
                 self.klass.create_default_options(skip_existing=True)
                 Session().commit()
@@ -299,7 +301,17 @@ class DbManage(object):
 
             def step_12(self):
                 self.klass.create_permissions()
+                Session().commit()
+
                 self.klass.populate_default_permissions()
+                Session().commit()
+
+                #fix all usergroups
+                ug_model = UserGroupModel()
+                for ug in UserGroup.get_all():
+                    perm_obj = ug_model._create_default_perms(ug)
+                    Session().add(perm_obj)
+                Session().commit()
 
         upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
 
