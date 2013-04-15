@@ -7,7 +7,7 @@ import logging
 from sqlalchemy import (Table, Column, MetaData, String, Text, Integer,
     create_engine)
 from sqlalchemy.sql import and_
-from sqlalchemy import exceptions as sa_exceptions
+from sqlalchemy import exc as sa_exceptions
 from sqlalchemy.sql import bindparam
 
 from rhodecode.lib.dbmigrate.migrate import exceptions
@@ -19,6 +19,7 @@ from rhodecode.lib.dbmigrate.migrate.versioning.version import VerNum
 
 
 log = logging.getLogger(__name__)
+
 
 class ControlledSchema(object):
     """A database under version control"""
