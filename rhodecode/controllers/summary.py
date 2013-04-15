@@ -177,19 +177,6 @@ class SummaryController(BaseRepoController):
 
         c.clone_repo_url = uri
         c.clone_repo_url_id = uri_id
-        c.repo_tags = OrderedDict()
-        for name, hash_ in c.rhodecode_repo.tags.items()[:10]:
-            try:
-                c.repo_tags[name] = c.rhodecode_repo.get_changeset(hash_)
-            except ChangesetError:
-                c.repo_tags[name] = EmptyChangeset(hash_)
-
-        c.repo_branches = OrderedDict()
-        for name, hash_ in c.rhodecode_repo.branches.items()[:10]:
-            try:
-                c.repo_branches[name] = c.rhodecode_repo.get_changeset(hash_)
-            except ChangesetError:
-                c.repo_branches[name] = EmptyChangeset(hash_)
 
         td = date.today() + timedelta(days=1)
         td_1m = td - timedelta(days=calendar.mdays[td.month])
