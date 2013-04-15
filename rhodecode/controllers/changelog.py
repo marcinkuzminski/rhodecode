@@ -36,7 +36,8 @@ from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
 from rhodecode.lib.graphmod import _colored, _dagwalker
-from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
+from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError,\
+    ChangesetError, NodeDoesNotExistError
 from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ class ChangelogController(BaseRepoController):
     @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
-    def index(self):
+    def index(self, repo_name, revision=None, f_path=None):
         limit = 100
         default = 20
         if request.GET.get('size'):
@@ -88,9 +89,27 @@ class ChangelogController(BaseRepoController):
         c.size = max(c.size, 1)
         p = safe_int(request.GET.get('page', 1), 1)
         branch_name = request.GET.get('branch', None)
+        c.changelog_for_path = f_path
         try:
-            collection = c.rhodecode_repo.get_changesets(start=0,
-                                                    branch_name=branch_name)
+
+            if f_path:
+                log.debug('generating changelog for path %s' % f_path)
+                # get the history for the file !
+                tip_cs = c.rhodecode_repo.get_changeset()
+                try:
+                    collection = tip_cs.get_file_history(f_path)
+                except (NodeDoesNotExistError, ChangesetError):
+                    #this node is not present at tip !
+                    try:
+                        cs = self.__get_cs_or_redirect(revision, repo_name)
+                        collection = cs.get_file_history(f_path)
+                    except RepositoryError, e:
+                        h.flash(str(e), category='warning')
+                        redirect(h.url('changelog_home', repo_name=repo_name))
+                collection = list(reversed(collection))
+            else:
+                collection = c.rhodecode_repo.get_changesets(start=0,
+                                                        branch_name=branch_name)
             c.total_cs = len(collection)
 
             c.pagination = RepoPage(collection, page=p, item_count=c.total_cs,
@@ -107,9 +126,10 @@ class ChangelogController(BaseRepoController):
         c.branch_name = branch_name
         c.branch_filters = [('', _('All Branches'))] + \
             [(k, k) for k in c.rhodecode_repo.branches.keys()]
-
-        self._graph(c.rhodecode_repo, [x.revision for x in c.pagination],
-                    c.total_cs, c.size, p)
+        _revs = []
+        if not f_path:
+            _revs = [x.revision for x in c.pagination]
+        self._graph(c.rhodecode_repo, _revs, c.total_cs, c.size, p)
 
         return render('changelog/changelog.html')
 

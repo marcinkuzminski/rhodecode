@@ -8,7 +8,7 @@
             ${h.select('diff1',c.file_changeset.raw_id,c.file_history)}
             ${h.submit('diff',_('Diff to revision'),class_="ui-btn")}
             ${h.submit('show_rev',_('Show at revision'),class_="ui-btn")}
-            ${h.link_to(_('Show full history'),h.url('shortlog_file_home',repo_name=c.repo_name, revision=c.file_changeset.raw_id, f_path=c.f_path),class_="ui-btn")}
+            ${h.link_to(_('Show full history'),h.url('changelog_file_home',repo_name=c.repo_name, revision=c.file_changeset.raw_id, f_path=c.f_path),class_="ui-btn")}
             ${h.hidden('annotate', c.annotate)}
             ${h.end_form()}
             </div>

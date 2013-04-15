@@ -25,26 +25,28 @@ ${self.context_bar('changelog')}
     <div class="table">
         % if c.pagination:
             <div id="graph">
-                <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
-                    <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
-                    <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
+                <div style="display:${'none' if c.changelog_for_path else ''}">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
+                        <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
+                        <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
 
-                    %if c.rhodecode_db_repo.fork:
-                        <a id="compare_fork" title="${_('Compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default',merge=1)}" class="ui-btn small">${_('Compare fork with parent')}</a>
-                    %endif
-                    %if h.is_hg(c.rhodecode_repo):
-                    <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
-                    %endif
-                </div>
-                <div class="container_header">
-                    ${h.form(h.url.current(),method='get')}
-                    <div style="float:left">
-                        ${h.submit('set',_('Show'),class_="ui-btn")}
-                        ${h.text('size',size=1,value=c.size)}
-                        ${_('revisions')}
+                        %if c.rhodecode_db_repo.fork:
+                            <a id="compare_fork" title="${_('Compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default',merge=1)}" class="ui-btn small">${_('Compare fork with parent')}</a>
+                        %endif
+                        %if h.is_hg(c.rhodecode_repo):
+                        <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
+                        %endif
                     </div>
-                    ${h.end_form()}
-                    <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
+                    <div class="container_header">
+                        ${h.form(h.url.current(),method='get')}
+                        <div style="float:left">
+                            ${h.submit('set',_('Show'),class_="ui-btn")}
+                            ${h.text('size',size=1,value=c.size)}
+                            ${_('revisions')}
+                        </div>
+                        ${h.end_form()}
+                        <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
+                    </div>
                 </div>
                 <div id="graph_nodes">
                     <canvas id="graph_canvas"></canvas>
@@ -56,7 +58,11 @@ ${self.context_bar('changelog')}
                 %for cnt,cs in enumerate(c.pagination):
                     <tr id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
                         <td class="checkbox">
-                            ${h.checkbox(cs.raw_id,class_="changeset_range")}
+                            %if c.changelog_for_path:
+                                ${h.checkbox(cs.raw_id,class_="changeset_range", disabled="disabled")}
+                            %else:
+                                ${h.checkbox(cs.raw_id,class_="changeset_range")}
+                            %endif
                         <td class="status">
                           %if c.statuses.get(cs.raw_id):
                             <div class="changeset-status-ico">
