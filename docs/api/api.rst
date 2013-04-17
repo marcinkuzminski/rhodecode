@@ -16,9 +16,24 @@ API ACCESS FOR WEB VIEWS
 API access can also be turned on for each web view in RhodeCode that is
 decorated with `@LoginRequired` decorator. To enable API access simple change
 the standard login decorator to `@LoginRequired(api_access=True)`.
+
+To make this operation easier, starting from version 1.7.0 there's a white list
+of views that will have API access enabled. Simply edit `api_access_controllers_whitelist`
+option in your .ini file, and define views that should have API access enabled.
+Following example shows how to enable API access to patch/diff raw file and archive
+in RhodeCode::
+
+    api_access_controllers_whitelist = 
+        ChangesetController:changeset_patch,
+        ChangesetController:changeset_raw,
+        FilesController:raw,
+        FilesController:archivefile
+
+
 After this change, a rhodecode view can be accessed without login by adding a
 GET parameter `?api_key=<api_key>` to url. By default this is only
-enabled on RSS/ATOM feed views.
+enabled on RSS/ATOM feed views. Exposing raw diffs is a good way to integrate with
+3rd party services like code review, or build farms that could download archives.
 
 
 API ACCESS
