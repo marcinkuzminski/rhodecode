@@ -113,3 +113,47 @@ might pass the url with stored credentials inside eg.
 using given credentials. Please take a note that they will be stored as
 plaintext inside the database. RhodeCode will remove auth info when showing the
 clone url in summary page.
+
+
+
+Visual settings in admin pannel
+-------------------------------
+
+
+Visualisation settings in RhodeCode settings view are extra customizations
+of server behavior. There are 3 main section in the settings.
+
+General
+~~~~~~~
+    
+`Use repository extra fields` option allows to set a custom fields for each
+repository in the system. Each new field consists of 3 attributes `field key`,
+`field label`, `field description`. Example usage of such fields would be to
+define company specific information into repositories eg. defining repo_manager
+key that would add give info about a manager of each repository. There's no
+limit for adding custom fields. Newly created fields are accessible via API.
+
+
+Icons
+~~~~~
+
+Show public repo icon / Show private repo icon on repositories - defines if
+public/private icons should be shown in the UI.
+
+
+Meta-Tagging
+~~~~~~~~~~~~
+
+With this option enabled, special metatags that are recognisible by RhodeCode
+will be turned into colored tags. Currently available tags are::
+
+    [featured]
+    [stale]
+    [dead]
+    [lang => lang]
+    [license => License]
+    [requires => Repo]
+    [recommends => Repo]
+    [see => URI]
+
+
