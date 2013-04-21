@@ -1565,7 +1565,8 @@ div.form div.fields div.field div.button {
     padding: 6px;
 }
 
-#content div.box div.pagination ul.pager li a:hover, #content div.box div.pagination ul.pager li a:active {
+#content div.box div.pagination ul.pager li a:hover,
+#content div.box div.pagination ul.pager li a:active {
     background: #b4b4b4 url("../images/pager_selected.png") repeat-x;
     border-top: 1px solid #ccc;
     border-left: 1px solid #bebebe;
@@ -1574,17 +1575,25 @@ div.form div.fields div.field div.button {
     margin: -1px;
 }
 
+#content div.box div.pagination-right {
+    float: right;
+}
+
 #content div.box div.pagination-wh {
     height: 1%;
-    clear: both;
     overflow: hidden;
     text-align: right;
     margin: 10px 0 0;
     padding: 0;
 }
 
-#content div.box div.pagination-right {
-    float: right;
+#content div.box div.pagination-wh > :first-child {
+    border-radius: 4px 0px 0px 4px;
+}
+
+#content div.box div.pagination-wh > :last-child{
+    border-radius: 0px 4px 4px 0px;
+    border-right: 1px solid #cfcfcf;
 }
 
 #content div.box div.pagination-wh a,
@@ -1598,11 +1607,9 @@ div.form div.fields div.field div.button {
     background: #ebebeb url("../images/pager.png") repeat-x;
     border-top: 1px solid #dedede;
     border-left: 1px solid #cfcfcf;
-    border-right: 1px solid #c4c4c4;
     border-bottom: 1px solid #c4c4c4;
     color: #4A4A4A;
     font-weight: 700;
-    margin: 0 0 0 4px;
     padding: 6px;
 }
 
@@ -1612,11 +1619,9 @@ div.form div.fields div.field div.button {
     background: #b4b4b4 url("../images/pager_selected.png") repeat-x;
     border-top: 1px solid #ccc;
     border-left: 1px solid #bebebe;
-    border-right: 1px solid #b1b1b1;
     border-bottom: 1px solid #afafaf;
     color: #515151;
     font-weight: 700;
-    margin: 0 0 0 4px;
     padding: 6px;
 }
 
@@ -1624,7 +1629,6 @@ div.form div.fields div.field div.button {
     background: #b4b4b4 url("../images/pager_selected.png") repeat-x;
     border-top: 1px solid #ccc;
     border-left: 1px solid #bebebe;
-    border-right: 1px solid #b1b1b1;
     border-bottom: 1px solid #afafaf;
     text-decoration: none;
 }
