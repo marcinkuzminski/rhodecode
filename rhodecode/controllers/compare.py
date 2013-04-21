@@ -145,10 +145,11 @@ class CompareController(BaseRepoController):
                           for cs in scmutil.revrange(hgrepo, revs)]
 
         elif alias == 'git':
-            assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
+            assert org_repo == other_repo, ('no support for compare for two '
+                                            'different repositories in git')
             so, se = org_repo.run_git_command(
-                'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
-                                                                       other_ref[1])
+                'log --reverse --pretty="format: %%H" -s -p %s..%s'
+                    % (org_ref[1], other_ref[1])
             )
             changesets = [org_repo.get_changeset(cs)
                           for cs in re.findall(r'[0-9a-fA-F]{40}', so)]
@@ -223,8 +224,10 @@ class CompareController(BaseRepoController):
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
+        if not c.ancestor:
+            log.warning('Unable to find ancestor revision')
+
         if partial:
-            assert c.ancestor
             return render('compare/compare_cs.html')
 
         if c.ancestor:
@@ -242,7 +245,8 @@ class CompareController(BaseRepoController):
         log.debug('running diff between %s@%s and %s@%s'
                   % (org_repo.scm_instance.path, org_ref,
                      other_repo.scm_instance.path, other_ref))
-        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]), rev2=safe_str(other_ref[1]))
+        _diff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]),
+                                               rev2=safe_str(other_ref[1]))
 
         diff_processor = diffs.DiffProcessor(_diff or '', format='gitdiff',
                                              diff_limit=diff_limit)
