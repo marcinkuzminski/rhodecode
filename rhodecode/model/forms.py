@@ -312,7 +312,7 @@ def ApplicationUiSettingsForm():
 def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
                            user_group_perms_choices, create_choices,
                            repo_group_create_choices, user_group_create_choices,
-                           fork_choices, register_choices):
+                           fork_choices, register_choices, extern_activate_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
@@ -330,6 +330,7 @@ def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
         default_fork = v.OneOf(fork_choices)
 
         default_register = v.OneOf(register_choices)
+        default_extern_activate = v.OneOf(extern_activate_choices)
     return _DefaultPermissionsForm
 
 

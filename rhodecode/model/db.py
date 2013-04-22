@@ -1424,12 +1424,13 @@ class Permission(Base, BaseModel):
         ('hg.fork.none', _('Repository forking disabled')),
         ('hg.fork.repository', _('Repository forking enabled')),
 
-        ('hg.register.none', _('Register disabled')),
-        ('hg.register.manual_activate', _('Register new user with RhodeCode '
-                                          'with manual activation')),
+        ('hg.register.none', _('Registration disabled')),
+        ('hg.register.manual_activate', _('User Registration with manual account activation')),
+        ('hg.register.auto_activate', _('User Registration with automatic account activation')),
 
-        ('hg.register.auto_activate', _('Register new user with RhodeCode '
-                                        'with auto activation')),
+        ('hg.extern_activate.manual', _('Manual activation of external account')),
+        ('hg.extern_activate.auto', _('Automatic activation of external account')),
+
     ]
 
     #definition of system default permissions for DEFAULT user
@@ -1440,6 +1441,7 @@ class Permission(Base, BaseModel):
         'hg.create.repository',
         'hg.fork.repository',
         'hg.register.manual_activate',
+        'hg.extern_activate.auto',
     ]
 
     # defines which permissions are more important higher the more important

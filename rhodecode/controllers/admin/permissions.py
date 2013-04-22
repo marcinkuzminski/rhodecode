@@ -75,6 +75,11 @@ class PermissionsController(BaseController):
             ('hg.register.auto_activate',
                 _('Allowed with automatic account activation')), ]
 
+        c.extern_activate_choices = [
+            ('hg.extern_activate.manual', _('Manual activation of external account')),
+            ('hg.extern_activate.auto', _('Automatic activation of external account')),
+        ]
+
         c.repo_create_choices = [('hg.create.none', _('Disabled')),
                                  ('hg.create.repository', _('Enabled'))]
 
@@ -121,7 +126,9 @@ class PermissionsController(BaseController):
                     [x[0] for x in c.repo_group_create_choices],
                     [x[0] for x in c.user_group_create_choices],
                     [x[0] for x in c.fork_choices],
-                    [x[0] for x in c.register_choices])()
+                    [x[0] for x in c.register_choices],
+                    [x[0] for x in c.extern_activate_choices],
+            )()
 
             try:
                 form_result = _form.to_python(dict(request.POST))
@@ -193,6 +200,9 @@ class PermissionsController(BaseController):
 
                 if p.permission.permission_name.startswith('hg.register.'):
                     defaults['default_register'] = p.permission.permission_name
+
+                if p.permission.permission_name.startswith('hg.extern_activate.'):
+                    defaults['default_extern_activate'] = p.permission.permission_name
 
                 if p.permission.permission_name.startswith('hg.fork.'):
                     defaults['default_fork'] = p.permission.permission_name

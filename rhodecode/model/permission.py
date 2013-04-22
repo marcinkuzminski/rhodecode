@@ -117,7 +117,8 @@ class PermissionModel(BaseModel):
                                  'default_repo_create',
                                  #'default_repo_group_create', #not implemented yet
                                  'default_user_group_create',
-                                 'default_fork', 'default_register']:
+                                 'default_fork', 'default_register',
+                                 'default_extern_activate']:
                 p = _make_new(perm_user, form_result[def_perm_key])
                 self.sa.add(p)
 

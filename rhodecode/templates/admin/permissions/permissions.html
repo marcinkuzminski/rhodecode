@@ -110,6 +110,14 @@
                     ${h.select('default_register','',c.register_choices)}
                 </div>
              </div>
+             <div class="field">
+                <div class="label">
+                    <label for="default_extern_activate">${_('External auth account activation')}:</label>
+                </div>
+                <div class="select">
+                    ${h.select('default_extern_activate','',c.extern_activate_choices)}
+                </div>
+             </div>
             <div class="buttons">
               ${h.submit('save',_('Save'),class_="ui-btn large")}
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
