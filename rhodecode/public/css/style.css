@@ -1591,7 +1591,7 @@ div.form div.fields div.field div.button {
     border-radius: 4px 0px 0px 4px;
 }
 
-#content div.box div.pagination-wh > :last-child{
+#content div.box div.pagination-wh > :last-child {
     border-radius: 0px 4px 4px 0px;
     border-right: 1px solid #cfcfcf;
 }

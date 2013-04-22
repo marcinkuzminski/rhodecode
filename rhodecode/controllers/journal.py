@@ -29,21 +29,21 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.expression import func
 
-from webhelpers.paginate import Page
 from webhelpers.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 from webob.exc import HTTPBadRequest
 from pylons import request, tmpl_context as c, response, url
 from pylons.i18n.translation import _
 
-import rhodecode.lib.helpers as h
-from rhodecode.lib.auth import LoginRequired, NotAnonymous
-from rhodecode.lib.base import BaseController, render
+from rhodecode.controllers.admin.admin import _journal_filter
 from rhodecode.model.db import UserLog, UserFollowing, Repository, User
 from rhodecode.model.meta import Session
-from rhodecode.lib.utils2 import safe_int, AttributeDict
-from rhodecode.controllers.admin.admin import _journal_filter
 from rhodecode.model.repo import RepoModel
+import rhodecode.lib.helpers as h
+from rhodecode.lib.helpers import Page
+from rhodecode.lib.auth import LoginRequired, NotAnonymous
+from rhodecode.lib.base import BaseController, render
+from rhodecode.lib.utils2 import safe_int, AttributeDict
 from rhodecode.lib.compat import json
 
 log = logging.getLogger(__name__)

@@ -199,20 +199,7 @@
 
         var myDataTable = new YAHOO.widget.DataTable("watched_repos_list_wrap", myColumnDefs, myDataSource,{
           sortedBy:{key:"name",dir:"asc"},
-          paginator: new YAHOO.widget.Paginator({
-              rowsPerPage: 25,
-              alwaysVisible: false,
-              template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
-              pageLinks: 5,
-              containerClass: 'pagination-wh',
-              currentPageClass: 'pager_curpage',
-              pageLinkClass: 'pager_link',
-              nextPageLinkLabel: '&gt;',
-              previousPageLinkLabel: '&lt;',
-              firstPageLinkLabel: '&lt;&lt;',
-              lastPageLinkLabel: '&gt;&gt;',
-              containers:['watched-user-paginator']
-          }),
+          paginator: YUI_paginator(25, ['watched-user-paginator']),
 
           MSG_SORTASC:"${_('Click to sort ascending')}",
           MSG_SORTDESC:"${_('Click to sort descending')}",
@@ -302,20 +289,7 @@
 
         var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
           sortedBy:{key:"name",dir:"asc"},
-          paginator: new YAHOO.widget.Paginator({
-              rowsPerPage: 25,
-              alwaysVisible: false,
-              template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
-              pageLinks: 5,
-              containerClass: 'pagination-wh',
-              currentPageClass: 'pager_curpage',
-              pageLinkClass: 'pager_link',
-              nextPageLinkLabel: '&gt;',
-              previousPageLinkLabel: '&lt;',
-              firstPageLinkLabel: '&lt;&lt;',
-              lastPageLinkLabel: '&gt;&gt;',
-              containers:['user-paginator']
-          }),
+          paginator: YUI_paginator(25, ['user-paginator']),
 
           MSG_SORTASC:"${_('Click to sort ascending')}",
           MSG_SORTDESC:"${_('Click to sort descending')}",

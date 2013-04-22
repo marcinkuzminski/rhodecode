@@ -2207,6 +2207,289 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
 }
 
 
+
+
+var YUI_paginator = function(links_per_page, containers){
+    // my custom paginator
+    (function () {
+
+        var Paginator = YAHOO.widget.Paginator,
+            l         = YAHOO.lang,
+            setId     = YAHOO.util.Dom.generateId;
+
+        Paginator.ui.MyFirstPageLink = function (p) {
+            this.paginator = p;
+
+            p.subscribe('recordOffsetChange',this.update,this,true);
+            p.subscribe('rowsPerPageChange',this.update,this,true);
+            p.subscribe('totalRecordsChange',this.update,this,true);
+            p.subscribe('destroy',this.destroy,this,true);
+
+            // TODO: make this work
+            p.subscribe('firstPageLinkLabelChange',this.update,this,true);
+            p.subscribe('firstPageLinkClassChange',this.update,this,true);
+        };
+
+        Paginator.ui.MyFirstPageLink.init = function (p) {
+            p.setAttributeConfig('firstPageLinkLabel', {
+                value : 1,
+                validator : l.isString
+            });
+            p.setAttributeConfig('firstPageLinkClass', {
+                value : 'yui-pg-first',
+                validator : l.isString
+            });
+            p.setAttributeConfig('firstPageLinkTitle', {
+                value : 'First Page',
+                validator : l.isString
+            });
+        };
+
+        // Instance members and methods
+        Paginator.ui.MyFirstPageLink.prototype = {
+            current   : null,
+            leftmost_page: null,
+            rightmost_page: null,
+            link      : null,
+            span      : null,
+            dotdot    : null,
+            getPos    : function(cur_page, max_page, items){
+                var edge = parseInt(items / 2) + 1;
+                if (cur_page <= edge){
+                    var radius = Math.max(parseInt(items / 2), items - cur_page);
+                }
+                else if ((max_page - cur_page) < edge) {
+                    var radius = (items - 1) - (max_page - cur_page);
+                }
+                else{
+                    var radius = parseInt(items / 2);
+                }
+
+                var left = Math.max(1, (cur_page - (radius)))
+                var right = Math.min(max_page, cur_page + (radius))
+                return [left, cur_page, right]
+            },
+            render : function (id_base) {
+                var p      = this.paginator,
+                    c      = p.get('firstPageLinkClass'),
+                    label  = p.get('firstPageLinkLabel'),
+                    title  = p.get('firstPageLinkTitle');
+
+                this.link     = document.createElement('a');
+                this.span     = document.createElement();
+
+                var _pos = this.getPos(p.getCurrentPage(), p.getTotalPages(), 5);
+                this.leftmost_page = _pos[0];
+                this.rightmost_page = _pos[2];
+
+                setId(this.link, id_base + '-first-link');
+                this.link.href      = '#';
+                this.link.className = c;
+                this.link.innerHTML = label;
+                this.link.title     = title;
+                YAHOO.util.Event.on(this.link,'click',this.onClick,this,true);
+
+                setId(this.span, id_base + '-first-span');
+                this.span.className = c;
+                this.span.innerHTML = label;
+
+                this.current = p.getCurrentPage() > 1 ? this.link : this.span;
+                return this.current;
+            },
+            update : function (e) {
+                var p      = this.paginator;
+                var _pos   = this.getPos(p.getCurrentPage(), p.getTotalPages(), 5);
+                this.leftmost_page = _pos[0];
+                this.rightmost_page = _pos[2];
+
+                if (e && e.prevValue === e.newValue) {
+                    return;
+                }
+
+                var par = this.current ? this.current.parentNode : null;
+                if (this.leftmost_page > 1) {
+                    if (par && this.current === this.span) {
+                        par.replaceChild(this.link,this.current);
+                        this.current = this.link;
+                    }
+                } else {
+                    if (par && this.current === this.link) {
+                        par.replaceChild(this.span,this.current);
+                        this.current = this.span;
+                    }
+                }
+            },
+            destroy : function () {
+                YAHOO.util.Event.purgeElement(this.link);
+                this.current.parentNode.removeChild(this.current);
+                this.link = this.span = null;
+            },
+            onClick : function (e) {
+                YAHOO.util.Event.stopEvent(e);
+                this.paginator.setPage(1);
+            }
+        };
+
+        })();
+    (function () {
+
+        var Paginator = YAHOO.widget.Paginator,
+            l         = YAHOO.lang,
+            setId     = YAHOO.util.Dom.generateId;
+
+        Paginator.ui.MyLastPageLink = function (p) {
+            this.paginator = p;
+
+            p.subscribe('recordOffsetChange',this.update,this,true);
+            p.subscribe('rowsPerPageChange',this.update,this,true);
+            p.subscribe('totalRecordsChange',this.update,this,true);
+            p.subscribe('destroy',this.destroy,this,true);
+
+            // TODO: make this work
+            p.subscribe('lastPageLinkLabelChange',this.update,this,true);
+            p.subscribe('lastPageLinkClassChange', this.update,this,true);
+        };
+
+        Paginator.ui.MyLastPageLink.init = function (p) {
+            p.setAttributeConfig('lastPageLinkLabel', {
+                value : -1,
+                validator : l.isString
+            });
+            p.setAttributeConfig('lastPageLinkClass', {
+                value : 'yui-pg-last',
+                validator : l.isString
+            });
+            p.setAttributeConfig('lastPageLinkTitle', {
+                value : 'Last Page',
+                validator : l.isString
+            });
+
+        };
+
+        Paginator.ui.MyLastPageLink.prototype = {
+
+            current   : null,
+            leftmost_page: null,
+            rightmost_page: null,
+            link      : null,
+            span      : null,
+            dotdot    : null,
+            na        : null,
+            getPos    : function(cur_page, max_page, items){
+                var edge = parseInt(items / 2) + 1;
+                if (cur_page <= edge){
+                    var radius = Math.max(parseInt(items / 2), items - cur_page);
+                }
+                else if ((max_page - cur_page) < edge) {
+                    var radius = (items - 1) - (max_page - cur_page);
+                }
+                else{
+                    var radius = parseInt(items / 2);
+                }
+
+                var left = Math.max(1, (cur_page - (radius)))
+                var right = Math.min(max_page, cur_page + (radius))
+                return [left, cur_page, right]
+            },
+            render : function (id_base) {
+                var p      = this.paginator,
+                    c      = p.get('lastPageLinkClass'),
+                    label  = p.get('lastPageLinkLabel'),
+                    last   = p.getTotalPages(),
+                    title  = p.get('lastPageLinkTitle');
+
+                var _pos = this.getPos(p.getCurrentPage(), p.getTotalPages(), 5);
+                this.leftmost_page = _pos[0];
+                this.rightmost_page = _pos[2];
+
+                this.link = document.createElement('a');
+                this.span = document.createElement();
+                this.na   = this.span.cloneNode(false);
+
+                setId(this.link, id_base + '-last-link');
+                this.link.href      = '#';
+                this.link.className = c;
+                this.link.innerHTML = label;
+                this.link.title     = title;
+                YAHOO.util.Event.on(this.link,'click',this.onClick,this,true);
+
+                setId(this.span, id_base + '-last-span');
+                this.span.className = c;
+                this.span.innerHTML = label;
+
+                setId(this.na, id_base + '-last-na');
+
+                if (this.rightmost_page < p.getTotalPages()){
+                    this.current = this.link;
+                }
+                else{
+                    this.current = this.span;
+                }
+
+                this.current.innerHTML = p.getTotalPages();
+                return this.current;
+            },
+
+            update : function (e) {
+                var p      = this.paginator;
+
+                var _pos = this.getPos(p.getCurrentPage(), p.getTotalPages(), 5);
+                this.leftmost_page = _pos[0];
+                this.rightmost_page = _pos[2];
+
+                if (e && e.prevValue === e.newValue) {
+                    return;
+                }
+
+                var par   = this.current ? this.current.parentNode : null,
+                    after = this.link;
+                if (par) {
+
+                    // only show the last page if the rightmost one is
+                    // lower, so we don't have doubled entries at the end
+                    if (!(this.rightmost_page < p.getTotalPages())){
+                        after = this.span
+                    }
+
+                    if (this.current !== after) {
+                        par.replaceChild(after,this.current);
+                        this.current = after;
+                    }
+                }
+                this.current.innerHTML = this.paginator.getTotalPages();
+
+            },
+            destroy : function () {
+                YAHOO.util.Event.purgeElement(this.link);
+                this.current.parentNode.removeChild(this.current);
+                this.link = this.span = null;
+            },
+            onClick : function (e) {
+                YAHOO.util.Event.stopEvent(e);
+                this.paginator.setPage(this.paginator.getTotalPages());
+            }
+        };
+
+        })();
+
+    var pagi = new YAHOO.widget.Paginator({
+        rowsPerPage: links_per_page,
+        alwaysVisible: false,
+        template : "{PreviousPageLink} {MyFirstPageLink} {PageLinks} {MyLastPageLink} {NextPageLink}",
+        pageLinks: 5,
+        containerClass: 'pagination-wh',
+        currentPageClass: 'pager_curpage',
+        pageLinkClass: 'pager_link',
+        nextPageLinkLabel: '&gt;',
+        previousPageLinkLabel: '&lt;',
+        containers:containers
+    })
+
+    return pagi
+}
+
+
+
 // global hooks after DOM is loaded
 
 YUE.onDOMReady(function(){
