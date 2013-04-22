@@ -23,7 +23,7 @@ option in your .ini file, and define views that should have API access enabled.
 Following example shows how to enable API access to patch/diff raw file and archive
 in RhodeCode::
 
-    api_access_controllers_whitelist = 
+    api_access_controllers_whitelist =
         ChangesetController:changeset_patch,
         ChangesetController:changeset_raw,
         FilesController:raw,

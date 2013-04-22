@@ -125,7 +125,7 @@ of server behavior. There are 3 main section in the settings.
 
 General
 ~~~~~~~
-    
+
 `Use repository extra fields` option allows to set a custom fields for each
 repository in the system. Each new field consists of 3 attributes `field key`,
 `field label`, `field description`. Example usage of such fields would be to
@@ -155,5 +155,3 @@ will be turned into colored tags. Currently available tags are::
     [requires => Repo]
     [recommends => Repo]
     [see => URI]
-
-
