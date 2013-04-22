@@ -145,8 +145,10 @@ class CompareController(BaseRepoController):
                           for cs in scmutil.revrange(hgrepo, revs)]
 
         elif alias == 'git':
-            assert org_repo == other_repo, ('no support for compare for two '
-                                            'different repositories in git')
+            if org_repo != other_repo:
+                raise Exception('Comparing of different GIT repositories is not'
+                                'allowed. Got %s != %s' % (org_repo, other_repo))
+
             so, se = org_repo.run_git_command(
                 'log --reverse --pretty="format: %%H" -s -p %s..%s'
                     % (org_ref[1], other_ref[1])
