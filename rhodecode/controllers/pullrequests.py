@@ -314,12 +314,11 @@ class PullrequestsController(BaseRepoController):
         org_ref = 'rev:merge:%s' % _form['merge_rev']
         other_repo = _form['other_repo']
         other_ref = 'rev:ancestor:%s' % _form['ancestor_rev']
-        revisions = reversed(_form['revisions'])
+        revisions = [x for x in reversed(_form['revisions'])]
         reviewers = _form['review_members']
 
         title = _form['pullrequest_title']
         description = _form['pullrequest_desc']
-
         try:
             pull_request = PullRequestModel().create(
                 self.rhodecode_user.user_id, org_repo, org_ref, other_repo,
