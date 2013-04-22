@@ -68,6 +68,10 @@ lang = en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
 
+## perform a full repository scan on each server start, this should be
+## set to false after first startup, to allow faster server restarts.
+initial_repo_scan = true
+
 ## uncomment and set this path to use archive download cache
 #archive_cache_dir = /tmp/tarballcache
 

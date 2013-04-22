@@ -96,8 +96,9 @@ def load_environment(global_conf, app_conf, initial=False):
     init_model(sa_engine_db1)
 
     repos_path = make_ui('db').configitems('paths')[0][1]
-    repo2db_mapper(ScmModel().repo_scan(repos_path),
-                   remove_obsolete=False, install_git_hook=False)
+    if str2bool(config.get('initial_repo_scan', True)):
+        repo2db_mapper(ScmModel().repo_scan(repos_path),
+                       remove_obsolete=False, install_git_hook=False)
     set_available_permissions(config)
     config['base_path'] = repos_path
     set_rhodecode_config(config)
