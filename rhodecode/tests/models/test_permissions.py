@@ -351,6 +351,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
+                              'hg.extern_activate.auto',
                               'repository.read', 'group.read',
                               'usergroup.read']))
 
@@ -370,6 +371,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.none', 'hg.fork.none',
                               'hg.register.manual_activate',
+                              'hg.extern_activate.auto',
                               'repository.read', 'group.read',
                               'usergroup.read']))
 
@@ -397,6 +399,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.none', 'hg.fork.none',
                               'hg.register.manual_activate',
+                              'hg.extern_activate.auto',
                               'repository.read', 'group.read',
                               'usergroup.read']))
 
@@ -424,6 +427,7 @@ class TestPermissions(unittest.TestCase):
         self.assertEqual(u1_auth.permissions['global'],
                          set(['hg.create.repository', 'hg.fork.repository',
                               'hg.register.manual_activate',
+                              'hg.extern_activate.auto',
                               'repository.read', 'group.read',
                               'usergroup.read']))
 
