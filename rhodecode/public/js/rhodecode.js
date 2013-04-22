@@ -2206,11 +2206,9 @@ var MultiSelectWidget = function(selected_id, available_id, form_id){
     }
 }
 
-
-
-
+// custom paginator
 var YUI_paginator = function(links_per_page, containers){
-    // my custom paginator
+
     (function () {
 
         var Paginator = YAHOO.widget.Paginator,
@@ -2276,7 +2274,8 @@ var YUI_paginator = function(links_per_page, containers){
                     title  = p.get('firstPageLinkTitle');
 
                 this.link     = document.createElement('a');
-                this.span     = document.createElement();
+                this.span     = document.createElement('span');
+                YUD.setStyle(this.span, 'display', 'none');
 
                 var _pos = this.getPos(p.getCurrentPage(), p.getTotalPages(), 5);
                 this.leftmost_page = _pos[0];
@@ -2403,7 +2402,9 @@ var YUI_paginator = function(links_per_page, containers){
                 this.rightmost_page = _pos[2];
 
                 this.link = document.createElement('a');
-                this.span = document.createElement();
+                this.span = document.createElement('span');
+                YUD.setStyle(this.span, 'display', 'none');
+
                 this.na   = this.span.cloneNode(false);
 
                 setId(this.link, id_base + '-last-link');
