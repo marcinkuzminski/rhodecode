@@ -89,5 +89,6 @@ class NodeAlreadyRemovedError(CommitError):
 class ImproperArchiveTypeError(VCSError):
     pass
 
+
 class CommandError(VCSError):
     pass

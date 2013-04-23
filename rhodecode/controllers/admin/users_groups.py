@@ -33,7 +33,8 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
-from rhodecode.lib.exceptions import UserGroupsAssignedException
+from rhodecode.lib.exceptions import UserGroupsAssignedException,\
+    RepoGroupAssignmentError
 from rhodecode.lib.utils2 import safe_unicode, str2bool, safe_int
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
     HasUserGroupPermissionAnyDecorator, HasPermissionAnyDecorator
@@ -94,10 +95,7 @@ class UsersGroupsController(BaseController):
                                      key=lambda u: u[1].lower())
         repo_model = RepoModel()
         c.users_array = repo_model.get_users_js()
-
-        # commented out due to not now supporting assignment for user group
-        # on user group
-        c.users_groups_array = "[]"  # repo_model.get_users_groups_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
         c.available_permissions = config['available_permissions']
 
     def __load_defaults(self, user_group_id):
@@ -123,6 +121,10 @@ class UsersGroupsController(BaseController):
         # fill user group users
         for p in user_group.user_user_group_to_perm:
             data.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        for p in user_group.user_group_user_group_to_perm:
+            data.update({'g_perm_%s' % p.user_group.users_group_name:
                              p.permission.permission_name})
 
         return data
@@ -261,8 +263,12 @@ class UsersGroupsController(BaseController):
         form = UserGroupPermsForm()().to_python(request.POST)
 
         # set the permissions !
-        UserGroupModel()._update_permissions(user_group, form['perms_new'],
-                                            form['perms_updates'])
+        try:
+            UserGroupModel()._update_permissions(user_group, form['perms_new'],
+                                                 form['perms_updates'])
+        except RepoGroupAssignmentError:
+            h.flash(_('Target group cannot be the same'), category='error')
+            return redirect(url('edit_users_group', id=id))
         #TODO: implement this
         #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
         #              repo_name, self.ip_addr, self.sa)
@@ -294,7 +300,8 @@ class UsersGroupsController(BaseController):
                 UserGroupModel().revoke_user_permission(user_group=id,
                                                         user=obj_id)
             elif obj_type == 'user_group':
-                pass
+                UserGroupModel().revoke_users_group_permission(target_user_group=id,
+                                                               user_group=obj_id)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())

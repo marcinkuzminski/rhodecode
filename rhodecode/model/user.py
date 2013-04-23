@@ -39,7 +39,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
     UserToPerm, UserGroupRepoToPerm, UserGroupToPerm, UserGroupMember, \
     Notification, RepoGroup, UserRepoGroupToPerm, UserGroupRepoGroupToPerm, \
-    UserEmailMap, UserIpMap
+    UserEmailMap, UserIpMap, UserGroupUserGroupToPerm, UserGroup
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
 from rhodecode.model.meta import Session
@@ -570,7 +570,6 @@ class UserModel(BaseModel):
                 user.permissions[GLOBAL].add(perm.permission.permission_name)
         ## END GLOBAL PERMISSIONS
 
-
         #======================================================================
         # !! PERMISSIONS FOR REPOSITORIES !!
         #======================================================================
@@ -664,6 +663,28 @@ class UserModel(BaseModel):
         #======================================================================
         # !! PERMISSIONS FOR USER GROUPS !!
         #======================================================================
+        # user group for user group permissions
+        user_group_user_groups_perms = \
+         self.sa.query(UserGroupUserGroupToPerm, Permission, UserGroup)\
+         .join((UserGroup, UserGroupUserGroupToPerm.target_user_group_id
+                == UserGroup.users_group_id))\
+         .join((Permission, UserGroupUserGroupToPerm.permission_id
+                == Permission.permission_id))\
+         .join((UserGroupMember, UserGroupUserGroupToPerm.user_group_id
+                == UserGroupMember.users_group_id))\
+         .filter(UserGroupMember.user_id == uid)\
+         .all()
+
+        multiple_counter = collections.defaultdict(int)
+        for perm in user_group_user_groups_perms:
+            g_k = perm.UserGroupUserGroupToPerm.target_user_group.users_group_name
+            multiple_counter[g_k] += 1
+            p = perm.Permission.permission_name
+            cur_perm = user.permissions[UK][g_k]
+            if multiple_counter[g_k] > 1:
+                p = _choose_perm(p, cur_perm)
+            user.permissions[UK][g_k] = p
+
         #user explicit permission for user groups
         user_user_groups_perms = Permission.get_default_user_group_perms(uid)
         for perm in user_user_groups_perms:

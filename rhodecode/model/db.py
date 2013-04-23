@@ -639,6 +639,8 @@ class UserGroup(Base, BaseModel):
     users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
     users_group_repo_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
     user_user_group_to_perm = relationship('UserUserGroupToPerm ', cascade='all')
+    user_group_user_group_to_perm = relationship('UserGroupUserGroupToPerm ', primaryjoin="UserGroupUserGroupToPerm.target_user_group_id==UserGroup.users_group_id", cascade='all')
+
     user = relationship('User')
 
     def __unicode__(self):
@@ -1617,24 +1619,24 @@ class UserGroupRepoToPerm(Base, BaseModel):
         return n
 
     def __unicode__(self):
-        return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
+        return u'<UserGroupRepoToPerm:%s => %s >' % (self.users_group, self.repository)
 
 
-#TODO; not sure if this will be ever used
 class UserGroupUserGroupToPerm(Base, BaseModel):
     __tablename__ = 'user_group_user_group_to_perm'
     __table_args__ = (
-        UniqueConstraint('user_group_id', 'user_group_id', 'permission_id'),
+        UniqueConstraint('target_user_group_id', 'user_group_id', 'permission_id'),
+        CheckConstraint('target_user_group_id != user_group_id'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
          'mysql_charset': 'utf8'}
     )
-    user_user_group_to_perm_id = Column("user_user_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
-    target_user_group_id = Column("target_users_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    user_group_user_group_to_perm_id = Column("user_group_user_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    target_user_group_id = Column("target_user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
     permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
     user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
 
-    target_user_group = relationship('UserGroup', remote_side=target_user_group_id, primaryjoin='UserGroupUserGroupToPerm.target_user_group_id==UserGroup.users_group_id')
-    user_group = relationship('UserGroup', remote_side=user_group_id, primaryjoin='UserGroupUserGroupToPerm.user_group_id==UserGroup.users_group_id')
+    target_user_group = relationship('UserGroup', primaryjoin='UserGroupUserGroupToPerm.target_user_group_id==UserGroup.users_group_id')
+    user_group = relationship('UserGroup', primaryjoin='UserGroupUserGroupToPerm.user_group_id==UserGroup.users_group_id')
     permission = relationship('Permission')
 
     @classmethod
@@ -1647,7 +1649,7 @@ class UserGroupUserGroupToPerm(Base, BaseModel):
         return n
 
     def __unicode__(self):
-        return u'<UserGroup:%s => %s >' % (self.target_user_group, self.user_group)
+        return u'<UserGroupUserGroup:%s => %s >' % (self.target_user_group, self.user_group)
 
 
 class UserGroupToPerm(Base, BaseModel):

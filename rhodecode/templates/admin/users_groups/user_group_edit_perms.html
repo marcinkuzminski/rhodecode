@@ -40,6 +40,24 @@
         </tr>
     %endfor
 
+    ## USER GROUPS
+    %for g2p in c.users_group.user_group_user_group_to_perm:
+        <tr id="id${id(g2p.user_group.users_group_name)}">
+            <td>${h.radio('g_perm_%s' % g2p.user_group.users_group_name,'usergroup.none')}</td>
+            <td>${h.radio('g_perm_%s' % g2p.user_group.users_group_name,'usergroup.read')}</td>
+            <td>${h.radio('g_perm_%s' % g2p.user_group.users_group_name,'usergroup.write')}</td>
+            <td>${h.radio('g_perm_%s' % g2p.user_group.users_group_name,'usergroup.admin')}</td>
+            <td style="white-space: nowrap;">
+                <img class="perm-gravatar" src="${h.url('/images/icons/group.png')}"/>${g2p.user_group.users_group_name}
+            </td>
+            <td>
+                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${g2p.user_group.users_group_id}, 'user_group', '${'id%s'%id(g2p.user_group.users_group_name)}')">
+                ${_('revoke')}
+                </span>
+            </td>
+        </tr>
+    %endfor
+
     <%
     _tmpl = h.literal("""' \
         <td><input type="radio" value="usergroup.none" name="perm_new_member_{0}" id="perm_new_member_{0}"></td> \

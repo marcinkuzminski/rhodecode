@@ -62,6 +62,10 @@ class AttachedForksError(Exception):
     pass
 
 
+class RepoGroupAssignmentError(Exception):
+    pass
+
+
 class HTTPLockedRC(HTTPClientError):
     """
     Special Exception For locked Repos in RhodeCode, the return code can
