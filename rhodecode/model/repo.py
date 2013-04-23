@@ -41,8 +41,9 @@ from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UserGroup, UserGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
     RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import HasRepoPermissionAny
+from rhodecode.lib.auth import HasRepoPermissionAny, HasUserGroupPermissionAny
 from rhodecode.lib.exceptions import AttachedForksError
+from rhodecode.model.scm import UserGroupList
 
 log = logging.getLogger(__name__)
 
@@ -140,7 +141,9 @@ class RepoModel(BaseModel):
     def get_users_groups_js(self):
         users_groups = self.sa.query(UserGroup)\
             .filter(UserGroup.users_group_active == True).all()
-
+        users_groups = UserGroupList(users_groups, perm_set=['usergroup.read',
+                                                             'usergroup.write',
+                                                             'usergroup.admin'])
         return json.dumps([
             {
              'id': gr.users_group_id,
@@ -472,9 +475,12 @@ class RepoModel(BaseModel):
                     repo=repo, user=member, perm=perm
                 )
             else:
-                self.grant_users_group_permission(
-                    repo=repo, group_name=member, perm=perm
-                )
+                #check if we have permissions to alter this usergroup
+                if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
+                                             'usergroup.admin')(member):
+                    self.grant_users_group_permission(
+                        repo=repo, group_name=member, perm=perm
+                    )
         # set new permissions
         for member, perm, member_type in perms_new:
             if member_type == 'user':
@@ -482,9 +488,12 @@ class RepoModel(BaseModel):
                     repo=repo, user=member, perm=perm
                 )
             else:
-                self.grant_users_group_permission(
-                    repo=repo, group_name=member, perm=perm
-                )
+                #check if we have permissions to alter this usergroup
+                if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
+                                             'usergroup.admin')(member):
+                    self.grant_users_group_permission(
+                        repo=repo, group_name=member, perm=perm
+                    )
 
     def create_fork(self, form_data, cur_user):
         """

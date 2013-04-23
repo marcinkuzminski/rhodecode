@@ -169,6 +169,7 @@ class ReposGroupModel(BaseModel):
     def _update_permissions(self, repos_group, perms_new=None,
                             perms_updates=None, recursive=False):
         from rhodecode.model.repo import RepoModel
+        from rhodecode.lib.auth import HasUserGroupPermissionAny
         if not perms_new:
             perms_new = []
         if not perms_updates:
@@ -220,13 +221,19 @@ class ReposGroupModel(BaseModel):
                     _set_perm_user(obj, user=member, perm=perm)
                 ## set for user group
                 else:
-                    _set_perm_group(obj, users_group=member, perm=perm)
+                    #check if we have permissions to alter this usergroup
+                    if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
+                                                 'usergroup.admin')(member):
+                        _set_perm_group(obj, users_group=member, perm=perm)
             # set new permissions
             for member, perm, member_type in perms_new:
                 if member_type == 'user':
                     _set_perm_user(obj, user=member, perm=perm)
                 else:
-                    _set_perm_group(obj, users_group=member, perm=perm)
+                    #check if we have permissions to alter this usergroup
+                    if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
+                                                 'usergroup.admin')(member):
+                        _set_perm_group(obj, users_group=member, perm=perm)
             updates.append(obj)
             #if it's not recursive call
             # break the loop and don't proceed with other changes

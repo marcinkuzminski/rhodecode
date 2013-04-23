@@ -63,6 +63,7 @@ class UserGroupModel(BaseModel):
 
     def _update_permissions(self, user_group, perms_new=None,
                             perms_updates=None):
+        from rhodecode.lib.auth import HasUserGroupPermissionAny
         if not perms_new:
             perms_new = []
         if not perms_updates:
@@ -76,9 +77,12 @@ class UserGroupModel(BaseModel):
                     user_group=user_group, user=member, perm=perm
                 )
             else:
-                self.grant_users_group_permission(
-                    target_user_group=user_group, user_group=member, perm=perm
-                )
+                #check if we have permissions to alter this usergroup
+                if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
+                                             'usergroup.admin')(member):
+                    self.grant_users_group_permission(
+                        target_user_group=user_group, user_group=member, perm=perm
+                    )
         # set new permissions
         for member, perm, member_type in perms_new:
             if member_type == 'user':
@@ -86,9 +90,12 @@ class UserGroupModel(BaseModel):
                     user_group=user_group, user=member, perm=perm
                 )
             else:
-                self.grant_users_group_permission(
-                    target_user_group=user_group, user_group=member, perm=perm
-                )
+                #check if we have permissions to alter this usergroup
+                if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
+                                             'usergroup.admin')(member):
+                    self.grant_users_group_permission(
+                        target_user_group=user_group, user_group=member, perm=perm
+                    )
 
     def get(self, users_group_id, cache=False):
         return UserGroup.get(users_group_id)
