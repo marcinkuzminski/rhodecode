@@ -175,6 +175,7 @@ class RepoModel(BaseModel):
     def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
                           super_user_actions=False):
         _render = self._render_datatable
+        from pylons import tmpl_context as c
 
         def quick_menu(repo_name):
             return _render('quick_menu', repo_name)
@@ -198,7 +199,6 @@ class RepoModel(BaseModel):
                            cs_cache.get('message'))
 
         def desc(desc):
-            from pylons import tmpl_context as c
             if c.visual.stylify_metatags:
                 return h.urlify_text(h.desc_stylize(h.truncate(desc, 60)))
             else:
@@ -460,8 +460,8 @@ class RepoModel(BaseModel):
             enable_statistics, enable_locking, enable_downloads
         )
 
-    def _update_permissions(self, repo, perms_new=None,
-                            perms_updates=None):
+    def _update_permissions(self, repo, perms_new=None, perms_updates=None,
+                            check_perms=True):
         if not perms_new:
             perms_new = []
         if not perms_updates:
@@ -476,8 +476,8 @@ class RepoModel(BaseModel):
                 )
             else:
                 #check if we have permissions to alter this usergroup
-                if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
-                                             'usergroup.admin')(member):
+                req_perms = ('usergroup.read', 'usergroup.write', 'usergroup.admin')
+                if not check_perms or HasUserGroupPermissionAny(*req_perms)(member):
                     self.grant_users_group_permission(
                         repo=repo, group_name=member, perm=perm
                     )
@@ -489,8 +489,8 @@ class RepoModel(BaseModel):
                 )
             else:
                 #check if we have permissions to alter this usergroup
-                if HasUserGroupPermissionAny('usergroup.read', 'usergroup.write',
-                                             'usergroup.admin')(member):
+                req_perms = ('usergroup.read', 'usergroup.write', 'usergroup.admin')
+                if not check_perms or HasUserGroupPermissionAny(*req_perms)(member):
                     self.grant_users_group_permission(
                         repo=repo, group_name=member, perm=perm
                     )
