@@ -303,7 +303,8 @@
               <a class="menu_link admin childs" title="${_('Admin')}">
                 ${_('Admin')}
               </a>
-              ${admin_menu_simple(c.rhodecode_user.repository_groups_admin, c.rhodecode_user.user_groups_admin)}
+              ${admin_menu_simple(c.rhodecode_user.repository_groups_admin,
+                                  c.rhodecode_user.user_groups_admin or h.HasPermissionAny('hg.usergroup.create.true')())}
           </li>
           % endif
           ${usermenu()}
