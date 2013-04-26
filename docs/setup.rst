@@ -196,6 +196,13 @@ Here's a typical ldap setup::
  Last Name Attribute  = lastName
  E-mail Attribute     = mail
 
+If your user groups are placed in a Organisation Unit (OU) structure the Search Settings configuration differs::
+
+ Search settings
+ Base DN              = DC=host,DC=example,DC=org
+ LDAP Filter          = (&(memberOf=CN=your user group,OU=subunit,OU=unit,DC=host,DC=example,DC=org)(objectClass=user))
+ LDAP Search Scope    = SUBTREE
+
 .. _enable_ldap:
 
 Enable LDAP : required
