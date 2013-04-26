@@ -17,7 +17,7 @@ from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
 from rhodecode.lib.vcs.utils import safe_unicode
 from rhodecode.lib.vcs.utils import date_fromtimestamp
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from rhodecode.lib.utils2 import safe_int
+from rhodecode.lib.utils2 import safe_int, safe_str
 
 
 class GitChangeset(BaseChangeset):
@@ -289,15 +289,18 @@ class GitChangeset(BaseChangeset):
         which is generally not good. Should be replaced with algorithm
         iterating commits.
         """
-
         self._get_filectx(path)
+        cs_id = safe_str(self.id)
+        f_path = safe_str(path)
+
         if limit:
             cmd = 'log -n %s --pretty="format: %%H" -s -p %s -- "%s"' % (
-                      safe_int(limit, 0), self.id, path
+                      safe_int(limit, 0), cs_id, f_path
                    )
+
         else:
             cmd = 'log --pretty="format: %%H" -s -p %s -- "%s"' % (
-                      self.id, path
+                      cs_id, f_path
                    )
         so, se = self.repository.run_git_command(cmd)
         ids = re.findall(r'[0-9a-fA-F]{40}', so)

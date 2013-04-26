@@ -3,7 +3,7 @@
 <%def name="title(*args)">
     ${_('%s Files') % c.repo_name}
     %if hasattr(c,'file'):
-        &middot; ${c.file.path or '\\'}
+        &middot; ${h.safe_unicode(c.file.path) or '\\'}
     %endif
     &middot; ${c.rhodecode_name}
 </%def>
