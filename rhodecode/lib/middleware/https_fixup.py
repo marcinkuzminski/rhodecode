@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pylons.controllers.util import Request
 from rhodecode.lib.utils2 import str2bool
 
 
@@ -36,15 +35,15 @@ class HttpsFixup(object):
     def __call__(self, environ, start_response):
         self.__fixup(environ)
         debug = str2bool(self.config.get('debug'))
-        if str2bool(self.config.get('use_htsts')) and not debug:
-            req = Request(environ, self.application)
-            resp = req.get_response(self.application)
-            if environ['wsgi.url_scheme'] == 'https':
-                resp.headers['Strict-Transport-Security'] = \
-                    'max-age=8640000; includeSubDomains'
-            return resp(environ, start_response)
+        is_ssl = environ['wsgi.url_scheme'] == 'https'
 
-        return self.application(environ, start_response)
+        def custom_start_response(status, headers, exc_info=None):
+            if is_ssl and str2bool(self.config.get('use_htsts')) and not debug:
+                headers.append(('Strict-Transport-Security',
+                                'max-age=8640000; includeSubDomains'))
+            return start_response(status, headers, exc_info)
+
+        return self.application(environ, custom_start_response)
 
     def __fixup(self, environ):
         """
