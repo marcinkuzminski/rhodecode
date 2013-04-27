@@ -15,8 +15,9 @@ def get_current_revision(quiet=False):
         repopath = os.path.join(os.path.dirname(__file__), '..', '..')
         scm = get_scm(repopath)[0]
         repo = get_repo(path=repopath, alias=scm)
-        tip = repo.get_changeset()
-        return (tip.revision, tip.short_id)
+        wk_dir = repo.workdir
+        cur_rev = wk_dir.get_changeset()
+        return (cur_rev.revision, cur_rev.short_id)
     except Exception, err:
         if not quiet:
             print ("WARNING: Cannot retrieve rhodecode's revision. "

@@ -10,7 +10,8 @@ class MercurialWorkdir(BaseWorkdir):
         return self.repository._repo.dirstate.branch()
 
     def get_changeset(self):
-        return self.repository.get_changeset()
+        wk_dir_id = self.repository._repo[None].parents()[0].hex()
+        return self.repository.get_changeset(wk_dir_id)
 
     def checkout_branch(self, branch=None):
         if branch is None:
