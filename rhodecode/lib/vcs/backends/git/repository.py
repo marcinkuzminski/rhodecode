@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    vcs.backends.git
-    ~~~~~~~~~~~~~~~~
+    vcs.backends.git.repository
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Git backend implementation.
+    Git repository implementation.
 
     :created_on: Apr 8, 2010
     :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
@@ -12,34 +12,36 @@
 import os
 import re
 import time
-import posixpath
-import logging
-import traceback
 import urllib
 import urllib2
-from dulwich.repo import Repo, NotGitRepository
+import logging
+import posixpath
+import string
+
 from dulwich.objects import Tag
-from string import Template
+from dulwich.repo import Repo, NotGitRepository
 
-import rhodecode
+from rhodecode.lib.vcs import subprocessio
 from rhodecode.lib.vcs.backends.base import BaseRepository, CollectionGenerator
-from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError
-from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
-from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
-from rhodecode.lib.vcs.exceptions import RepositoryError
-from rhodecode.lib.vcs.exceptions import TagAlreadyExistError
-from rhodecode.lib.vcs.exceptions import TagDoesNotExistError
-from rhodecode.lib.vcs.utils import safe_unicode, makedate, date_fromtimestamp
-from rhodecode.lib.vcs.utils.lazy import LazyProperty, ThreadLocalLazyProperty
-from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
-from rhodecode.lib.vcs.utils.paths import abspath
-from rhodecode.lib.vcs.utils.paths import get_user_home
-from .workdir import GitWorkdir
-from .changeset import GitChangeset
-from .inmemory import GitInMemoryChangeset
-from .config import ConfigFile
-from rhodecode.lib import subprocessio
+from rhodecode.lib.vcs.conf import settings
 
+from rhodecode.lib.vcs.exceptions import (
+    BranchDoesNotExistError, ChangesetDoesNotExistError, EmptyRepositoryError,
+    RepositoryError, TagAlreadyExistError, TagDoesNotExistError
+)
+from rhodecode.lib.vcs.utils import safe_unicode, makedate, date_fromtimestamp
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
+from rhodecode.lib.vcs.utils.paths import abspath, get_user_home
+
+from rhodecode.lib.vcs.utils.hgcompat import (
+    hg_url, httpbasicauthhandler, httpdigestauthhandler
+)
+
+from .changeset import GitChangeset
+from .config import ConfigFile
+from .inmemory import GitInMemoryChangeset
+from .workdir import GitWorkdir
 
 log = logging.getLogger(__name__)
 
@@ -115,7 +117,7 @@ class GitRepository(BaseRepository):
             del gitenv['GIT_DIR']
         gitenv['GIT_CONFIG_NOGLOBAL'] = '1'
 
-        _git_path = rhodecode.CONFIG.get('git_path', 'git')
+        _git_path = settings.GIT_EXECUTABLE_PATH
         cmd = [_git_path] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
@@ -153,11 +155,6 @@ class GitRepository(BaseRepository):
 
         On failures it'll raise urllib2.HTTPError
         """
-        from mercurial.util import url as Url
-
-        # those authnadlers are patched for python 2.6.5 bug an
-        # infinit looping when given invalid resources
-        from mercurial.url import httpbasicauthhandler, httpdigestauthhandler
 
         # check first if it's not an local url
         if os.path.isdir(url) or url.startswith('file:'):
@@ -167,7 +164,7 @@ class GitRepository(BaseRepository):
             url = url[url.find('+') + 1:]
 
         handlers = []
-        test_uri, authinfo = Url(url).authinfo()
+        test_uri, authinfo = hg_url(url).authinfo()
         if not test_uri.endswith('info/refs'):
             test_uri = test_uri.rstrip('/') + '/info/refs'
         if authinfo:
@@ -224,8 +221,8 @@ class GitRepository(BaseRepository):
             self._repo.head()
         except KeyError:
             return []
-        rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
-                                                      '--all').strip()
+
+        rev_filter = _git_path = settings.GIT_REV_FILTER
         cmd = 'rev-list %s --reverse --date-order' % (rev_filter)
         try:
             so, se = self.run_git_command(cmd)
@@ -502,11 +499,10 @@ class GitRepository(BaseRepository):
             cmd_template += ' $branch_name'
             cmd_params['branch_name'] = branch_name
         else:
-            rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
-                                                          '--all').strip()
+            rev_filter = _git_path = settings.GIT_REV_FILTER
             cmd_template += ' %s' % (rev_filter)
 
-        cmd = Template(cmd_template).safe_substitute(**cmd_params)
+        cmd = string.Template(cmd_template).safe_substitute(**cmd_params)
         revs = self.run_git_command(cmd)[0].splitlines()
         start_pos = 0
         end_pos = len(revs)

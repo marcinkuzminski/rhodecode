@@ -7,7 +7,7 @@ import traceback
 from webob import Request, Response, exc
 
 import rhodecode
-from rhodecode.lib import subprocessio
+from rhodecode.lib.vcs import subprocessio
 
 log = logging.getLogger(__name__)
 

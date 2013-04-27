@@ -1,5 +1,6 @@
 from rhodecode.tests import *
 from rhodecode.model.db import UserGroup, UserGroupToPerm, Permission
+from rhodecode.model.meta import Session
 
 TEST_USER_GROUP = 'admins_test'
 
@@ -48,13 +49,13 @@ class TestAdminUsersGroupsController(TestController):
         self.checkSessionFlash(response,
                                'Created user group %s' % users_group_name)
 
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).one()
 
         response = self.app.delete(url('users_group', id=gr.users_group_id))
 
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).scalar()
 
@@ -119,7 +120,7 @@ class TestAdminUsersGroupsController(TestController):
         ugid = ug.users_group_id
         response = self.app.delete(url('users_group', id=ug.users_group_id))
         response = response.follow()
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).scalar()
 
@@ -192,7 +193,7 @@ class TestAdminUsersGroupsController(TestController):
         ugid = ug.users_group_id
         response = self.app.delete(url('users_group', id=ug.users_group_id))
         response = response.follow()
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).scalar()
 

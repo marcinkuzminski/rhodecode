@@ -5,11 +5,9 @@
 import re
 import difflib
 import logging
+import itertools
 
 from difflib import unified_diff
-from itertools import tee, imap
-
-from mercurial.match import match
 
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.nodes import FileNode, NodeError
@@ -65,7 +63,7 @@ def get_gitdiff(filenode_old, filenode_new, ignore_whitespace=True):
     new_raw_id = getattr(filenode_new.changeset, 'raw_id', '0' * 40)
 
     repo = filenode_new.changeset.repository
-    vcs_gitdiff = repo._get_diff(old_raw_id, new_raw_id, filenode_new.path,
+    vcs_gitdiff = repo.get_diff(old_raw_id, new_raw_id, filenode_new.path,
                                  ignore_whitespace)
 
     return vcs_gitdiff
@@ -97,10 +95,11 @@ class DiffProcessor(object):
 
         elif self.__format == 'gitdiff':
             udiff_copy = self.copy_iterator()
-            self.lines = imap(self.escaper, self._parse_gitdiff(udiff_copy))
+            self.lines = itertools.imap(self.escaper,
+                                        self._parse_gitdiff(udiff_copy))
         else:
             udiff_copy = self.copy_iterator()
-            self.lines = imap(self.escaper, udiff_copy)
+            self.lines = itertools.imap(self.escaper, udiff_copy)
 
         # Select a differ.
         if differ == 'difflib':
@@ -117,7 +116,7 @@ class DiffProcessor(object):
         an original as it's needed for repeating operations on
         this instance of DiffProcessor
         """
-        self.__udiff, iterator_copy = tee(self.__udiff)
+        self.__udiff, iterator_copy = itertools.tee(self.__udiff)
         return iterator_copy
 
     def _extract_rev(self, line1, line2):

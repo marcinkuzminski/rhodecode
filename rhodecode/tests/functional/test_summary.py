@@ -36,13 +36,16 @@ class TestSummaryController(TestController):
         response = self.app.get(url(controller='summary', action='index',
                                     repo_name=HG_REPO))
         response.mustcontain(
-            """var data = [["py", {"count": 42, "desc": ["Python"]}], """
-            """["rst", {"count": 11, "desc": ["Rst"]}], """
+            """var data = [["py", {"count": 68, "desc": ["Python"]}], """
+            """["rst", {"count": 16, "desc": ["Rst"]}], """
+            """["css", {"count": 2, "desc": ["Css"]}], """
             """["sh", {"count": 2, "desc": ["Bash"]}], """
-            """["makefile", {"count": 1, "desc": ["Makefile", "Makefile"]}],"""
-            """ ["cfg", {"count": 1, "desc": ["Ini"]}], """
-            """["css", {"count": 1, "desc": ["Css"]}], """
-            """["bat", {"count": 1, "desc": ["Batch"]}]];"""
+            """["yml", {"count": 1, "desc": ["Yaml"]}], """
+            """["makefile", {"count": 1, "desc": ["Makefile", "Makefile"]}], """
+            """["js", {"count": 1, "desc": ["Javascript"]}], """
+            """["cfg", {"count": 1, "desc": ["Ini"]}], """
+            """["ini", {"count": 1, "desc": ["Ini"]}], """
+            """["html", {"count": 1, "desc": ["EvoqueHtml", "Html"]}]];"""
         )
 
         # clone url...
@@ -118,5 +121,5 @@ class TestSummaryController(TestController):
     def _enable_stats(self):
         r = Repository.get_by_repo_name(HG_REPO)
         r.enable_statistics = True
-        self.Session.add(r)
-        self.Session.commit()
+        Session().add(r)
+        Session().commit()

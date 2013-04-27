@@ -1,7 +1,8 @@
 # encoding: UTF-8
 import sys
 import datetime
-from string import Template
+import string
+
 from rhodecode.lib.vcs.utils.filesize import filesizeformat
 from rhodecode.lib.vcs.utils.helpers import get_total_seconds
 
@@ -63,7 +64,7 @@ class ProgressBar(object):
     def get_template(self):
         separator = self.get_separator()
         elements = self.get_elements()
-        return Template(separator.join((('$%s' % e) for e in elements)))
+        return string.Template(separator.join((('$%s' % e) for e in elements)))
 
     def get_total_time(self, current_time=None):
         if current_time is None:

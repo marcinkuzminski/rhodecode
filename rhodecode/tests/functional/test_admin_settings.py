@@ -6,6 +6,7 @@ from rhodecode.tests import *
 from rhodecode.lib import helpers as h
 from rhodecode.model.user import UserModel
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.meta import Session
 
 
 class TestAdminSettingsController(TestController):
@@ -135,7 +136,7 @@ class TestAdminSettingsController(TestController):
         uname = 'testme'
         usr = UserModel().create_or_update(username=uname, password='qweqwe',
                                            email='testme@rhodecod.org')
-        self.Session().commit()
+        Session().commit()
         params = usr.get_api_data()
         user_id = usr.user_id
         self.log_user(username=uname, password='qweqwe')

@@ -30,7 +30,12 @@ from tempfile import _RandomNameSequence
 
 from paste.deploy import loadapp
 from paste.script.appinstall import SetupCommand
+
+import pylons
+import pylons.test
 from pylons import config, url
+from pylons.i18n.translation import _get_translator
+
 from routes.util import URLGenerator
 from webtest import TestApp
 from nose.plugins.skip import SkipTest
@@ -39,8 +44,6 @@ from rhodecode import is_windows
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User
 from rhodecode.tests.nose_parametrized import parameterized
-
-import pylons.test
 from rhodecode.lib.utils2 import safe_unicode, safe_str
 
 
@@ -149,7 +152,13 @@ class TestController(TestCase):
 
         self.app = TestApp(wsgiapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
-        self.Session = Session
+        pylons.app_globals._push_object(config['pylons.app_globals'])
+        pylons.config._push_object(config)
+
+        # Initialize a translator for tests that utilize i18n
+        translator = _get_translator(pylons.config.get('lang'))
+        pylons.translator._push_object(translator)
+
         self.index_location = config['app_conf']['index_dir']
         TestCase.__init__(self, *args, **kwargs)
 

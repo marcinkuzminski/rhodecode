@@ -15,11 +15,10 @@ import mimetypes
 
 from pygments import lexers
 
+from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.vcs.exceptions import NodeError, RemovedFileNodeError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils import safe_unicode
-from rhodecode.lib.vcs.exceptions import NodeError
-from rhodecode.lib.vcs.exceptions import RemovedFileNodeError
-from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 
 class NodeKind:
@@ -353,7 +352,6 @@ class FileNode(Node):
 
     @LazyProperty
     def mimetype_main(self):
-        return ['', '']
         return self.mimetype.split('/')[0]
 
     @LazyProperty

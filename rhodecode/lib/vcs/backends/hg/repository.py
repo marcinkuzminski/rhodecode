@@ -1,26 +1,46 @@
+# -*- coding: utf-8 -*-
+"""
+    vcs.backends.hg.repository
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Mercurial repository implementation.
+
+    :created_on: Apr 8, 2010
+    :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
+"""
+
 import os
 import time
-import datetime
 import urllib
 import urllib2
+import logging
+import datetime
+
 
 from rhodecode.lib.vcs.backends.base import BaseRepository, CollectionGenerator
-from .workdir import MercurialWorkdir
-from .changeset import MercurialChangeset
-from .inmemory import MercurialInMemoryChangeset
+from rhodecode.lib.vcs.conf import settings
 
-from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError, \
-    ChangesetDoesNotExistError, EmptyRepositoryError, RepositoryError, \
-    VCSError, TagAlreadyExistError, TagDoesNotExistError
-from rhodecode.lib.vcs.utils import author_email, author_name, date_fromtimestamp, \
-    makedate, safe_unicode
+from rhodecode.lib.vcs.exceptions import (
+    BranchDoesNotExistError, ChangesetDoesNotExistError, EmptyRepositoryError,
+    RepositoryError, VCSError, TagAlreadyExistError, TagDoesNotExistError
+)
+from rhodecode.lib.vcs.utils import (
+    author_email, author_name, date_fromtimestamp, makedate, safe_unicode
+)
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
+from rhodecode.lib.vcs.utils.hgcompat import (
+    ui, nullid, match, patch, diffopts, clone, get_contact, pull,
+    localrepository, RepoLookupError, Abort, RepoError, hex, scmutil, hg_url,
+    httpbasicauthhandler, httpdigestauthhandler
+)
 
-from rhodecode.lib.vcs.utils.hgcompat import ui, nullid, match, patch, \
-    diffopts, clone, get_contact, pull, localrepository, RepoLookupError, \
-    Abort, RepoError, hex, scmutil
+from .changeset import MercurialChangeset
+from .inmemory import MercurialInMemoryChangeset
+from .workdir import MercurialWorkdir
+
+log = logging.getLogger(__name__)
 
 
 class MercurialRepository(BaseRepository):
@@ -272,12 +292,6 @@ class MercurialRepository(BaseRepository):
         is valid or True if it's a local path
         """
 
-        from mercurial.util import url as Url
-
-        # those authnadlers are patched for python 2.6.5 bug an
-        # infinit looping when given invalid resources
-        from mercurial.url import httpbasicauthhandler, httpdigestauthhandler
-
         # check first if it's not an local url
         if os.path.isdir(url) or url.startswith('file:'):
             return True
@@ -286,7 +300,7 @@ class MercurialRepository(BaseRepository):
             url = url[url.find('+') + 1:]
 
         handlers = []
-        test_uri, authinfo = Url(url).authinfo()
+        test_uri, authinfo = hg_url(url).authinfo()
 
         if authinfo:
             #create a password manager
@@ -486,8 +500,10 @@ class MercurialRepository(BaseRepository):
             revisions = scmutil.revrange(self._repo, filter_)
         else:
             revisions = self.revisions
-        revs = reversed(revisions[start_pos:end_pos]) if reverse else \
-                revisions[start_pos:end_pos]
+
+        revs = revisions[start_pos:end_pos]
+        if reverse:
+            revs = reversed(revs)
 
         return CollectionGenerator(self, revs)
 

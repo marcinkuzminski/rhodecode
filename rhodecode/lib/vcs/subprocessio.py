@@ -24,7 +24,7 @@ If not, see <http://www.gnu.org/licenses/>.
 '''
 import os
 import subprocess
-from rhodecode.lib.compat import deque, Event, Thread, _bytes, _bytearray
+from rhodecode.lib.vcs.utils.compat import deque, Event, Thread, _bytes, _bytearray
 
 
 class StreamFeeder(Thread):

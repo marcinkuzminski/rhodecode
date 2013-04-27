@@ -18,7 +18,7 @@ from rhodecode.lib.vcs.utils import author_email, author_name
 from rhodecode.lib.vcs.utils.paths import get_user_home
 from rhodecode.lib.vcs.exceptions import VCSError
 
-from conf import TEST_HG_REPO, TEST_GIT_REPO, TEST_TMP_PATH
+from rhodecode.tests.vcs.conf import TEST_HG_REPO, TEST_GIT_REPO, TEST_TMP_PATH
 
 
 class PathsTest(unittest.TestCase):

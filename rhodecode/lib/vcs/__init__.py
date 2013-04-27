@@ -10,13 +10,14 @@
     :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
 """
 
-VERSION = (0, 3, 0, 'dev')
+VERSION = (0, 4, 0, 'dev')
 
 __version__ = '.'.join((str(each) for each in VERSION[:4]))
 
 __all__ = [
     'get_version', 'get_repo', 'get_backend',
-    'VCSError', 'RepositoryError', 'ChangesetError']
+    'VCSError', 'RepositoryError', 'ChangesetError'
+]
 
 import sys
 from rhodecode.lib.vcs.backends import get_repo, get_backend
@@ -28,6 +29,7 @@ def get_version():
     Returns shorter version (digit parts only) as string.
     """
     return '.'.join((str(each) for each in VERSION[:3]))
+
 
 def main(argv=None):
     if argv is None:

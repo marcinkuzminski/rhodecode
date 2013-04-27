@@ -8,7 +8,7 @@ from rhodecode.lib.vcs.exceptions import RepositoryError, VCSError, NodeDoesNotE
 from rhodecode.lib.vcs.nodes import NodeKind, FileNode, DirNode, NodeState
 from rhodecode.lib.vcs.utils.compat import unittest
 from rhodecode.tests.vcs.base import BackendTestMixin
-from conf import TEST_GIT_REPO, TEST_GIT_REPO_CLONE, get_new_dir
+from rhodecode.tests.vcs.conf import TEST_GIT_REPO, TEST_GIT_REPO_CLONE, get_new_dir
 
 
 class GitRepositoryTest(unittest.TestCase):

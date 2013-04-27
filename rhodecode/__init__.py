@@ -27,6 +27,19 @@ import sys
 import platform
 
 VERSION = (1, 7, 0, 'dev')
+BACKENDS = {
+    'hg': 'Mercurial repository',
+    'git': 'Git repository',
+}
+
+CELERY_ON = False
+CELERY_EAGER = False
+
+# link to config for pylons
+CONFIG = {}
+
+# Linked module for extensions
+EXTENSIONS = {}
 
 try:
     from rhodecode.lib import get_current_revision
@@ -45,23 +58,5 @@ __py_version__ = sys.version_info
 __author__ = 'Marcin Kuzminski'
 __url__ = 'http://rhodecode.org'
 
-PLATFORM_WIN = ('Windows')
-PLATFORM_OTHERS = ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'SunOS') #depracated
-
-is_windows = __platform__ in PLATFORM_WIN
+is_windows = __platform__ in ('Windows')
 is_unix = not is_windows
-
-
-BACKENDS = {
-    'hg': 'Mercurial repository',
-    'git': 'Git repository',
-}
-
-CELERY_ON = False
-CELERY_EAGER = False
-
-# link to config for pylons
-CONFIG = {}
-
-# Linked module for extensions
-EXTENSIONS = {}

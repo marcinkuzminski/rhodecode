@@ -150,7 +150,6 @@ class GitInMemoryChangeset(BaseInMemoryChangeset):
 
         ref = 'refs/heads/%s' % branch
         repo.refs[ref] = commit.id
-        repo.refs.set_symbolic_ref('HEAD', ref)
 
         # Update vcs repository object & recreate dulwich repo
         self.repository.revisions.append(commit.id)

@@ -10,16 +10,18 @@
 """
 
 import datetime
-from itertools import chain
+import itertools
+
 from rhodecode.lib.vcs.utils import author_name, author_email
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.helpers import get_dict_for_attrs
 from rhodecode.lib.vcs.conf import settings
 
-from rhodecode.lib.vcs.exceptions import ChangesetError, EmptyRepositoryError, \
-    NodeAlreadyAddedError, NodeAlreadyChangedError, NodeAlreadyExistsError, \
-    NodeAlreadyRemovedError, NodeDoesNotExistError, NodeNotChangedError, \
-    RepositoryError
+from rhodecode.lib.vcs.exceptions import (
+    ChangesetError, EmptyRepositoryError, NodeAlreadyAddedError,
+    NodeAlreadyChangedError, NodeAlreadyExistsError, NodeAlreadyRemovedError,
+    NodeDoesNotExistError, NodeNotChangedError, RepositoryError
+)
 
 
 class BaseRepository(object):
@@ -851,7 +853,7 @@ class BaseInMemoryChangeset(object):
         Returns generator of paths from nodes marked as added, changed or
         removed.
         """
-        for node in chain(self.added, self.changed, self.removed):
+        for node in itertools.chain(self.added, self.changed, self.removed):
             yield node.path
 
     def get_paths(self):

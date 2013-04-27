@@ -3,10 +3,11 @@ Tests so called "in memory changesets" commit API of vcs.
 """
 from __future__ import with_statement
 
-from rhodecode.lib import vcs
 import time
 import datetime
-from conf import SCM_TESTS, get_new_dir
+
+from rhodecode.lib import vcs
+from rhodecode.tests.vcs.conf import SCM_TESTS, get_new_dir
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
 from rhodecode.lib.vcs.exceptions import NodeAlreadyAddedError
 from rhodecode.lib.vcs.exceptions import NodeAlreadyExistsError

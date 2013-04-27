@@ -29,11 +29,11 @@ class TestHomeController(TestController):
                         r"""alt=\"Public repository\" src=\"/images/icons/lock_"""
                         r"""open.png\"/>""")
 
-        response.mustcontain(
-r"""<a title=\"Marcin Kuzminski &amp;lt;marcin@python-works.com&amp;gt;:\n\n"""
-r"""merge\" class=\"tooltip\" href=\"/vcs_test_hg/changeset/27cd5cce30c96924232"""
-r"""dffcd24178a07ffeb5dfc\">r173:27cd5cce30c9</a>"""
-)
+        response.mustcontain("""fixes issue with having custom format for git-log""")
+        response.mustcontain("""/%s/changeset/5f2c6ee195929b0be80749243c18121c9864a3b3""" % GIT_REPO)
+
+        response.mustcontain("""disable security checks on hg clone for travis""")
+        response.mustcontain("""/%s/changeset/96507bd11ecc815ebc6270fdf6db110928c09c1e""" % HG_REPO)
 
     def test_repo_summary_with_anonymous_access_disabled(self):
         anon = User.get_default_user()

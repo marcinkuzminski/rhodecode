@@ -14,10 +14,10 @@ class TestJournalController(TestController):
 
     def test_stop_following_repository(self):
         session = self.log_user()
-#        usr = self.Session.query(User).filter(User.username == 'test_admin').one()
-#        repo = self.Session.query(Repository).filter(Repository.repo_name == HG_REPO).one()
+#        usr = Session().query(User).filter(User.username == 'test_admin').one()
+#        repo = Session().query(Repository).filter(Repository.repo_name == HG_REPO).one()
 #
-#        followings = self.Session.query(UserFollowing)\
+#        followings = Session().query(UserFollowing)\
 #            .filter(UserFollowing.user == usr)\
 #            .filter(UserFollowing.follows_repository == repo).all()
 #

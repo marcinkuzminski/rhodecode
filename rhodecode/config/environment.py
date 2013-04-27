@@ -18,7 +18,7 @@ from rhodecode.config.routing import make_map
 from rhodecode.lib import helpers
 from rhodecode.lib.auth import set_available_permissions
 from rhodecode.lib.utils import repo2db_mapper, make_ui, set_rhodecode_config,\
-    load_rcextensions, check_git_version
+    load_rcextensions, check_git_version, set_vcs_config
 from rhodecode.lib.utils2 import engine_from_config, str2bool
 from rhodecode.lib.db_manage import DbManage
 from rhodecode.model import init_model
@@ -114,4 +114,6 @@ def load_environment(global_conf, app_conf, initial=False):
     # store config reference into our module to skip import magic of
     # pylons
     rhodecode.CONFIG.update(config)
+
+    set_vcs_config(rhodecode.CONFIG)
     return config

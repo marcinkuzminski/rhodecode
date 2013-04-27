@@ -1,8 +1,8 @@
 from __future__ import with_statement
 
 import datetime
-from base import BackendTestMixin
-from conf import SCM_TESTS
+from rhodecode.tests.vcs.base import BackendTestMixin
+from rhodecode.tests.vcs.conf import SCM_TESTS
 from rhodecode.lib.vcs.nodes import FileNode
 from rhodecode.lib.vcs.utils.compat import unittest
 

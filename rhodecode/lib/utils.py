@@ -374,6 +374,26 @@ def set_rhodecode_config(config):
         config[k] = v
 
 
+def set_vcs_config(config):
+    """
+    Patch VCS config with some RhodeCode specific stuff
+
+    :param config: rhodecode.CONFIG
+    """
+    import rhodecode
+    from rhodecode.lib.vcs import conf
+    from rhodecode.lib.utils2 import aslist
+    conf.settings.BACKENDS = {
+        'hg': 'rhodecode.lib.vcs.backends.hg.MercurialRepository',
+        'git': 'rhodecode.lib.vcs.backends.git.GitRepository',
+    }
+
+    conf.settings.GIT_EXECUTABLE_PATH = config.get('git_path', 'git')
+    conf.settings.GIT_REV_FILTER = config.get('git_rev_filter', '--all').strip()
+    conf.settings.DEFAULT_ENCODINGS = aslist(config.get('default_encoding',
+                                                        'utf8'), sep=',')
+
+
 def map_groups(path):
     """
     Given a full path to a repository, create all nested groups that this
@@ -739,6 +759,7 @@ def check_git_version():
     """
     from rhodecode import BACKENDS
     from rhodecode.lib.vcs.backends.git.repository import GitRepository
+    from rhodecode.lib.vcs.conf import settings
     from distutils.version import StrictVersion
 
     stdout, stderr = GitRepository._run_git_command('--version', _bare=True,
@@ -760,7 +781,8 @@ def check_git_version():
         to_old_git = True
 
     if 'git' in BACKENDS:
-        log.debug('GIT version detected: %s' % stdout)
+        log.debug('GIT executable: "%s" version detected: %s'
+                  % (settings.GIT_EXECUTABLE_PATH, stdout))
         if stderr:
             log.warning('Unable to detect git version, org error was: %r' % stderr)
         elif to_old_git:

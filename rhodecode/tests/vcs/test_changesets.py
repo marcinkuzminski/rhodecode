@@ -1,15 +1,19 @@
 from __future__ import with_statement
 
-from rhodecode.lib import vcs
 import datetime
-from base import BackendTestMixin
-from conf import SCM_TESTS
+from rhodecode.lib import vcs
+from rhodecode.tests.vcs.base import BackendTestMixin
+from rhodecode.tests.vcs.conf import SCM_TESTS
+
 from rhodecode.lib.vcs.backends.base import BaseChangeset
-from rhodecode.lib.vcs.nodes import FileNode, AddedFileNodesGenerator,\
+from rhodecode.lib.vcs.nodes import (
+    FileNode, AddedFileNodesGenerator,
     ChangedFileNodesGenerator, RemovedFileNodesGenerator
-from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError
-from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
-from rhodecode.lib.vcs.exceptions import RepositoryError
+)
+from rhodecode.lib.vcs.exceptions import (
+    BranchDoesNotExistError, ChangesetDoesNotExistError,
+    RepositoryError
+)
 from rhodecode.lib.vcs.utils.compat import unittest
 
 

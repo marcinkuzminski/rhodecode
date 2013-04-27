@@ -11,23 +11,15 @@ class TestChangelogController(TestController):
         response.mustcontain('''id="chg_20" class="container tablerow1"''')
         response.mustcontain(
             """<input class="changeset_range" """
-            """id="5e204e7583b9c8e7b93a020bd036564b1e731dae" """
-            """name="5e204e7583b9c8e7b93a020bd036564b1e731dae" """
+            """id="7b22a518347bb9bc19679f6af07cd0a61bfe16e7" """
+            """name="7b22a518347bb9bc19679f6af07cd0a61bfe16e7" """
             """type="checkbox" value="1" />"""
         )
-
+        #rev 640: code garden
         response.mustcontain(
-            """<span class="changeset_hash">r154:5e204e7583b9</span>"""
+            """<span class="changeset_hash">r640:0a4e54a44604</span>"""
         )
-
-        response.mustcontain("""Small update at simplevcs app""")
-
-#        response.mustcontain(
-#            """<div id="changed_total_5e204e7583b9c8e7b93a020bd036564b1e731dae" """
-#            """style="float:right;" class="changed_total tooltip" """
-#            """title="Affected number of files, click to show """
-#            """more details">3</div>"""
-#        )
+        response.mustcontain("""code garden""")
 
     def test_index_pagination_hg(self):
         self.log_user()
@@ -48,28 +40,14 @@ class TestChangelogController(TestController):
         # Test response after pagination...
         response.mustcontain(
             """<input class="changeset_range" """
-            """id="46ad32a4f974e45472a898c6b0acb600320579b1" """
-            """name="46ad32a4f974e45472a898c6b0acb600320579b1" """
+            """id="22baf968d547386b9516965ce89d189665003a31" """
+            """name="22baf968d547386b9516965ce89d189665003a31" """
             """type="checkbox" value="1" />"""
         )
 
         response.mustcontain(
-            """<span class="changeset_hash">r64:46ad32a4f974</span>"""
+            """<span class="changeset_hash">r539:22baf968d547</span>"""
         )
-
-#        response.mustcontain(
-#            """<div id="changed_total_46ad32a4f974e45472a898c6b0acb600320579b1" """
-#            """style="float:right;" class="changed_total tooltip" """
-#            """title="Affected number of files, click to show """
-#            """more details">21</div>"""
-#        )
-#
-#        response.mustcontain(
-#            """<a href="/%s/changeset/"""
-#            """46ad32a4f974e45472a898c6b0acb600320579b1" """
-#            """title="Merge with 2e6a2bf9356ca56df08807f4ad86d480da72a8f4">"""
-#            """46ad32a4f974</a>""" % HG_REPO
-#        )
 
     def test_index_git(self):
         self.log_user()
