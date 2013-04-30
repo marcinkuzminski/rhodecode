@@ -7,6 +7,7 @@
             <th class="left">${_('Date')}</th>
             <th class="left">${_('Author')}</th>
             <th class="left">${_('Revision')}</th>
+            <th class="left">${_('Compare')}</th>
         </tr>
     </thead>
     %for cnt,book in enumerate(c.repo_bookmarks.items()):
@@ -23,6 +24,10 @@
               <div>
                   <pre><a href="${h.url('files_home',repo_name=c.repo_name,revision=book[1].raw_id)}">r${book[1].revision}:${h.short_id(book[1].raw_id)}</a></pre>
               </div>
+            </td>
+            <td>
+                <input class="branch-compare" type="radio" name="compare_org" value="${book[0]}"/>
+                <input class="branch-compare" type="radio" name="compare_other" value="${book[0]}"/>
             </td>
         </tr>
     %endfor
