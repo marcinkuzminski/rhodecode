@@ -41,8 +41,9 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap,\
-    Permission
+    Permission, User
 from rhodecode.lib.compat import json
+from rhodecode.lib.exceptions import DefaultUserException
 
 log = logging.getLogger(__name__)
 
@@ -377,7 +378,10 @@ class ApiController(JSONRPCController):
         """
 
         result = []
-        for user in UserModel().get_all():
+        users_list = User.query().order_by(User.username)\
+                        .filter(User.username != User.DEFAULT_USER)\
+                        .all()
+        for user in users_list:
             result.append(user.get_api_data())
         return result
 
@@ -477,6 +481,9 @@ class ApiController(JSONRPCController):
                 msg='updated user ID:%s %s' % (user.user_id, user.username),
                 user=user.get_api_data()
             )
+        except DefaultUserException:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('editing default user is forbidden')
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to update user `%s`' % userid)

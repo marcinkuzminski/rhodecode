@@ -68,7 +68,9 @@ class UsersController(BaseController):
         """GET /users: All items in the collection"""
         # url('users')
 
-        c.users_list = User.query().order_by(User.username).all()
+        c.users_list = User.query().order_by(User.username)\
+                        .filter(User.username != User.DEFAULT_USER)\
+                        .all()
 
         users_data = []
         total_records = len(c.users_list)
