@@ -11,7 +11,7 @@ from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
-from rhodecode.model.db import Repository
+from rhodecode.model.db import Repository, User
 
 
 API_URL = '/_admin/api'
@@ -164,7 +164,9 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'get_users',)
         response = api_call(self, params)
         ret_all = []
-        for usr in UserModel().get_all():
+        _users = User.query().filter(User.username != User.DEFAULT_USER)\
+                             .order_by(User.username).all()
+        for usr in _users:
             ret = usr.get_api_data()
             ret_all.append(jsonify(ret))
         expected = ret_all
