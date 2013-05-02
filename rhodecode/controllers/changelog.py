@@ -36,7 +36,8 @@ from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.helpers import RepoPage
 from rhodecode.lib.compat import json
 from rhodecode.lib.graphmod import _colored, _dagwalker
-from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError
+from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError,\
+    EmptyRepositoryError
 from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
@@ -80,6 +81,9 @@ class ChangelogController(BaseRepoController):
             page_revisions = [x.raw_id for x in collection]
             c.comments = c.rhodecode_db_repo.get_comments(page_revisions)
             c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
+        except (EmptyRepositoryError), e:
+            h.flash(str(e), category='warning')
+            return redirect(url('summary_home', repo_name=c.repo_name))
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
             h.flash(str(e), category='error')
