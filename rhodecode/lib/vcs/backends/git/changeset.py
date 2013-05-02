@@ -29,7 +29,7 @@ class GitChangeset(BaseChangeset):
         self.repository = repository
 
         try:
-            commit = self.repository._repo.get_object(revision)
+            commit = self.repository._repo[revision]
             if isinstance(commit, objects.Tag):
                 revision = commit.object[1]
                 commit = self.repository._repo.get_object(commit.object[1])
@@ -39,7 +39,6 @@ class GitChangeset(BaseChangeset):
         self.id = self.raw_id
         self.short_id = self.raw_id[:12]
         self._commit = commit
-
         self._tree_id = commit.tree
         self._committer_property = 'committer'
         self._author_property = 'author'
@@ -47,10 +46,12 @@ class GitChangeset(BaseChangeset):
         self._date_tz_property = 'commit_timezone'
         self.revision = repository.revisions.index(revision)
 
-        self.message = safe_unicode(commit.message)
-
         self.nodes = {}
         self._paths = {}
+
+    @LazyProperty
+    def message(self):
+        return safe_unicode(self._commit.message)
 
     @LazyProperty
     def committer(self):

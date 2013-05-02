@@ -49,8 +49,10 @@ class WorkdirTestCaseMixin(BackendTestMixin):
             author=u'joe',
             branch='foobar',
         )
+        self.assertEqual(self.repo.workdir.get_branch(), self.default_branch)
 
     def test_get_changeset(self):
+        old_head = self.repo.get_changeset()
         self.imc.add(FileNode('docs/index.txt',
             content='Documentation\n'))
         head = self.imc.commit(
@@ -58,7 +60,13 @@ class WorkdirTestCaseMixin(BackendTestMixin):
             author=u'joe',
             branch='foobar',
         )
+        self.assertEqual(self.repo.workdir.get_branch(), self.default_branch)
+        self.repo.workdir.checkout_branch('foobar')
         self.assertEqual(self.repo.workdir.get_changeset(), head)
+
+        # Make sure that old head is still there after update to defualt branch
+        self.repo.workdir.checkout_branch(self.default_branch)
+        self.assertEqual(self.repo.workdir.get_changeset(), old_head)
 
     def test_checkout_branch(self):
         from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError

@@ -208,6 +208,14 @@ class ChangesetsTestCaseMixin(BackendTestMixin):
             self.assertGreaterEqual(cs.date, start_date)
 
     def test_get_changesets_respects_end_date(self):
+        start_date = datetime.datetime(2010, 1, 1)
+        end_date = datetime.datetime(2010, 2, 1)
+        for cs in self.repo.get_changesets(start_date=start_date,
+                                           end_date=end_date):
+            self.assertGreaterEqual(cs.date, start_date)
+            self.assertLessEqual(cs.date, end_date)
+
+    def test_get_changesets_respects_start_date_and_end_date(self):
         end_date = datetime.datetime(2010, 2, 1)
         for cs in self.repo.get_changesets(end_date=end_date):
             self.assertLessEqual(cs.date, end_date)
