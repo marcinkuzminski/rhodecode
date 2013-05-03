@@ -62,10 +62,10 @@ if sys.version_info < (2, 7):
     requirements.append("argparse")
 
 if is_windows:
-    requirements.append("mercurial==2.5.4")
+    requirements.append("mercurial==2.6.0")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial==2.5.4")
+    requirements.append("mercurial==2.6.0")
 
 
 dependency_links = [
