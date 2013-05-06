@@ -477,6 +477,27 @@ class BaseTestApi(object):
         UserModel().delete(usr.user_id)
         Session().commit()
 
+    def test_api_create_user_without_password(self):
+        username = 'test_new_api_user_passwordless'
+        email = username + "@foo.com"
+
+        id_, params = _build_data(self.apikey, 'create_user',
+                                  username=username,
+                                  email=email)
+        response = api_call(self, params)
+
+        usr = UserModel().get_by_username(username)
+        ret = dict(
+            msg='created new user `%s`' % username,
+            user=jsonify(usr.get_api_data())
+        )
+
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+
+        UserModel().delete(usr.user_id)
+        Session().commit()
+
     @mock.patch.object(UserModel, 'create_or_update', crash)
     def test_api_create_user_when_exception_happened(self):
 

@@ -407,7 +407,7 @@ class ApiController(JSONRPCController):
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_user(self, apiuser, username, email, password,
+    def create_user(self, apiuser, username, email, password=Optional(None),
                     firstname=Optional(None), lastname=Optional(None),
                     active=Optional(True), admin=Optional(False),
                     ldap_dn=Optional(None)):

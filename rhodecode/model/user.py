@@ -133,7 +133,7 @@ class UserModel(BaseModel):
             new_user.admin = admin
             # set password only if creating an user or password is changed
             if not edit or user.password != password:
-                new_user.password = get_crypt_password(password)
+                new_user.password = get_crypt_password(password) if password else None
                 new_user.api_key = generate_api_key(username)
             new_user.email = email
             new_user.active = active
