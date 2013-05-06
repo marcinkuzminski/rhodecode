@@ -244,7 +244,7 @@ ${self.context_bar('changelog')}
                     var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
                     var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
                     var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
-                    var url = url.replace('__BRANCH__',selected_branch);
+                    var url = url.replace('__BRANCH__', encodeURIComponent(selected_branch));
                     if(selected_branch != ''){
                         window.location = url;
                     }else{
