@@ -12,6 +12,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.db import Repository, User
+from rhodecode.lib.utils2 import  time_to_datetime
 
 
 API_URL = '/_admin/api'
@@ -291,8 +292,15 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   locked=True)
         response = api_call(self, params)
-        expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                   % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        expected = {
+            'repo': self.REPO,
+            'locked': True,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        }
+        expected['locked_since'] = json.loads(response.body)['result']['locked_since']
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_aquire_by_non_admin(self):
@@ -304,8 +312,15 @@ class BaseTestApi(object):
                                       repoid=repo_name,
                                       locked=True)
             response = api_call(self, params)
-            expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                       % (self.TEST_USER_LOGIN, repo_name, True))
+            expected = {
+                'repo': repo_name,
+                'locked': True,
+                'locked_since': None,
+                'locked_by': self.TEST_USER_LOGIN,
+                'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                        % (self.TEST_USER_LOGIN, repo_name, True))
+            }
+            expected['locked_since'] = json.loads(response.body)['result']['locked_since']
             self._compare_ok(id_, expected, given=response.body)
         finally:
             fixture.destroy_repo(repo_name)
@@ -339,8 +354,14 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   locked=False)
         response = api_call(self, params)
-        expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                   % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
+        expected = {
+            'repo': self.REPO,
+            'locked': False,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
+        }
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_aquire_optional_userid(self):
@@ -348,19 +369,33 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   locked=True)
         response = api_call(self, params)
-        expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                   % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        expected = {
+            'repo': self.REPO,
+            'locked': True,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        }
+        expected['locked_since'] = json.loads(response.body)['result']['locked_since']
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_optional_locked(self):
-        from rhodecode.lib.utils2 import  time_to_datetime
-        _locked_since = json.dumps(time_to_datetime(Repository\
-                                    .get_by_repo_name(self.REPO).locked[1]))
         id_, params = _build_data(self.apikey, 'lock',
                                   repoid=self.REPO)
         response = api_call(self, params)
-        expected = ('Repo `%s` locked by `%s`. Locked=`True`. Locked since: `%s`'
-                   % (self.REPO, TEST_USER_ADMIN_LOGIN, _locked_since))
+        time_ = json.loads(response.body)['result']['locked_since']
+        expected = {
+            'repo': self.REPO,
+            'locked': True,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('Repo `%s` locked by `%s`. '
+                            % (self.REPO,
+                               json.dumps(time_to_datetime(time_))))
+
+        }
+        expected['locked_since'] = time_
         self._compare_ok(id_, expected, given=response.body)
 
     @mock.patch.object(Repository, 'lock', crash)

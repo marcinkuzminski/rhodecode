@@ -1007,8 +1007,10 @@ class Repository(Base, BaseModel):
         return data
 
     @classmethod
-    def lock(cls, repo, user_id):
-        repo.locked = [user_id, time.time()]
+    def lock(cls, repo, user_id, lock_time=None):
+        if not lock_time:
+            lock_time = time.time()
+        repo.locked = [user_id, lock_time]
         Session().add(repo)
         Session().commit()
 

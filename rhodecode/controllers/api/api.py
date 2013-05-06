@@ -25,6 +25,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+import time
 import traceback
 import logging
 
@@ -265,27 +266,47 @@ class ApiController(JSONRPCController):
             lockobj = Repository.getlock(repo)
 
             if lockobj[0] is None:
-                return ('Repo `%s` not locked. Locked=`False`.'
-                        % (repo.repo_name))
+                _d = {
+                    'repo': repo.repo_name,
+                    'locked': False,
+                    'locked_since': None,
+                    'locked_by': None,
+                    'msg': 'Repo `%s` not locked.' % repo.repo_name
+                }
+                return _d
             else:
                 userid, time_ = lockobj
-                user = get_user_or_error(userid)
+                lock_user = get_user_or_error(userid)
+                _d = {
+                    'repo': repo.repo_name,
+                    'locked': True,
+                    'locked_since': time_,
+                    'locked_by': lock_user.username,
+                    'msg': ('Repo `%s` locked by `%s`. '
+                            % (repo.repo_name,
+                               json.dumps(time_to_datetime(time_))))
+                }
+                return _d
 
-                return ('Repo `%s` locked by `%s`. Locked=`True`. '
-                        'Locked since: `%s`'
-                    % (repo.repo_name, user.username,
-                       json.dumps(time_to_datetime(time_))))
-
+        # force locked state through a flag
         else:
             locked = str2bool(locked)
             try:
                 if locked:
-                    Repository.lock(repo, user.user_id)
+                    lock_time = time.time()
+                    Repository.lock(repo, user.user_id, lock_time)
                 else:
+                    lock_time = None
                     Repository.unlock(repo)
-
-                return ('User `%s` set lock state for repo `%s` to `%s`'
-                        % (user.username, repo.repo_name, locked))
+                _d = {
+                    'repo': repo.repo_name,
+                    'locked': locked,
+                    'locked_since': lock_time,
+                    'locked_by': user.username,
+                    'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                            % (user.username, repo.repo_name, locked))
+                }
+                return _d
             except Exception:
                 log.error(traceback.format_exc())
                 raise JSONRPCError(
