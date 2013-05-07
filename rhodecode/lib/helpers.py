@@ -1078,6 +1078,9 @@ def fancy_file_stats(stats):
 
     :param stats: two element list of added/deleted lines of code
     """
+    from rhodecode.lib.diffs import NEW_FILENODE, DEL_FILENODE, \
+        MOD_FILENODE, RENAMED_FILENODE, CHMOD_FILENODE, BIN_FILENODE
+
     def cgen(l_type, a_v, d_v):
         mapping = {'tr': 'top-right-rounded-corner-mid',
                    'tl': 'top-left-rounded-corner-mid',
@@ -1098,16 +1101,41 @@ def fancy_file_stats(stats):
         if l_type == 'd' and not a_v:
             return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
 
-    a, d = stats[0], stats[1]
+    a, d = stats['added'], stats['deleted']
     width = 100
 
-    if a == 'b':
+    if stats['binary']:
         #binary mode
-        b_d = '<div class="bin%s %s" style="width:100%%">%s</div>' % (d, cgen('a', a_v='', d_v=0), 'bin')
-        b_a = '<div class="bin1" style="width:0%%">%s</div>' % ('bin')
+        lbl = ''
+        bin_op = 1
+
+        if BIN_FILENODE in stats['ops']:
+            lbl = 'bin+'
+
+        if NEW_FILENODE in stats['ops']:
+            lbl += _('new file')
+            bin_op = NEW_FILENODE
+        elif MOD_FILENODE in stats['ops']:
+            lbl += _('mod')
+            bin_op = MOD_FILENODE
+        elif DEL_FILENODE in stats['ops']:
+            lbl += _('del')
+            bin_op = DEL_FILENODE
+        elif RENAMED_FILENODE in stats['ops']:
+            lbl += _('rename')
+            bin_op = RENAMED_FILENODE
+
+        #chmod can go with other operations
+        if CHMOD_FILENODE in stats['ops']:
+            _org_lbl = _('chmod')
+            lbl += _org_lbl if lbl.endswith('+') else '+%s' % _org_lbl
+
+        #import ipdb;ipdb.set_trace()
+        b_d = '<div class="bin bin%s %s" style="width:100%%">%s</div>' % (bin_op, cgen('a', a_v='', d_v=0), lbl)
+        b_a = '<div class="bin bin1" style="width:0%%"></div>'
         return literal('<div style="width:%spx">%s%s</div>' % (width, b_a, b_d))
 
-    t = stats[0] + stats[1]
+    t = stats['added'] + stats['deleted']
     unit = float(width) / (t or 1)
 
     # needs > 9% of width to be visible or 0 to be hidden

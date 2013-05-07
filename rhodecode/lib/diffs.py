@@ -128,6 +128,7 @@ DEL_FILENODE = 2
 MOD_FILENODE = 3
 RENAMED_FILENODE = 4
 CHMOD_FILENODE = 5
+BIN_FILENODE = 6
 
 
 class DiffLimitExceeded(Exception):
@@ -166,6 +167,7 @@ class DiffProcessor(object):
         (?:^deleted[ ]file[ ]mode[ ](?P<deleted_file_mode>.+)(?:\n|$))?
         (?:^index[ ](?P<a_blob_id>[0-9A-Fa-f]+)
             \.\.(?P<b_blob_id>[0-9A-Fa-f]+)[ ]?(?P<b_mode>.+)?(?:\n|$))?
+        (?:^(?P<bin_patch>GIT[ ]binary[ ]patch)(?:\n|$))?
         (?:^---[ ](a/(?P<a_file>.+)|/dev/null)(?:\n|$))?
         (?:^\+\+\+[ ](b/(?P<b_file>.+)|/dev/null)(?:\n|$))?
     """, re.VERBOSE | re.MULTILINE)
@@ -181,6 +183,7 @@ class DiffProcessor(object):
         (?:^deleted[ ]file[ ]mode[ ](?P<deleted_file_mode>.+)(?:\n|$))?
         (?:^index[ ](?P<a_blob_id>[0-9A-Fa-f]+)
             \.\.(?P<b_blob_id>[0-9A-Fa-f]+)[ ]?(?P<b_mode>.+)?(?:\n|$))?
+        (?:^(?P<bin_patch>GIT[ ]binary[ ]patch)(?:\n|$))?
         (?:^---[ ](a/(?P<a_file>.+)|/dev/null)(?:\n|$))?
         (?:^\+\+\+[ ](b/(?P<b_file>.+)|/dev/null)(?:\n|$))?
     """, re.VERBOSE | re.MULTILINE)
@@ -357,62 +360,84 @@ class DiffProcessor(object):
             head, diff = self._get_header(raw_diff)
 
             op = None
-            stats = None
-            msgs = []
+            stats = {
+                'added': 0,
+                'deleted': 0,
+                'binary': False,
+                'ops': {},
+            }
 
             if head['deleted_file_mode']:
                 op = 'D'
-                stats = ['b', DEL_FILENODE]
-                msgs.append('deleted file')
+                stats['binary'] = True
+                stats['ops'][DEL_FILENODE] = 'deleted file'
+
             elif head['new_file_mode']:
                 op = 'A'
-                stats = ['b', NEW_FILENODE]
-                msgs.append('new file %s' % head['new_file_mode'])
-            else:
+                stats['binary'] = True
+                stats['ops'][NEW_FILENODE] = 'new file %s' % head['new_file_mode']
+            else:  # modify operation, can be cp, rename, chmod
+                # CHMOD
                 if head['new_mode'] and head['old_mode']:
                     op = 'M'
-                    stats = ['b', CHMOD_FILENODE]
-                    msgs.append('modified file chmod %s => %s'
-                                  % (head['old_mode'], head['new_mode']))
+                    stats['binary'] = True
+                    stats['ops'][CHMOD_FILENODE] = ('modified file chmod %s => %s'
+                                        % (head['old_mode'], head['new_mode']))
+                # RENAME
                 if (head['rename_from'] and head['rename_to']
                       and head['rename_from'] != head['rename_to']):
                     op = 'M'
-                    stats = ['b', RENAMED_FILENODE] # might overwrite CHMOD_FILENODE
-                    msgs.append('file renamed from %s to %s'
-                                  % (head['rename_from'], head['rename_to']))
-                if op is None: # fall back: detect missed old style add or remove
+                    stats['binary'] = True
+                    stats['ops'][RENAMED_FILENODE] = ('file renamed from %s to %s'
+                                    % (head['rename_from'], head['rename_to']))
+
+                # FALL BACK: detect missed old style add or remove
+                if op is None:
                     if not head['a_file'] and head['b_file']:
                         op = 'A'
-                        stats = ['b', NEW_FILENODE]
-                        msgs.append('new file')
+                        stats['binary'] = True
+                        stats['ops'][NEW_FILENODE] = 'new file'
+
                     elif head['a_file'] and not head['b_file']:
                         op = 'D'
-                        stats = ['b', DEL_FILENODE]
-                        msgs.append('deleted file')
+                        stats['binary'] = True
+                        stats['ops'][DEL_FILENODE] = 'deleted file'
+
+                # it's not ADD not DELETE
                 if op is None:
                     op = 'M'
-                    stats = ['b', MOD_FILENODE]
+                    stats['binary'] = True
+                    stats['ops'][MOD_FILENODE] = 'modified file'
 
-            if head['a_file'] or head['b_file']: # a real diff
+            # a real non-binary diff
+            if head['a_file'] or head['b_file']:
                 try:
-                    chunks, stats = self._parse_lines(diff)
-                except DiffLimitExceeded:
-                    diff_container = lambda _diff: LimitedDiffContainer(
-                                                self.diff_limit,
-                                                self.cur_diff_size,
-                                                _diff)
-                    break
-            else: # GIT binary patch (or empty diff)
-                chunks = []
-                msgs.append('binary diff not shown') # or no diff because it was a rename or chmod or add/remove of empty file
+                    chunks, _stats = self._parse_lines(diff)
+                    stats['binary'] = False
+                    stats['added'] = _stats[0]
+                    stats['deleted'] = _stats[1]
+                    # explicit mark that it's a modified file
+                    if op == 'M':
+                        stats['ops'][MOD_FILENODE] = 'modified file'
 
-            if msgs:
-                chunks.insert(0, [{
-                    'old_lineno': '',
-                    'new_lineno': '',
-                    'action':     'binary',
-                    'line':       msg,
-                    } for msg in msgs])
+                except DiffLimitExceeded:
+                    diff_container = lambda _diff: \
+                        LimitedDiffContainer(self.diff_limit,
+                                            self.cur_diff_size, _diff)
+                    break
+            else:  # GIT binary patch (or empty diff)
+                # GIT Binary patch
+                if head['bin_patch']:
+                    stats['ops'][BIN_FILENODE] = 'binary diff not shown'
+                chunks = []
+
+            chunks.insert(0, [{
+                'old_lineno': '',
+                'new_lineno': '',
+                'action':     'context',
+                'line':       msg,
+                } for _op, msg in stats['ops'].iteritems()
+                  if _op not in [MOD_FILENODE]])
 
             _files.append({
                 'filename':         head['b_path'],

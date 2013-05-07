@@ -9,7 +9,11 @@ y)y@U((_~Lrb!=|_@`K?vV_&A58+!u-Gs6x+MGjBnI|qTLFnGH9xvX<aXaWHBd@WW0
 
 diff --git a/img/baseline-20px.png b/img/baseline-20px.png
 deleted file mode 100644
-Binary file img/baseline-20px.png has changed
+index f76dd238ade08917e6712764a16a22005a50573d..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+Hc$@<O00001
+
 diff --git a/index.html b/index.html
 --- a/index.html
 +++ b/index.html

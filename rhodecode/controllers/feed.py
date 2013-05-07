@@ -76,8 +76,8 @@ class FeedController(BaseRepoController):
             limited_diff = True
 
         for st in _parsed:
-            st.update({'added': st['stats'][0],
-                       'removed': st['stats'][1]})
+            st.update({'added': st['stats']['added'],
+                       'removed': st['stats']['deleted']})
             changes.append('\n %(operation)s %(filename)s '
                            '(%(added)s lines added, %(removed)s lines removed)'
                             % st)

@@ -213,13 +213,10 @@ class PullrequestsController(BaseRepoController):
 
         c.files = []
         c.changes = {}
-        c.lines_added = 0
-        c.lines_deleted = 0
         for f in _parsed:
             st = f['stats']
-            if st[0] != 'b':
-                c.lines_added += st[0]
-                c.lines_deleted += st[1]
+            c.lines_added += st['added']
+            c.lines_deleted += st['deleted']
             fid = h.FID('', f['filename'])
             c.files.append([fid, f['operation'], f['filename'], f['stats']])
             htmldiff = diff_processor.as_html(enable_comments=enable_comments,

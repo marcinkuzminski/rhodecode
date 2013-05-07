@@ -1,0 +1,10 @@
+diff --git a/README b/README.rst
+rename from README
+rename to README.rst
+--- a/README
++++ b/README.rst
+@@ -1,1 +1,4 @@
+ readme2
++line 1
++ line2
++

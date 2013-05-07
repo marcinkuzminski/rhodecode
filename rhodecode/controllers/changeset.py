@@ -265,9 +265,8 @@ class ChangesetController(BaseRepoController):
                     c.limited_diff = True
                 for f in _parsed:
                     st = f['stats']
-                    if st[0] != 'b':
-                        c.lines_added += st[0]
-                        c.lines_deleted += st[1]
+                    c.lines_added += st['added']
+                    c.lines_deleted += st['deleted']
                     fid = h.FID(changeset.raw_id, f['filename'])
                     diff = diff_processor.as_html(enable_comments=enable_comments,
                                                   parsed_lines=[f])

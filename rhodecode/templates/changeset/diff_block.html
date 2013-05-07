@@ -9,7 +9,6 @@
 </div>
 <div class="diff-container" id="${'diff-container-%s' % (id(change))}">
 %for FID,(cs1, cs2, change, path, diff, stats) in change.iteritems():
-    ##%if op !='removed':
     <div id="${FID}_target" style="clear:both;margin-top:25px"></div>
     <div id="${FID}" class="diffblock  margined comm">
         <div class="code-header">
@@ -38,7 +37,6 @@
             ${diff|n}
         </div>
     </div>
-    ##%endif
 %endfor
 </div>
 </%def>
