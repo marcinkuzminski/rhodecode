@@ -213,6 +213,9 @@ class PullrequestsController(BaseRepoController):
 
         c.files = []
         c.changes = {}
+        c.lines_added = 0
+        c.lines_deleted = 0
+
         for f in _parsed:
             st = f['stats']
             c.lines_added += st['added']
