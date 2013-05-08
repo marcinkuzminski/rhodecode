@@ -54,7 +54,12 @@ ${self.context_bar('changelog')}
                    %for cs in c.cs_ranges:
                        <div class="cur_cs">${h.link_to('r%s:%s' % (cs.revision,h.short_id(cs.raw_id)),h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
                       %for FID, (cs1, cs2, change, path, diff, stats) in c.changes[cs.raw_id].iteritems():
-                        <div class="cs_${change}">${h.link_to(h.safe_unicode(path),h.url.current(anchor=FID))}</div>
+                         <div class="cs_${change}">
+                               <div class="node">
+                                   ${h.link_to(h.safe_unicode(path),h.url.current(anchor=FID))}
+                               </div>
+                           <div class="changes">${h.fancy_file_stats(stats)}</div>
+                         </div>
                       %endfor
                    %endfor
             </div>
