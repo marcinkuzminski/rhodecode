@@ -28,7 +28,8 @@ def permissions_setup_func(group_name='g0', perm='group.read', recursive=True):
     perms_updates = [[test_u1_id, perm, 'user']]
     ReposGroupModel()._update_permissions(repos_group,
                                           perms_updates=perms_updates,
-                                          recursive=recursive)
+                                          recursive=recursive,
+                                          check_perms=False)
     Session().commit()
 
 
