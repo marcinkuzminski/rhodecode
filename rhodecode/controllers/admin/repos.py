@@ -492,6 +492,7 @@ class ReposController(BaseRepoController):
             ScmModel().pull_changes(repo_name, self.rhodecode_user.username)
             h.flash(_('Pulled from remote location'), category='success')
         except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during pull from remote location'),
                     category='error')
 
