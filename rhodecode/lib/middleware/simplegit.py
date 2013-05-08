@@ -222,8 +222,7 @@ class SimpleGit(BaseVCSController):
             # store the make_lock for later evaluation in hooks
             extras.update({'make_lock': make_lock,
                            'locked_by': locked_by})
-        # set the environ variables for this request
-        os.environ['RC_SCM_DATA'] = json.dumps(extras)
+
         fix_PATH()
         log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')
