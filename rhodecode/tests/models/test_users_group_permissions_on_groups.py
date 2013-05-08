@@ -1,5 +1,3 @@
-import os
-import unittest
 import functools
 from rhodecode.tests import *
 

@@ -1,5 +1,3 @@
-import os
-import unittest
 from rhodecode.tests import *
 from rhodecode.tests.fixture import Fixture
 from rhodecode.model.repos_group import ReposGroupModel
@@ -17,7 +15,7 @@ from rhodecode.model.permission import PermissionModel
 fixture = Fixture()
 
 
-class TestPermissions(unittest.TestCase):
+class TestPermissions(BaseTestCase):
     def __init__(self, methodName='runTest'):
         super(TestPermissions, self).__init__(methodName=methodName)
 

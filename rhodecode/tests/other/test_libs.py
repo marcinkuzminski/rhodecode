@@ -23,7 +23,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-import unittest
 import datetime
 import hashlib
 import mock
@@ -64,7 +63,7 @@ TEST_URLS += [
 ]
 
 
-class TestLibs(unittest.TestCase):
+class TestLibs(BaseTestCase):
 
     @parameterized.expand(TEST_URLS)
     def test_uri_filter(self, test_url, expected, expected_creds):

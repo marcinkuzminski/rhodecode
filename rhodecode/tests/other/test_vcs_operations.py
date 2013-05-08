@@ -151,7 +151,7 @@ def set_anonymous_access(enable=True):
 # TESTS
 #==============================================================================
 
-class TestVCSOperations(unittest.TestCase):
+class TestVCSOperations(BaseTestCase):
 
     @classmethod
     def setup_class(cls):

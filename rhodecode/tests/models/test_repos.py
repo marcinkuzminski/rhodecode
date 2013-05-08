@@ -1,5 +1,3 @@
-import os
-import unittest
 from rhodecode.tests import *
 
 from rhodecode.model.meta import Session
@@ -11,7 +9,7 @@ from rhodecode.lib.exceptions import AttachedForksError
 fixture = Fixture()
 
 
-class TestRepos(unittest.TestCase):
+class TestRepos(BaseTestCase):
 
     def setUp(self):
         pass

@@ -35,6 +35,7 @@ import pylons
 import pylons.test
 from pylons import config, url
 from pylons.i18n.translation import _get_translator
+from pylons.util import ContextObj
 
 from routes.util import URLGenerator
 from webtest import TestApp
@@ -55,7 +56,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     'parameterized', 'environ', 'url', 'get_new_dir', 'TestController',
-    'SkipTest', 'ldap_lib_installed',
+    'SkipTest', 'ldap_lib_installed', 'BaseTestCase', 'init_stack',
     'TESTS_TMP_PATH', 'HG_REPO', 'GIT_REPO', 'NEW_HG_REPO', 'NEW_GIT_REPO',
     'HG_FORK', 'GIT_FORK', 'TEST_USER_ADMIN_LOGIN', 'TEST_USER_ADMIN_PASS',
     'TEST_USER_REGULAR_LOGIN', 'TEST_USER_REGULAR_PASS',
@@ -144,23 +145,31 @@ def get_new_dir(title):
     return get_normalized_path(path)
 
 
-class TestController(TestCase):
+def init_stack(config=None):
+    if not config:
+        config = pylons.test.pylonsapp.config
+    url._push_object(URLGenerator(config['routes.map'], environ))
+    pylons.app_globals._push_object(config['pylons.app_globals'])
+    pylons.config._push_object(config)
+    pylons.tmpl_context._push_object(ContextObj())
+    # Initialize a translator for tests that utilize i18n
+    translator = _get_translator(pylons.config.get('lang'))
+    pylons.translator._push_object(translator)
+
+
+class BaseTestCase(TestCase):
+    def __init__(self, *args, **kwargs):
+        self.wsgiapp = pylons.test.pylonsapp
+        init_stack(self.wsgiapp.config)
+        TestCase.__init__(self, *args, **kwargs)
+
+
+class TestController(BaseTestCase):
 
     def __init__(self, *args, **kwargs):
-        wsgiapp = pylons.test.pylonsapp
-        config = wsgiapp.config
-
-        self.app = TestApp(wsgiapp)
-        url._push_object(URLGenerator(config['routes.map'], environ))
-        pylons.app_globals._push_object(config['pylons.app_globals'])
-        pylons.config._push_object(config)
-
-        # Initialize a translator for tests that utilize i18n
-        translator = _get_translator(pylons.config.get('lang'))
-        pylons.translator._push_object(translator)
-
+        BaseTestCase.__init__(self, *args, **kwargs)
+        self.app = TestApp(self.wsgiapp)
         self.index_location = config['app_conf']['index_dir']
-        TestCase.__init__(self, *args, **kwargs)
 
     def log_user(self, username=TEST_USER_ADMIN_LOGIN,
                  password=TEST_USER_ADMIN_PASS):

@@ -1,5 +1,3 @@
-import os
-import unittest
 from rhodecode.tests import *
 
 from rhodecode.model.db import User, Notification, UserNotification
@@ -9,7 +7,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.notification import NotificationModel
 
 
-class TestNotifications(unittest.TestCase):
+class TestNotifications(BaseTestCase):
 
     def __init__(self, methodName='runTest'):
         Session.remove()

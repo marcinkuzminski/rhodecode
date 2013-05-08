@@ -1,4 +1,3 @@
-import unittest
 from rhodecode.tests import *
 
 from rhodecode.model.db import User, UserGroup, UserGroupMember, UserEmailMap,\
@@ -12,7 +11,7 @@ from rhodecode.tests.fixture import Fixture
 fixture = Fixture()
 
 
-class TestUser(unittest.TestCase):
+class TestUser(BaseTestCase):
     def __init__(self, methodName='runTest'):
         Session.remove()
         super(TestUser, self).__init__(methodName=methodName)
@@ -87,7 +86,7 @@ class TestUser(unittest.TestCase):
         Session().commit()
 
 
-class TestUsers(unittest.TestCase):
+class TestUsers(BaseTestCase):
 
     def __init__(self, methodName='runTest'):
         super(TestUsers, self).__init__(methodName=methodName)

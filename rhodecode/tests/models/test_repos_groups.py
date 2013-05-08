@@ -1,5 +1,4 @@
 import os
-import unittest
 from sqlalchemy.exc import IntegrityError
 
 from rhodecode.tests import *
@@ -34,7 +33,7 @@ def _update_repo(name, **kwargs):
     return r
 
 
-class TestReposGroups(unittest.TestCase):
+class TestReposGroups(BaseTestCase):
 
     def setUp(self):
         self.g1 = fixture.create_group('test1', skip_if_exists=True)

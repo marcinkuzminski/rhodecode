@@ -1,6 +1,5 @@
 from __future__ import with_statement
 import os
-import unittest
 from rhodecode.tests import *
 from rhodecode.lib.diffs import DiffProcessor, NEW_FILENODE, DEL_FILENODE, \
     MOD_FILENODE, RENAMED_FILENODE, CHMOD_FILENODE, BIN_FILENODE
@@ -236,7 +235,7 @@ DIFF_FIXTURES = {
 }
 
 
-class DiffLibTest(unittest.TestCase):
+class DiffLibTest(BaseTestCase):
 
     @parameterized.expand([(x,) for x in DIFF_FIXTURES])
     def test_diff(self, diff_fixture):

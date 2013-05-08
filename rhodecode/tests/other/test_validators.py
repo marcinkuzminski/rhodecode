@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import unittest
 import formencode
 
 from rhodecode.tests import *
@@ -16,7 +15,7 @@ from rhodecode.tests.fixture import Fixture
 fixture = Fixture()
 
 
-class TestReposGroups(unittest.TestCase):
+class TestReposGroups(BaseTestCase):
 
     def setUp(self):
         pass
