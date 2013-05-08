@@ -657,12 +657,12 @@ def create_test_env(repos_test_path, config):
 
     #CREATE DEFAULT TEST REPOS
     cur_dir = dn(dn(abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
+    tar = tarfile.open(jn(cur_dir, 'tests', 'fixtures', "vcs_test_hg.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
 
     cur_dir = dn(dn(abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_git.tar.gz"))
+    tar = tarfile.open(jn(cur_dir, 'tests', 'fixtures', "vcs_test_git.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, GIT_REPO))
     tar.close()
 
