@@ -342,10 +342,10 @@ class SubprocessIOChunker(object):
             input_streamer.start()
             inputstream = input_streamer.output
 
+        _shell = kwargs.get('shell', True)
         if isinstance(cmd, (list, tuple)):
             cmd = ' '.join(cmd)
 
-        _shell = kwargs.get('shell') or True
         kwargs['shell'] = _shell
         _p = subprocess.Popen(cmd,
             bufsize=-1,
@@ -353,7 +353,7 @@ class SubprocessIOChunker(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             **kwargs
-            )
+        )
 
         bg_out = BufferedGenerator(_p.stdout, buffer_size, chunk_size, starting_values)
         bg_err = BufferedGenerator(_p.stderr, 16000, 1, bottomless=True)

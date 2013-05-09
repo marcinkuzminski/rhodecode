@@ -125,10 +125,11 @@ class GitRepository(BaseRepository):
         cmd = [_git_path] + _copts + cmd
         if _str_cmd:
             cmd = ' '.join(cmd)
+
         try:
             _opts = dict(
                 env=gitenv,
-                shell=False,
+                shell=True,
             )
             _opts.update(opts)
             p = subprocessio.SubprocessIOChunker(cmd, **_opts)
