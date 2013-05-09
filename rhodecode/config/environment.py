@@ -87,19 +87,14 @@ def load_environment(global_conf, app_conf, initial=False):
         if not int(os.environ.get('RC_WHOOSH_TEST_DISABLE', 0)):
             create_test_index(TESTS_TMP_PATH, config, True)
 
-    #check git version
-    check_git_version()
     DbManage.check_waitress()
     # MULTIPLE DB configs
     # Setup the SQLAlchemy database engine
     sa_engine_db1 = engine_from_config(config, 'sqlalchemy.db1.')
     init_model(sa_engine_db1)
 
-    repos_path = make_ui('db').configitems('paths')[0][1]
-    if str2bool(config.get('initial_repo_scan', True)):
-        repo2db_mapper(ScmModel().repo_scan(repos_path),
-                       remove_obsolete=False, install_git_hook=False)
     set_available_permissions(config)
+    repos_path = make_ui('db').configitems('paths')[0][1]
     config['base_path'] = repos_path
     set_rhodecode_config(config)
 
@@ -114,6 +109,12 @@ def load_environment(global_conf, app_conf, initial=False):
     # store config reference into our module to skip import magic of
     # pylons
     rhodecode.CONFIG.update(config)
-
     set_vcs_config(rhodecode.CONFIG)
+
+    #check git version
+    check_git_version()
+
+    if str2bool(config.get('initial_repo_scan', True)):
+        repo2db_mapper(ScmModel().repo_scan(repos_path),
+                       remove_obsolete=False, install_git_hook=False)
     return config
