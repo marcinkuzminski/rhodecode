@@ -21,3 +21,4 @@ syntax: regexp
 ^rc.*\.ini$
 ^fabfile.py
 ^\.rhodecode$
+^\.idea$
