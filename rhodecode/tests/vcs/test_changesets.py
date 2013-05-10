@@ -1,5 +1,6 @@
 from __future__ import with_statement
 
+import time
 import datetime
 from rhodecode.lib import vcs
 from rhodecode.tests.vcs.base import BackendTestMixin
@@ -12,9 +13,10 @@ from rhodecode.lib.vcs.nodes import (
 )
 from rhodecode.lib.vcs.exceptions import (
     BranchDoesNotExistError, ChangesetDoesNotExistError,
-    RepositoryError
+    RepositoryError, EmptyRepositoryError
 )
 from rhodecode.lib.vcs.utils.compat import unittest
+from rhodecode.tests.vcs.conf import get_new_dir
 
 
 class TestBaseChangeset(unittest.TestCase):
@@ -196,6 +198,14 @@ class ChangesetsTestCaseMixin(BackendTestMixin):
     def test_get_changesets_numerical_id_respects_both_start_and_end(self):
         changesets = list(self.repo.get_changesets(start=2, end=3))
         self.assertEqual(len(changesets), 2)
+
+    def test_get_changesets_on_empty_repo_raises_EmptyRepository_error(self):
+        Backend = self.get_backend()
+        repo_path = get_new_dir(str(time.time()))
+        repo = Backend(repo_path, create=True)
+
+        with self.assertRaises(EmptyRepositoryError):
+            list(repo.get_changesets(start='foobar'))
 
     def test_get_changesets_includes_end_changeset(self):
         second_id = self.repo.revisions[1]

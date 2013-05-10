@@ -78,7 +78,7 @@ class MercurialRepository(BaseRepository):
     @property
     def _empty(self):
         """
-        Checks if repository is empty without any changesets
+        Checks if repository is empty ie. without any changesets
         """
         # TODO: Following raises errors when using InMemoryChangeset...
         # return len(self._repo.changelog) == 0

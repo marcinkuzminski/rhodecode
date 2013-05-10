@@ -81,6 +81,18 @@ class GitRepository(BaseRepository):
         except KeyError:
             return None
 
+    @property
+    def _empty(self):
+        """
+        Checks if repository is empty ie. without any changesets
+        """
+
+        try:
+            self.revisions[0]
+        except (KeyError, IndexError):
+            return True
+        return False
+
     @LazyProperty
     def revisions(self):
         """
@@ -250,9 +262,7 @@ class GitRepository(BaseRepository):
 
         is_null = lambda o: len(o) == revision.count('0')
 
-        try:
-            self.revisions[0]
-        except (KeyError, IndexError):
+        if self._empty:
             raise EmptyRepositoryError("There are no changesets yet")
 
         if revision in (None, '', 'tip', 'HEAD', 'head', -1):
@@ -492,6 +502,11 @@ class GitRepository(BaseRepository):
         if branch_name and branch_name not in self.branches:
             raise BranchDoesNotExistError("Branch '%s' not found" \
                                           % branch_name)
+        # actually we should check now if it's not an empty repo to not spaw
+        # subprocess commands
+        if self._empty:
+            raise EmptyRepositoryError("There are no changesets yet")
+
         # %H at format means (full) commit hash, initial hashes are retrieved
         # in ascending date order
         cmd_template = 'log --date-order --reverse --pretty=format:"%H"'
