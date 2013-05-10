@@ -148,14 +148,14 @@ class HgRepositoryGetDiffTest(RepositoryGetDiffTest, unittest.TestCase):
     def test_initial_commit_diff(self):
         initial_rev = self.repo.revisions[0]
         self.assertEqual(self.repo.get_diff(self.repo.EMPTY_CHANGESET, initial_rev), '''diff --git a/foobar b/foobar
-new file mode 100755
+new file mode 100644
 --- /dev/null
 +++ b/foobar
 @@ -0,0 +1,1 @@
 +foobar
 \ No newline at end of file
 diff --git a/foobar2 b/foobar2
-new file mode 100755
+new file mode 100644
 --- /dev/null
 +++ b/foobar2
 @@ -0,0 +1,1 @@
@@ -174,7 +174,7 @@ new file mode 100755
 +FOOBAR
 \ No newline at end of file
 diff --git a/foobar3 b/foobar3
-new file mode 100755
+new file mode 100644
 --- /dev/null
 +++ b/foobar3
 @@ -0,0 +1,1 @@
@@ -185,7 +185,7 @@ new file mode 100755
     def test_third_changeset_diff(self):
         revs = self.repo.revisions
         self.assertEqual(self.repo.get_diff(revs[1], revs[2]), '''diff --git a/foobar b/foobar
-deleted file mode 100755
+deleted file mode 100644
 --- a/foobar
 +++ /dev/null
 @@ -1,1 +0,0 @@
