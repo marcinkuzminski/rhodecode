@@ -418,6 +418,7 @@ class FileNode(Node):
         """Returns filenode extension"""
         return self.name.split('.')[-1]
 
+    @property
     def is_executable(self):
         """
         Returns ``True`` if file has executable flag turned on.
