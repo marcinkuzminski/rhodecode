@@ -496,9 +496,9 @@ class ScmModel(BaseModel):
         # proper backend should then translate that into required type
         message = safe_unicode(message)
         author = safe_unicode(author)
-        m = IMC(repo)
-        m.change(FileNode(path, content))
-        tip = m.commit(message=message,
+        imc = IMC(repo)
+        imc.change(FileNode(path, content, mode=cs.get_file_mode(f_path)))
+        tip = imc.commit(message=message,
                        author=author,
                        parents=[cs], branch=cs.branch)
 
