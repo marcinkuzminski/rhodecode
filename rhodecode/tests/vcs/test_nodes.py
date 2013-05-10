@@ -140,13 +140,13 @@ class NodeBasicTest(unittest.TestCase):
 
     def test_file_node_is_executable(self):
         node = FileNode('foobar', 'empty... almost', mode=0100755)
-        self.assertTrue(node.is_executable())
+        self.assertTrue(node.is_executable)
 
         node = FileNode('foobar', 'empty... almost', mode=0100500)
-        self.assertTrue(node.is_executable())
+        self.assertTrue(node.is_executable)
 
         node = FileNode('foobar', 'empty... almost', mode=0100644)
-        self.assertFalse(node.is_executable())
+        self.assertFalse(node.is_executable)
 
     def test_mimetype(self):
         py_node = FileNode('test.py')
