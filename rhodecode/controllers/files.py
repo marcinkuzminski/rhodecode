@@ -303,7 +303,7 @@ class FilesController(BaseRepoController):
             first_line = sl[0] if sl else ''
             # modes:  0 - Unix, 1 - Mac, 2 - DOS
             mode = detect_mode(first_line, 0)
-            content = convert_line_endings(r_post.get('content'), mode)
+            content = convert_line_endings(r_post.get('content', ''), mode)
 
             message = r_post.get('message') or c.default_message
             author = self.rhodecode_user.full_contact
@@ -352,11 +352,11 @@ class FilesController(BaseRepoController):
 
         if r_post:
             unix_mode = 0
-            content = convert_line_endings(r_post.get('content'), unix_mode)
+            content = convert_line_endings(r_post.get('content', ''), unix_mode)
 
             message = r_post.get('message') or c.default_message
             filename = r_post.get('filename')
-            location = r_post.get('location')
+            location = r_post.get('location', '')
             file_obj = r_post.get('upload_file', None)
 
             if file_obj is not None and hasattr(file_obj, 'filename'):

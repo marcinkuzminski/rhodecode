@@ -1,6 +1,10 @@
+import os
 from rhodecode.tests import *
 from rhodecode.model.db import Repository
 from rhodecode.model.meta import Session
+from rhodecode.tests.fixture import Fixture
+
+fixture = Fixture()
 
 ARCHIVE_SPECS = {
     '.tar.bz2': ('application/x-bzip2', 'tbz2', ''),
@@ -442,26 +446,290 @@ removed extra unicode conversion in diff.</div>
         )
         response.mustcontain("vcs/web/simplevcs/views/repository.py")
 
+    #HG - ADD FILE
     def test_add_file_view_hg(self):
         self.log_user()
         response = self.app.get(url('files_add_home',
                                       repo_name=HG_REPO,
                                       revision='tip', f_path='/'))
 
+    def test_add_file_into_hg_missing_content(self):
+        self.log_user()
+        response = self.app.post(url('files_add_home',
+                                      repo_name=HG_REPO,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    ''
+                                 },
+                                 status=302)
+
+        self.checkSessionFlash(response, 'No content')
+
+    def test_add_file_into_hg_missing_filename(self):
+        self.log_user()
+        response = self.app.post(url('files_add_home',
+                                      repo_name=HG_REPO,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "foo"
+                                 },
+                                 status=302)
+
+        self.checkSessionFlash(response, 'No filename')
+
+    @parameterized.expand([
+        ('/abs', 'foo'),
+        ('../rel', 'foo'),
+        ('file/../foo', 'foo'),
+    ])
+    def test_add_file_into_hg_bad_filenames(self, location, filename):
+        self.log_user()
+        response = self.app.post(url('files_add_home',
+                                      repo_name=HG_REPO,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "foo",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+
+        self.checkSessionFlash(response, 'Location must be relative path and must not contain .. in path')
+
+    @parameterized.expand([
+        (1, '', 'foo.txt'),
+        (2, 'dir', 'foo.rst'),
+        (3, 'rel/dir', 'foo.bar'),
+    ])
+    def test_add_file_into_hg(self, cnt, location, filename):
+        self.log_user()
+        repo = fixture.create_repo('commit-test-%s' % cnt, repo_type='hg')
+        response = self.app.post(url('files_add_home',
+                                      repo_name=repo.repo_name,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "foo",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+        try:
+            self.checkSessionFlash(response, 'Successfully committed to %s'
+                                   % os.path.join(location, filename))
+        finally:
+            fixture.destroy_repo(repo.repo_name)
+
+    ##GIT - ADD FILE
     def test_add_file_view_git(self):
         self.log_user()
         response = self.app.get(url('files_add_home',
                                       repo_name=GIT_REPO,
                                       revision='tip', f_path='/'))
 
+    def test_add_file_into_git_missing_content(self):
+        self.log_user()
+        response = self.app.post(url('files_add_home',
+                                      repo_name=GIT_REPO,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    ''
+                                 },
+                                 status=302)
+
+        self.checkSessionFlash(response, 'No content')
+
+    def test_add_file_into_git_missing_filename(self):
+        self.log_user()
+        response = self.app.post(url('files_add_home',
+                                      repo_name=GIT_REPO,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "foo"
+                                 },
+                                 status=302)
+
+        self.checkSessionFlash(response, 'No filename')
+
+    @parameterized.expand([
+        ('/abs', 'foo'),
+        ('../rel', 'foo'),
+        ('file/../foo', 'foo'),
+    ])
+    def test_add_file_into_git_bad_filenames(self, location, filename):
+        self.log_user()
+        response = self.app.post(url('files_add_home',
+                                      repo_name=GIT_REPO,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "foo",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+
+        self.checkSessionFlash(response, 'Location must be relative path and must not contain .. in path')
+
+    @parameterized.expand([
+        (1, '', 'foo.txt'),
+        (2, 'dir', 'foo.rst'),
+        (3, 'rel/dir', 'foo.bar'),
+    ])
+    def test_add_file_into_git(self, cnt, location, filename):
+        self.log_user()
+        repo = fixture.create_repo('commit-test-%s' % cnt, repo_type='git')
+        response = self.app.post(url('files_add_home',
+                                      repo_name=repo.repo_name,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "foo",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+        try:
+            self.checkSessionFlash(response, 'Successfully committed to %s'
+                                   % os.path.join(location, filename))
+        finally:
+            fixture.destroy_repo(repo.repo_name)
+
+    #HG - EDIT
     def test_edit_file_view_hg(self):
         self.log_user()
         response = self.app.get(url('files_edit_home',
                                       repo_name=HG_REPO,
                                       revision='tip', f_path='vcs/nodes.py'))
 
+    def test_edit_file_view_not_on_branch_hg(self):
+        self.log_user()
+        repo = fixture.create_repo('test-edit-repo', repo_type='hg')
+
+        ## add file
+        location = 'vcs'
+        filename = 'nodes.py'
+        response = self.app.post(url('files_add_home',
+                                      repo_name=repo.repo_name,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "def py():\n print 'hello'\n",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+        response.follow()
+        try:
+            self.checkSessionFlash(response, 'Successfully committed to %s'
+                                   % os.path.join(location, filename))
+            response = self.app.get(url('files_edit_home',
+                                          repo_name=repo.repo_name,
+                                          revision='tip', f_path='vcs/nodes.py'),
+                                    status=302)
+            self.checkSessionFlash(response,
+                'You can only edit files with revision being a valid branch')
+        finally:
+            fixture.destroy_repo(repo.repo_name)
+
+    def test_edit_file_view_commit_changes_hg(self):
+        self.log_user()
+        repo = fixture.create_repo('test-edit-repo', repo_type='hg')
+
+        ## add file
+        location = 'vcs'
+        filename = 'nodes.py'
+        response = self.app.post(url('files_add_home',
+                                      repo_name=repo.repo_name,
+                                      revision='tip',
+                                      f_path='/'),
+                                 params={
+                                    'content': "def py():\n print 'hello'\n",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+        response.follow()
+        try:
+            self.checkSessionFlash(response, 'Successfully committed to %s'
+                                   % os.path.join(location, filename))
+            response = self.app.post(url('files_edit_home',
+                                          repo_name=repo.repo_name,
+                                          revision=repo.scm_instance.DEFAULT_BRANCH_NAME,
+                                          f_path='vcs/nodes.py'),
+                                     params={
+                                        'content': "def py():\n print 'hello world'\n",
+                                        'message': 'i commited',
+                                     },
+                                    status=302)
+            self.checkSessionFlash(response,
+                                   'Successfully committed to vcs/nodes.py')
+        finally:
+            fixture.destroy_repo(repo.repo_name)
+
+    #GIT - EDIT
     def test_edit_file_view_git(self):
         self.log_user()
         response = self.app.get(url('files_edit_home',
                                       repo_name=GIT_REPO,
                                       revision='tip', f_path='vcs/nodes.py'))
+
+    def test_edit_file_view_not_on_branch_git(self):
+        self.log_user()
+        repo = fixture.create_repo('test-edit-repo', repo_type='git')
+
+        ## add file
+        location = 'vcs'
+        filename = 'nodes.py'
+        response = self.app.post(url('files_add_home',
+                                      repo_name=repo.repo_name,
+                                      revision='tip', f_path='/'),
+                                 params={
+                                    'content': "def py():\n print 'hello'\n",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+        response.follow()
+        try:
+            self.checkSessionFlash(response, 'Successfully committed to %s'
+                                   % os.path.join(location, filename))
+            response = self.app.get(url('files_edit_home',
+                                          repo_name=repo.repo_name,
+                                          revision='tip', f_path='vcs/nodes.py'),
+                                    status=302)
+            self.checkSessionFlash(response,
+                'You can only edit files with revision being a valid branch')
+        finally:
+            fixture.destroy_repo(repo.repo_name)
+
+    def test_edit_file_view_commit_changes_git(self):
+        self.log_user()
+        repo = fixture.create_repo('test-edit-repo', repo_type='git')
+
+        ## add file
+        location = 'vcs'
+        filename = 'nodes.py'
+        response = self.app.post(url('files_add_home',
+                                      repo_name=repo.repo_name,
+                                      revision='tip',
+                                      f_path='/'),
+                                 params={
+                                    'content': "def py():\n print 'hello'\n",
+                                    'filename': filename,
+                                    'location': location
+                                 },
+                                 status=302)
+        response.follow()
+        try:
+            self.checkSessionFlash(response, 'Successfully committed to %s'
+                                   % os.path.join(location, filename))
+            response = self.app.post(url('files_edit_home',
+                                          repo_name=repo.repo_name,
+                                          revision=repo.scm_instance.DEFAULT_BRANCH_NAME,
+                                          f_path='vcs/nodes.py'),
+                                     params={
+                                        'content': "def py():\n print 'hello world'\n",
+                                        'message': 'i commited',
+                                     },
+                                    status=302)
+            self.checkSessionFlash(response,
+                                   'Successfully committed to vcs/nodes.py')
+        finally:
+            fixture.destroy_repo(repo.repo_name)
