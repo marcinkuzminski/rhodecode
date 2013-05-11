@@ -41,7 +41,7 @@ from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.auth import LoginRequired, NotAnonymous
 from rhodecode.lib.utils2 import safe_str, safe_int, time_to_datetime
 from rhodecode.lib.helpers import Page
-from webob.exc import HTTPNotFound
+from webob.exc import HTTPNotFound, HTTPForbidden
 from sqlalchemy.sql.expression import or_
 from rhodecode.lib.vcs.exceptions import VCSError
 
@@ -151,6 +151,16 @@ class GistsController(BaseController):
         #    h.form(url('gist', id=ID),
         #           method='delete')
         # url('gist', id=ID)
+        gist = GistModel().get_gist(id)
+        owner = gist.gist_owner == c.rhodecode_user.user_id
+        if h.HasPermissionAny('hg.admin')() or owner:
+            GistModel().delete(gist)
+            Session().commit()
+            h.flash(_('Deleted gist %s') % gist.gist_access_id, category='success')
+        else:
+            raise HTTPForbidden()
+
+        return redirect(url('gists'))
 
     @LoginRequired()
     def show(self, id, format='html'):

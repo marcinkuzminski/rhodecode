@@ -5,11 +5,12 @@ from rhodecode.model.db import User, Gist
 
 
 def _create_gist(f_name, content='some gist', lifetime=-1,
-                 description='gist-desc', gist_type='public'):
+                 description='gist-desc', gist_type='public',
+                 owner=TEST_USER_ADMIN_LOGIN):
     gist_mapping = {
         f_name: {'content': content}
     }
-    user = User.get_by_username(TEST_USER_ADMIN_LOGIN)
+    user = User.get_by_username(owner)
     gist = GistModel().create(description, owner=user,
                        gist_mapping=gist_mapping, gist_type=gist_type,
                        lifetime=lifetime)
@@ -109,8 +110,21 @@ class TestGistsController(TestController):
         response = self.app.put(url('gist', id=1))
 
     def test_delete(self):
-        self.skipTest('not implemented')
-        response = self.app.delete(url('gist', id=1))
+        self.log_user()
+        gist = _create_gist('delete-me')
+        response = self.app.delete(url('gist', id=gist.gist_id))
+        self.checkSessionFlash(response, 'Deleted gist %s' % gist.gist_id)
+
+    def test_delete_normal_user_his_gist(self):
+        self.log_user(TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS)
+        gist = _create_gist('delete-me', owner=TEST_USER_REGULAR_LOGIN)
+        response = self.app.delete(url('gist', id=gist.gist_id))
+        self.checkSessionFlash(response, 'Deleted gist %s' % gist.gist_id)
+
+    def test_delete_normal_user_not_his_own_gist(self):
+        self.log_user(TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS)
+        gist = _create_gist('delete-me')
+        response = self.app.delete(url('gist', id=gist.gist_id), status=403)
 
     def test_show(self):
         gist = _create_gist('gist-show-me')
