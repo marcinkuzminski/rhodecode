@@ -1,3 +1,5 @@
+import datetime
+
 from rhodecode.tests import *
 from rhodecode.model.gist import GistModel
 from rhodecode.model.meta import Session
@@ -72,6 +74,15 @@ class TestGistsController(TestController):
         response.mustcontain('added file: foo')
         response.mustcontain('gist test')
         response.mustcontain('<div class="ui-btn green badge">Public gist</div>')
+
+    def test_access_expired_gist(self):
+        self.log_user()
+        gist = _create_gist('never-see-me')
+        gist.gist_expires = 0  # 1970
+        Session().add(gist)
+        Session().commit()
+
+        response = self.app.get(url('gist', id=gist.gist_access_id), status=404)
 
     def test_create_private(self):
         self.log_user()
