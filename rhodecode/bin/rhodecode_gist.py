@@ -119,7 +119,7 @@ def _run(argv):
     if gist_content and '\0' in gist_content:
         raise Exception('Error: binary files upload is not possible')
 
-    filename = args.filename or filename
+    filename = os.path.basename(args.filename or filename)
     if gist_content:
         files = {
             filename: {
