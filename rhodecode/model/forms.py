@@ -424,7 +424,8 @@ def PullRequestForm(repo_id):
 def GistForm(lifetime_options):
     class _GistForm(formencode.Schema):
 
-        filename = v.UnicodeString(strip=True, required=False)
+        filename = All(v.BasePath()(),
+                       v.UnicodeString(strip=True, required=False))
         description = v.UnicodeString(required=False, if_missing='')
         lifetime = v.OneOf(lifetime_options)
         content = v.UnicodeString(required=True, not_empty=True)

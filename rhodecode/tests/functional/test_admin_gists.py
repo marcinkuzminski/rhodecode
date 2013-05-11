@@ -75,6 +75,16 @@ class TestGistsController(TestController):
         response.mustcontain('gist test')
         response.mustcontain('<div class="ui-btn green badge">Public gist</div>')
 
+    def test_create_with_path_with_dirs(self):
+        self.log_user()
+        response = self.app.post(url('gists'),
+                                 params={'lifetime': -1,
+                                         'content': 'gist test',
+                                         'filename': '/home/foo',
+                                         'public': 'public'},
+                                 status=200)
+        response.mustcontain('Filename cannot be inside a directory')
+
     def test_access_expired_gist(self):
         self.log_user()
         gist = _create_gist('never-see-me')

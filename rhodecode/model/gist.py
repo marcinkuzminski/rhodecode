@@ -120,6 +120,9 @@ class GistModel(BaseModel):
 
         processed_mapping = {}
         for filename in gist_mapping:
+            if filename != os.path.basename(filename):
+                raise Exception('Filename cannot be inside a directory')
+
             content = gist_mapping[filename]['content']
             #TODO: expand support for setting explicit lexers
 #             if lexer is None:
