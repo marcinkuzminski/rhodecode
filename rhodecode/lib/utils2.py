@@ -27,6 +27,7 @@ import os
 import re
 import sys
 import time
+import uuid
 import datetime
 import traceback
 import webob
@@ -607,3 +608,39 @@ def _extract_extras(env=None):
 
 def _set_extras(extras):
     os.environ['RC_SCM_DATA'] = json.dumps(extras)
+
+
+def unique_id(hexlen=32):
+    alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz"
+    return suuid(truncate_to=hexlen, alphabet=alphabet)
+
+
+def suuid(url=None, truncate_to=22, alphabet=None):
+    """
+    Generate and return a short URL safe UUID.
+
+    If the url parameter is provided, set the namespace to the provided
+    URL and generate a UUID.
+
+    :param url to get the uuid for
+    :truncate_to: truncate the basic 22 UUID to shorter version
+
+    The IDs won't be universally unique any longer, but the probability of
+    a collision will still be very low.
+    """
+    # Define our alphabet.
+    _ALPHABET = alphabet or "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+
+    # If no URL is given, generate a random UUID.
+    if url is None:
+        unique_id = uuid.uuid4().int
+    else:
+        unique_id = uuid.uuid3(uuid.NAMESPACE_URL, url).int
+
+    alphabet_length = len(_ALPHABET)
+    output = []
+    while unique_id > 0:
+        digit = unique_id % alphabet_length
+        output.append(_ALPHABET[digit])
+        unique_id = int(unique_id / alphabet_length)
+    return "".join(output)[:truncate_to]

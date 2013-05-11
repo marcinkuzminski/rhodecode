@@ -286,6 +286,18 @@
               </a>
             </li>
           %endif
+            <li ${is_current('gists')}>
+              <a class="menu_link gists childs" title="${_('Show public gists')}"  href="${h.url('gists')}">
+              ${_('Gists')}
+              </a>
+                <ul class="admin_menu">
+                  <li>${h.link_to(_('Create new gist'),h.url('new_gist'),class_='gists-new ')}</li>
+                  <li>${h.link_to(_('Public gists'),h.url('gists'),class_='gists ')}</li>
+                  %if c.rhodecode_user.username != 'default':
+                    <li>${h.link_to(_('My private gists'),h.url('gists', private=1),class_='gists-private ')}</li>
+                  %endif
+                </ul>
+            </li>
           <li ${is_current('search')}>
               <a class="menu_link search" title="${_('Search in repositories')}"  href="${h.url('search')}">
               ${_('Search')}

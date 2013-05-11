@@ -236,7 +236,6 @@ class DiffProcessor(object):
         Escaper for diff escapes special chars and checks the diff limit
 
         :param string:
-        :type string:
         """
 
         self.cur_diff_size += len(string)
@@ -331,7 +330,6 @@ class DiffProcessor(object):
             a_blob_id, b_blob_id, b_mode, a_file, b_file
 
         :param diff_chunk:
-        :type diff_chunk:
         """
 
         if self.vcs == 'git':

@@ -54,6 +54,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup, PullRequest
 from rhodecode.lib.hooks import log_push_action
+from rhodecode.lib.exceptions import NonRelativePathError
 
 log = logging.getLogger(__name__)
 
@@ -531,44 +532,76 @@ class ScmModel(BaseModel):
                           revisions=[tip.raw_id])
         return tip
 
-    def create_node(self, repo, repo_name, cs, user, author, message, content,
-                      f_path):
-        user = self._get_user(user)
-        IMC = self._get_IMC_module(repo.alias)
+    def create_nodes(self, user, repo, message, nodes, parent_cs=None,
+                     author=None, trigger_push_hook=True):
+        """
+        Commits given multiple nodes into repo
 
-        # decoding here will force that we have proper encoded values
-        # in any other case this will throw exceptions and deny commit
-        if isinstance(content, (basestring,)):
-            content = safe_str(content)
-        elif isinstance(content, (file, cStringIO.OutputType,)):
-            content = content.read()
-        else:
-            raise Exception('Content is of unrecognized type %s' % (
-                type(content)
-            ))
+        :param user: RhodeCode User object or user_id, the commiter
+        :param repo: RhodeCode Repository object
+        :param message: commit message
+        :param nodes: mapping {filename:{'content':content},...}
+        :param parent_cs: parent changeset, can be empty than it's initial commit
+        :param author: author of commit, cna be different that commiter only for git
+        :param trigger_push_hook: trigger push hooks
+
+        :returns: new commited changeset
+        """
+
+        user = self._get_user(user)
+        scm_instance = repo.scm_instance_no_cache()
+
+        processed_nodes = []
+        for f_path in nodes:
+            if f_path.startswith('/') or f_path.startswith('.') or '../' in f_path:
+                raise NonRelativePathError('%s is not an relative path' % f_path)
+            if f_path:
+                f_path = os.path.normpath(f_path)
+            f_path = safe_str(f_path)
+            content = nodes[f_path]['content']
+            # decoding here will force that we have proper encoded values
+            # in any other case this will throw exceptions and deny commit
+            if isinstance(content, (basestring,)):
+                content = safe_str(content)
+            elif isinstance(content, (file, cStringIO.OutputType,)):
+                content = content.read()
+            else:
+                raise Exception('Content is of unrecognized type %s' % (
+                    type(content)
+                ))
+            processed_nodes.append((f_path, content))
 
         message = safe_unicode(message)
-        author = safe_unicode(author)
-        path = safe_str(f_path)
-        m = IMC(repo)
+        commiter = user.full_contact
+        author = safe_unicode(author) if author else commiter
 
-        if isinstance(cs, EmptyChangeset):
+        IMC = self._get_IMC_module(scm_instance.alias)
+        imc = IMC(scm_instance)
+
+        if not parent_cs:
+            parent_cs = EmptyChangeset(alias=scm_instance.alias)
+
+        if isinstance(parent_cs, EmptyChangeset):
             # EmptyChangeset means we we're editing empty repository
             parents = None
         else:
-            parents = [cs]
+            parents = [parent_cs]
+        # add multiple nodes
+        for path, content in processed_nodes:
+            imc.add(FileNode(path, content=content))
 
-        m.add(FileNode(path, content=content))
-        tip = m.commit(message=message,
-                       author=author,
-                       parents=parents, branch=cs.branch)
+        tip = imc.commit(message=message,
+                         author=author,
+                         parents=parents,
+                         branch=parent_cs.branch)
 
-        self.mark_for_invalidation(repo_name)
-        self._handle_push(repo,
-                          username=user.username,
-                          action='push_local',
-                          repo_name=repo_name,
-                          revisions=[tip.raw_id])
+        self.mark_for_invalidation(repo.repo_name)
+        if trigger_push_hook:
+            self._handle_push(scm_instance,
+                              username=user.username,
+                              action='push_local',
+                              repo_name=repo.repo_name,
+                              revisions=[tip.raw_id])
         return tip
 
     def get_nodes(self, repo_name, revision, root_path='/', flat=True):
@@ -610,7 +643,6 @@ class ScmModel(BaseModel):
         grouped by type
 
         :param repo:
-        :type repo:
         """
 
         hist_l = []

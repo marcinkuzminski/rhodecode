@@ -419,3 +419,16 @@ def PullRequestForm(repo_id):
         merge_rev = v.UnicodeString(strip=True, required=True)
 
     return _PullRequestForm
+
+
+def GistForm(lifetime_options):
+    class _GistForm(formencode.Schema):
+
+        filename = v.UnicodeString(strip=True, required=False)
+        description = v.UnicodeString(required=False, if_missing='')
+        lifetime = v.OneOf(lifetime_options)
+        content = v.UnicodeString(required=True, not_empty=True)
+        public = v.UnicodeString(required=False, if_missing='')
+        private = v.UnicodeString(required=False, if_missing='')
+
+    return _GistForm

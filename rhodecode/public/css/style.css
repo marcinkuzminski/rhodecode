@@ -2306,6 +2306,11 @@ h3.files_location {
     padding: 5px !important;
 }
 
+#files_data .codeblock #editor_container .error-message {
+    color: red;
+    padding: 10px 10px 10px 26px
+}
+
 .file_history {
     padding-top: 10px;
     font-size: 16px;
@@ -3566,8 +3571,12 @@ div.gravatar img {
     border-radius: 4px 4px 4px 4px !important;
     cursor: pointer !important;
     padding: 3px 3px 3px 3px;
-    background-position: 0 -15px;
+    background-position: 0 -100px;
 
+}
+
+.ui-btn.badge {
+    cursor: default !important;
 }
 
 .ui-btn.disabled {
@@ -3598,12 +3607,14 @@ div.gravatar img {
     outline: none;
 }
 .ui-btn:hover {
-    background-position: 0 -15px;
+    background-position: 0 -100px;
     text-decoration: none;
     color: #515151;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 3px #FFFFFF !important;
 }
-
+.ui-btn.badge:hover {
+    box-shadow: none !important;
+}
 .ui-btn.disabled:hover {
     background-position: 0;
     color: #999;
@@ -3645,6 +3656,7 @@ div.gravatar img {
 }
 
 .ui-btn.green {
+    color: #fff;
     background-color: #57a957;
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#62c462), to(#57a957));
@@ -3656,6 +3668,22 @@ div.gravatar img {
     background-image: linear-gradient(to bottom, #62c462, #57a957);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#62c462', endColorstr='#57a957', GradientType=0);
     border-color: #57a957 #57a957 #3d773d;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+}
+
+.ui-btn.yellow {
+    color: #fff;
+    background-color: #faa732;
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fbb450), to(#f89406));
+    background-image: -moz-linear-gradient(top, #fbb450, #f89406);
+    background-image: -ms-linear-gradient(top, #fbb450, #f89406);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fbb450), color-stop(100%, #f89406));
+    background-image: -webkit-linear-gradient(top, #fbb450, #f89406);
+    background-image: -o-linear-gradient(top, #fbb450, #f89406);
+    background-image: linear-gradient(to bottom, #fbb450, #f89406);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fbb450', endColorstr='#f89406', GradientType=0);
+    border-color: #f89406 #f89406 #ad6704;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 

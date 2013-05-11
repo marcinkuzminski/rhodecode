@@ -16,13 +16,17 @@ def _commit_change(repo, filename, content, message, vcs_type, parent=None, newf
         _cs = EmptyChangeset(alias=vcs_type)
 
     if newfile:
-        cs = ScmModel().create_node(
-            repo=repo.scm_instance, repo_name=repo.repo_name,
-            cs=_cs, user=TEST_USER_ADMIN_LOGIN,
-            author=TEST_USER_ADMIN_LOGIN,
+        nodes = {
+            filename: {
+                'content': content
+            }
+        }
+        cs = ScmModel().create_nodes(
+            user=TEST_USER_ADMIN_LOGIN, repo=repo,
             message=message,
-            content=content,
-            f_path=filename
+            nodes=nodes,
+            parent_cs=_cs,
+            author=TEST_USER_ADMIN_LOGIN,
         )
     else:
         cs = ScmModel().commit_change(
@@ -317,15 +321,9 @@ class TestCompareController(TestController):
         self.r1_id = repo1.repo_id
         r1_name = repo1.repo_name
 
-        #commit something initially !
-        cs0 = ScmModel().create_node(
-            repo=repo1.scm_instance, repo_name=r1_name,
-            cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
-            author=TEST_USER_ADMIN_LOGIN,
-            message='commit1',
-            content='line1',
-            f_path='file1'
-        )
+        cs0 = _commit_change(repo=r1_name, filename='file1',
+                       content='line1', message='commit1', vcs_type='hg',
+                       newfile=True)
         Session().commit()
         self.assertEqual(repo1.scm_instance.revisions, [cs0.raw_id])
         #fork the repo1
@@ -339,32 +337,20 @@ class TestCompareController(TestController):
         self.r2_id = repo2.repo_id
         r2_name = repo2.repo_name
 
-        #make 3 new commits in fork
-        cs1 = ScmModel().create_node(
-            repo=repo2.scm_instance, repo_name=r2_name,
-            cs=repo2.scm_instance[-1], user=TEST_USER_ADMIN_LOGIN,
-            author=TEST_USER_ADMIN_LOGIN,
-            message='commit1-fork',
-            content='file1-line1-from-fork',
-            f_path='file1-fork'
-        )
-        cs2 = ScmModel().create_node(
-            repo=repo2.scm_instance, repo_name=r2_name,
-            cs=cs1, user=TEST_USER_ADMIN_LOGIN,
-            author=TEST_USER_ADMIN_LOGIN,
-            message='commit2-fork',
-            content='file2-line1-from-fork',
-            f_path='file2-fork'
-        )
-        cs3 = ScmModel().create_node(
-            repo=repo2.scm_instance, repo_name=r2_name,
-            cs=cs2, user=TEST_USER_ADMIN_LOGIN,
-            author=TEST_USER_ADMIN_LOGIN,
-            message='commit3-fork',
-            content='file3-line1-from-fork',
-            f_path='file3-fork'
-        )
 
+        cs1 = _commit_change(repo=r2_name, filename='file1-fork',
+                       content='file1-line1-from-fork', message='commit1-fork',
+                       vcs_type='hg', parent=repo2.scm_instance[-1],
+                       newfile=True)
+
+        cs2 = _commit_change(repo=r2_name, filename='file2-fork',
+                       content='file2-line1-from-fork', message='commit2-fork',
+                       vcs_type='hg', parent=cs1,
+                       newfile=True)
+
+        cs3 = _commit_change(repo=r2_name, filename='file3-fork',
+                       content='file3-line1-from-fork', message='commit3-fork',
+                       vcs_type='hg', parent=cs2, newfile=True)
         #compare !
         rev1 = 'default'
         rev2 = 'default'
@@ -383,14 +369,18 @@ class TestCompareController(TestController):
         response.mustcontain('No changesets')
 
         #add new commit into parent !
-        cs0 = ScmModel().create_node(
-            repo=repo1.scm_instance, repo_name=r1_name,
-            cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
-            author=TEST_USER_ADMIN_LOGIN,
-            message='commit2-parent',
-            content='line1-added-after-fork',
-            f_path='file2'
-        )
+#         cs0 = ScmModel().create_node(
+#             repo=repo1.scm_instance, repo_name=r1_name,
+#             cs=EmptyChangeset(alias='hg'), user=TEST_USER_ADMIN_LOGIN,
+#             author=TEST_USER_ADMIN_LOGIN,
+#             message='commit2-parent',
+#             content='line1-added-after-fork',
+#             f_path='file2'
+#         )
+        cs0 = _commit_change(repo=r1_name, filename='file2',
+                    content='line1-added-after-fork', message='commit2-parent',
+                    vcs_type='hg', parent=None, newfile=True)
+
         #compare !
         rev1 = 'default'
         rev2 = 'default'

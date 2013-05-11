@@ -1130,7 +1130,6 @@ class Repository(Base, BaseModel):
         Returns statuses for this repository
 
         :param revisions: list of revisions to get statuses for
-        :type revisions: list
         """
 
         statuses = ChangesetStatus.query()\
@@ -2120,6 +2119,44 @@ class UserNotification(Base, BaseModel):
     def mark_as_read(self):
         self.read = True
         Session().add(self)
+
+
+class Gist(Base, BaseModel):
+    __tablename__ = 'gists'
+    __table_args__ = (
+        Index('g_gist_access_id_idx', 'gist_access_id'),
+        Index('g_created_on_idx', 'created_on'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    GIST_PUBLIC = u'public'
+    GIST_PRIVATE = u'private'
+
+    gist_id = Column('gist_id', Integer(), primary_key=True)
+    gist_access_id = Column('gist_access_id', UnicodeText(1024))
+    gist_description = Column('gist_description', UnicodeText(1024))
+    gist_owner = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=True)
+    gist_expires = Column('gist_expires', Float(), nullable=False)
+    gist_type = Column('gist_type', Unicode(128), nullable=False)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    modified_at = Column('modified_at', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+
+    owner = relationship('User')
+
+    @classmethod
+    def get_or_404(cls, id_):
+        res = cls.query().filter(cls.gist_access_id == id_).scalar()
+        if not res:
+            raise HTTPNotFound
+        return res
+
+    @classmethod
+    def get_by_access_id(cls, gist_access_id):
+        return cls.query().filter(cls.gist_access_id==gist_access_id).scalar()
+
+    def gist_url(self):
+        from pylons import url
+        return url('gist', id=self.gist_access_id, qualified=True)
 
 
 class DbMigrateVersion(Base, BaseModel):

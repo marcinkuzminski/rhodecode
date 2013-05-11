@@ -35,7 +35,6 @@ def api_call(apikey, apihost, format, method=None, **kw):
         Builds API data with given random ID
 
         :param random_id:
-        :type random_id:
         """
         return {
             "id": random_id,
@@ -80,7 +79,9 @@ class RcConf(object):
 
     def __init__(self, config_location=None, autoload=True, autocreate=False,
                  config=None):
-        self._conf_name = CONFIG_NAME if not config_location else config_location
+        HOME = os.getenv('HOME', os.getenv('USERPROFILE')) or ''
+        HOME_CONF = os.path.abspath(os.path.join(HOME, CONFIG_NAME))
+        self._conf_name = HOME_CONF if not config_location else config_location
         self._conf = {}
         if autocreate:
             self.make_config(config)
@@ -106,7 +107,6 @@ class RcConf(object):
         Saves given config as a JSON dump in the _conf_name location
 
         :param config:
-        :type config:
         """
         update = False
         if os.path.exists(self._conf_name):

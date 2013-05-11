@@ -57,6 +57,7 @@ from rhodecode.model.db import Repository
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
 from webob.exc import HTTPNotFound
+from rhodecode.lib.exceptions import NonRelativePathError
 
 
 log = logging.getLogger(__name__)
@@ -371,25 +372,32 @@ class FilesController(BaseRepoController):
                 h.flash(_('No filename'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
-            if location.startswith('/') or location.startswith('.') or '../' in location:
-                h.flash(_('Location must be relative path and must not '
-                          'contain .. in path'), category='warning')
-                return redirect(url('changeset_home', repo_name=c.repo_name,
-                                    revision='tip'))
-            if location:
-                location = os.path.normpath(location)
+            #strip all crap out of file, just leave the basename
             filename = os.path.basename(filename)
             node_path = os.path.join(location, filename)
             author = self.rhodecode_user.full_contact
 
             try:
-                self.scm_model.create_node(repo=c.rhodecode_repo,
-                                           repo_name=repo_name, cs=c.cs,
-                                           user=self.rhodecode_user.user_id,
-                                           author=author, message=message,
-                                           content=content, f_path=node_path)
+                nodes = {
+                    node_path: {
+                        'content': content
+                    }
+                }
+                self.scm_model.create_nodes(
+                    user=c.rhodecode_user.user_id, repo=c.rhodecode_db_repo,
+                    message=message,
+                    nodes=nodes,
+                    parent_cs=c.cs,
+                    author=author,
+                )
+
                 h.flash(_('Successfully committed to %s') % node_path,
                         category='success')
+            except NonRelativePathError, e:
+                h.flash(_('Location must be relative path and must not '
+                          'contain .. in path'), category='warning')
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))
             except (NodeError, NodeAlreadyExistsError), e:
                 h.flash(_(e), category='error')
             except Exception:

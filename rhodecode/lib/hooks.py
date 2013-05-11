@@ -306,11 +306,8 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
     connect to database and run the logging code. Hacky as sh*t but works.
 
     :param repo_path:
-    :type repo_path:
     :param revs:
-    :type revs:
     :param env:
-    :type env:
     """
     from paste.deploy import appconfig
     from sqlalchemy import engine_from_config

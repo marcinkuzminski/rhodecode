@@ -104,8 +104,7 @@ class BaseModel(object):
         """
         Helper method to get user by ID, or username fallback
 
-        :param user:
-        :type user: UserID, username, or User instance
+        :param user: UserID, username, or User instance
         """
         from rhodecode.model.db import User
         return self._get_instance(User, user,
@@ -115,8 +114,7 @@ class BaseModel(object):
         """
         Helper method to get repository by ID, or repository name
 
-        :param repository:
-        :type repository: RepoID, repository name or Repository Instance
+        :param repository: RepoID, repository name or Repository Instance
         """
         from rhodecode.model.db import Repository
         return self._get_instance(Repository, repository,
@@ -126,8 +124,7 @@ class BaseModel(object):
         """
         Helper method to get permission by ID, or permission name
 
-        :param permission:
-        :type permission: PermissionID, permission_name or Permission instance
+        :param permission: PermissionID, permission_name or Permission instance
         """
         from rhodecode.model.db import Permission
         return self._get_instance(Permission, permission,

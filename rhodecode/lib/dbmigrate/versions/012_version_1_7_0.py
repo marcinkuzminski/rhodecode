@@ -39,6 +39,13 @@ def upgrade(migrate_engine):
     tbl.create()
 
     #==========================================================================
+    # Gist
+    #==========================================================================
+    from rhodecode.lib.dbmigrate.schema.db_1_7_0 import Gist
+    tbl = Gist.__table__
+    tbl.create()
+
+    #==========================================================================
     # UserGroup
     #==========================================================================
     from rhodecode.lib.dbmigrate.schema.db_1_7_0 import UserGroup
@@ -48,7 +55,7 @@ def upgrade(migrate_engine):
     user_id.create(table=tbl)
 
     #==========================================================================
-    # UserGroup
+    # RepoGroup
     #==========================================================================
     from rhodecode.lib.dbmigrate.schema.db_1_7_0 import RepoGroup
     tbl = RepoGroup.__table__

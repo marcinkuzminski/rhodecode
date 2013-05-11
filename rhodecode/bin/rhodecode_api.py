@@ -66,7 +66,6 @@ def main(argv=None):
     Main execution function for cli
 
     :param argv:
-    :type argv:
     """
     if argv is None:
         argv = sys.argv

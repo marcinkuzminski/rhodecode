@@ -391,6 +391,9 @@ def make_map(config):
         m.connect('admin_add_repo', '/add_repo/{new_repo:[a-z0-9\. _-]*}',
                   action='add_repo')
 
+    #ADMIN GIST
+    rmap.resource('gist', 'gists', controller='admin/gists',
+        path_prefix=ADMIN_PREFIX)
     #==========================================================================
     # API V2
     #==========================================================================

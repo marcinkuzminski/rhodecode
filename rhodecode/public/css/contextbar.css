@@ -4,6 +4,9 @@
 
 #quick .repo_switcher { background-image: url("../images/icons/database.png"); }
 #quick .journal { background-image: url("../images/icons/book.png"); }
+#quick .gists { background-image: url("../images/icons/note.png"); }
+#quick .gists-private { background-image: url("../images/icons/note_error.png"); }
+#quick .gists-new { background-image: url("../images/icons/note_add.png"); }
 #quick .search { background-image: url("../images/icons/search_16.png"); }
 #quick .admin { background-image: url("../images/icons/cog_edit.png"); }
 
@@ -25,6 +28,9 @@
 #context-bar a.admin { background-image: url("../images/icons/cog_edit.png"); }
 
 #context-bar a.journal { background-image: url("../images/icons/book.png"); }
+#context-bar a.gists { background-image: url("../images/icons/note.png"); }
+#context-bar a.gists-private { background-image: url("../images/icons/note_error.png"); }
+#context-bar a.gists-new { background-image: url("../images/icons/note_add.png"); }
 #context-bar a.repos { background-image: url("../images/icons/database_edit.png"); }
 #context-bar a.repos_groups { background-image: url("../images/icons/database_link.png"); }
 #context-bar a.users { background-image: url("../images/icons/user_edit.png"); }

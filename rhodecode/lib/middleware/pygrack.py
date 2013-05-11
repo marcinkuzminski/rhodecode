@@ -59,7 +59,6 @@ class GitRepository(object):
         Small fix for repo_path
 
         :param path:
-        :type path:
         """
         return path.split(self.repo_name, 1)[-1].strip('/')
 

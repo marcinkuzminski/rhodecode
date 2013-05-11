@@ -26,7 +26,6 @@ def _build_data(apikey, method, **kw):
     Builds API data with given random ID
 
     :param random_id:
-    :type random_id:
     """
     random_id = random.randrange(1, 9999)
     return random_id, json.dumps({

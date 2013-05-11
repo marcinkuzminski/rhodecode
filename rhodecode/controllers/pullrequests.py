@@ -165,7 +165,6 @@ class PullrequestsController(BaseRepoController):
         Load context data needed for generating compare diff
 
         :param pull_request:
-        :type pull_request:
         """
         org_repo = pull_request.org_repo
         (org_ref_type,

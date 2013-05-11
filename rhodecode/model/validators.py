@@ -11,7 +11,7 @@ from webhelpers.pylonslib.secure_form import authentication_token
 
 from formencode.validators import (
     UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set,
-    NotEmpty, IPAddress, CIDR
+    NotEmpty, IPAddress, CIDR, String, FancyValidator
 )
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib import ipaddr
@@ -25,7 +25,7 @@ from rhodecode.lib.auth import HasReposGroupPermissionAny, HasPermissionAny
 
 # silence warnings and pylint
 UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set, \
-    NotEmpty, IPAddress, CIDR
+    NotEmpty, IPAddress, CIDR, String, FancyValidator
 
 log = logging.getLogger(__name__)
 

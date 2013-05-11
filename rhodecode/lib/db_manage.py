@@ -558,7 +558,6 @@ class DbManage(object):
         bad permissions, we must clean them up
 
         :param username:
-        :type username:
         """
         default_user = User.get_by_username(username)
         if not default_user:
