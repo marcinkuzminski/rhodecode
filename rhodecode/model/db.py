@@ -2152,11 +2152,54 @@ class Gist(Base, BaseModel):
 
     @classmethod
     def get_by_access_id(cls, gist_access_id):
-        return cls.query().filter(cls.gist_access_id==gist_access_id).scalar()
+        return cls.query().filter(cls.gist_access_id == gist_access_id).scalar()
 
     def gist_url(self):
         from pylons import url
         return url('gist', id=self.gist_access_id, qualified=True)
+
+    @classmethod
+    def base_path(cls):
+        """
+        Returns base path when all gists are stored
+
+        :param cls:
+        """
+        from rhodecode.model.gist import GIST_STORE_LOC
+        q = Session().query(RhodeCodeUi)\
+            .filter(RhodeCodeUi.ui_key == URL_SEP)
+        q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        return os.path.join(q.one().ui_value, GIST_STORE_LOC)
+
+    def get_api_data(self):
+        """
+        Common function for generating gist related data for API
+        """
+        gist = self
+        data = dict(
+            gist_id=gist.gist_id,
+            type=gist.gist_type,
+            access_id=gist.gist_access_id,
+            description=gist.gist_description,
+            url=gist.gist_url(),
+            expires=gist.gist_expires,
+            created_on=gist.created_on,
+        )
+        return data
+
+    def __json__(self):
+        data = dict(
+        )
+        data.update(self.get_api_data())
+        return data
+    ## SCM functions
+
+    @property
+    def scm_instance(self):
+        from rhodecode.lib.vcs import get_repo
+        base_path = self.base_path()
+        return get_repo(os.path.join(*map(safe_str,
+                                          [base_path, self.gist_access_id])))
 
 
 class DbMigrateVersion(Base, BaseModel):

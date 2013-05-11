@@ -38,7 +38,6 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import Gist
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.scm import ScmModel
-from rhodecode.lib.vcs import get_repo
 
 log = logging.getLogger(__name__)
 
@@ -68,16 +67,17 @@ class GistModel(BaseModel):
         log.info("Removing %s" % (rm_path))
         shutil.rmtree(rm_path)
 
+    def get_gist(self, gist):
+        return self._get_gist(gist)
+
     def get_gist_files(self, gist_access_id):
         """
         Get files for given gist
 
         :param gist_access_id:
         """
-        root_path = RepoModel().repos_path
-        r = get_repo(os.path.join(*map(safe_str,
-                                [root_path, GIST_STORE_LOC, gist_access_id])))
-        cs = r.get_changeset()
+        repo = Gist.get_by_access_id(gist_access_id)
+        cs = repo.scm_instance.get_changeset()
         return (
          cs, [n for n in cs.get_node('/')]
         )
