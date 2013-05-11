@@ -22,7 +22,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+from __future__ import with_statement
 import os
 import time
 import logging
@@ -32,6 +32,7 @@ import shutil
 from pylons.i18n.translation import _
 from rhodecode.lib.utils2 import safe_unicode, unique_id, safe_int, \
     time_to_datetime, safe_str, AttributeDict
+from rhodecode.lib.compat import json
 from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Gist
@@ -41,7 +42,8 @@ from rhodecode.lib.vcs import get_repo
 
 log = logging.getLogger(__name__)
 
-GIST_STORE_LOC = '.gist_store'
+GIST_STORE_LOC = '.rc_gist_store'
+GIST_METADATA_FILE = '.rc_gist_metadata'
 
 
 class GistModel(BaseModel):
@@ -143,7 +145,17 @@ class GistModel(BaseModel):
             nodes=processed_mapping,
             trigger_push_hook=False
         )
-
+        # store metadata inside the gist, this can be later used for imports
+        # or gist identification
+        metadata = {
+            'gist_db_id': gist.gist_id,
+            'gist_access_id': gist.gist_access_id,
+            'gist_owner_id': owner.user_id,
+            'gist_type': gist.gist_type,
+            'gist_exipres': gist.gist_expires
+        }
+        with open(os.path.join(repo.path, '.hg', GIST_METADATA_FILE), 'wb') as f:
+            f.write(json.dumps(metadata))
         return gist
 
     def delete(self, gist, fs_remove=True):
