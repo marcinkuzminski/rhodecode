@@ -38,11 +38,14 @@
           <div class="gist-item" style="padding:10px 20px 10px 15px">
 
             <div class="gravatar">
-               <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(gist.owner.full_contact),24)}"/>
+               <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(gist.owner.full_contact),28)}"/>
             </div>
-            <div title="${gist.owner.full_contact}" class="user">
+            <div title="${gist.owner.full_contact}" class="user" style="font-size: 16px">
                 <b>${h.person(gist.owner.full_contact)}</b> /
                 <b><a href="${h.url('gist',id=gist.gist_access_id)}">gist:${gist.gist_access_id}</a></b>
+            </div>
+            <div style="padding: 4px 0px 0px 0px">
+                ${_('Created')} ${h.age(gist.created_on)} /
                 <span style="color: #AAA">
                   %if gist.gist_expires == -1:
                    ${_('Expires')}: ${_('never')}
@@ -51,10 +54,8 @@
                   %endif
                 </span>
             </div>
-            <div>${_('Created')} ${h.age(gist.created_on)}
-            </div>
 
-            <div style="border:0px;padding:10px 0px 0px 35px;color:#AAA">${gist.gist_description}</div>
+            <div style="border:0px;padding:10px 0px 0px 40px;color:#AAA">${gist.gist_description}</div>
           </div>
         % endfor
 
