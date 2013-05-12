@@ -38,14 +38,16 @@
                             <div class="ui-btn yellow badge">${_('Private gist')}</div>
                           %endif
                         </div>
-                       <span style="color: #AAA">
+                        <div class="left item ${'' if c.gist.gist_description else 'last'}" style="color: #AAA">
                          %if c.gist.gist_expires == -1:
                           ${_('Expires')}: ${_('never')}
                          %else:
                           ${_('Expires')}: ${h.age(h.time_to_datetime(c.gist.gist_expires))}
                          %endif
-                       </span>
-                        <div class="left item last">${c.gist.gist_description}</div>
+                       </div>
+                       <div class="left item last">
+                            ${c.gist.gist_description}
+                       </div>
                         <div class="buttons">
                           ## only owner should see that
                           %if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
@@ -71,7 +73,8 @@
                % for file in c.files:
                <div style="border: 1px solid #EEE;margin-top:20px">
                 <div id="${h.FID('G', file.path)}" class="stats" style="border-bottom: 1px solid #DDD;padding: 8px 14px;">
-                    <b>${file.path}</b>
+                    <a href="${c.gist.gist_url()}">¶</a>
+                    <b style="margin:0px 0px 0px 4px">${file.path}</b>
                     ##<div class="buttons">
                     ##   ${h.link_to(_('Show as raw'),h.url(''),class_="ui-btn")}
                     ##</div>

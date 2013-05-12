@@ -24,12 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
 import logging
 import datetime
 import traceback
 import hashlib
-import time
-from collections import defaultdict
+import collections
 
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -1120,7 +1120,7 @@ class Repository(Base, BaseModel):
             .filter(ChangesetComment.repo == self)
         if revisions:
             cmts = cmts.filter(ChangesetComment.revision.in_(revisions))
-        grouped = defaultdict(list)
+        grouped = collections.defaultdict(list)
         for cmt in cmts.all():
             grouped[cmt.revision].append(cmt)
         return grouped
@@ -2155,6 +2155,11 @@ class Gist(Base, BaseModel):
         return cls.query().filter(cls.gist_access_id == gist_access_id).scalar()
 
     def gist_url(self):
+        import rhodecode
+        alias_url = rhodecode.CONFIG.get('gist_alias_url')
+        if alias_url:
+            return alias_url.replace('{gistid}', self.gist_access_id)
+
         from pylons import url
         return url('gist', id=self.gist_access_id, qualified=True)
 

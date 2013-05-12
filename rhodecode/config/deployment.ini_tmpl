@@ -115,6 +115,12 @@ rss_include_diff = false
 show_sha_length = 12
 show_revision_number = true
 
+## gist URL alias, used to create nicer urls for gist. This should be an
+## url that does rewrites to _admin/gists/<gistid>. 
+## example: http://gist.rhodecode.org/{gistid}. Empty means use the internal
+## RhodeCode url, ie. http[s]://rhodecode.server/_admin/gists/<gistid>
+gist_alias_url =
+
 ## white list of API enabled controllers. This allows to add list of
 ## controllers to which access will be enabled by api_key. eg: to enable
 ## api access to raw_files put `FilesController:raw`, to enable access to patches

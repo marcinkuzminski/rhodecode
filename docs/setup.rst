@@ -534,6 +534,28 @@ Sample config for nginx using proxy::
         #server 127.0.0.1:5002;
     }
 
+    ## gist alias
+    server {
+       listen          443;
+       server_name     gist.myserver.com;
+       access_log      /var/log/nginx/gist.access.log;
+       error_log       /var/log/nginx/gist.error.log;
+
+       ssl on;
+       ssl_certificate     gist.rhodecode.myserver.com.crt;
+       ssl_certificate_key gist.rhodecode.myserver.com.key;
+
+       ssl_session_timeout 5m;
+
+       ssl_protocols SSLv3 TLSv1;
+       ssl_ciphers DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:EDH-RSA-DES-CBC3-SHA:AES256-SHA:DES-CBC3-SHA:AES128-SHA:RC4-SHA:RC4-MD5;
+       ssl_prefer_server_ciphers on;
+
+       location / {
+           rewrite ^/(.*) https://rhodecode.myserver.com/_admin/gists/$1;
+       }
+    }
+
     server {
        listen          443;
        server_name     rhodecode.myserver.com;
@@ -550,16 +572,8 @@ Sample config for nginx using proxy::
        ssl_ciphers DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:EDH-RSA-DES-CBC3-SHA:AES256-SHA:DES-CBC3-SHA:AES128-SHA:RC4-SHA:RC4-MD5;
        ssl_prefer_server_ciphers on;
 
-       # uncomment if you have nginx with chunking module compiled
-       # fixes the issues of having to put postBuffer data for large git
-       # pushes
-       #chunkin on;
-       #error_page 411 = @my_411_error;
-       #location @my_411_error {
-       #    chunkin_resume;
-       #}
-
-       # uncomment if you want to serve static files by nginx
+       ## uncomment root directive if you want to serve static files by nginx
+       ## requires static_files = false in .ini file
        #root /path/to/installation/rhodecode/public;
 
        location / {
@@ -590,18 +604,6 @@ pushes or large pushes::
     proxy_send_timeout          7200;
     proxy_read_timeout          7200;
     proxy_buffers               8 32k;
-
-Also, when using root path with nginx you might set the static files to false
-in the production.ini file::
-
-    [app:main]
-      use = egg:rhodecode
-      full_stack = true
-      static_files = false
-      lang=en
-      cache_dir = %(here)s/data
-
-In order to not have the statics served by the application. This improves speed.
 
 
 Apache virtual host reverse proxy example
