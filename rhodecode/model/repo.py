@@ -307,7 +307,7 @@ class RepoModel(BaseModel):
             if 'repo_group' in kwargs:
                 cur_repo.group = RepoGroup.get(kwargs['repo_group'])
 
-            for strip, k in [(0, 'repo_type'), (1, 'repo_enable_downloads'),
+            for strip, k in [(1, 'repo_enable_downloads'),
                       (1, 'repo_description'), (1, 'repo_enable_locking'),
                       (1, 'repo_landing_rev'), (0, 'clone_uri'),
                       (1, 'repo_private'), (1, 'repo_enable_statistics')]:
