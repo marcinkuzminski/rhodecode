@@ -551,9 +551,8 @@ Sample config for nginx using proxy::
        ssl_ciphers DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:EDH-RSA-DES-CBC3-SHA:AES256-SHA:DES-CBC3-SHA:AES128-SHA:RC4-SHA:RC4-MD5;
        ssl_prefer_server_ciphers on;
 
-       location / {
-           rewrite ^/(.*) https://rhodecode.myserver.com/_admin/gists/$1;
-       }
+       rewrite ^/(.+)$ https://rhodecode.myserver.com/_admin/gists/$1;
+       rewrite (.*) https://rhodecode.myserver.org/_admin/gists;
     }
 
     server {
