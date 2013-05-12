@@ -140,8 +140,9 @@ class ReposGroupModel(BaseModel):
 
     def create(self, group_name, group_description, owner, parent=None, just_db=False):
         try:
+            user = self._get_user(owner)
             new_repos_group = RepoGroup()
-            new_repos_group.user = self._get_user(owner)
+            new_repos_group.user = user
             new_repos_group.group_description = group_description or group_name
             new_repos_group.parent_group = self._get_repo_group(parent)
             new_repos_group.group_name = new_repos_group.get_new_name(group_name)
@@ -150,10 +151,11 @@ class ReposGroupModel(BaseModel):
             perm_obj = self._create_default_perms(new_repos_group)
             self.sa.add(perm_obj)
 
-            #create an ADMIN permission for owner, later owner should go into
-            #the owner field of groups
-            self.grant_user_permission(repos_group=new_repos_group,
-                                       user=owner, perm='group.admin')
+            #create an ADMIN permission for owner except if we're super admin,
+            #later owner should go into the owner field of groups
+            if not user.is_admin:
+                self.grant_user_permission(repos_group=new_repos_group,
+                                           user=owner, perm='group.admin')
 
             if not just_db:
                 # we need to flush here, in order to check if database won't
