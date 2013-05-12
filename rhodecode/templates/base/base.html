@@ -292,8 +292,9 @@
               </a>
                 <ul class="admin_menu">
                   <li>${h.link_to(_('Create new gist'),h.url('new_gist'),class_='gists-new ')}</li>
-                  <li>${h.link_to(_('Public gists'),h.url('gists'),class_='gists ')}</li>
+                  <li>${h.link_to(_('All public gists'),h.url('gists'),class_='gists ')}</li>
                   %if c.rhodecode_user.username != 'default':
+                    <li>${h.link_to(_('My public gists'),h.url('gists', public=1),class_='gists')}</li>
                     <li>${h.link_to(_('My private gists'),h.url('gists', private=1),class_='gists-private ')}</li>
                   %endif
                 </ul>

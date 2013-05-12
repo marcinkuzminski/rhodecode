@@ -66,12 +66,18 @@ class GistsController(BaseController):
         """GET /admin/gists: All items in the collection"""
         # url('gists')
         c.show_private = request.GET.get('private') and c.rhodecode_user.username != 'default'
+        c.show_public = request.GET.get('public') and c.rhodecode_user.username != 'default'
+
         gists = Gist().query()\
             .filter(or_(Gist.gist_expires == -1, Gist.gist_expires >= time.time()))\
             .order_by(Gist.created_on.desc())
         if c.show_private:
             c.gists = gists.filter(Gist.gist_type == Gist.GIST_PRIVATE)\
                              .filter(Gist.gist_owner == c.rhodecode_user.user_id)
+        elif c.show_public:
+            c.gists = gists.filter(Gist.gist_type == Gist.GIST_PUBLIC)\
+                             .filter(Gist.gist_owner == c.rhodecode_user.user_id)
+
         else:
             c.gists = gists.filter(Gist.gist_type == Gist.GIST_PUBLIC)
         p = safe_int(request.GET.get('page', 1), 1)
