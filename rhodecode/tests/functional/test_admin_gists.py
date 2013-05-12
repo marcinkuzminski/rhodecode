@@ -33,18 +33,18 @@ class TestGistsController(TestController):
         # Test response...
         response.mustcontain('There are no gists yet')
 
-        _create_gist('gist1')
-        _create_gist('gist2', lifetime=1400)
-        _create_gist('gist3', description='gist3-desc')
-        _create_gist('gist4', gist_type='private')
+        g1 = _create_gist('gist1').gist_access_id
+        g2 = _create_gist('gist2', lifetime=1400).gist_access_id
+        g3 = _create_gist('gist3', description='gist3-desc').gist_access_id
+        g4 = _create_gist('gist4', gist_type='private').gist_access_id
         response = self.app.get(url('gists'))
         # Test response...
-        response.mustcontain('gist:1')
-        response.mustcontain('gist:2')
+        response.mustcontain('gist:%s' % g1)
+        response.mustcontain('gist:%s' % g2)
         response.mustcontain('Expires: in 23 hours')  # we don't care about the end
-        response.mustcontain('gist:3')
+        response.mustcontain('gist:%s' % g3)
         response.mustcontain('gist3-desc')
-        response.mustcontain(no=['gist:4'])
+        response.mustcontain(no=['gist:%s' % g4])
 
     def test_index_private_gists(self):
         self.log_user()

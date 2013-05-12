@@ -459,7 +459,7 @@ removed extra unicode conversion in diff.</div>
                                       repo_name=HG_REPO,
                                       revision='tip', f_path='/'),
                                  params={
-                                    ''
+                                    'content': ''
                                  },
                                  status=302)
 
