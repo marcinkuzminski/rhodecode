@@ -118,9 +118,13 @@ ${h.end_form()}
     </div>
     <%namespace name="dpb" file="/base/default_perms_box.html"/>
     ${dpb.default_perms_box(url('users_group_perm', id=c.users_group.users_group_id))}
+
+    ## permissions overview
+    <%namespace name="p" file="/base/perms_summary.html"/>
+    ${p.perms_summary(c.permissions)}
 </div>
 
-<div class="box box-right">
+<div class="box box-right" style="clear:right">
     <div class="title">
         <h5>${_('Permissions')}</h5>
     </div>

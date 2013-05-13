@@ -66,6 +66,10 @@ class UsersGroupsController(BaseController):
         c.available_permissions = config['available_permissions']
 
     def __load_data(self, user_group_id):
+        permissions = {
+            'repositories': {},
+            'repositories_groups': {}
+        }
         ugroup_repo_perms = UserGroupRepoToPerm.query()\
             .options(joinedload(UserGroupRepoToPerm.permission))\
             .options(joinedload(UserGroupRepoToPerm.repository))\
@@ -73,7 +77,7 @@ class UsersGroupsController(BaseController):
             .all()
 
         for gr in ugroup_repo_perms:
-            c.users_group.permissions['repositories'][gr.repository.repo_name]  \
+            permissions['repositories'][gr.repository.repo_name]  \
                 = gr.permission.permission_name
 
         ugroup_group_perms = UserGroupRepoGroupToPerm.query()\
@@ -83,9 +87,9 @@ class UsersGroupsController(BaseController):
             .all()
 
         for gr in ugroup_group_perms:
-            c.users_group.permissions['repositories_groups'][gr.group.group_name] \
+            permissions['repositories_groups'][gr.group.group_name] \
                 = gr.permission.permission_name
-
+        c.permissions = permissions
         c.group_members_obj = sorted((x.user for x in c.users_group.members),
                                      key=lambda u: u.username.lower())
 
