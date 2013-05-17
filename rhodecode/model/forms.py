@@ -182,7 +182,8 @@ def RepoForm(edit=False, old_data={}, supported_backends=BACKENDS.keys(),
                         v.SlugifyName())
         repo_group = All(v.CanWriteGroup(old_data),
                          v.OneOf(repo_groups, hideList=True))
-        repo_type = v.OneOf(supported_backends)
+        repo_type = v.OneOf(supported_backends, required=False,
+                            if_missing=old_data.get('repo_type'))
         repo_description = v.UnicodeString(strip=True, min=1, not_empty=False)
         repo_private = v.StringBoolean(if_missing=False)
         repo_landing_rev = v.OneOf(landing_revs, hideList=True)
