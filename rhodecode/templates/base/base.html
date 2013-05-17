@@ -77,11 +77,14 @@
   </ul>
 </%def>
 
-<%def name="admin_menu_simple(repository_groups=None, user_groups=None)">
+<%def name="admin_menu_simple(repositories=None, repository_groups=None, user_groups=None)">
   <ul>
+   %if repositories:
+      <li>${h.link_to(_('Repositories'),h.url('repos'),class_='repos')}</li>
+   %endif
    %if repository_groups:
       <li>${h.link_to(_('Repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
-   %endif:
+   %endif
    %if user_groups:
       <li>${h.link_to(_('User groups'),h.url('users_groups'),class_='groups')}</li>
    %endif
@@ -311,12 +314,13 @@
               </a>
               ${admin_menu()}
             </li>
-          % elif c.rhodecode_user.repository_groups_admin or c.rhodecode_user.user_groups_admin:
+          % elif c.rhodecode_user.repositories_admin or c.rhodecode_user.repository_groups_admin or c.rhodecode_user.user_groups_admin:
           <li ${is_current('admin')}>
               <a class="menu_link admin childs" title="${_('Admin')}">
                 ${_('Admin')}
               </a>
-              ${admin_menu_simple(c.rhodecode_user.repository_groups_admin,
+              ${admin_menu_simple(c.rhodecode_user.repositories_admin,
+                                  c.rhodecode_user.repository_groups_admin,
                                   c.rhodecode_user.user_groups_admin or h.HasPermissionAny('hg.usergroup.create.true')())}
           </li>
           % endif

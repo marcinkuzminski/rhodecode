@@ -403,7 +403,7 @@ class  AuthUser(object):
         return self.admin
 
     @property
-    def repos_admin(self):
+    def repositories_admin(self):
         """
         Returns list of repositories you're an admin of
         """

@@ -133,15 +133,14 @@ class ReposController(BaseRepoController):
         defaults['id_fork_of'] = db_repo.fork.repo_id if db_repo.fork else ''
         return defaults
 
-    @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
+        repo_list = Repository.query()\
+                                .order_by(func.lower(Repository.repo_name))\
+                                .all()
 
-        c.repos_list = Repository.query()\
-                        .order_by(func.lower(Repository.repo_name))\
-                        .all()
-
+        c.repos_list = RepoList(repo_list, perm_set=['repository.admin'])
         repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
                                                    admin=True,
                                                    super_user_actions=True)
