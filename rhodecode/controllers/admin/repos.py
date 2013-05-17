@@ -254,11 +254,15 @@ class ReposController(BaseRepoController):
         choices, c.landing_revs = ScmModel().get_repo_landing_revs(repo_name)
         c.landing_revs_choices = choices
         repo = Repository.get_by_repo_name(repo_name)
-        _form = RepoForm(edit=True, old_data={'repo_name': repo_name,
-                                              'repo_group': repo.group.get_dict() \
-                                              if repo.group else {}},
+        old_data = {
+            'repo_name': repo_name,
+            'repo_group': repo.group.get_dict() if repo.group else {},
+            'repo_type': repo.repo_type,
+        }
+        _form = RepoForm(edit=True, old_data=old_data,
                          repo_groups=c.repo_groups_choices,
                          landing_revs=c.landing_revs_choices)()
+
         try:
             form_result = _form.to_python(dict(request.POST))
             repo = repo_model.update(repo_name, **form_result)
