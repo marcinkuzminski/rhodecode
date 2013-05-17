@@ -46,7 +46,7 @@ from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
     RhodeCodeSetting, RepositoryField
 from rhodecode.model.forms import RepoForm, RepoFieldForm, RepoPermsForm
-from rhodecode.model.scm import ScmModel, RepoGroupList
+from rhodecode.model.scm import ScmModel, RepoGroupList, RepoList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
 from sqlalchemy.sql.expression import func
@@ -123,10 +123,12 @@ class ReposController(BaseRepoController):
 
         defaults = RepoModel()._get_defaults(repo_name)
 
+        _repos = Repository.query().order_by(Repository.repo_name).all()
+        read_access_repos = RepoList(_repos)
         c.repos_list = [('', _('--REMOVE FORK--'))]
-        c.repos_list += [(x.repo_id, x.repo_name) for x in
-                    Repository.query().order_by(Repository.repo_name).all()
-                    if x.repo_id != c.repo_info.repo_id]
+        c.repos_list += [(x.repo_id, x.repo_name)
+                         for x in read_access_repos
+                         if x.repo_id != c.repo_info.repo_id]
 
         defaults['id_fork_of'] = db_repo.fork.repo_id if db_repo.fork else ''
         return defaults

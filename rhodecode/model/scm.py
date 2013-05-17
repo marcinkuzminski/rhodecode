@@ -197,6 +197,17 @@ class _PermCheckIterator(object):
             yield db_obj
 
 
+class RepoList(_PermCheckIterator):
+
+    def __init__(self, db_repo_list, perm_set=None):
+        if not perm_set:
+            perm_set = ['repository.read', 'repository.write', 'repository.admin']
+
+        super(RepoList, self).__init__(obj_list=db_repo_list,
+                    obj_attr='repo_name', perm_set=perm_set,
+                    perm_checker=HasRepoPermissionAny)
+
+
 class RepoGroupList(_PermCheckIterator):
 
     def __init__(self, db_repo_group_list, perm_set=None):
