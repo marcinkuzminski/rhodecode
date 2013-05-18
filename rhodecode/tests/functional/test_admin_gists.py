@@ -92,7 +92,7 @@ class TestGistsController(TestController):
         Session().add(gist)
         Session().commit()
 
-        response = self.app.get(url('gist', id=gist.gist_access_id), status=404)
+        response = self.app.get(url('gist', gist_id=gist.gist_access_id), status=404)
 
     def test_create_private(self):
         self.log_user()
@@ -128,28 +128,28 @@ class TestGistsController(TestController):
 
     def test_update(self):
         self.skipTest('not implemented')
-        response = self.app.put(url('gist', id=1))
+        response = self.app.put(url('gist', gist_id=1))
 
     def test_delete(self):
         self.log_user()
         gist = _create_gist('delete-me')
-        response = self.app.delete(url('gist', id=gist.gist_id))
+        response = self.app.delete(url('gist', gist_id=gist.gist_id))
         self.checkSessionFlash(response, 'Deleted gist %s' % gist.gist_id)
 
     def test_delete_normal_user_his_gist(self):
         self.log_user(TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS)
         gist = _create_gist('delete-me', owner=TEST_USER_REGULAR_LOGIN)
-        response = self.app.delete(url('gist', id=gist.gist_id))
+        response = self.app.delete(url('gist', gist_id=gist.gist_id))
         self.checkSessionFlash(response, 'Deleted gist %s' % gist.gist_id)
 
     def test_delete_normal_user_not_his_own_gist(self):
         self.log_user(TEST_USER_REGULAR_LOGIN, TEST_USER_REGULAR_PASS)
         gist = _create_gist('delete-me')
-        response = self.app.delete(url('gist', id=gist.gist_id), status=403)
+        response = self.app.delete(url('gist', gist_id=gist.gist_id), status=403)
 
     def test_show(self):
         gist = _create_gist('gist-show-me')
-        response = self.app.get(url('gist', id=gist.gist_access_id))
+        response = self.app.get(url('gist', gist_id=gist.gist_access_id))
         response.mustcontain('added file: gist-show-me<')
         response.mustcontain('test_admin (RhodeCode Admin) - created')
         response.mustcontain('gist-desc')
@@ -157,4 +157,4 @@ class TestGistsController(TestController):
 
     def test_edit(self):
         self.skipTest('not implemented')
-        response = self.app.get(url('edit_gist', id=1))
+        response = self.app.get(url('edit_gist', gist_id=1))

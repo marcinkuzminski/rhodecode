@@ -2161,7 +2161,7 @@ class Gist(Base, BaseModel):
             return alias_url.replace('{gistid}', self.gist_access_id)
 
         from pylons import url
-        return url('gist', id=self.gist_access_id, qualified=True)
+        return url('gist', gist_id=self.gist_access_id, qualified=True)
 
     @classmethod
     def base_path(cls):

@@ -52,7 +52,7 @@
                           ## only owner should see that
                           %if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
                             ##${h.link_to(_('Edit'),h.url(''),class_="ui-btn")}
-                            ${h.form(url('gist', id=c.gist.gist_id),method='delete')}
+                            ${h.form(url('gist', gist_id=c.gist.gist_id),method='delete')}
                                 ${h.submit('remove_gist', _('Delete'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this gist')+"');")}
                             ${h.end_form()}
                           %endif

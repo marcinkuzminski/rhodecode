@@ -126,7 +126,7 @@ class GistsController(BaseController):
             log.error(traceback.format_exc())
             h.flash(_('Error occurred during gist creation'), category='error')
             return redirect(url('new_gist'))
-        return redirect(url('gist', id=new_gist_id))
+        return redirect(url('gist', gist_id=new_gist_id))
 
     @LoginRequired()
     @NotAnonymous()
@@ -138,26 +138,26 @@ class GistsController(BaseController):
 
     @LoginRequired()
     @NotAnonymous()
-    def update(self, id):
-        """PUT /admin/gists/id: Update an existing item"""
+    def update(self, gist_id):
+        """PUT /admin/gists/gist_id: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="PUT" />
         # Or using helpers:
-        #    h.form(url('gist', id=ID),
+        #    h.form(url('gist', gist_id=ID),
         #           method='put')
-        # url('gist', id=ID)
+        # url('gist', gist_id=ID)
 
     @LoginRequired()
     @NotAnonymous()
-    def delete(self, id):
-        """DELETE /admin/gists/id: Delete an existing item"""
+    def delete(self, gist_id):
+        """DELETE /admin/gists/gist_id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="DELETE" />
         # Or using helpers:
-        #    h.form(url('gist', id=ID),
+        #    h.form(url('gist', gist_id=ID),
         #           method='delete')
-        # url('gist', id=ID)
-        gist = GistModel().get_gist(id)
+        # url('gist', gist_id=ID)
+        gist = GistModel().get_gist(gist_id)
         owner = gist.gist_owner == c.rhodecode_user.user_id
         if h.HasPermissionAny('hg.admin')() or owner:
             GistModel().delete(gist)
@@ -169,10 +169,9 @@ class GistsController(BaseController):
         return redirect(url('gists'))
 
     @LoginRequired()
-    def show(self, id, format='html'):
-        """GET /admin/gists/id: Show a specific item"""
-        # url('gist', id=ID)
-        gist_id = id
+    def show(self, gist_id, format='html'):
+        """GET /admin/gists/gist_id: Show a specific item"""
+        # url('gist', gist_id=ID)
         c.gist = Gist.get_or_404(gist_id)
 
         #check if this gist is not expired
@@ -191,6 +190,6 @@ class GistsController(BaseController):
 
     @LoginRequired()
     @NotAnonymous()
-    def edit(self, id, format='html'):
-        """GET /admin/gists/id/edit: Form to edit an existing item"""
-        # url('edit_gist', id=ID)
+    def edit(self, gist_id, format='html'):
+        """GET /admin/gists/gist_id/edit: Form to edit an existing item"""
+        # url('edit_gist', gist_id=ID)

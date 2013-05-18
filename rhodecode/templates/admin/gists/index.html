@@ -42,7 +42,7 @@
             </div>
             <div title="${gist.owner.full_contact}" class="user" style="font-size: 16px">
                 <b>${h.person(gist.owner.full_contact)}</b> /
-                <b><a href="${h.url('gist',id=gist.gist_access_id)}">gist:${gist.gist_access_id}</a></b>
+                <b><a href="${h.url('gist',gist_id=gist.gist_access_id)}">gist:${gist.gist_access_id}</a></b>
             </div>
             <div style="padding: 4px 0px 0px 0px">
                 ${_('Created')} ${h.age(gist.created_on)} /
