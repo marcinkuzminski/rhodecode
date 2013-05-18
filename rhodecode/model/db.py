@@ -613,6 +613,11 @@ class UserLog(Base, BaseModel):
     action = Column("action", UnicodeText(1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
+    def __unicode__(self):
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                      self.repository_name,
+                                      self.action)
+
     @property
     def action_as_day(self):
         return datetime.date(*self.action_date.timetuple()[:3])

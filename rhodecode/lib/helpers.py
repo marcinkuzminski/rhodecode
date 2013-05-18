@@ -684,6 +684,10 @@ def action_parser(user_log, feed=False, parse_cs=False):
                     url('pullrequest_show', repo_name=repo_name,
                     pull_request_id=pull_request_id))
 
+    def get_archive_name():
+        archive_name = action_params
+        return archive_name
+
     # action : translated str, callback(extractor), icon
     action_map = {
     'user_deleted_repo':           (_('[deleted] repository'),
@@ -696,6 +700,8 @@ def action_parser(user_log, feed=False, parse_cs=False):
                                     get_fork_name, 'arrow_divide.png'),
     'user_updated_repo':           (_('[updated] repository'),
                                     None, 'database_edit.png'),
+    'user_downloaded_archive':      (_('[downloaded] archive from repository'),
+                                    get_archive_name, 'page_white_compressed.png'),
     'admin_deleted_repo':          (_('[delete] repository'),
                                     None, 'database_delete.png'),
     'admin_created_repo':          (_('[created] repository'),

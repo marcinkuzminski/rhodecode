@@ -32,7 +32,7 @@ import shutil
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-from rhodecode.lib.utils import jsonify
+from rhodecode.lib.utils import jsonify, action_logger
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
@@ -492,7 +492,10 @@ class FilesController(BaseRepoController):
                         os.remove(archive)
                     break
                 yield data
-
+        # store download action
+        action_logger(user=c.rhodecode_user,
+                      action='user_downloaded_archive:%s' % (archive_name),
+                      repo=repo_name, ipaddr=self.ip_addr, commit=True)
         response.content_disposition = str('attachment; filename=%s' % (archive_name))
         response.content_type = str(content_type)
         return get_chunked_archive(archive)
