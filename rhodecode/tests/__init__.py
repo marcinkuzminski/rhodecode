@@ -25,7 +25,6 @@ import hashlib
 import tempfile
 from os.path import join as jn
 
-from unittest import TestCase
 from tempfile import _RandomNameSequence
 
 from paste.deploy import loadapp
@@ -41,6 +40,7 @@ from routes.util import URLGenerator
 from webtest import TestApp
 from nose.plugins.skip import SkipTest
 
+from rhodecode.lib.compat import unittest
 from rhodecode import is_windows
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User
@@ -157,11 +157,11 @@ def init_stack(config=None):
     pylons.translator._push_object(translator)
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         self.wsgiapp = pylons.test.pylonsapp
         init_stack(self.wsgiapp.config)
-        TestCase.__init__(self, *args, **kwargs)
+        unittest.TestCase.__init__(self, *args, **kwargs)
 
 
 class TestController(BaseTestCase):

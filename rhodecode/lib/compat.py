@@ -32,6 +32,10 @@ from rhodecode import __py_version__, is_windows
 #==============================================================================
 from rhodecode.lib.ext_json import json
 
+if __py_version__ >= (2, 7):
+    import unittest
+else:
+    import unittest2 as unittest
 
 #==============================================================================
 # izip_longest
