@@ -27,7 +27,7 @@ from __future__ import with_statement
 import sys
 import argparse
 
-from rhodecode.bin.base import api_call, RcConf, FORMAT_JSON, FORMAT_PRETTY
+from rhodecode.bin.base import json, api_call, RcConf, FORMAT_JSON, FORMAT_PRETTY
 
 
 def argparser(argv):
@@ -53,8 +53,8 @@ def argparser(argv):
             help='API method name to call followed by key:value attributes',
     )
     group.add_argument('--format', dest='format', type=str,
-            help='output format default: `pretty` can '
-                 'be also `%s`' % FORMAT_JSON,
+            help='output format default: `%s` can '
+                 'be also `%s`' % (FORMAT_PRETTY, FORMAT_JSON),
             default=FORMAT_PRETTY
     )
     args, other = parser.parse_known_args()
@@ -90,16 +90,27 @@ def main(argv=None):
                              '--apikey or --apihost in params')
 
     apikey = args.apikey or conf['apikey']
-    host = args.apihost or conf['apihost']
+    apihost = args.apihost or conf['apihost']
     method = args.method
+
+    # if we don't have method here it's an error
+    if not method:
+        parser.error('Please specify method name')
 
     try:
         margs = dict(map(lambda s: s.split(':', 1), other))
     except Exception:
         sys.stderr.write('Error parsing arguments \n')
         sys.exit()
+    if args.format == FORMAT_PRETTY:
+        print 'Calling method %s => %s' % (method, apihost)
 
-    api_call(apikey, host, args.format, method, **margs)
+    json_data = api_call(apikey, apihost, method, **margs)['result']
+    if args.format == FORMAT_JSON:
+        print json.dumps(json_data)
+    elif args.format == FORMAT_PRETTY:
+        print 'Server response \n%s' % (
+                json.dumps(json_data, indent=4, sort_keys=True))
     return 0
 
 if __name__ == '__main__':

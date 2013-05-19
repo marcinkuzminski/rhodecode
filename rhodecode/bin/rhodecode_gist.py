@@ -30,7 +30,7 @@ import stat
 import argparse
 import fileinput
 
-from rhodecode.bin.base import api_call, RcConf
+from rhodecode.bin.base import json, api_call, RcConf, FORMAT_JSON, FORMAT_PRETTY
 
 
 def argparser(argv):
@@ -59,7 +59,11 @@ def argparser(argv):
     group.add_argument('-d', '--description', help='Gist description')
     group.add_argument('-l', '--lifetime', metavar='MINUTES',
                        help='Gist lifetime in minutes, -1 (Default) is forever')
-
+    group.add_argument('--format', dest='format', type=str,
+            help='output format default: `%s` can '
+                 'be also `%s`' % (FORMAT_PRETTY, FORMAT_JSON),
+            default=FORMAT_PRETTY
+    )
     args, other = parser.parse_known_args()
     return parser, args, other
 
@@ -135,7 +139,12 @@ def _run(argv):
             files=files
         )
 
-        api_call(apikey, host, 'json', 'create_gist', **margs)
+        json_data = api_call(apikey, host, 'create_gist', **margs)['result']
+        if args.format == FORMAT_JSON:
+            print json.dumps(json_data)
+        elif args.format == FORMAT_PRETTY:
+            print 'Created %s gist %s' % (json_data['gist_type'],
+                                          json_data['gist_url'])
     return 0
 
 

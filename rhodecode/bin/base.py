@@ -20,15 +20,16 @@ FORMAT_PRETTY = 'pretty'
 FORMAT_JSON = 'json'
 
 
-def api_call(apikey, apihost, format, method=None, **kw):
+def api_call(apikey, apihost, method=None, **kw):
     """
-    Api_call wrapper for RhodeCode
+    Api_call wrapper for RhodeCode.
 
     :param apikey:
     :param apihost:
     :param format: formatting, pretty means prints and pprint of json
      json returns unparsed json
     :param method:
+    :returns: json response from server
     """
     def _build_data(random_id):
         """
@@ -45,24 +46,20 @@ def api_call(apikey, apihost, format, method=None, **kw):
 
     if not method:
         raise Exception('please specify method name !')
+
     id_ = random.randrange(1, 9999)
     req = urllib2.Request('%s/_admin/api' % apihost,
                       data=json.dumps(_build_data(id_)),
                       headers={'content-type': 'text/plain'})
-    if format == FORMAT_PRETTY:
-        sys.stdout.write('calling %s to %s \n' % (req.get_data(), apihost))
     ret = urllib2.urlopen(req)
     raw_json = ret.read()
     json_data = json.loads(raw_json)
     id_ret = json_data['id']
-    _formatted_json = pprint.pformat(json_data)
     if id_ret == id_:
-        if format == FORMAT_JSON:
-            sys.stdout.write(str(raw_json))
-        else:
-            sys.stdout.write('rhodecode returned:\n%s\n' % (_formatted_json))
+        return json_data
 
     else:
+        _formatted_json = pprint.pformat(json_data)
         raise Exception('something went wrong. '
                         'ID mismatch got %s, expected %s | %s' % (
                                             id_ret, id_, _formatted_json))
