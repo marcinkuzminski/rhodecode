@@ -2138,7 +2138,7 @@ class Gist(Base, BaseModel):
     GIST_PRIVATE = u'private'
 
     gist_id = Column('gist_id', Integer(), primary_key=True)
-    gist_access_id = Column('gist_access_id', Unicode(1024))
+    gist_access_id = Column('gist_access_id', Unicode(250))
     gist_description = Column('gist_description', UnicodeText(1024))
     gist_owner = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=True)
     gist_expires = Column('gist_expires', Float(), nullable=False)
