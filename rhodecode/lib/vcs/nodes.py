@@ -13,8 +13,6 @@ import stat
 import posixpath
 import mimetypes
 
-from pygments import lexers
-
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.vcs.exceptions import NodeError, RemovedFileNodeError
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
@@ -360,7 +358,7 @@ class FileNode(Node):
         Returns pygment's lexer class. Would try to guess lexer taking file's
         content, name and mimetype.
         """
-
+        from pygments import lexers
         try:
             lexer = lexers.guess_lexer_for_filename(self.name, self.content, stripnl=False)
         except lexers.ClassNotFound:
