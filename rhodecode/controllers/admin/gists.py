@@ -28,7 +28,7 @@ import traceback
 import formencode
 from formencode import htmlfill
 
-from pylons import request, tmpl_context as c, url
+from pylons import request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
@@ -169,7 +169,7 @@ class GistsController(BaseController):
         return redirect(url('gists'))
 
     @LoginRequired()
-    def show(self, gist_id, format='html'):
+    def show(self, gist_id, format='html', revision='tip', f_path=None):
         """GET /admin/gists/gist_id: Show a specific item"""
         # url('gist', gist_id=ID)
         c.gist = Gist.get_or_404(gist_id)
@@ -185,7 +185,10 @@ class GistsController(BaseController):
         except VCSError:
             log.error(traceback.format_exc())
             raise HTTPNotFound()
-
+        if format == 'raw':
+            content = '\n\n'.join([f.content for f in c.files if (f_path is None or f.path == f_path)])
+            response.content_type = 'text/plain'
+            return content
         return render('admin/gists/show.html')
 
     @LoginRequired()

@@ -381,7 +381,7 @@ def make_map(config):
                   action="edit", conditions=dict(method=["GET"]))
         m.connect("notification", "/notification/{notification_id}",
                   action="show", conditions=dict(method=["GET"]))
-        m.connect("formatted_notification", "/notifications/{notification_id}.{format}",
+        m.connect("formatted_notification", "/notification/{notification_id}.{format}",
                   action="show", conditions=dict(method=["GET"]))
 
     #ADMIN GIST
@@ -391,11 +391,11 @@ def make_map(config):
                   action="create", conditions=dict(method=["POST"]))
         m.connect("gists", "/gists",
                   action="index", conditions=dict(method=["GET"]))
-        m.connect("formatted_gists", "/gists.{format}",
+        m.connect("formatted_gists", "/gists/{format}",
                   action="index", conditions=dict(method=["GET"]))
         m.connect("new_gist", "/gists/new",
                   action="new", conditions=dict(method=["GET"]))
-        m.connect("formatted_new_gist", "/gists/new.{format}",
+        m.connect("formatted_new_gist", "/gists/new/{format}",
                   action="new", conditions=dict(method=["GET"]))
         m.connect("/gist/{gist_id}",
                   action="update", conditions=dict(method=["PUT"]))
@@ -404,11 +404,13 @@ def make_map(config):
         m.connect("edit_gist", "/gist/{gist_id}/edit",
                   action="edit", conditions=dict(method=["GET"]))
         m.connect("formatted_edit_gist",
-                  "/gist/{gist_id}.{format}/edit",
+                  "/gist/{gist_id}/{format}/edit",
                   action="edit", conditions=dict(method=["GET"]))
         m.connect("gist", "/gist/{gist_id}",
                   action="show", conditions=dict(method=["GET"]))
-        m.connect("formatted_gist", "/gists/{gist_id}.{format}",
+        m.connect("formatted_gist", "/gist/{gist_id}/{format}",
+                  action="show", conditions=dict(method=["GET"]))
+        m.connect("formatted_gist_file", "/gist/{gist_id}/{format}/{revision}/{f_path:.*}",
                   action="show", conditions=dict(method=["GET"]))
 
     #ADMIN MAIN PAGES

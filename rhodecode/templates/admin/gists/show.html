@@ -48,14 +48,19 @@
                        <div class="left item last">
                             ${c.gist.gist_description}
                        </div>
-                        <div class="buttons">
-                          ## only owner should see that
-                          %if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
-                            ##${h.link_to(_('Edit'),h.url(''),class_="ui-btn")}
+                       %if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
+                        <div style="float:right;margin:-4px 0px 0px 0px">
                             ${h.form(url('gist', gist_id=c.gist.gist_id),method='delete')}
                                 ${h.submit('remove_gist', _('Delete'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this gist')+"');")}
                             ${h.end_form()}
-                          %endif
+                        </div>
+                       %endif
+                        <div class="buttons">
+                          ## only owner should see that
+                          ##%if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
+                            ##${h.link_to(_('Edit'),h.url(''),class_="ui-btn")}
+                          ##%endif
+                          ${h.link_to(_('Show as raw'),h.url('formatted_gist', gist_id=c.gist.gist_id, format='raw'),class_="ui-btn")}
                         </div>
                     </div>
 
@@ -75,9 +80,9 @@
                 <div id="${h.FID('G', file.path)}" class="stats" style="border-bottom: 1px solid #DDD;padding: 8px 14px;">
                     <a href="${c.gist.gist_url()}">¶</a>
                     <b style="margin:0px 0px 0px 4px">${file.path}</b>
-                    ##<div class="buttons">
-                    ##   ${h.link_to(_('Show as raw'),h.url(''),class_="ui-btn")}
-                    ##</div>
+                    <div style="float:right">
+                       ${h.link_to(_('Show as raw'),h.url('formatted_gist_file', gist_id=c.gist.gist_id, format='raw', revision=file.changeset.raw_id, f_path=file.path),class_="ui-btn")}
+                    </div>
                 </div>
                 <div class="code-body">
                     ${h.pygmentize(file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
