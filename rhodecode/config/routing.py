@@ -391,12 +391,12 @@ def make_map(config):
                   action="create", conditions=dict(method=["POST"]))
         m.connect("gists", "/gists",
                   action="index", conditions=dict(method=["GET"]))
-        m.connect("formatted_gists", "/gists/{format}",
-                  action="index", conditions=dict(method=["GET"]))
         m.connect("new_gist", "/gists/new",
                   action="new", conditions=dict(method=["GET"]))
         m.connect("formatted_new_gist", "/gists/new/{format}",
                   action="new", conditions=dict(method=["GET"]))
+        m.connect("formatted_gists", "/gists/{format}",
+                  action="index", conditions=dict(method=["GET"]))
         m.connect("/gist/{gist_id}",
                   action="update", conditions=dict(method=["PUT"]))
         m.connect("/gist/{gist_id}",
