@@ -532,10 +532,9 @@ removed extra unicode conversion in diff.</div>
                                       repo_name=GIT_REPO,
                                       revision='tip', f_path='/'),
                                  params={
-                                    ''
+                                     'content': ''
                                  },
                                  status=302)
-
         self.checkSessionFlash(response, 'No content')
 
     def test_add_file_into_git_missing_filename(self):
