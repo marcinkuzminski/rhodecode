@@ -155,6 +155,19 @@ class TestGistsController(TestController):
         response.mustcontain('gist-desc')
         response.mustcontain('<div class="ui-btn green badge">Public gist</div>')
 
+    def test_show_as_raw(self):
+        gist = _create_gist('gist-show-me', content='GIST CONTENT')
+        response = self.app.get(url('formatted_gist',
+                                    gist_id=gist.gist_access_id, format='raw'))
+        self.assertEqual(response.body, 'GIST CONTENT')
+
+    def test_show_as_raw_individual_file(self):
+        gist = _create_gist('gist-show-me-raw', content='GIST BODY')
+        response = self.app.get(url('formatted_gist_file',
+                                    gist_id=gist.gist_access_id, format='raw',
+                                    revision='tip', f_path='gist-show-me-raw'))
+        self.assertEqual(response.body, 'GIST BODY')
+
     def test_edit(self):
         self.skipTest('not implemented')
         response = self.app.get(url('edit_gist', gist_id=1))
