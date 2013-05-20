@@ -504,6 +504,14 @@ class ScmModel(BaseModel):
         try:
             if repo.alias == 'git':
                 repo.fetch(clone_uri)
+                # git doesn't really have something like post-fetch action
+                # we fake that now. #TODO: extract fetched revisions somehow
+                # here
+                self._handle_push(repo,
+                                  username=username,
+                                  action='push_remote',
+                                  repo_name=repo_name,
+                                  revisions=[])
             else:
                 self._handle_rc_scm_extras(username, dbrepo.repo_name,
                                            repo.alias, action='push_remote')
