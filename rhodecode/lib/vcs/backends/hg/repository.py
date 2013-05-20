@@ -33,7 +33,7 @@ from rhodecode.lib.vcs.utils.paths import abspath
 from rhodecode.lib.vcs.utils.hgcompat import (
     ui, nullid, match, patch, diffopts, clone, get_contact, pull,
     localrepository, RepoLookupError, Abort, RepoError, hex, scmutil, hg_url,
-    httpbasicauthhandler, httpdigestauthhandler
+    httpbasicauthhandler, httpdigestauthhandler, peer
 )
 
 from .changeset import MercurialChangeset
@@ -515,7 +515,8 @@ class MercurialRepository(BaseRepository):
         """
         url = self._get_url(url)
         try:
-            pull(self.baseui, self._repo, url)
+            other = peer(self._repo, {}, url)
+            self._repo.pull(other, heads=None, force=None)
         except Abort, err:
             # Propagate error but with vcs's type
             raise RepositoryError(str(err))

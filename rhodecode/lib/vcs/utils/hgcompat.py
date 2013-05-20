@@ -16,6 +16,7 @@ from mercurial import discovery
 from mercurial import localrepo
 from mercurial import scmutil
 from mercurial.discovery import findcommonoutgoing
+from mercurial.hg import peer
 
 from mercurial.util import url as hg_url
 
