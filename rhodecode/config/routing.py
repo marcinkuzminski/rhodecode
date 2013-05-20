@@ -370,18 +370,18 @@ def make_map(config):
                   action="new", conditions=dict(method=["GET"]))
         m.connect("formatted_new_notification", "/notifications/new.{format}",
                   action="new", conditions=dict(method=["GET"]))
-        m.connect("/notification/{notification_id}",
+        m.connect("/notifications/{notification_id}",
                   action="update", conditions=dict(method=["PUT"]))
-        m.connect("/notification/{notification_id}",
+        m.connect("/notifications/{notification_id}",
                   action="delete", conditions=dict(method=["DELETE"]))
-        m.connect("edit_notification", "/notification/{notification_id}/edit",
+        m.connect("edit_notification", "/notifications/{notification_id}/edit",
                   action="edit", conditions=dict(method=["GET"]))
         m.connect("formatted_edit_notification",
-                  "/notification/{notification_id}.{format}/edit",
+                  "/notifications/{notification_id}.{format}/edit",
                   action="edit", conditions=dict(method=["GET"]))
-        m.connect("notification", "/notification/{notification_id}",
+        m.connect("notification", "/notifications/{notification_id}",
                   action="show", conditions=dict(method=["GET"]))
-        m.connect("formatted_notification", "/notification/{notification_id}.{format}",
+        m.connect("formatted_notification", "/notifications/{notification_id}.{format}",
                   action="show", conditions=dict(method=["GET"]))
 
     #ADMIN GIST
@@ -393,24 +393,24 @@ def make_map(config):
                   action="index", conditions=dict(method=["GET"]))
         m.connect("new_gist", "/gists/new",
                   action="new", conditions=dict(method=["GET"]))
-        m.connect("formatted_new_gist", "/gists/new/{format}",
+        m.connect("formatted_new_gist", "/gists/new.{format}",
                   action="new", conditions=dict(method=["GET"]))
-        m.connect("formatted_gists", "/gists/{format}",
+        m.connect("formatted_gists", "/gists.{format}",
                   action="index", conditions=dict(method=["GET"]))
-        m.connect("/gist/{gist_id}",
+        m.connect("/gists/{gist_id}",
                   action="update", conditions=dict(method=["PUT"]))
-        m.connect("/gist/{gist_id}",
+        m.connect("/gists/{gist_id}",
                   action="delete", conditions=dict(method=["DELETE"]))
-        m.connect("edit_gist", "/gist/{gist_id}/edit",
+        m.connect("edit_gist", "/gists/{gist_id}/edit",
                   action="edit", conditions=dict(method=["GET"]))
         m.connect("formatted_edit_gist",
-                  "/gist/{gist_id}/{format}/edit",
+                  "/gists/{gist_id}/{format}/edit",
                   action="edit", conditions=dict(method=["GET"]))
-        m.connect("gist", "/gist/{gist_id}",
+        m.connect("gist", "/gists/{gist_id}",
                   action="show", conditions=dict(method=["GET"]))
-        m.connect("formatted_gist", "/gist/{gist_id}/{format}",
+        m.connect("formatted_gist", "/gists/{gist_id}/{format}",
                   action="show", conditions=dict(method=["GET"]))
-        m.connect("formatted_gist_file", "/gist/{gist_id}/{format}/{revision}/{f_path:.*}",
+        m.connect("formatted_gist_file", "/gists/{gist_id}/{format}/{revision}/{f_path:.*}",
                   action="show", conditions=dict(method=["GET"]))
 
     #ADMIN MAIN PAGES
