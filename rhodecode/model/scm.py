@@ -405,16 +405,8 @@ class ScmModel(BaseModel):
         self.sa.add(repo)
         return repo
 
-    def _handle_push(self, repo, username, action, repo_name, revisions):
-        """
-        Triggers push action hooks
-
-        :param repo: SCM repo
-        :param username: username who pushes
-        :param action: push/push_loca/push_remote
-        :param repo_name: name of repo
-        :param revisions: list of revisions that we pushed
-        """
+    def _handle_rc_scm_extras(self, username, repo_name, repo_alias,
+                              action=None):
         from rhodecode import CONFIG
         from rhodecode.lib.base import _get_ip_addr
         try:
@@ -425,21 +417,32 @@ class ScmModel(BaseModel):
             # environ data
             from webob import Request
             environ = Request.blank('').environ
-
-        #trigger push hook
         extras = {
             'ip': _get_ip_addr(environ),
             'username': username,
-            'action': 'push_local',
+            'action': action or 'push_local',
             'repository': repo_name,
-            'scm': repo.alias,
+            'scm': repo_alias,
             'config': CONFIG['__file__'],
             'server_url': get_server_url(environ),
             'make_lock': None,
             'locked_by': [None, None]
         }
-        _scm_repo = repo._repo
         _set_extras(extras)
+
+    def _handle_push(self, repo, username, action, repo_name, revisions):
+        """
+        Triggers push action hooks
+
+        :param repo: SCM repo
+        :param username: username who pushes
+        :param action: push/push_loca/push_remote
+        :param repo_name: name of repo
+        :param revisions: list of revisions that we pushed
+        """
+        self._handle_rc_scm_extras(username, repo_name, repo_alias=repo.alias)
+        _scm_repo = repo._repo
+        # trigger push hook
         if repo.alias == 'hg':
             log_push_action(_scm_repo.ui, _scm_repo, node=revisions[0])
         elif repo.alias == 'git':
@@ -471,7 +474,10 @@ class ScmModel(BaseModel):
             if repo.alias == 'git':
                 repo.fetch(clone_uri)
             else:
+                self._handle_rc_scm_extras(username, dbrepo.repo_name,
+                                           repo.alias, action='push_remote')
                 repo.pull(clone_uri)
+
             self.mark_for_invalidation(repo_name)
         except Exception:
             log.error(traceback.format_exc())
