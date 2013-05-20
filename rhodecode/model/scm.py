@@ -436,7 +436,8 @@ class ScmModel(BaseModel):
         self.sa.add(repo)
         return repo
 
-    def _handle_rc_scm_extras(self, username, repo_name, repo_alias):
+    def _handle_rc_scm_extras(self, username, repo_name, repo_alias,
+                              action=None):
         from rhodecode import CONFIG
         from rhodecode.lib.base import _get_ip_addr
         try:
@@ -450,7 +451,7 @@ class ScmModel(BaseModel):
         extras = {
             'ip': _get_ip_addr(environ),
             'username': username,
-            'action': 'push_local',
+            'action': action or 'push_local',
             'repository': repo_name,
             'scm': repo_alias,
             'config': CONFIG['__file__'],
@@ -504,7 +505,10 @@ class ScmModel(BaseModel):
             if repo.alias == 'git':
                 repo.fetch(clone_uri)
             else:
+                self._handle_rc_scm_extras(username, dbrepo.repo_name,
+                                           repo.alias, action='push_remote')
                 repo.pull(clone_uri)
+
             self.mark_for_invalidation(repo_name)
         except Exception:
             log.error(traceback.format_exc())
