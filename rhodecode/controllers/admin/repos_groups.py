@@ -211,11 +211,6 @@ class ReposGroupsController(BaseController):
         )()
         try:
             form_result = repos_group_form.to_python(dict(request.POST))
-            if not c.rhodecode_user.is_admin:
-                if self._revoke_perms_on_yourself(form_result):
-                    msg = _('Cannot revoke permission for yourself as admin')
-                    h.flash(msg, category='warning')
-                    raise Exception('revoke admin permission on self')
 
             new_gr = ReposGroupModel().update(group_name, form_result)
             Session().commit()
@@ -278,14 +273,20 @@ class ReposGroupsController(BaseController):
     @HasReposGroupPermissionAnyDecorator('group.admin')
     def set_repo_group_perm_member(self, group_name):
         c.repos_group = ReposGroupModel()._get_repo_group(group_name)
-        form = RepoGroupPermsForm()().to_python(request.POST)
-
-        recursive = form['recursive']
+        form_result = RepoGroupPermsForm()().to_python(request.POST)
+        if not c.rhodecode_user.is_admin:
+            if self._revoke_perms_on_yourself(form_result):
+                msg = _('Cannot revoke permission for yourself as admin')
+                h.flash(msg, category='warning')
+                return redirect(url('edit_repos_group', group_name=group_name))
+        recursive = form_result['recursive']
         # iterate over all members(if in recursive mode) of this groups and
         # set the permissions !
         # this can be potentially heavy operation
-        ReposGroupModel()._update_permissions(c.repos_group, form['perms_new'],
-                                              form['perms_updates'], recursive)
+        ReposGroupModel()._update_permissions(c.repos_group,
+                                              form_result['perms_new'],
+                                              form_result['perms_updates'],
+                                              recursive)
         #TODO: implement this
         #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
         #              repo_name, self.ip_addr, self.sa)
