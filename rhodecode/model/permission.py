@@ -123,7 +123,7 @@ class PermissionModel(BaseModel):
                 self.sa.add(p)
 
             #stage 3 update all default permissions for repos if checked
-            if form_result['overwrite_default_repo'] == True:
+            if form_result['overwrite_default_repo']:
                 _def_name = form_result['default_repo_perm'].split('repository.')[-1]
                 _def = Permission.get_by_key('repository.' + _def_name)
                 # repos
@@ -136,7 +136,7 @@ class PermissionModel(BaseModel):
                         r2p.permission = _def
                         self.sa.add(r2p)
 
-            if form_result['overwrite_default_group'] == True:
+            if form_result['overwrite_default_group']:
                 _def_name = form_result['default_group_perm'].split('group.')[-1]
                 # groups
                 _def = Permission.get_by_key('group.' + _def_name)
@@ -146,7 +146,7 @@ class PermissionModel(BaseModel):
                     g2p.permission = _def
                     self.sa.add(g2p)
 
-            if form_result['overwrite_default_user_group'] == True:
+            if form_result['overwrite_default_user_group']:
                 _def_name = form_result['default_user_group_perm'].split('usergroup.')[-1]
                 # groups
                 _def = Permission.get_by_key('usergroup.' + _def_name)

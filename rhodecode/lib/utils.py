@@ -555,7 +555,7 @@ def load_rcextensions(root_path):
 
         #OVERRIDE OUR EXTENSIONS FROM RC-EXTENSIONS (if present)
 
-        if getattr(EXT, 'INDEX_EXTENSIONS', []) != []:
+        if getattr(EXT, 'INDEX_EXTENSIONS', []):
             log.debug('settings custom INDEX_EXTENSIONS')
             conf.INDEX_EXTENSIONS = getattr(EXT, 'INDEX_EXTENSIONS', [])
 

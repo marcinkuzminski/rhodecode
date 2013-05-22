@@ -35,7 +35,7 @@ class CeleryCommand(BasePasterCommand):
         except KeyError:
             CELERY_ON = False
 
-        if CELERY_ON == False:
+        if not CELERY_ON:
             raise Exception('Please enable celery_on in .ini config '
                             'file before running celeryd')
         rhodecode.CELERY_ON = CELERY_ON
