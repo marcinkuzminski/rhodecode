@@ -368,7 +368,7 @@ class SubprocessIOChunker(object):
         # presence of stuff in stderr output) we error out.
         # Else, we are happy.
         _returncode = _p.poll()
-        if _returncode or (_returncode == None and bg_err.length):
+        if _returncode or (_returncode is None and bg_err.length):
             try:
                 _p.terminate()
             except:

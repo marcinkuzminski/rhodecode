@@ -79,7 +79,7 @@ class RhodecodeAPI():
         if uid != response["id"]:
             raise InvalidResponseIDError("UUID does not match.")
 
-        if response["error"] != None:
+        if response["error"] is not None:
             raise RhodecodeResponseError(response["error"])
 
         return response["result"]

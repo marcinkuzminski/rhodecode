@@ -252,7 +252,7 @@ class TestAdminSettingsController(TestController):
         repo2 = Repository.get_by_repo_name(GIT_REPO)
         self.checkSessionFlash(response,
         'Marked repo %s as fork of %s' % (repo.repo_name, "Nothing"))
-        assert repo.fork == None
+        assert repo.fork is None
 
     def test_set_fork_of_same_repo(self):
         self.log_user()

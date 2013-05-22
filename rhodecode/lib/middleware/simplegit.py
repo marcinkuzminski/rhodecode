@@ -97,7 +97,7 @@ def is_git(environ):
     path_info = environ['PATH_INFO']
     isgit_path = GIT_PROTO_PAT.match(path_info)
     log.debug('pathinfo: %s detected as GIT %s' % (
-        path_info, isgit_path != None)
+        path_info, isgit_path is not None)
     )
     return isgit_path
 

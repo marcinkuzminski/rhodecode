@@ -60,7 +60,7 @@ class TestReposGroups(BaseTestCase):
         gr2 = fixture.create_user_group('tes2')
         Session().commit()
         self.assertRaises(formencode.Invalid, validator.to_python, 'test')
-        assert gr.users_group_id != None
+        assert gr.users_group_id is not None
         validator = v.ValidUserGroup(edit=True,
                                     old_data={'users_group_id':
                                               gr2.users_group_id})

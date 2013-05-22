@@ -234,7 +234,7 @@ class ChangesetController(BaseRepoController):
                 # show comments from them
 
                 prs = set([x.pull_request for x in
-                           filter(lambda x: x.pull_request != None, st)])
+                           filter(lambda x: x.pull_request is not None, st)])
 
                 for pr in prs:
                     c.comments.extend(pr.comments)

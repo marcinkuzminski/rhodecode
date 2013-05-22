@@ -161,7 +161,7 @@ def test_clone_with_credentials(no_errors=False, repo=HG_REPO, method=METHOD,
                                 seq=None, backend='hg'):
     cwd = path = jn(TESTS_TMP_PATH, repo)
 
-    if seq == None:
+    if seq is None:
         seq = _RandomNameSequence().next()
 
     try:

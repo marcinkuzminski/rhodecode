@@ -514,7 +514,7 @@ class DbManage(object):
                     ('ldap_attr_login', ''), ('ldap_attr_firstname', ''),
                     ('ldap_attr_lastname', ''), ('ldap_attr_email', '')]:
 
-            if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
+            if skip_existing and RhodeCodeSetting.get_by_name(k) is not None:
                 log.debug('Skipping option %s' % k)
                 continue
             setting = RhodeCodeSetting(k, v)
@@ -530,7 +530,7 @@ class DbManage(object):
             ('default_repo_private', False),
             ('default_repo_type', 'hg')]:
 
-            if skip_existing and RhodeCodeSetting.get_by_name(k) != None:
+            if skip_existing and RhodeCodeSetting.get_by_name(k) is not None:
                 log.debug('Skipping option %s' % k)
                 continue
             setting = RhodeCodeSetting(k, v)
