@@ -67,10 +67,10 @@ class BaseTestApi(object):
     REPO_TYPE = None
 
     @classmethod
-    def setUpClass(self):
-        self.usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
-        self.apikey = self.usr.api_key
-        self.test_user = UserModel().create_or_update(
+    def setUpClass(cls):
+        cls.usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
+        cls.apikey = cls.usr.api_key
+        cls.test_user = UserModel().create_or_update(
             username='test-api',
             password='test',
             email='test@api.rhodecode.org',
@@ -78,11 +78,11 @@ class BaseTestApi(object):
             lastname='last'
         )
         Session().commit()
-        self.TEST_USER_LOGIN = self.test_user.username
-        self.apikey_regular = self.test_user.api_key
+        cls.TEST_USER_LOGIN = cls.test_user.username
+        cls.apikey_regular = cls.test_user.api_key
 
     @classmethod
-    def teardownClass(self):
+    def teardownClass(cls):
         pass
 
     def setUp(self):
