@@ -598,11 +598,9 @@ def action_parser(user_log, feed=False, parse_cs=False):
                         'ref_name': _name
                     })
                     revs.append(_rev)
-        cs_links = []
-        cs_links.append(" " + ', '.join(
+        cs_links = [" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
-            )
-        )
+        )]
         _op1, _name1 = _get_op(revs_ids[0])
         _op2, _name2 = _get_op(revs_ids[-1])
 

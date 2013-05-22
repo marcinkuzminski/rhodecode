@@ -635,9 +635,7 @@ class GitRepository(BaseRepository):
         Tries to pull changes from external location.
         """
         url = self._get_url(url)
-        cmd = ['pull']
-        cmd.append("--ff-only")
-        cmd.append(url)
+        cmd = ['pull', "--ff-only", url]
         cmd = ' '.join(cmd)
         # If error occurs run_git_command raises RepositoryError already
         self.run_git_command(cmd)

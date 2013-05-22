@@ -55,8 +55,7 @@ class SimpleGitUploadPackHandler(dulserver.UploadPackHandler):
         self.progress("counting objects: %d, done.\n" % len(objects_iter))
         dulserver.write_pack_objects(dulserver.ProtocolFile(None, write),
                                      objects_iter)
-        messages = []
-        messages.append('thank you for using rhodecode')
+        messages = ['thank you for using rhodecode']
 
         for msg in messages:
             self.progress(msg + "\n")
