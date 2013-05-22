@@ -911,9 +911,9 @@ class ApiController(JSONRPCController):
             _forks_msg = ''
             _forks = [f for f in repo.forks]
             if handle_forks == 'detach':
-                _forks_msg = ' ' + _('Detached %s forks') % len(_forks)
+                _forks_msg = ' ' + 'Detached %s forks' % len(_forks)
             elif handle_forks == 'delete':
-                _forks_msg = ' ' + _('Deleted %s forks') % len(_forks)
+                _forks_msg = ' ' + 'Deleted %s forks' % len(_forks)
             elif _forks:
                 raise JSONRPCError(
                     'Cannot delete `%s` it still contains attached forks'
