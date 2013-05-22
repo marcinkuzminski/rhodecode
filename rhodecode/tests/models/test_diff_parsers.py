@@ -34,13 +34,13 @@ DIFF_FIXTURES = {
                   RENAMED_FILENODE: 'file renamed from README.rst to README',
                   CHMOD_FILENODE: 'modified file chmod 100755 => 100644'}}),
     ],
-    'hg_diff_rename_and_chmod_file.diff': [
-        ('README', 'M',
+    'hg_diff_mod_file_and_rename.diff': [
+        ('README.rst', 'M',
          {'added': 3,
           'deleted': 0,
           'binary': False,
           'ops': {MOD_FILENODE: 'modified file',
-                  BIN_FILENODE: 'binary diff not shown'}}),
+                  RENAMED_FILENODE: 'file renamed from README to README.rst'}}),
     ],
     'hg_diff_del_single_binary_file.diff': [
         ('US Warszawa.jpg', 'D',
