@@ -367,7 +367,6 @@ div:hover > a.permalink {
     height: 40px;
     width: 46px;
     display: block;
-    background: url("../images/button_home.png");
     background-position: 0 0;
     margin: 0;
     padding: 0;
@@ -1738,7 +1737,7 @@ div.form div.fields div.field div.button {
 
 #summary-menu-stats a span {
     background-color: #DEDEDE;
-    color: 888 !important;
+    color: #888 !important;
     border-radius: 4px;
     padding: 2px 4px;
     font-size: 10px;
@@ -3473,7 +3472,7 @@ table.code-browser .submodule-dir {
 }
 
 #msg_close {
-    background: transparent url("../icons/cross_grey_small.png") no-repeat scroll 0 0;
+    background: transparent url("../images/cross_grey_small.png") no-repeat scroll 0 0;
     cursor: pointer;
     height: 16px;
     position: absolute;
