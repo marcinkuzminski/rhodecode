@@ -105,7 +105,11 @@ def main(argv=None):
     if args.format == FORMAT_PRETTY:
         print 'Calling method %s => %s' % (method, apihost)
 
-    json_data = api_call(apikey, apihost, method, **margs)['result']
+    json_resp = api_call(apikey, apihost, method, **margs)
+    if json_resp['error']:
+        json_data = json_resp['error']
+    else:
+        json_data = json_resp['result']
     if args.format == FORMAT_JSON:
         print json.dumps(json_data)
     elif args.format == FORMAT_PRETTY:
