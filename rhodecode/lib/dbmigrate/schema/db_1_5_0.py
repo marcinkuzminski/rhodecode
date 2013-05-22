@@ -807,7 +807,7 @@ class Repository(Base, BaseModel):
         from rhodecode.lib.vcs.backends.git import GitRepository
         required = (MercurialRepository, GitRepository)
         if not isinstance(repo, required):
-            raise Exception('repo must be instance of %s' % required)
+            raise Exception('repo must be instance of %s' % (','.join(required)))
 
         # inject ui extra param to log this action via push logger
         for k, v in extras.items():
