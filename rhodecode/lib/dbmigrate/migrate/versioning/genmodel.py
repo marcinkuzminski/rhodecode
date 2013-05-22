@@ -144,11 +144,11 @@ class ModelGenerator(object):
         return '\n'.join(out)
 
     def genB2AMigration(self, indent='    '):
-        '''Generate a migration from B to A.
+        """Generate a migration from B to A.
 
         Was: toUpgradeDowngradePython
         Assume model (A) is most current and database (B) is out-of-date.
-        '''
+        """
 
         decls = ['from migrate.changeset import schema',
                  'pre_meta = MetaData()',

@@ -244,7 +244,7 @@ class SchemaDiff(object):
                 self.tables_different[table_name]=td
 
     def __str__(self):
-        ''' Summarize differences. '''
+        """ Summarize differences. """
         out = []
         column_template ='      %%%is: %%r' % self.label_width
 
