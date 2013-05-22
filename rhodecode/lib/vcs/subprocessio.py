@@ -234,7 +234,7 @@ class BufferedGenerator():
         Iterator might have done reading from underlying source, but the read
         chunks might still be available for serving through .next() method.
 
-        @return An Event class instance.
+        :returns: An Event class instance.
         """
         return self.worker.EOF
 
@@ -245,7 +245,7 @@ class BufferedGenerator():
         Iterator might have done reading from underlying source, but the read
         chunks might still be available for serving through .next() method.
 
-        @return An Bool value.
+        :returns: An Bool value.
         """
         return self.worker.EOF.is_set()
 
