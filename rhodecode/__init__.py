@@ -58,5 +58,5 @@ __py_version__ = sys.version_info
 __author__ = 'Marcin Kuzminski'
 __url__ = 'http://rhodecode.org'
 
-is_windows = __platform__ in ('Windows')
+is_windows = __platform__ in ['Windows']
 is_unix = not is_windows

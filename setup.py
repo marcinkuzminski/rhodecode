@@ -30,7 +30,7 @@ __url__ = _get_meta_var('__url__', _metadata)
 # defines current platform
 __platform__ = platform.system()
 
-is_windows = __platform__ in ('Windows')
+is_windows = __platform__ in ['Windows']
 
 requirements = [
     "waitress==0.8.2",
