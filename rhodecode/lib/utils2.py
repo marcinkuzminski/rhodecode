@@ -281,8 +281,6 @@ def safe_str(unicode_, to_encoding=None):
     except (ImportError, UnicodeEncodeError):
         return unicode_.encode(to_encoding[0], 'replace')
 
-    return safe_str
-
 
 def remove_suffix(s, suffix):
     if s.endswith(suffix):

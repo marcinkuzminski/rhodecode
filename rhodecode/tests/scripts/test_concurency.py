@@ -217,5 +217,4 @@ if __name__ == '__main__':
                                         seq=seq, backend=backend)
         print 'time taken %.3f' % (time.time() - s)
     except Exception, e:
-        raise
         sys.exit('stop on %s' % e)

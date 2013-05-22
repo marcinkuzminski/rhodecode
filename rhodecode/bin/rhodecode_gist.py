@@ -162,7 +162,6 @@ def main(argv=None):
     try:
         return _run(argv)
     except Exception, e:
-        raise
         print e
         return 1
 
