@@ -33,7 +33,7 @@ __platform__ = platform.system()
 is_windows = __platform__ in ['Windows']
 
 requirements = [
-    "waitress==0.8.2",
+    "waitress==0.8.4",
     "webob==1.0.8",
     "webtest==1.4.3",
     "Pylons==1.0.0",
