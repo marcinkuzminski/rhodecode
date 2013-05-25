@@ -323,6 +323,7 @@ OUTPUT::
     result: [
               {
                 "user_id" :     "<user_id>",
+                "api_key" :     "<api_key>",
                 "username" :    "<username>",
                 "firstname":    "<firstname>",
                 "lastname" :    "<lastname>",
@@ -414,6 +415,7 @@ OUTPUT::
               "msg" : "updated user ID:<userid> <username>",
               "user": {
                 "user_id" :  "<user_id>",
+                "api_key" :  "<api_key>",
                 "username" : "<username>",
                 "firstname": "<firstname>",
                 "lastname" : "<lastname>",
@@ -482,6 +484,7 @@ OUTPUT::
                "members" :  [
                               {
                                 "user_id" :  "<user_id>",
+                                "api_key" :  "<api_key>",
                                 "username" : "<username>",
                                 "firstname": "<firstname>",
                                 "lastname" : "<lastname>",
@@ -664,6 +667,7 @@ OUTPUT::
                                   {
                                     "type":        "user",
                                     "user_id" :    "<user_id>",
+                                    "api_key" :    "<api_key>",
                                     "username" :   "<username>",
                                     "firstname":   "<firstname>",
                                     "lastname" :   "<lastname>",
@@ -689,6 +693,7 @@ OUTPUT::
                                   {
                                     "user_id" :     "<user_id>",
                                     "username" :    "<username>",
+                                    "api_key" :     "<api_key>",
                                     "firstname":    "<firstname>",
                                     "lastname" :    "<lastname>",
                                     "email" :       "<email>",
