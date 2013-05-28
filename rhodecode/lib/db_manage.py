@@ -168,13 +168,6 @@ class DbManage(object):
             def __init__(self, klass):
                 self.klass = klass
 
-            def step_0(self):
-                # step 0 is the schema upgrade, and than follow proper upgrades
-                notify('attempting to do database upgrade from '
-                       'version %s to version %s' %(curr_version, __dbversion__))
-                api.upgrade(db_uri, repository_path, __dbversion__)
-                notify('Schema upgrade completed')
-
             def step_1(self):
                 pass
 
@@ -313,12 +306,34 @@ class DbManage(object):
                     Session().add(perm_obj)
                 Session().commit()
 
-        upgrade_steps = [0] + range(curr_version + 1, __dbversion__ + 1)
+                adm = User.get_first_admin()
+                # fix owners of UserGroup
+                for ug in Session().query(UserGroup).all():
+                   ug.user_id = adm.user_id
+                   Session().add(ug)
+                Session().commit()
+
+                # fix owners of RepoGroup
+                for ug in Session().query(RepoGroup).all():
+                   ug.user_id = adm.user_id
+                   Session().add(ug)
+                Session().commit()
+
+            def step_13(self):
+                pass
+
+        upgrade_steps = range(curr_version + 1, __dbversion__ + 1)
+        notify('attempting to do database upgrade from '
+               'version %s to version %s' % (curr_version, __dbversion__))
 
         # CALL THE PROPER ORDER OF STEPS TO PERFORM FULL UPGRADE
         _step = None
         for step in upgrade_steps:
             notify('performing upgrade step %s' % step)
+
+            api.upgrade(db_uri, repository_path, step)
+            notify('Schema upgrade for step %s completed' % (step,))
+
             getattr(UpgradeSteps(self), 'step_%s' % step)()
             self.sa.commit()
             _step = step

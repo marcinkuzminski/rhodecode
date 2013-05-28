@@ -24,44 +24,23 @@ def upgrade(migrate_engine):
     """
     _reset_base(migrate_engine)
 
-    #==========================================================================
-    # UserUserGroupToPerm
-    #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_7_0 import UserUserGroupToPerm
-    tbl = UserUserGroupToPerm.__table__
-    tbl.create()
-
-    #==========================================================================
-    # UserGroupUserGroupToPerm
-    #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_7_0 import UserGroupUserGroupToPerm
-    tbl = UserGroupUserGroupToPerm.__table__
-    tbl.create()
-
-    #==========================================================================
-    # Gist
-    #==========================================================================
-    from rhodecode.lib.dbmigrate.schema.db_1_7_0 import Gist
-    tbl = Gist.__table__
-    tbl.create()
 
     #==========================================================================
     # UserGroup
     #==========================================================================
     from rhodecode.lib.dbmigrate.schema.db_1_7_0 import UserGroup
     tbl = UserGroup.__table__
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=False, default=None)
-    # create username column
-    user_id.create(table=tbl)
+    user_id = tbl.columns.user_id
+    user_id.alter(nullable=False)
 
     #==========================================================================
     # RepoGroup
     #==========================================================================
     from rhodecode.lib.dbmigrate.schema.db_1_7_0 import RepoGroup
     tbl = RepoGroup.__table__
-    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=True, unique=False, default=None)
-    # create username column
-    user_id.create(table=tbl)
+    user_id = tbl.columns.user_id
+    user_id.alter(nullable=False)
+
 
 def downgrade(migrate_engine):
     meta = MetaData()
