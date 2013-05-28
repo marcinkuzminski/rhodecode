@@ -286,6 +286,7 @@ def ApplicationVisualisationForm():
         rhodecode_repository_fields = v.StringBoolean(if_missing=False)
         rhodecode_lightweight_journal = v.StringBoolean(if_missing=False)
         rhodecode_dashboard_items = v.UnicodeString()
+        rhodecode_show_version = v.StringBoolean(if_missing=False)
 
     return _ApplicationVisualisationForm
 

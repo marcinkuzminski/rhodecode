@@ -42,7 +42,12 @@
                ${_('Server instance: %s') % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}
            </p>
            <p class="footer-link-right">
-               <a href="${h.url('rhodecode_official')}">RhodeCode ${c.rhodecode_version}</a>
+               <a href="${h.url('rhodecode_official')}">
+               RhodeCode
+               %if c.visual.show_version:
+                   ${c.rhodecode_version}
+               %endif
+               </a>
                &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski and others
                &ndash; <a href="${h.url('bugtracker')}">${_('Report a bug')}</a>
            </p>

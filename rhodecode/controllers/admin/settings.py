@@ -209,6 +209,11 @@ class SettingsController(BaseController):
                     form_result['rhodecode_dashboard_items']
                 Session().add(sett5)
 
+                sett6 = RhodeCodeSetting.get_by_name_or_create('show_version')
+                sett6.app_settings_value = \
+                    form_result['rhodecode_show_version']
+                Session().add(sett6)
+
                 Session().commit()
                 set_rhodecode_config(config)
                 h.flash(_('Updated visualisation settings'),

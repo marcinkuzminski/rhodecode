@@ -659,6 +659,7 @@ class DbManage(object):
             ('show_private_icon', True, bool),
             ('stylify_metatags', False, bool),
             ('dashboard_items', 100, int),
+            ('show_version', True, bool)
         ]
         for key, val, type_ in settings:
             sett = RhodeCodeSetting(key, val)

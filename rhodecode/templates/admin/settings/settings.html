@@ -134,6 +134,11 @@
                         <label for="rhodecode_repository_fields">${_('Use repository extra fields')}</label>
                     </div>
                     <span class="help-block">${_('Allows storing additional customized fields per repository.')}</span>
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_show_version','True')}
+                        <label for="rhodecode_show_version">${_('Show RhodeCode version')}</label>
+                    </div>
+                    <span class="help-block">${_('Shows or hides displayed version of RhodeCode in the footer')}</span>
                 </div>
              </div>
             <div class="field">

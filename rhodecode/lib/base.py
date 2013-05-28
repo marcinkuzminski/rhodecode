@@ -273,6 +273,8 @@ class BaseController(WSGIController):
         c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
         c.visual.dashboard_items = safe_int(rc_config.get('rhodecode_dashboard_items', 100))
         c.visual.repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
+        c.visual.show_version = str2bool(rc_config.get('rhodecode_show_version'))
+
         ## INI stored
         self.cut_off_limit = int(config.get('cut_off_limit'))
 
