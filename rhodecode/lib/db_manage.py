@@ -645,11 +645,12 @@ class DbManage(object):
             ('paths', '/', path),
             #('phases', 'publish', 'false')
         ]
-        for section,key,value in ui_config:
+        for section, key, value in ui_config:
             ui_conf = RhodeCodeUi()
             setattr(ui_conf, 'ui_section', section)
             setattr(ui_conf, 'ui_key', key)
             setattr(ui_conf, 'ui_value', value)
+            self.sa.add(ui_conf)
 
         settings = [
             ('realm', 'RhodeCode authentication', unicode),
