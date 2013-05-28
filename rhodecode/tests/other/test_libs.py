@@ -172,9 +172,9 @@ class TestLibs(BaseTestCase):
 
         def fake_conf(**kwargs):
             from pylons import config
-            config['app_conf'] = {}
-            config['app_conf']['use_gravatar'] = True
-            config['app_conf'].update(kwargs)
+            config = {}
+            config['use_gravatar'] = True
+            config.update(kwargs)
             return config
 
         class fake_url():
@@ -184,31 +184,31 @@ class TestLibs(BaseTestCase):
 
         with mock.patch('pylons.url', fake_url):
             fake = fake_conf(alternative_gravatar_url='http://test.com/{email}')
-            with mock.patch('pylons.config', fake):
+            with mock.patch('rhodecode.CONFIG', fake):
                     from pylons import url
                     assert url.current() == 'https://server.com'
                     grav = gravatar_url(email_address='test@foo.com', size=24)
                     assert grav == 'http://test.com/test@foo.com'
 
             fake = fake_conf(alternative_gravatar_url='http://test.com/{email}')
-            with mock.patch('pylons.config', fake):
+            with mock.patch('rhodecode.CONFIG', fake):
                 grav = gravatar_url(email_address='test@foo.com', size=24)
                 assert grav == 'http://test.com/test@foo.com'
 
             fake = fake_conf(alternative_gravatar_url='http://test.com/{md5email}')
-            with mock.patch('pylons.config', fake):
+            with mock.patch('rhodecode.CONFIG', fake):
                 em = 'test@foo.com'
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'http://test.com/%s' % (_md5(em))
 
             fake = fake_conf(alternative_gravatar_url='http://test.com/{md5email}/{size}')
-            with mock.patch('pylons.config', fake):
+            with mock.patch('rhodecode.CONFIG', fake):
                 em = 'test@foo.com'
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'http://test.com/%s/%s' % (_md5(em), 24)
 
             fake = fake_conf(alternative_gravatar_url='{scheme}://{netloc}/{md5email}/{size}')
-            with mock.patch('pylons.config', fake):
+            with mock.patch('rhodecode.CONFIG', fake):
                 em = 'test@foo.com'
                 grav = gravatar_url(email_address=em, size=24)
                 assert grav == 'https://server.com/%s/%s' % (_md5(em), 24)
