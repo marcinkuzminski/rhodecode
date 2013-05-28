@@ -3,7 +3,7 @@
 ##    <%namespace name="p" file="/base/perms_summary.html"/>
 ##    ${p.perms_summary(c.perm_user.permissions)}
 
-<%def name="perms_summary(permissions)">
+<%def name="perms_summary(permissions, show_all=False)">
 <div id="perms" class="table">
      %for section in sorted(permissions.keys()):
         <div class="perms_section_head">${section.replace("_"," ").capitalize()}</div>
@@ -12,6 +12,7 @@
         %else:
         <div id='tbl_list_wrap_${section}' class="yui-skin-sam">
          <table id="tbl_list_${section}">
+          ## global permission box
           %if section == 'global':
               <thead>
                   <tr>
@@ -39,6 +40,7 @@
               </thead>
               <tbody>
               %for k, section_perm in sorted(permissions[section].items(), key=lambda s: s[1]+s[0].lower()):
+                  %if section_perm.split('.')[-1] != 'none' or show_all:
                   <tr>
                       <td>
                           %if section == 'repositories':
@@ -63,6 +65,7 @@
                           %endif
                       </td>
                   </tr>
+                  %endif
               %endfor
               </tbody>
           %endif
