@@ -26,6 +26,7 @@
 
 import os
 import sys
+import time
 import uuid
 import logging
 from os.path import dirname as dn, join as jn
@@ -56,7 +57,164 @@ def notify(msg):
     Notification for migrations messages
     """
     ml = len(msg) + (4 * 2)
-    print >> sys.stdout, ('*** %s ***\n%s' % (msg, '*' * ml)).upper()
+    print('\n%s\n*** %s ***\n%s' % ('*' * ml, msg, '*' * ml)).upper()
+
+
+class UpgradeSteps(object):
+    """
+    Those steps follow schema versions so for example schema
+    for example schema with seq 002 == step_2 and so on.
+    """
+
+    def __init__(self, klass):
+        self.klass = klass
+
+    def step_1(self):
+        pass
+
+    def step_2(self):
+        notify('Patching repo paths for newer version of RhodeCode')
+        self.klass.fix_repo_paths()
+
+        notify('Patching default user of RhodeCode')
+        self.klass.fix_default_user()
+
+        log.info('Changing ui settings')
+        self.klass.create_ui_settings()
+
+    def step_3(self):
+        notify('Adding additional settings into RhodeCode db')
+        self.klass.fix_settings()
+        notify('Adding ldap defaults')
+        self.klass.create_ldap_options(skip_existing=True)
+
+    def step_4(self):
+        notify('create permissions and fix groups')
+        self.klass.create_permissions()
+        self.klass.fixup_groups()
+
+    def step_5(self):
+        pass
+
+    def step_6(self):
+
+        notify('re-checking permissions')
+        self.klass.create_permissions()
+
+        notify('installing new UI options')
+        sett4 = RhodeCodeSetting('show_public_icon', True)
+        Session().add(sett4)
+        sett5 = RhodeCodeSetting('show_private_icon', True)
+        Session().add(sett5)
+        sett6 = RhodeCodeSetting('stylify_metatags', False)
+        Session().add(sett6)
+
+        notify('fixing old PULL hook')
+        _pull = RhodeCodeUi.get_by_key('preoutgoing.pull_logger')
+        if _pull:
+            _pull.ui_key = RhodeCodeUi.HOOK_PULL
+            Session().add(_pull)
+
+        notify('fixing old PUSH hook')
+        _push = RhodeCodeUi.get_by_key('pretxnchangegroup.push_logger')
+        if _push:
+            _push.ui_key = RhodeCodeUi.HOOK_PUSH
+            Session().add(_push)
+
+        notify('installing new pre-push hook')
+        hooks4 = RhodeCodeUi()
+        hooks4.ui_section = 'hooks'
+        hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
+        hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
+        Session().add(hooks4)
+
+        notify('installing new pre-pull hook')
+        hooks6 = RhodeCodeUi()
+        hooks6.ui_section = 'hooks'
+        hooks6.ui_key = RhodeCodeUi.HOOK_PRE_PULL
+        hooks6.ui_value = 'python:rhodecode.lib.hooks.pre_pull'
+        Session().add(hooks6)
+
+        notify('installing hgsubversion option')
+        # enable hgsubversion disabled by default
+        hgsubversion = RhodeCodeUi()
+        hgsubversion.ui_section = 'extensions'
+        hgsubversion.ui_key = 'hgsubversion'
+        hgsubversion.ui_value = ''
+        hgsubversion.ui_active = False
+        Session().add(hgsubversion)
+
+        notify('installing hg git option')
+        # enable hggit disabled by default
+        hggit = RhodeCodeUi()
+        hggit.ui_section = 'extensions'
+        hggit.ui_key = 'hggit'
+        hggit.ui_value = ''
+        hggit.ui_active = False
+        Session().add(hggit)
+
+        notify('re-check default permissions')
+        default_user = User.get_by_username(User.DEFAULT_USER)
+        perm = Permission.get_by_key('hg.fork.repository')
+        reg_perm = UserToPerm()
+        reg_perm.user = default_user
+        reg_perm.permission = perm
+        Session().add(reg_perm)
+
+    def step_7(self):
+        perm_fixes = self.klass.reset_permissions(User.DEFAULT_USER)
+        Session().commit()
+        if perm_fixes:
+            notify('There was an inconsistent state of permissions '
+                   'detected for default user. Permissions are now '
+                   'reset to the default value for default user. '
+                   'Please validate and check default permissions '
+                   'in admin panel')
+
+    def step_8(self):
+        self.klass.create_permissions()
+        self.klass.populate_default_permissions()
+        self.klass.create_default_options(skip_existing=True)
+        Session().commit()
+
+    def step_9(self):
+        pass
+
+    def step_10(self):
+        pass
+
+    def step_11(self):
+        self.klass.update_repo_info()
+
+    def step_12(self):
+        self.klass.create_permissions()
+        Session().commit()
+
+        self.klass.populate_default_permissions()
+        Session().commit()
+
+        #fix all usergroups
+        ug_model = UserGroupModel()
+        for ug in UserGroup.get_all():
+            perm_obj = ug_model._create_default_perms(ug)
+            Session().add(perm_obj)
+        Session().commit()
+
+        adm = User.get_first_admin()
+        # fix owners of UserGroup
+        for ug in Session().query(UserGroup).all():
+            ug.user_id = adm.user_id
+            Session().add(ug)
+        Session().commit()
+
+        # fix owners of RepoGroup
+        for ug in Session().query(RepoGroup).all():
+            ug.user_id = adm.user_id
+            Session().add(ug)
+        Session().commit()
+
+    def step_13(self):
+        pass
 
 
 class DbManage(object):
@@ -155,173 +313,6 @@ class DbManage(object):
         log.info("Clearing cache keys now...")
         CacheInvalidation.clear_cache()
 
-        #======================================================================
-        # UPGRADE STEPS
-        #======================================================================
-
-        class UpgradeSteps(object):
-            """
-            Those steps follow schema versions so for example schema
-            for example schema with seq 002 == step_2 and so on.
-            """
-
-            def __init__(self, klass):
-                self.klass = klass
-
-            def step_1(self):
-                pass
-
-            def step_2(self):
-                notify('Patching repo paths for newer version of RhodeCode')
-                self.klass.fix_repo_paths()
-
-                notify('Patching default user of RhodeCode')
-                self.klass.fix_default_user()
-
-                log.info('Changing ui settings')
-                self.klass.create_ui_settings()
-
-            def step_3(self):
-                notify('Adding additional settings into RhodeCode db')
-                self.klass.fix_settings()
-                notify('Adding ldap defaults')
-                self.klass.create_ldap_options(skip_existing=True)
-
-            def step_4(self):
-                notify('create permissions and fix groups')
-                self.klass.create_permissions()
-                self.klass.fixup_groups()
-
-            def step_5(self):
-                pass
-
-            def step_6(self):
-
-                notify('re-checking permissions')
-                self.klass.create_permissions()
-
-                notify('installing new UI options')
-                sett4 = RhodeCodeSetting('show_public_icon', True)
-                Session().add(sett4)
-                sett5 = RhodeCodeSetting('show_private_icon', True)
-                Session().add(sett5)
-                sett6 = RhodeCodeSetting('stylify_metatags', False)
-                Session().add(sett6)
-
-                notify('fixing old PULL hook')
-                _pull = RhodeCodeUi.get_by_key('preoutgoing.pull_logger')
-                if _pull:
-                    _pull.ui_key = RhodeCodeUi.HOOK_PULL
-                    Session().add(_pull)
-
-                notify('fixing old PUSH hook')
-                _push = RhodeCodeUi.get_by_key('pretxnchangegroup.push_logger')
-                if _push:
-                    _push.ui_key = RhodeCodeUi.HOOK_PUSH
-                    Session().add(_push)
-
-                notify('installing new pre-push hook')
-                hooks4 = RhodeCodeUi()
-                hooks4.ui_section = 'hooks'
-                hooks4.ui_key = RhodeCodeUi.HOOK_PRE_PUSH
-                hooks4.ui_value = 'python:rhodecode.lib.hooks.pre_push'
-                Session().add(hooks4)
-
-                notify('installing new pre-pull hook')
-                hooks6 = RhodeCodeUi()
-                hooks6.ui_section = 'hooks'
-                hooks6.ui_key = RhodeCodeUi.HOOK_PRE_PULL
-                hooks6.ui_value = 'python:rhodecode.lib.hooks.pre_pull'
-                Session().add(hooks6)
-
-                notify('installing hgsubversion option')
-                # enable hgsubversion disabled by default
-                hgsubversion = RhodeCodeUi()
-                hgsubversion.ui_section = 'extensions'
-                hgsubversion.ui_key = 'hgsubversion'
-                hgsubversion.ui_value = ''
-                hgsubversion.ui_active = False
-                Session().add(hgsubversion)
-
-                notify('installing hg git option')
-                # enable hggit disabled by default
-                hggit = RhodeCodeUi()
-                hggit.ui_section = 'extensions'
-                hggit.ui_key = 'hggit'
-                hggit.ui_value = ''
-                hggit.ui_active = False
-                Session().add(hggit)
-
-                notify('re-check default permissions')
-                default_user = User.get_by_username(User.DEFAULT_USER)
-                perm = Permission.get_by_key('hg.fork.repository')
-                reg_perm = UserToPerm()
-                reg_perm.user = default_user
-                reg_perm.permission = perm
-                Session().add(reg_perm)
-
-            def step_7(self):
-                perm_fixes = self.klass.reset_permissions(User.DEFAULT_USER)
-                Session().commit()
-                if perm_fixes:
-                    notify('There was an inconsistent state of permissions '
-                           'detected for default user. Permissions are now '
-                           'reset to the default value for default user. '
-                           'Please validate and check default permissions '
-                           'in admin panel')
-
-            def step_8(self):
-                self.klass.create_permissions()
-                self.klass.populate_default_permissions()
-                self.klass.create_default_options(skip_existing=True)
-                Session().commit()
-
-            def step_9(self):
-                perm_fixes = self.klass.reset_permissions(User.DEFAULT_USER)
-                Session().commit()
-                if perm_fixes:
-                    notify('There was an inconsistent state of permissions '
-                           'detected for default user. Permissions are now '
-                           'reset to the default value for default user. '
-                           'Please validate and check default permissions '
-                           'in admin panel')
-
-            def step_10(self):
-                pass
-
-            def step_11(self):
-                self.klass.update_repo_info()
-
-            def step_12(self):
-                self.klass.create_permissions()
-                Session().commit()
-
-                self.klass.populate_default_permissions()
-                Session().commit()
-
-                #fix all usergroups
-                ug_model = UserGroupModel()
-                for ug in UserGroup.get_all():
-                    perm_obj = ug_model._create_default_perms(ug)
-                    Session().add(perm_obj)
-                Session().commit()
-
-                adm = User.get_first_admin()
-                # fix owners of UserGroup
-                for ug in Session().query(UserGroup).all():
-                   ug.user_id = adm.user_id
-                   Session().add(ug)
-                Session().commit()
-
-                # fix owners of RepoGroup
-                for ug in Session().query(RepoGroup).all():
-                   ug.user_id = adm.user_id
-                   Session().add(ug)
-                Session().commit()
-
-            def step_13(self):
-                pass
-
         upgrade_steps = range(curr_version + 1, __dbversion__ + 1)
         notify('attempting to do database upgrade from '
                'version %s to version %s' % (curr_version, __dbversion__))
@@ -330,12 +321,16 @@ class DbManage(object):
         _step = None
         for step in upgrade_steps:
             notify('performing upgrade step %s' % step)
+            time.sleep(2)
 
             api.upgrade(db_uri, repository_path, step)
-            notify('Schema upgrade for step %s completed' % (step,))
+            notify('schema upgrade for step %s completed' % (step,))
 
-            getattr(UpgradeSteps(self), 'step_%s' % step)()
+            fixture = 'step_%s' % step
+            notify('performing fixture step %s' % fixture)
+            getattr(UpgradeSteps(self), fixture)()
             self.sa.commit()
+            notify('fixture %s completed' % (fixture,))
             _step = step
 
         notify('upgrade to version %s successful' % _step)
