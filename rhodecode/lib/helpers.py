@@ -16,7 +16,7 @@ import textwrap
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
 from pygments import highlight as code_highlight
-from pylons import url, request, config
+from pylons import url
 from pylons.i18n.translation import _, ungettext
 from hashlib import md5
 
@@ -778,17 +778,20 @@ HasReposGroupPermissionAny
 # GRAVATAR URL
 #==============================================================================
 
-def gravatar_url(email_address, size=30):
+def gravatar_url(email_address, size=30, ssl_enabled=True):
     from pylons import url  # doh, we need to re-import url to mock it later
-    _def = 'anonymous@rhodecode.org'
-    use_gravatar = str2bool(config['app_conf'].get('use_gravatar'))
+    from rhodecode import CONFIG
+
+    _def = 'anonymous@rhodecode.org'  # default gravatar
+    use_gravatar = str2bool(CONFIG.get('use_gravatar'))
+    alternative_gravatar_url = CONFIG.get('alternative_gravatar_url', '')
     email_address = email_address or _def
-    if (not use_gravatar or not email_address or email_address == _def):
+    if not use_gravatar or not email_address or email_address == _def:
         f = lambda a, l: min(l, key=lambda x: abs(x - a))
         return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
 
-    if use_gravatar and config['app_conf'].get('alternative_gravatar_url'):
-        tmpl = config['app_conf'].get('alternative_gravatar_url', '')
+    if use_gravatar and alternative_gravatar_url:
+        tmpl = alternative_gravatar_url
         parsed_url = urlparse.urlparse(url.current(qualified=True))
         tmpl = tmpl.replace('{email}', email_address)\
                    .replace('{md5email}', hashlib.md5(email_address.lower()).hexdigest()) \
@@ -797,7 +800,6 @@ def gravatar_url(email_address, size=30):
                    .replace('{size}', str(size))
         return tmpl
 
-    ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
     baseurl_nossl = "http://www.gravatar.com/avatar/"
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
