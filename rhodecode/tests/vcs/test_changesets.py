@@ -1,3 +1,4 @@
+# encoding: utf8
 from __future__ import with_statement
 
 import time
@@ -302,6 +303,7 @@ class ChangesetsChangesTestCaseMixin(BackendTestMixin):
                 'date': datetime.datetime(2010, 1, 1, 20),
                 'added': [
                     FileNode('foo/bar', content='foo'),
+                    FileNode('foo/bał', content='foo'),
                     FileNode('foobar', content='foo'),
                     FileNode('qwe', content='foo'),
                 ],
@@ -323,6 +325,7 @@ class ChangesetsChangesTestCaseMixin(BackendTestMixin):
         changeset = self.repo.get_changeset(0)
         self.assertItemsEqual(changeset.added, [
             changeset.get_node('foo/bar'),
+            changeset.get_node('foo/bał'),
             changeset.get_node('foobar'),
             changeset.get_node('qwe'),
         ])
@@ -344,6 +347,14 @@ class ChangesetsChangesTestCaseMixin(BackendTestMixin):
         self.assertEqual(len(changeset.removed), 1)
         self.assertEqual(list(changeset.removed)[0].path, 'qwe')
 
+    def test_get_filemode(self):
+        changeset = self.repo.get_changeset()
+        self.assertEqual(33188, changeset.get_file_mode('foo/bar'))
+
+    def test_get_filemode_non_ascii(self):
+        changeset = self.repo.get_changeset()
+        self.assertEqual(33188, changeset.get_file_mode('foo/bał'))
+        self.assertEqual(33188, changeset.get_file_mode(u'foo/bał'))
 
 # For each backend create test case class
 for alias in SCM_TESTS:

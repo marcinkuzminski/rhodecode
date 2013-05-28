@@ -580,8 +580,8 @@ class ScmModel(BaseModel):
                 raise NonRelativePathError('%s is not an relative path' % f_path)
             if f_path:
                 f_path = os.path.normpath(f_path)
-            f_path = safe_str(f_path)
             content = nodes[f_path]['content']
+            f_path = safe_str(f_path)
             # decoding here will force that we have proper encoded values
             # in any other case this will throw exceptions and deny commit
             if isinstance(content, (basestring,)):

@@ -104,7 +104,7 @@ class GitChangeset(BaseChangeset):
         return path
 
     def _get_id_for_path(self, path):
-
+        path = safe_str(path)
         # FIXME: Please, spare a couple of minutes and make those codes cleaner;
         if not path in self._paths:
             path = path.strip('/')
@@ -154,7 +154,7 @@ class GitChangeset(BaseChangeset):
             if not path in self._paths:
                 raise NodeDoesNotExistError("There is no file nor directory "
                     "at the given path '%s' at revision %s"
-                    % (path, self.short_id))
+                    % (path, safe_str(self.short_id)))
         return self._paths[path]
 
     def _get_kind(self, path):
@@ -254,6 +254,7 @@ class GitChangeset(BaseChangeset):
         Returns stat mode of the file at the given ``path``.
         """
         # ensure path is traversed
+        path = safe_str(path)
         self._get_id_for_path(path)
         return self._stat_modes[path]
 
