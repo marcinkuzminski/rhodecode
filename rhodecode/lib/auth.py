@@ -445,8 +445,8 @@ class  AuthUser(object):
             return False
 
     def __repr__(self):
-        return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
-                                              self.is_authenticated)
+        return "<AuthUser('id:%s[%s] ip:%s auth:%s')>"\
+            % (self.user_id, self.username, self.ip_addr, self.is_authenticated)
 
     def set_authenticated(self, authenticated=True):
         if self.user_id != self.anonymous_user.user_id:
