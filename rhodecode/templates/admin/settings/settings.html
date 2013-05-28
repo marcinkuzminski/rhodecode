@@ -133,9 +133,18 @@
                         ${h.checkbox('rhodecode_repository_fields','True')}
                         <label for="rhodecode_repository_fields">${_('Use repository extra fields')}</label>
                     </div>
+                    <span class="help-block">${_('Allows storing additional customized fields per repository.')}</span>
                 </div>
              </div>
-
+            <div class="field">
+                <div class="label">
+                    <label for="rhodecode_realm">${_('Dashboard items')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('rhodecode_dashboard_items',size=5)}
+                    <span class="help-block">${_('Number of items displayed in lightweight dashboard before pagination is shown.')}</span>
+                </div>
+            </div>
              <div class="field">
                 <div class="label label-checkbox">
                     <label>${_('Icons')}:</label>
@@ -149,6 +158,7 @@
                         ${h.checkbox('rhodecode_show_private_icon','True')}
                         <label for="rhodecode_show_private_icon">${_('Show private repo icon on repositories')}</label>
                     </div>
+                    <span class="help-block">${_('Show public/private icons next to repositories names')}</span>
                  </div>
              </div>
 

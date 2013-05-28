@@ -267,18 +267,19 @@ class BaseController(WSGIController):
         # Visual options
         c.visual = AttributeDict({})
         rc_config = RhodeCodeSetting.get_app_settings()
-
+        ## DB stored
         c.visual.show_public_icon = str2bool(rc_config.get('rhodecode_show_public_icon'))
         c.visual.show_private_icon = str2bool(rc_config.get('rhodecode_show_private_icon'))
         c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
-        c.visual.dashboard_items = safe_int(config.get('dashboard_items', 100))
+        c.visual.dashboard_items = safe_int(rc_config.get('rhodecode_dashboard_items', 100))
         c.visual.repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
+        ## INI stored
+        self.cut_off_limit = int(config.get('cut_off_limit'))
+
         c.repo_name = get_repo_slug(request)  # can be empty
         c.backends = BACKENDS.keys()
         c.unread_notifications = NotificationModel()\
                         .get_unread_cnt_for_user(c.rhodecode_user.user_id)
-        self.cut_off_limit = int(config.get('cut_off_limit'))
-
         self.sa = meta.Session
         self.scm_model = ScmModel(self.sa)
 

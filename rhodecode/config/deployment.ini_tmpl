@@ -106,9 +106,6 @@ use_htsts = false
 ## number of commits stats will parse on each iteration
 commit_parse_limit = 25
 
-## number of items displayed in lightweight dashboard before paginating is shown
-dashboard_items = 100
-
 ## use gravatar service to display avatars
 use_gravatar = true
 

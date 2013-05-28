@@ -183,6 +183,7 @@ class SettingsController(BaseController):
                 )
 
             try:
+                #TODO: rewrite this to something less ugly
                 sett1 = RhodeCodeSetting.get_by_name_or_create('show_public_icon')
                 sett1.app_settings_value = \
                     form_result['rhodecode_show_public_icon']
@@ -202,6 +203,11 @@ class SettingsController(BaseController):
                 sett4.app_settings_value = \
                     form_result['rhodecode_repository_fields']
                 Session().add(sett4)
+
+                sett5 = RhodeCodeSetting.get_by_name_or_create('dashboard_items')
+                sett5.app_settings_value = \
+                    form_result['rhodecode_dashboard_items']
+                Session().add(sett5)
 
                 Session().commit()
                 set_rhodecode_config(config)
