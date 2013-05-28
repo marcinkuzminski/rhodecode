@@ -11,6 +11,7 @@ syntax: regexp
 ^docs/build/
 ^docs/_build/
 ^data$
+^sql_dumps/
 ^\.settings$
 ^\.project$
 ^\.pydevproject$
