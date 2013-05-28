@@ -270,6 +270,11 @@ class RhodeCodeUi(Base, BaseModel):
     ui_value = Column("ui_value", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
+    # def __init__(self, section='', key='', value=''):
+    #     self.ui_section = section
+    #     self.ui_key = key
+    #     self.ui_value = value
+
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.ui_key == key).scalar()

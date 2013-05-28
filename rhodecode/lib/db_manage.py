@@ -637,56 +637,32 @@ class DbManage(object):
 
         self.create_ui_settings()
 
-        #HG UI OPTIONS
-        web1 = RhodeCodeUi()
-        web1.ui_section = 'web'
-        web1.ui_key = 'push_ssl'
-        web1.ui_value = 'false'
+        ui_config = [
+            ('web', 'push_ssl', 'false'),
+            ('web', 'allow_archive', 'gz zip bz2'),
+            ('web', 'allow_push', '*'),
+            ('web', 'baseurl', '/'),
+            ('paths', '/', path),
+            #('phases', 'publish', 'false')
+        ]
+        for section,key,value in ui_config:
+            ui_conf = RhodeCodeUi()
+            setattr(ui_conf, 'ui_section', section)
+            setattr(ui_conf, 'ui_key', key)
+            setattr(ui_conf, 'ui_value', value)
 
-        web2 = RhodeCodeUi()
-        web2.ui_section = 'web'
-        web2.ui_key = 'allow_archive'
-        web2.ui_value = 'gz zip bz2'
-
-        web3 = RhodeCodeUi()
-        web3.ui_section = 'web'
-        web3.ui_key = 'allow_push'
-        web3.ui_value = '*'
-
-        web4 = RhodeCodeUi()
-        web4.ui_section = 'web'
-        web4.ui_key = 'baseurl'
-        web4.ui_value = '/'
-
-        paths = RhodeCodeUi()
-        paths.ui_section = 'paths'
-        paths.ui_key = '/'
-        paths.ui_value = path
-
-        phases = RhodeCodeUi()
-        phases.ui_section = 'phases'
-        phases.ui_key = 'publish'
-        phases.ui_value = False
-
-        sett1 = RhodeCodeSetting('realm', 'RhodeCode authentication')
-        sett2 = RhodeCodeSetting('title', 'RhodeCode')
-        sett3 = RhodeCodeSetting('ga_code', '')
-
-        sett4 = RhodeCodeSetting('show_public_icon', True)
-        sett5 = RhodeCodeSetting('show_private_icon', True)
-        sett6 = RhodeCodeSetting('stylify_metatags', False)
-
-        self.sa.add(web1)
-        self.sa.add(web2)
-        self.sa.add(web3)
-        self.sa.add(web4)
-        self.sa.add(paths)
-        self.sa.add(sett1)
-        self.sa.add(sett2)
-        self.sa.add(sett3)
-        self.sa.add(sett4)
-        self.sa.add(sett5)
-        self.sa.add(sett6)
+        settings = [
+            ('realm', 'RhodeCode authentication', unicode),
+            ('title', 'RhodeCode', unicode),
+            ('ga_code', '', unicode),
+            ('show_public_icon', True, bool),
+            ('show_private_icon', True, bool),
+            ('stylify_metatags', False, bool),
+            ('dashboard_items', 100, int),
+        ]
+        for key, val, type_ in settings:
+            sett = RhodeCodeSetting(key, val)
+            self.sa.add(sett)
 
         self.create_ldap_options()
         self.create_default_options()
