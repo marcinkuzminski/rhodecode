@@ -88,7 +88,7 @@ def ValidUsername(edit=False, old_data={}):
             'invalid_username':
                 _(u'Username may only contain alphanumeric characters '
                   'underscores, periods or dashes and must begin with '
-                  'alphanumeric character')
+                  'alphanumeric character or underscore')
         }
 
         def validate_python(self, value, state):
@@ -105,7 +105,7 @@ def ValidUsername(edit=False, old_data={}):
                     msg = M(self, 'username_exists', state, username=value)
                     raise formencode.Invalid(msg, value, state)
 
-            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]*$', value) is None:
+            if re.match(r'^[a-zA-Z0-9\_]{1}[a-zA-Z0-9\-\_\.]*$', value) is None:
                 msg = M(self, 'invalid_username', state)
                 raise formencode.Invalid(msg, value, state)
     return _validator
