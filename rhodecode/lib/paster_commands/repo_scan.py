@@ -29,17 +29,13 @@ import os
 import sys
 import logging
 
-from os.path import dirname as dn, join as jn
 from rhodecode.model.scm import ScmModel
-#to get the rhodecode import
-rc_path = dn(dn(dn(os.path.realpath(__file__))))
-sys.path.append(rc_path)
 from rhodecode.lib.utils import BasePasterCommand, repo2db_mapper
 
-from rhodecode.model.db import Repository
-from rhodecode.model.repo import RepoModel
-from rhodecode.model.meta import Session
-
+# fix rhodecode import
+from os.path import dirname as dn
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
 
 log = logging.getLogger(__name__)
 

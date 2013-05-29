@@ -24,32 +24,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
-import traceback
 import logging
 from os.path import dirname as dn, join as jn
 
 #to get the rhodecode import
 sys.path.append(dn(dn(dn(os.path.realpath(__file__)))))
 
-from string import strip
-from shutil import rmtree
-
 from whoosh.analysis import RegexTokenizer, LowercaseFilter, StopFilter
 from whoosh.fields import TEXT, ID, STORED, NUMERIC, BOOLEAN, Schema, FieldType, DATETIME
-from whoosh.index import create_in, open_dir
 from whoosh.formats import Characters
-from whoosh.highlight import highlight, HtmlFormatter, ContextFragmenter
-
-from webhelpers.html.builder import escape, literal
-from sqlalchemy import engine_from_config
-
-from rhodecode.model import init_model
-from rhodecode.model.scm import ScmModel
-from rhodecode.model.repo import RepoModel
-from rhodecode.config.environment import load_environment
+from whoosh.highlight import highlight as whoosh_highlight, HtmlFormatter, ContextFragmenter
 from rhodecode.lib.utils2 import LazyProperty
-from rhodecode.lib.utils import BasePasterCommand, Command, add_cache,\
-    load_rcextensions
 
 log = logging.getLogger(__name__)
 
@@ -97,74 +82,6 @@ JOURNAL_SCHEMA = Schema(
     repository=TEXT(),
     ip=TEXT(),
 )
-
-
-class MakeIndex(BasePasterCommand):
-
-    max_args = 1
-    min_args = 1
-
-    usage = "CONFIG_FILE"
-    summary = "Creates or update full text search index"
-    group_name = "RhodeCode"
-    takes_config_file = -1
-    parser = Command.standard_parser(verbose=True)
-
-    def command(self):
-        logging.config.fileConfig(self.path_to_ini_file)
-        from pylons import config
-        add_cache(config)
-        engine = engine_from_config(config, 'sqlalchemy.db1.')
-        init_model(engine)
-        index_location = config['index_dir']
-        repo_location = self.options.repo_location \
-            if self.options.repo_location else RepoModel().repos_path
-        repo_list = map(strip, self.options.repo_list.split(',')) \
-            if self.options.repo_list else None
-        repo_update_list = map(strip, self.options.repo_update_list.split(',')) \
-            if self.options.repo_update_list else None
-        load_rcextensions(config['here'])
-        #======================================================================
-        # WHOOSH DAEMON
-        #======================================================================
-        from rhodecode.lib.pidlock import LockHeld, DaemonLock
-        from rhodecode.lib.indexers.daemon import WhooshIndexingDaemon
-        try:
-            l = DaemonLock(file_=jn(dn(dn(index_location)), 'make_index.lock'))
-            WhooshIndexingDaemon(index_location=index_location,
-                                 repo_location=repo_location,
-                                 repo_list=repo_list,
-                                 repo_update_list=repo_update_list)\
-                .run(full_index=self.options.full_index)
-            l.release()
-        except LockHeld:
-            sys.exit(1)
-
-    def update_parser(self):
-        self.parser.add_option('--repo-location',
-                          action='store',
-                          dest='repo_location',
-                          help="Specifies repositories location to index OPTIONAL",
-                          )
-        self.parser.add_option('--index-only',
-                          action='store',
-                          dest='repo_list',
-                          help="Specifies a comma separated list of repositores "
-                                "to build index on. If not given all repositories "
-                                "are scanned for indexing. OPTIONAL",
-                          )
-        self.parser.add_option('--update-only',
-                          action='store',
-                          dest='repo_update_list',
-                          help="Specifies a comma separated list of repositores "
-                                "to re-build index on. OPTIONAL",
-                          )
-        self.parser.add_option('-f',
-                          action='store_true',
-                          dest='full_index',
-                          help="Specifies that index should be made full i.e"
-                                " destroy old and build from scratch",
-                          default=False)
 
 
 class WhooshResultWrapper(object):
@@ -249,9 +166,6 @@ class WhooshResultWrapper(object):
         Smart function that implements chunking the content
         but not overlap chunks so it doesn't highlight the same
         close occurrences twice.
-
-        :param matcher:
-        :param size:
         """
         memory = [(0, 0)]
         if self.matcher.supports('positions'):
@@ -269,7 +183,7 @@ class WhooshResultWrapper(object):
     def highlight(self, content, top=5):
         if self.search_type not in ['content', 'message']:
             return ''
-        hl = highlight(
+        hl = whoosh_highlight(
             text=content,
             terms=self.highlight_items,
             analyzer=ANALYZER,

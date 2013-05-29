@@ -900,13 +900,15 @@ class Page(_Page):
         if self.page != self.last_page and rightmost_page < self.last_page:
             nav_items.append(self._pagerlink(self.last_page, self.last_page))
 
+        ## prerender links
+        nav_items.append(literal('<link rel="prerender" href="/rhodecode/changelog/1?page=%s">' % str(int(self.page)+1)))
         return self.separator.join(nav_items)
 
     def pager(self, format='~2~', page_param='page', partial_param='partial',
         show_if_single_page=False, separator=' ', onclick=None,
         symbol_first='<<', symbol_last='>>',
         symbol_previous='<', symbol_next='>',
-        link_attr={'class': 'pager_link'},
+        link_attr={'class': 'pager_link', 'rel': 'prerender'},
         curpage_attr={'class': 'pager_curpage'},
         dotdot_attr={'class': 'pager_dotdot'}, **kwargs):
 

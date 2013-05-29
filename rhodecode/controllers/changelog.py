@@ -132,7 +132,7 @@ class ChangelogController(BaseRepoController):
             c.total_cs = len(collection)
 
             c.pagination = RepoPage(collection, page=p, item_count=c.total_cs,
-                                    items_per_page=c.size, branch=branch_name)
+                                    items_per_page=c.size, branch=branch_name,)
             collection = list(c.pagination)
             page_revisions = [x.raw_id for x in c.pagination]
             c.comments = c.rhodecode_db_repo.get_comments(page_revisions)

@@ -29,12 +29,12 @@ import os
 import sys
 import logging
 
-from os.path import dirname as dn, join as jn
-#to get the rhodecode import
-rc_path = dn(dn(dn(os.path.realpath(__file__))))
-sys.path.append(rc_path)
 from rhodecode.lib.utils import BasePasterCommand
 
+# fix rhodecode import
+from os.path import dirname as dn
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
 
 log = logging.getLogger(__name__)
 

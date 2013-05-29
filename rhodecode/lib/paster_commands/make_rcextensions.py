@@ -26,16 +26,15 @@ from __future__ import with_statement
 
 import os
 import sys
-import pkg_resources
-import traceback
 import logging
-
-from os.path import dirname as dn, join as jn
-#to get the rhodecode import
-rc_path = dn(dn(dn(os.path.realpath(__file__))))
-sys.path.append(rc_path)
+import pkg_resources
 
 from rhodecode.lib.utils import BasePasterCommand, ask_ok
+
+# fix rhodecode import
+from os.path import dirname as dn
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
 
 log = logging.getLogger(__name__)
 
@@ -65,9 +64,9 @@ class Command(BasePasterCommand):
 
         here = config['here']
         tmpl = pkg_resources.resource_string(
-            'rhodecode', jn('config', 'rcextensions', '__init__.py')
+            'rhodecode', os.path.join('config', 'rcextensions', '__init__.py')
         )
-        ext_file = jn(here, 'rcextensions', '__init__.py')
+        ext_file = os.path.join(here, 'rcextensions', '__init__.py')
         if os.path.exists(ext_file):
             msg = ('Extension file already exists, do you want '
                    'to overwrite it ? [y/n]')
