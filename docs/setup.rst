@@ -574,14 +574,13 @@ Sample config for nginx using proxy::
        ## uncomment root directive if you want to serve static files by nginx
        ## requires static_files = false in .ini file
        #root /path/to/installation/rhodecode/public;
-
+       include         /etc/nginx/proxy.conf;
        location / {
             try_files $uri @rhode;
        }
 
        location @rhode {
             proxy_pass      http://rc;
-            include         /etc/nginx/proxy.conf;
        }
 
     }
