@@ -595,13 +595,14 @@ pushes or large pushes::
     proxy_set_header            X-Real-IP $remote_addr;
     proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header            Proxy-host $proxy_host;
-    client_max_body_size        400m;
-    client_body_buffer_size     128k;
     proxy_buffering             off;
     proxy_connect_timeout       7200;
     proxy_send_timeout          7200;
     proxy_read_timeout          7200;
     proxy_buffers               8 32k;
+    client_max_body_size        1024m;
+    client_body_buffer_size     128k;
+    large_client_header_buffers 8 64k;
 
 
 Apache virtual host reverse proxy example
