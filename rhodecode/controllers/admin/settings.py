@@ -242,10 +242,10 @@ class SettingsController(BaseController):
                 sett = RhodeCodeUi.get_by_key('push_ssl')
                 sett.ui_value = form_result['web_push_ssl']
                 Session().add(sett)
-
-                sett = RhodeCodeUi.get_by_key('/')
-                sett.ui_value = form_result['paths_root_path']
-                Session().add(sett)
+                if c.visual.allow_repo_location_change:
+                    sett = RhodeCodeUi.get_by_key('/')
+                    sett.ui_value = form_result['paths_root_path']
+                    Session().add(sett)
 
                 #HOOKS
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE)

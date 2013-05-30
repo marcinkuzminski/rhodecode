@@ -277,6 +277,7 @@ class BaseController(WSGIController):
 
         ## INI stored
         self.cut_off_limit = int(config.get('cut_off_limit'))
+        c.visual.allow_repo_location_change = str2bool(config.get('allow_repo_location_change', True))
 
         c.repo_name = get_repo_slug(request)  # can be empty
         c.backends = BACKENDS.keys()
