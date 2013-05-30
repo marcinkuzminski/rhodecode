@@ -216,8 +216,10 @@ class WhooshIndexingDaemon(object):
                   (repo_name, start_rev))
 
         indexed = 0
-        for cs in repo.get_changesets(start=start_rev):
-            log.debug('    >> %s' % cs)
+        cs_iter = repo.get_changesets(start=start_rev)
+        total = len(cs_iter)
+        for cs in cs_iter:
+            log.debug('    >> %s/%s' % (cs, total))
             writer.add_document(
                 raw_id=unicode(cs.raw_id),
                 owner=unicode(repo.contact),
