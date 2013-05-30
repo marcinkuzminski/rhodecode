@@ -140,9 +140,18 @@ class WhooshIndexingDaemon(object):
         return index_paths_
 
     def get_node(self, repo, path):
-        n_path = path[len(repo.path) + 1:]
+        """
+        gets a filenode based on given full path.It operates on string for
+        hg git compatability.
+
+        :param repo: scm repo instance
+        :param path: full path including root location
+        :return: FileNode
+        """
+        root_path = safe_str(repo.path)+'/'
+        parts = safe_str(path).partition(root_path)
         cs = self._get_index_changeset(repo)
-        node = cs.get_node(n_path)
+        node = cs.get_node(parts[-1])
         return node
 
     def get_node_mtime(self, node):
