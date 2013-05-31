@@ -355,7 +355,41 @@ def is_following_repo(repo_name, user_id):
     from rhodecode.model.scm import ScmModel
     return ScmModel().is_following_repo(repo_name, user_id)
 
-flash = _Flash()
+class _Message(object):
+    """A message returned by ``Flash.pop_messages()``.
+
+    Converting the message to a string returns the message text. Instances
+    also have the following attributes:
+
+    * ``message``: the message text.
+    * ``category``: the category specified when the message was created.
+    """
+
+    def __init__(self, category, message):
+        self.category=category
+        self.message=message
+
+    def __str__(self):
+        return self.message
+
+    __unicode__ = __str__
+
+    def __html__(self):
+        return escape(safe_unicode(self.message))
+
+class Flash(_Flash):
+
+    def pop_messages(self):
+        """Return all accumulated messages and delete them from the session.
+
+        The return value is a list of ``Message`` objects.
+        """
+        from pylons import session
+        messages = session.pop(self.session_key, [])
+        session.save()
+        return [_Message(*m) for m in messages]
+
+flash = Flash()
 
 #==============================================================================
 # SCM FILTERS available via h.
