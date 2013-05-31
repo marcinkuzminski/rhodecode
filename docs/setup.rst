@@ -552,7 +552,7 @@ Sample config for nginx using proxy::
        ssl_prefer_server_ciphers on;
 
        rewrite ^/(.+)$ https://rhodecode.myserver.com/_admin/gists/$1;
-       rewrite (.*) https://rhodecode.myserver.org/_admin/gists;
+       rewrite (.*)    https://rhodecode.myserver.com/_admin/gists;
     }
 
     server {
