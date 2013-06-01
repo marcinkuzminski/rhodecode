@@ -641,7 +641,7 @@ msgstr ""
 
 #: rhodecode/controllers/admin/repos_groups.py:268
 #, python-format
-msgid "Error occurred during deletion of repos group %s"
+msgid "Error occurred during deletion of repository group %s"
 msgstr ""
 
 #: rhodecode/controllers/admin/repos_groups.py:279
