@@ -87,8 +87,8 @@ def ValidUsername(edit=False, old_data={}):
                 _(u'Username "%(username)s" is forbidden'),
             'invalid_username':
                 _(u'Username may only contain alphanumeric characters '
-                  'underscores, periods or dashes and must begin with '
-                  'alphanumeric character or underscore')
+                    'underscores, periods or dashes and must begin with '
+                    'alphanumeric character or underscore')
         }
 
         def validate_python(self, value, state):

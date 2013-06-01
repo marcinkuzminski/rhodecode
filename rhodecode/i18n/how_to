@@ -2,7 +2,11 @@
 # to create new language #
 ##########################
 
-#this needs to be done on source codes, preferable default/stable branches
+Translations are also available on transifex under::
+
+    https://www.transifex.com/projects/p/RhodeCode/
+
+#this needs to be done on source codes, preferable on default/stable branches
  
 python setup.py extract_messages <- get messages from project
 python setup.py init_catalog -l pl <- create a language directory for <pl> lang
