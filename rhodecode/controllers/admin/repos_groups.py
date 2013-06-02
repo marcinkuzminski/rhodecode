@@ -265,8 +265,8 @@ class ReposGroupsController(BaseController):
             #TODO: in future action_logger(, '', '', '', self.sa)
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('Error occurred during deletion of repos '
-                      'group %s') % group_name, category='error')
+            h.flash(_('Error occurred during deletion of repository group %s')
+                    % group_name, category='error')
 
         return redirect(url('repos_groups'))
 
