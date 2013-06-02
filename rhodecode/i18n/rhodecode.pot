@@ -1,14 +1,13 @@
 # Translations template for RhodeCode.
-# Copyright (C) 2013 ORGANIZATION
+# Copyright (C) 2013 Marcin Kuzminski RhodeCode
 # This file is distributed under the same license as the RhodeCode project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
-#
-#, fuzzy
+##, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.7.0dev\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-06-01 18:38+0200\n"
+"Report-Msgid-Bugs-To: marcin@maq.io\n"
+"POT-Creation-Date: 2013-06-02 16:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,18 +33,18 @@ msgstr ""
 msgid "%s line context"
 msgstr ""
 
-#: rhodecode/controllers/changeset.py:345 rhodecode/controllers/pullrequests.py:481
+#: rhodecode/controllers/changeset.py:345
+#: rhodecode/controllers/pullrequests.py:481
 #, python-format
 msgid "Status change -> %s"
 msgstr ""
 
 #: rhodecode/controllers/changeset.py:376
-msgid ""
-"Changing status on a changeset associated with a closed pull request is not "
-"allowed"
+msgid "Changing status on a changeset associated with a closed pull request is not allowed"
 msgstr ""
 
-#: rhodecode/controllers/compare.py:74 rhodecode/controllers/pullrequests.py:259
+#: rhodecode/controllers/compare.py:74
+#: rhodecode/controllers/pullrequests.py:259
 msgid "There are no changesets yet"
 msgstr ""
 
@@ -70,9 +69,7 @@ msgid "The resource could not be found"
 msgstr ""
 
 #: rhodecode/controllers/error.py:107
-msgid ""
-"The server encountered an unexpected condition which prevented it from "
-"fulfilling the request."
+msgid "The server encountered an unexpected condition which prevented it from fulfilling the request."
 msgstr ""
 
 #: rhodecode/controllers/feed.py:52
@@ -185,7 +182,8 @@ msgstr ""
 
 #: rhodecode/controllers/files.py:633 rhodecode/controllers/pullrequests.py:153
 #: rhodecode/controllers/summary.py:77 rhodecode/model/scm.py:693
-#: rhodecode/templates/switch_to_list.html:15 rhodecode/templates/tags/tags.html:10
+#: rhodecode/templates/switch_to_list.html:15
+#: rhodecode/templates/tags/tags.html:10
 msgid "Tags"
 msgstr ""
 
@@ -427,8 +425,10 @@ msgstr ""
 #: rhodecode/templates/admin/users_groups/users_group_add.html:8
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:9
 #: rhodecode/templates/admin/users_groups/users_groups.html:9
-#: rhodecode/templates/base/base.html:317 rhodecode/templates/base/base.html:318
-#: rhodecode/templates/base/base.html:324 rhodecode/templates/base/base.html:325
+#: rhodecode/templates/base/base.html:317
+#: rhodecode/templates/base/base.html:318
+#: rhodecode/templates/base/base.html:324
+#: rhodecode/templates/base/base.html:325
 msgid "Admin"
 msgstr ""
 
@@ -1008,9 +1008,7 @@ msgstr ""
 
 #: rhodecode/lib/helpers.py:1404
 #, python-format
-msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from the "
-"filesystem please run the application again in order to rescan repositories"
+msgid "%s repository is not mapped to db perhaps it was created or renamed from the filesystem please run the application again in order to rescan repositories"
 msgstr ""
 
 #: rhodecode/lib/unionrepo.py:193
@@ -1381,9 +1379,7 @@ msgstr ""
 
 #: rhodecode/model/user.py:309
 #, python-format
-msgid ""
-"user \"%s\" still owns %s repositories and cannot be removed. Switch owners "
-"or remove those repositories. %s"
+msgid "user \"%s\" still owns %s repositories and cannot be removed. Switch owners or remove those repositories. %s"
 msgstr ""
 
 #: rhodecode/model/user.py:334
@@ -1414,9 +1410,7 @@ msgid "Username \"%(username)s\" is forbidden"
 msgstr ""
 
 #: rhodecode/model/validators.py:89
-msgid ""
-"Username may only contain alphanumeric characters underscores, periods or "
-"dashes and must begin with alphanumeric character or underscore"
+msgid "Username may only contain alphanumeric characters underscores, periods or dashes and must begin with alphanumeric character or underscore"
 msgstr ""
 
 #: rhodecode/model/validators.py:117
@@ -1434,9 +1428,7 @@ msgid "User group \"%(usergroup)s\" already exists"
 msgstr ""
 
 #: rhodecode/model/validators.py:139
-msgid ""
-"user group name may only contain alphanumeric characters underscores, periods"
-" or dashes and must begin with alphanumeric character"
+msgid "user group name may only contain alphanumeric characters underscores, periods or dashes and must begin with alphanumeric character"
 msgstr ""
 
 #: rhodecode/model/validators.py:177
@@ -1535,9 +1527,7 @@ msgid "e-mail \"%(email)s\" does not exist."
 msgstr ""
 
 #: rhodecode/model/validators.py:724
-msgid ""
-"The LDAP Login attribute of the CN must be specified - this is the name of "
-"the attribute that is equivalent to \"username\""
+msgid "The LDAP Login attribute of the CN must be specified - this is the name of the attribute that is equivalent to \"username\""
 msgstr ""
 
 #: rhodecode/model/validators.py:737
@@ -1575,7 +1565,8 @@ msgstr ""
 #: rhodecode/templates/branches/branches.html:9
 #: rhodecode/templates/journal/journal.html:9
 #: rhodecode/templates/journal/journal.html:46
-#: rhodecode/templates/journal/journal.html:47 rhodecode/templates/tags/tags.html:9
+#: rhodecode/templates/journal/journal.html:47
+#: rhodecode/templates/tags/tags.html:9
 msgid "quick filter..."
 msgstr ""
 
@@ -1584,13 +1575,15 @@ msgstr ""
 msgid "repositories"
 msgstr ""
 
-#: rhodecode/templates/index_base.html:13 rhodecode/templates/index_base.html:18
+#: rhodecode/templates/index_base.html:13
+#: rhodecode/templates/index_base.html:18
 #: rhodecode/templates/admin/repos/repo_add.html:5
 #: rhodecode/templates/admin/repos/repos.html:21
 msgid "Add repository"
 msgstr ""
 
-#: rhodecode/templates/index_base.html:15 rhodecode/templates/index_base.html:20
+#: rhodecode/templates/index_base.html:15
+#: rhodecode/templates/index_base.html:20
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:31
 msgid "Add group"
 msgstr ""
@@ -1613,7 +1606,8 @@ msgstr ""
 msgid "Group name"
 msgstr ""
 
-#: rhodecode/templates/index_base.html:41 rhodecode/templates/index_base.html:123
+#: rhodecode/templates/index_base.html:41
+#: rhodecode/templates/index_base.html:123
 #: rhodecode/templates/admin/repos/repo_add_base.html:56
 #: rhodecode/templates/admin/repos/repo_edit.html:68
 #: rhodecode/templates/admin/repos/repos.html:73
@@ -1653,7 +1647,8 @@ msgstr ""
 #: rhodecode/templates/journal/journal.html:283
 #: rhodecode/templates/summary/summary.html:55
 #: rhodecode/templates/summary/summary.html:124
-#: rhodecode/templates/tags/tags.html:48 rhodecode/templates/tags/tags_data.html:6
+#: rhodecode/templates/tags/tags.html:48
+#: rhodecode/templates/tags/tags_data.html:6
 msgid "Name"
 msgstr ""
 
@@ -1863,7 +1858,8 @@ msgstr ""
 msgid "There are no bookmarks yet"
 msgstr ""
 
-#: rhodecode/templates/admin/admin.html:5 rhodecode/templates/admin/admin.html:13
+#: rhodecode/templates/admin/admin.html:5
+#: rhodecode/templates/admin/admin.html:13
 #: rhodecode/templates/base/base.html:73
 msgid "Admin journal"
 msgstr ""
@@ -1906,7 +1902,8 @@ msgstr ""
 #: rhodecode/templates/bookmarks/bookmarks_data.html:7
 #: rhodecode/templates/branches/branches.html:48
 #: rhodecode/templates/branches/branches_data.html:7
-#: rhodecode/templates/tags/tags.html:49 rhodecode/templates/tags/tags_data.html:7
+#: rhodecode/templates/tags/tags.html:49
+#: rhodecode/templates/tags/tags_data.html:7
 msgid "Date"
 msgstr ""
 
@@ -1937,9 +1934,7 @@ msgstr ""
 #: rhodecode/templates/admin/repos/repo_add_base.html:69
 #: rhodecode/templates/admin/repos/repo_edit.html:82
 #: rhodecode/templates/forks/fork.html:69
-msgid ""
-"Private repositories are only visible to people explicitly added as "
-"collaborators."
+msgid "Private repositories are only visible to people explicitly added as collaborators."
 msgstr ""
 
 #: rhodecode/templates/admin/defaults/defaults.html:55
@@ -2249,10 +2244,7 @@ msgid "Anonymous access"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:49
-msgid ""
-"All default permissions on each repository will be reset to chosen "
-"permission, note that all custom default permission on repositories will be "
-"lost"
+msgid "All default permissions on each repository will be reset to chosen permission, note that all custom default permission on repositories will be lost"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:50
@@ -2262,10 +2254,7 @@ msgid "Overwrite existing settings"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:62
-msgid ""
-"All default permissions on each repository group will be reset to chosen "
-"permission, note that all custom default permission on repository groups will"
-" be lost"
+msgid "All default permissions on each repository group will be reset to chosen permission, note that all custom default permission on repository groups will be lost"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:69
@@ -2273,10 +2262,7 @@ msgid "User group"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:76
-msgid ""
-"All default permissions on each user group will be reset to chosen "
-"permission, note that all custom default permission on repository groups will"
-" be lost"
+msgid "All default permissions on each user group will be reset to chosen permission, note that all custom default permission on repository groups will be lost"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:83
@@ -2346,7 +2332,8 @@ msgstr ""
 #: rhodecode/templates/admin/repos/repo_add.html:12
 #: rhodecode/templates/admin/repos/repo_add.html:16
 #: rhodecode/templates/base/base.html:74 rhodecode/templates/base/base.html:88
-#: rhodecode/templates/base/base.html:116 rhodecode/templates/base/base.html:275
+#: rhodecode/templates/base/base.html:116
+#: rhodecode/templates/base/base.html:275
 msgid "Repositories"
 msgstr ""
 
@@ -2469,9 +2456,7 @@ msgid "Confirm to invalidate repository cache"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:218
-msgid ""
-"Manually invalidate cache for this repository. On first access repository "
-"will be cached again"
+msgid "Manually invalidate cache for this repository. On first access repository will be cached again"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:223
@@ -2497,7 +2482,8 @@ msgid "Active"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:243
-#: rhodecode/templates/base/base.html:292 rhodecode/templates/base/base.html:293
+#: rhodecode/templates/base/base.html:292
+#: rhodecode/templates/base/base.html:293
 msgid "Public journal"
 msgstr ""
 
@@ -2510,9 +2496,7 @@ msgid "Add to public journal"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:256
-msgid ""
-"All actions made on this repository will be accessible to everyone in public "
-"journal"
+msgid "All actions made on this repository will be accessible to everyone in public journal"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:263
@@ -2579,10 +2563,7 @@ msgid "Delete forks"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:315
-msgid ""
-"This repository will be renamed in a special way in order to be unaccesible "
-"for RhodeCode and VCS systems. If you need to fully delete it from file "
-"system please do it manually"
+msgid "This repository will be renamed in a special way in order to be unaccesible for RhodeCode and VCS systems. If you need to fully delete it from file system please do it manually"
 msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:329
@@ -2692,9 +2673,7 @@ msgid "apply to children"
 msgstr ""
 
 #: rhodecode/templates/admin/repos_groups/repos_group_edit_perms.html:88
-msgid ""
-"Set or revoke permission to all children of that group, including non-private"
-" repositories and other groups"
+msgid "Set or revoke permission to all children of that group, including non-private repositories and other groups"
 msgstr ""
 
 #: rhodecode/templates/admin/repos_groups/repos_groups.html:4
@@ -2748,9 +2727,7 @@ msgid "Add child group"
 msgstr ""
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:68
-msgid ""
-"Enable lock-by-pulling on group. This option will be applied to all other "
-"groups and repositories inside"
+msgid "Enable lock-by-pulling on group. This option will be applied to all other groups and repositories inside"
 msgstr ""
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:5
@@ -2821,10 +2798,7 @@ msgid "Rescan option"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:40
-msgid ""
-"In case a repository was deleted from filesystem and there are leftovers in "
-"the database check this option to scan obsolete data in database and remove "
-"it."
+msgid "In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it."
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:41
@@ -2832,9 +2806,7 @@ msgid "Destroy old data"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:43
-msgid ""
-"Rescan repositories location for new repositories. Also deletes obsolete if "
-"`destroy` flag is checked "
+msgid "Rescan repositories location for new repositories. Also deletes obsolete if `destroy` flag is checked "
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:48
@@ -2948,9 +2920,7 @@ msgid "Require SSL for vcs operations"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:220
-msgid ""
-"RhodeCode will require SSL for pushing or pulling. If SSL is missing it will "
-"return HTTP Error 406: Not Acceptable"
+msgid "RhodeCode will require SSL for pushing or pulling. If SSL is missing it will return HTTP Error 406: Not Acceptable"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:226
@@ -2990,9 +2960,7 @@ msgid "Enable hgsubversion extension"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:263
-msgid ""
-"Requires hgsubversion library installed. Allows cloning from svn remote "
-"locations"
+msgid "Requires hgsubversion library installed. Allows cloning from svn remote locations"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:274
@@ -3000,9 +2968,7 @@ msgid "Repositories location"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:279
-msgid ""
-"Click to unlock. You must restart RhodeCode in order to make this setting "
-"take effect."
+msgid "Click to unlock. You must restart RhodeCode in order to make this setting take effect."
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:280
@@ -3011,9 +2977,7 @@ msgid "Unlock"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:282
-msgid ""
-"Location where repositories are stored. After changing this value a restart, "
-"and rescan is required"
+msgid "Location where repositories are stored. After changing this value a restart, and rescan is required"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:303
@@ -3298,7 +3262,8 @@ msgstr ""
 msgid "Switch To"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:127 rhodecode/templates/base/base.html:279
+#: rhodecode/templates/base/base.html:127
+#: rhodecode/templates/base/base.html:279
 msgid "loading..."
 msgstr ""
 
@@ -3311,7 +3276,8 @@ msgstr ""
 msgid "Compare fork"
 msgstr ""
 
-#: rhodecode/templates/base/base.html:139 rhodecode/templates/base/base.html:312
+#: rhodecode/templates/base/base.html:139
+#: rhodecode/templates/base/base.html:312
 #: rhodecode/templates/search/search.html:14
 #: rhodecode/templates/search/search.html:54
 msgid "Search"
@@ -3405,9 +3371,7 @@ msgstr ""
 
 #: rhodecode/templates/base/default_perms_box.html:18
 #, python-format
-msgid ""
-"Select to inherit permissions from %s settings. With this selected below "
-"options does not apply."
+msgid "Select to inherit permissions from %s settings. With this selected below options does not apply."
 msgstr ""
 
 #: rhodecode/templates/base/default_perms_box.html:26
@@ -3530,7 +3494,8 @@ msgstr ""
 #: rhodecode/templates/branches/branches.html:50
 #: rhodecode/templates/branches/branches_data.html:8
 #: rhodecode/templates/changelog/changelog_summary_data.html:8
-#: rhodecode/templates/tags/tags.html:51 rhodecode/templates/tags/tags_data.html:8
+#: rhodecode/templates/tags/tags.html:51
+#: rhodecode/templates/tags/tags_data.html:8
 msgid "Author"
 msgstr ""
 
@@ -3539,7 +3504,8 @@ msgstr ""
 #: rhodecode/templates/branches/branches.html:51
 #: rhodecode/templates/branches/branches_data.html:9
 #: rhodecode/templates/changelog/changelog_summary_data.html:5
-#: rhodecode/templates/tags/tags.html:52 rhodecode/templates/tags/tags_data.html:9
+#: rhodecode/templates/tags/tags.html:52
+#: rhodecode/templates/tags/tags_data.html:9
 msgid "Revision"
 msgstr ""
 
@@ -3547,7 +3513,8 @@ msgstr ""
 #: rhodecode/templates/bookmarks/bookmarks_data.html:10
 #: rhodecode/templates/branches/branches.html:53
 #: rhodecode/templates/branches/branches_data.html:10
-#: rhodecode/templates/tags/tags.html:54 rhodecode/templates/tags/tags_data.html:10
+#: rhodecode/templates/tags/tags.html:54
+#: rhodecode/templates/tags/tags_data.html:10
 msgid "Compare"
 msgstr ""
 
@@ -4020,7 +3987,8 @@ msgstr ""
 msgid "File diff"
 msgstr ""
 
-#: rhodecode/templates/files/files.html:4 rhodecode/templates/files/files.html:76
+#: rhodecode/templates/files/files.html:4
+#: rhodecode/templates/files/files.html:76
 #, python-format
 msgid "%s Files"
 msgstr ""
