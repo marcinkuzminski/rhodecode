@@ -1,0 +1,15 @@
+[main]
+host = https://www.transifex.com
+
+[RhodeCode.pot]
+source_file = rhodecode/i18n/rhodecode.pot
+source_lang = en
+
+trans.pl    = rhodecode/i18n/pl/LC_MESSAGES/rhodecode.po
+trans.ru    = rhodecode/i18n/ru/LC_MESSAGES/rhodecode.po
+trans.fr    = rhodecode/i18n/fr/LC_MESSAGES/rhodecode.po
+trans.ja    = rhodecode/i18n/ja/LC_MESSAGES/rhodecode.po
+trans.pt_BR = rhodecode/i18n/pt_BR/LC_MESSAGES/rhodecode.po
+trans.zh_CN = rhodecode/i18n/zh_CN/LC_MESSAGES/rhodecode.po
+trans.zh_TW = rhodecode/i18n/zh_TW/LC_MESSAGES/rhodecode.po
+type = PO
