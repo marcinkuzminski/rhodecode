@@ -48,7 +48,7 @@ Fetch latest version of strings for translation by running::
 
 Update PO file by doing::
 
-    python setup.py update_catalog -l pl<- to update the translations
+    python setup.py update_catalog -l <new_language_code><- to update the translations
 
 Edit the new updated po file. Repeat all steps after `init_catalog` step from
 new translation instructions
