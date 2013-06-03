@@ -50,7 +50,8 @@ asyncore_use_poll = True
 
 ## GUNICORN ##
 #use = egg:gunicorn#main
-## number of process workers. Don't change that to more than 1
+## number of process workers. You must set `instance_id = *` when this option
+## is set to more than one worker
 #workers = 1
 ## process name
 #proc_name = rhodecode
