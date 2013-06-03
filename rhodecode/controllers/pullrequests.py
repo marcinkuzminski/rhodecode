@@ -30,8 +30,8 @@ from webob.exc import HTTPNotFound, HTTPForbidden
 from collections import defaultdict
 from itertools import groupby
 
-from pylons import request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
+from pylons import request, tmpl_context as c, url
+from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib.compat import json
@@ -44,17 +44,14 @@ from rhodecode.lib import diffs
 from rhodecode.lib.utils import action_logger, jsonify
 from rhodecode.lib.vcs.utils import safe_str
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
-from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.diffs import LimitedDiffContainer
-from rhodecode.model.db import User, PullRequest, ChangesetStatus,\
-    ChangesetComment
+from rhodecode.model.db import  PullRequest, ChangesetStatus, ChangesetComment
 from rhodecode.model.pull_request import PullRequestModel
 from rhodecode.model.meta import Session
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.comment import ChangesetCommentsModel
 from rhodecode.model.changeset_status import ChangesetStatusModel
 from rhodecode.model.forms import PullRequestForm
-from mercurial import scmutil
 from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)

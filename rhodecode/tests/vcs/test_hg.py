@@ -10,7 +10,7 @@ from rhodecode.lib.vcs.utils.compat import unittest
 
 
 # Use only clean mercurial's ui
-import mercurial.scmutil
+from rhodecode.lib.vcs.utils.hgcompat import mercurial
 mercurial.scmutil.rcpath()
 if mercurial.scmutil._rcpath:
     mercurial.scmutil._rcpath = mercurial.scmutil._rcpath[:1]

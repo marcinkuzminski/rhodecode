@@ -1,4 +1,4 @@
-from mercurial import ui, config
+from rhodecode.lib.vcs.utils.hgcompat import ui, config
 
 
 def make_ui(self, path='hgwebdir.config'):

@@ -406,7 +406,7 @@ def ValidCloneUri():
     def url_handler(repo_type, url, ui=None):
         if repo_type == 'hg':
             from rhodecode.lib.vcs.backends.hg.repository import MercurialRepository
-            from mercurial.httppeer import httppeer
+            from rhodecode.lib.vcs.utils.hgcompat import httppeer
             if url.startswith('http'):
                 ## initially check if it's at least the proper URL
                 ## or does it pass basic auth
@@ -418,7 +418,7 @@ def ValidCloneUri():
             elif url.startswith('git+http'):
                 raise NotImplementedError()
             else:
-                raise Exception('clone from URI %s not allowed' % (url))
+                raise Exception('clone from URI %s not allowed' % (url,))
 
         elif repo_type == 'git':
             from rhodecode.lib.vcs.backends.git.repository import GitRepository

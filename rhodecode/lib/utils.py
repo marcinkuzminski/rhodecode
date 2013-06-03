@@ -39,13 +39,12 @@ from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
 
-from mercurial import ui, config
-
 from webhelpers.text import collapse, remove_formatting, strip_tags
 
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.backends.base import BaseChangeset
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.hgcompat import ui, config
 from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 

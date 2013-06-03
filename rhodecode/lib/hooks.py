@@ -29,9 +29,7 @@ import binascii
 import traceback
 from inspect import isfunction
 
-from mercurial.scmutil import revrange
-from mercurial.node import nullrev
-
+from rhodecode.lib.vcs.utils.hgcompat import nullrev, revrange
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
