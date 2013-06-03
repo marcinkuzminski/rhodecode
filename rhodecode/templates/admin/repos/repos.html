@@ -17,9 +17,11 @@
     <div class="title">
         ${self.breadcrumbs()}
         <ul class="links">
+         %if h.HasPermissionAny('hg.admin','hg.create.repository')():
           <li>
             <span>${h.link_to(_(u'Add repository'),h.url('new_repo'))}</span>
           </li>
+         %endif
         </ul>
     </div>
     <div class="table yui-skin-sam" id="repos_list_wrap"></div>
