@@ -133,6 +133,15 @@ define company specific information into repositories eg. defining repo_manager
 key that would add give info about a manager of each repository. There's no
 limit for adding custom fields. Newly created fields are accessible via API.
 
+`Show RhodeCode version` option toggles displaying exact RhodeCode version in
+the footer
+
+
+Dashboard items
+~~~~~~~~~~~~~~~
+
+Number if items in main page dashboard before pagination is displayed
+
 
 Icons
 ~~~~~
