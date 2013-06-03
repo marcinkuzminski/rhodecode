@@ -46,7 +46,7 @@ threads = 5
 max_request_body_size = 107374182400
 ## use poll instead of select, fixes fd limits, may not work on old
 ## windows systems.
-asyncore_use_poll = True
+#asyncore_use_poll = True
 
 ## GUNICORN ##
 #use = egg:gunicorn#main
