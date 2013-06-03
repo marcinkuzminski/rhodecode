@@ -1272,7 +1272,7 @@ class RepoGroup(Base, BaseModel):
 
         repo_groups = []
         if show_empty_group:
-            repo_groups = [('-1', '-- %s --' % _('top level'))]
+            repo_groups = [('-1', u'-- %s --' % _('top level'))]
         sep = ' &raquo; '
         _name = lambda k: _literal(sep.join(k))
 
