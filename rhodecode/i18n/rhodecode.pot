@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.7.0dev\n"
 "Report-Msgid-Bugs-To: marcin@maq.io\n"
-"POT-Creation-Date: 2013-06-02 16:27+0200\n"
+"POT-Creation-Date: 2013-06-04 15:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgid "%s line context"
 msgstr ""
 
 #: rhodecode/controllers/changeset.py:345
-#: rhodecode/controllers/pullrequests.py:481
+#: rhodecode/controllers/pullrequests.py:478
 #, python-format
 msgid "Status change -> %s"
 msgstr ""
@@ -44,7 +44,7 @@ msgid "Changing status on a changeset associated with a closed pull request is n
 msgstr ""
 
 #: rhodecode/controllers/compare.py:74
-#: rhodecode/controllers/pullrequests.py:259
+#: rhodecode/controllers/pullrequests.py:256
 msgid "There are no changesets yet"
 msgstr ""
 
@@ -173,14 +173,14 @@ msgstr ""
 msgid "Changesets"
 msgstr ""
 
-#: rhodecode/controllers/files.py:632 rhodecode/controllers/pullrequests.py:152
+#: rhodecode/controllers/files.py:632 rhodecode/controllers/pullrequests.py:149
 #: rhodecode/controllers/summary.py:76 rhodecode/model/scm.py:682
 #: rhodecode/templates/switch_to_list.html:3
 #: rhodecode/templates/branches/branches.html:10
 msgid "Branches"
 msgstr ""
 
-#: rhodecode/controllers/files.py:633 rhodecode/controllers/pullrequests.py:153
+#: rhodecode/controllers/files.py:633 rhodecode/controllers/pullrequests.py:150
 #: rhodecode/controllers/summary.py:77 rhodecode/model/scm.py:693
 #: rhodecode/templates/switch_to_list.html:15
 #: rhodecode/templates/tags/tags.html:10
@@ -218,51 +218,51 @@ msgstr ""
 msgid "Your password reset was successful, new password has been sent to your email"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:139
+#: rhodecode/controllers/pullrequests.py:136
 #: rhodecode/templates/changeset/changeset.html:10
 #: rhodecode/templates/email_templates/changeset_comment.html:8
 msgid "Changeset"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:149
+#: rhodecode/controllers/pullrequests.py:146
 msgid "Special"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:150
+#: rhodecode/controllers/pullrequests.py:147
 msgid "Peer branches"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:151 rhodecode/model/scm.py:688
+#: rhodecode/controllers/pullrequests.py:148 rhodecode/model/scm.py:688
 #: rhodecode/templates/switch_to_list.html:28
 #: rhodecode/templates/bookmarks/bookmarks.html:10
 msgid "Bookmarks"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:324
+#: rhodecode/controllers/pullrequests.py:321
 msgid "Pull request requires a title with min. 3 chars"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:326
+#: rhodecode/controllers/pullrequests.py:323
 msgid "Error creating pull request"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:346
+#: rhodecode/controllers/pullrequests.py:343
 msgid "Successfully opened new pull request"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:349
+#: rhodecode/controllers/pullrequests.py:346
 msgid "Error occurred during sending pull request"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:388
+#: rhodecode/controllers/pullrequests.py:385
 msgid "Successfully deleted pull request"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:484
+#: rhodecode/controllers/pullrequests.py:481
 msgid "Closing with"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:521
+#: rhodecode/controllers/pullrequests.py:518
 msgid "Closing pull request on other statuses than rejected or approved forbidden"
 msgstr ""
 
@@ -1578,7 +1578,7 @@ msgstr ""
 #: rhodecode/templates/index_base.html:13
 #: rhodecode/templates/index_base.html:18
 #: rhodecode/templates/admin/repos/repo_add.html:5
-#: rhodecode/templates/admin/repos/repos.html:21
+#: rhodecode/templates/admin/repos/repos.html:22
 msgid "Add repository"
 msgstr ""
 
@@ -1610,7 +1610,7 @@ msgstr ""
 #: rhodecode/templates/index_base.html:123
 #: rhodecode/templates/admin/repos/repo_add_base.html:56
 #: rhodecode/templates/admin/repos/repo_edit.html:68
-#: rhodecode/templates/admin/repos/repos.html:73
+#: rhodecode/templates/admin/repos/repos.html:75
 #: rhodecode/templates/admin/repos_groups/repos_groups_add.html:42
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:47
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:44
@@ -1635,7 +1635,7 @@ msgstr ""
 #: rhodecode/templates/index_base.html:121
 #: rhodecode/templates/admin/repos/repo_add_base.html:9
 #: rhodecode/templates/admin/repos/repo_edit.html:32
-#: rhodecode/templates/admin/repos/repos.html:71
+#: rhodecode/templates/admin/repos/repos.html:73
 #: rhodecode/templates/admin/users/user_edit_my_account.html:172
 #: rhodecode/templates/base/perms_summary.html:37
 #: rhodecode/templates/bookmarks/bookmarks.html:48
@@ -1657,7 +1657,7 @@ msgid "Last Change"
 msgstr ""
 
 #: rhodecode/templates/index_base.html:126
-#: rhodecode/templates/admin/repos/repos.html:74
+#: rhodecode/templates/admin/repos/repos.html:76
 #: rhodecode/templates/admin/users/user_edit_my_account.html:174
 #: rhodecode/templates/journal/journal.html:195
 #: rhodecode/templates/journal/journal.html:285
@@ -1666,12 +1666,12 @@ msgstr ""
 
 #: rhodecode/templates/index_base.html:128
 #: rhodecode/templates/admin/repos/repo_edit.html:114
-#: rhodecode/templates/admin/repos/repos.html:76
+#: rhodecode/templates/admin/repos/repos.html:78
 msgid "Owner"
 msgstr ""
 
 #: rhodecode/templates/index_base.html:136
-#: rhodecode/templates/admin/repos/repos.html:84
+#: rhodecode/templates/admin/repos/repos.html:86
 #: rhodecode/templates/admin/users/user_edit_my_account.html:183
 #: rhodecode/templates/admin/users/users.html:107
 #: rhodecode/templates/bookmarks/bookmarks.html:74
@@ -1683,7 +1683,7 @@ msgid "Click to sort ascending"
 msgstr ""
 
 #: rhodecode/templates/index_base.html:137
-#: rhodecode/templates/admin/repos/repos.html:85
+#: rhodecode/templates/admin/repos/repos.html:87
 #: rhodecode/templates/admin/users/user_edit_my_account.html:184
 #: rhodecode/templates/admin/users/users.html:108
 #: rhodecode/templates/bookmarks/bookmarks.html:75
@@ -1699,7 +1699,7 @@ msgid "No repositories found."
 msgstr ""
 
 #: rhodecode/templates/index_base.html:139
-#: rhodecode/templates/admin/repos/repos.html:87
+#: rhodecode/templates/admin/repos/repos.html:89
 #: rhodecode/templates/admin/users/user_edit_my_account.html:186
 #: rhodecode/templates/admin/users/users.html:110
 #: rhodecode/templates/bookmarks/bookmarks.html:77
@@ -1711,7 +1711,7 @@ msgid "Data error."
 msgstr ""
 
 #: rhodecode/templates/index_base.html:140
-#: rhodecode/templates/admin/repos/repos.html:88
+#: rhodecode/templates/admin/repos/repos.html:90
 #: rhodecode/templates/admin/users/user_edit_my_account.html:58
 #: rhodecode/templates/admin/users/user_edit_my_account.html:187
 #: rhodecode/templates/admin/users/users.html:111
@@ -1882,7 +1882,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: rhodecode/templates/admin/admin_log.html:6
-#: rhodecode/templates/admin/repos/repos.html:77
+#: rhodecode/templates/admin/repos/repos.html:79
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:46
 #: rhodecode/templates/admin/users/user_edit_my_account.html:176
 #: rhodecode/templates/admin/users/users.html:87
@@ -2657,7 +2657,7 @@ msgstr ""
 msgid "Repositories administration"
 msgstr ""
 
-#: rhodecode/templates/admin/repos/repos.html:86
+#: rhodecode/templates/admin/repos/repos.html:88
 #: rhodecode/templates/admin/users/user_edit_my_account.html:185
 #: rhodecode/templates/admin/users/users.html:109
 #: rhodecode/templates/bookmarks/bookmarks.html:76
