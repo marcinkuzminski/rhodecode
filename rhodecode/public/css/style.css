@@ -4658,7 +4658,7 @@ div.pr {
     padding: 10px 4px;
 }
 div.pr-closed {
-    background-color: rgba(245,245,245,0.5);
+    background-color: #eee;
 }
 
 span.pr-closed-tag {
