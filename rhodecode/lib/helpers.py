@@ -425,7 +425,7 @@ def show_id(cs):
 
 def fmt_date(date):
     if date:
-        _fmt = _(u"%a, %d %b %Y %H:%M:%S").encode('utf8')
+        _fmt = u"%a, %d %b %Y %H:%M:%S".encode('utf8')
         return date.strftime(_fmt).decode('utf8')
 
     return ""
