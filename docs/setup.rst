@@ -451,11 +451,11 @@ to define a regular expression that will fetch issue id stored in commit
 messages and replace that with an url to this issue. To enable this simply
 uncomment following variables in the ini file::
 
-    url_pat = (?:^#|\s#)(\w+)
+    issue_pat = (?:^#|\s#)(\w+)
     issue_server_link = https://myissueserver.com/{repo}/issue/{id}
     issue_prefix = #
 
-`url_pat` is the regular expression that will fetch issues from commit messages.
+`issue_pat` is the regular expression that will fetch issues from commit messages.
 Default regex will match issues in format of #<number> eg. #300.
 
 Matched issues will be replace with the link specified as `issue_server_link`
