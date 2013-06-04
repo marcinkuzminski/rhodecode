@@ -47,12 +47,19 @@ class PullRequestModel(BaseModel):
     def __get_pull_request(self, pull_request):
         return self._get_instance(PullRequest, pull_request)
 
-    def get_all(self, repo):
-        repo = self._get_repo(repo)
-        return PullRequest.query()\
-                .filter(PullRequest.other_repo == repo)\
-                .order_by(PullRequest.created_on.desc())\
-                .all()
+    def get_all(self, repo_name, from_=False, closed=False):
+        """Get all PRs for repo.
+        Default is all PRs to the repo, PRs from the repo if from_.
+        Closed PRs are only included if closed is true."""
+        repo = self._get_repo(repo_name)
+        q = PullRequest.query()
+        if from_:
+            q = q.filter(PullRequest.org_repo == repo)
+        else:
+            q = q.filter(PullRequest.other_repo == repo)
+        if not closed:
+            q = q.filter(PullRequest.status != PullRequest.STATUS_CLOSED)
+        return q.order_by(PullRequest.created_on.desc()).all()
 
     def create(self, created_by, org_repo, org_ref, other_repo, other_ref,
                revisions, reviewers, title, description=None):

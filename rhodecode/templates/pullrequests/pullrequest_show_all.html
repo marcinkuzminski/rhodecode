@@ -5,7 +5,11 @@
 </%def>
 
 <%def name="breadcrumbs_links()">
-    ${_('Pull requests')}
+%if c.from_:
+    ${_('Pull requests from %s') % c.repo_name}
+%else:
+    ${_('Pull requests to %s') % c.repo_name}
+%endif
 </%def>
 
 <%def name="page_nav()">
@@ -20,7 +24,27 @@ ${self.repo_context_bar('showpullrequest')}
     <div class="title">
         ${self.breadcrumbs()}
     </div>
+
+    <div style="margin: 0 20px">
+        <div>
+        %if c.from_:
+            ${h.link_to(_('Instead, show pull requests to %s') % c.repo_name, h.url('pullrequest_show_all',repo_name=c.repo_name,closed=c.closed))}
+        %else:
+            ${h.link_to(_('Instead, show pull requests from %s') % c.repo_name, h.url('pullrequest_show_all',repo_name=c.repo_name,closed=c.closed,from_=1))}
+        %endif
+        </div>
+
+        <div>
+        %if c.closed:
+            ${h.link_to(_('Hide closed pull requests'), h.url('pullrequest_show_all',repo_name=c.repo_name,from_=c.from_))}
+        %else:
+            ${h.link_to(_('Show closed pull requests too'), h.url('pullrequest_show_all',repo_name=c.repo_name,from_=c.from_,closed=1))}
+        %endif
+        </div>
+    </div>
+
     ${c.pullrequest_data}
+
 </div>
 
 </%def>

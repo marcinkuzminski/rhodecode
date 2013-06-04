@@ -226,7 +226,9 @@ class PullrequestsController(BaseRepoController):
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def show_all(self, repo_name):
-        c.pull_requests = PullRequestModel().get_all(repo_name)
+        c.from_ = request.GET.get('from_') or ''
+        c.closed = request.GET.get('closed') or ''
+        c.pull_requests = PullRequestModel().get_all(repo_name, from_=c.from_, closed=c.closed)
         c.repo_name = repo_name
         p = safe_int(request.GET.get('page', 1), 1)
 

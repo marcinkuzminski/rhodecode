@@ -4,7 +4,7 @@
   <div class="pr ${'pr-closed' if pr.is_closed() else ''}">
     <div class="pr-title">
       <img src="${h.url('/images/icons/flag_status_%s.png' % str(pr.last_review_status))}" />
-      <a href="${h.url('pullrequest_show',repo_name=c.repo_name,pull_request_id=pr.pull_request_id)}">
+      <a href="${h.url('pullrequest_show',repo_name=pr.other_repo.repo_name,pull_request_id=pr.pull_request_id)}">
       ${_('Pull request #%s opened by %s on %s') % (pr.pull_request_id, pr.author.full_name, h.fmt_date(pr.created_on))}
       </a>
        %if pr.is_closed():
