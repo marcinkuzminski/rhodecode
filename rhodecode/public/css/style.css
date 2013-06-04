@@ -4656,6 +4656,9 @@ div.pr {
     margin: 0px 20px;
     padding: 10px 4px;
 }
+div.pr-desc {
+    margin: 0px 20px;
+}
 div.pr-closed {
     background-color: #eee;
 }
