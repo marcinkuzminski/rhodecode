@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.7.0dev\n"
 "Report-Msgid-Bugs-To: marcin@maq.io\n"
-"POT-Creation-Date: 2013-06-04 15:40+0200\n"
+"POT-Creation-Date: 2013-06-04 17:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -835,11 +835,6 @@ msgstr ""
 
 #: rhodecode/lib/diffs.py:92
 msgid "No changes detected"
-msgstr ""
-
-#: rhodecode/lib/helpers.py:428
-#, python-format
-msgid "%a, %d %b %Y %H:%M:%S"
 msgstr ""
 
 #: rhodecode/lib/helpers.py:539
