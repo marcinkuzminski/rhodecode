@@ -176,6 +176,10 @@ class ChangelogController(BaseRepoController):
         c.branch_name = branch_name
         c.branch_filters = [('', _('All Branches'))] + \
             [(k, k) for k in c.rhodecode_repo.branches.keys()]
+        if c.rhodecode_repo.closed_branches:
+            prefix = _('(closed)') + ' '
+            c.branch_filters += [('-', '-')] + \
+                [(k, prefix + k) for k in c.rhodecode_repo.closed_branches.keys()]
         _revs = []
         if not f_path:
             _revs = [x.revision for x in c.pagination]

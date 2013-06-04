@@ -101,18 +101,23 @@ class MercurialRepository(BaseRepository):
         return self._get_branches()
 
     @LazyProperty
+    def closed_branches(self):
+        return self._get_branches(normal=False, closed=True)
+
+    @LazyProperty
     def allbranches(self):
         """
         List all branches, including closed branches.
         """
         return self._get_branches(closed=True)
 
-    def _get_branches(self, closed=False):
+    def _get_branches(self, normal=True, closed=False):
         """
         Get's branches for this repository
         Returns only not closed branches by default
 
         :param closed: return also closed branches for mercurial
+        :param normal: return also normal branches
         """
 
         if self._empty:
@@ -135,6 +140,8 @@ class MercurialRepository(BaseRepository):
                 else:
                     bt[bn] = tip
 
+            if not normal:
+                return bt_closed
             if closed:
                 bt.update(bt_closed)
             return bt

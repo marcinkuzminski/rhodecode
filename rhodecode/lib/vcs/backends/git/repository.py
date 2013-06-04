@@ -371,6 +371,10 @@ class GitRepository(BaseRepository):
         return OrderedDict(sorted(_branches, key=sortkey, reverse=False))
 
     @LazyProperty
+    def closed_branches(self):
+        return {}
+
+    @LazyProperty
     def tags(self):
         return self._get_tags()
 
