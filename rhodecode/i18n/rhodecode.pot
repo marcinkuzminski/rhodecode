@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RhodeCode 1.7.0dev\n"
 "Report-Msgid-Bugs-To: marcin@maq.io\n"
-"POT-Creation-Date: 2013-06-04 17:43+0200\n"
+"POT-Creation-Date: 2013-06-05 19:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3407,72 +3407,72 @@ msgstr ""
 msgid "Edit Permission"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:43
+#: rhodecode/templates/base/root.html:44
 msgid "Add another comment"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:44
+#: rhodecode/templates/base/root.html:45
 #: rhodecode/templates/data_table/_dt_elements.html:147
 msgid "Stop following this repository"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:45
+#: rhodecode/templates/base/root.html:46
 msgid "Start following this repository"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:46
+#: rhodecode/templates/base/root.html:47
 msgid "Group"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:47
+#: rhodecode/templates/base/root.html:48
 msgid "members"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:48
+#: rhodecode/templates/base/root.html:49
 #: rhodecode/templates/pullrequests/pullrequest.html:203
 msgid "Loading ..."
 msgstr ""
 
-#: rhodecode/templates/base/root.html:49
+#: rhodecode/templates/base/root.html:50
 msgid "Search truncated"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:50
+#: rhodecode/templates/base/root.html:51
 msgid "No matching files"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:51
+#: rhodecode/templates/base/root.html:52
 #: rhodecode/templates/changelog/changelog.html:45
 msgid "Open new pull request"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:52
+#: rhodecode/templates/base/root.html:53
 msgid "Open new pull request for selected changesets"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:53
+#: rhodecode/templates/base/root.html:54
 msgid "Show selected changesets __S -> __E"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:54
+#: rhodecode/templates/base/root.html:55
 msgid "Show selected changeset __S"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:55
+#: rhodecode/templates/base/root.html:56
 msgid "Selection link"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:56
+#: rhodecode/templates/base/root.html:57
 #: rhodecode/templates/changeset/diff_block.html:8
 msgid "Collapse diff"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:57
+#: rhodecode/templates/base/root.html:58
 msgid "Expand diff"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:58
-msgid "Failed to remoke permission"
+#: rhodecode/templates/base/root.html:59
+msgid "Failed to revoke permission"
 msgstr ""
 
 #: rhodecode/templates/bookmarks/bookmarks.html:5
