@@ -112,11 +112,15 @@ class SettingsController(BaseController):
 
         if setting_id == 'mapping':
             rm_obsolete = request.POST.get('destroy', False)
-            log.debug('Rescanning directories with destroy=%s' % rm_obsolete)
+            invalidate_cache = request.POST.get('invalidate', False)
+            log.debug('rescanning directories with destroy obsolete=%s'
+                      % (rm_obsolete,))
             initial = ScmModel().repo_scan()
-            log.debug('invalidating all repositories')
-            for repo_name in initial.keys():
-                ScmModel().mark_for_invalidation(repo_name)
+
+            if invalidate_cache:
+                log.debug('invalidating all repositories cache')
+                for repo_name in initial.keys():
+                    ScmModel().mark_for_invalidation(repo_name)
 
             added, removed = repo2db_mapper(initial, rm_obsolete)
             _repr = lambda l: ', '.join(map(safe_unicode, l)) or '-'

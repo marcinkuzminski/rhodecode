@@ -40,6 +40,12 @@
                         <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
                         ${_('Destroy old data')}</span> </label>
                     </div>
+                    <div class="checkbox">
+                        ${h.checkbox('invalidate',True)}
+                        <label for="invalidate">
+                        <span class="tooltip" title="${h.tooltip(_('Invalidate cache for all repositories during scan'))}">
+                        ${_('Invalidate cache for all repositories')}</span> </label>
+                    </div>
                     <span class="help-block">${_('Rescan repositories location for new repositories. Also deletes obsolete if `destroy` flag is checked ')}</span>
                 </div>
             </div>
