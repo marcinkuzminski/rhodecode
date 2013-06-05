@@ -30,7 +30,7 @@ import traceback
 import logging
 import cStringIO
 import pkg_resources
-from os.path import dirname as dn, join as jn
+from os.path import join as jn
 
 from sqlalchemy import func
 from pylons.i18n.translation import _
@@ -47,9 +47,9 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.utils2 import safe_str, safe_unicode, get_server_url,\
     _set_extras
 from rhodecode.lib.auth import HasRepoPermissionAny, HasReposGroupPermissionAny,\
-    HasUserGroupPermissionAnyDecorator, HasUserGroupPermissionAny
+    HasUserGroupPermissionAny
 from rhodecode.lib.utils import get_filesystem_repos, make_ui, \
-    action_logger, REMOVED_REPO_PAT
+    action_logger
 from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup, PullRequest
@@ -486,12 +486,15 @@ class ScmModel(BaseModel):
         :param scm_type:
         """
         if scm_type == 'hg':
-            from rhodecode.lib.vcs.backends.hg import \
-                MercurialInMemoryChangeset as IMC
-        elif scm_type == 'git':
-            from rhodecode.lib.vcs.backends.git import \
-                GitInMemoryChangeset as IMC
-        return IMC
+            from rhodecode.lib.vcs.backends.hg import MercurialInMemoryChangeset
+            return MercurialInMemoryChangeset
+
+        if scm_type == 'git':
+            from rhodecode.lib.vcs.backends.git import GitInMemoryChangeset
+            return GitInMemoryChangeset
+
+        raise Exception('Invalid scm_type, must be one of hg,git got %s'
+                        % (scm_type,))
 
     def pull_changes(self, repo, username):
         dbrepo = self.__get_repo(repo)
@@ -724,7 +727,6 @@ class ScmModel(BaseModel):
             if os.path.exists(_hook_file):
                 # let's take a look at this hook, maybe it's rhodecode ?
                 log.debug('hook exists, checking if it is from rhodecode')
-                _HOOK_VER_PAT = re.compile(r'^RC_HOOK_VER')
                 with open(_hook_file, 'rb') as f:
                     data = f.read()
                     matches = re.compile(r'(?:%s)\s*=\s*(.*)'
@@ -741,7 +743,7 @@ class ScmModel(BaseModel):
                 _rhodecode_hook = True
 
             if _rhodecode_hook or force_create:
-                log.debug('writing %s hook file !' % h_type)
+                log.debug('writing %s hook file !' % (h_type,))
                 with open(_hook_file, 'wb') as f:
                     tmpl = tmpl.replace('_TMPL_', rhodecode.__version__)
                     f.write(tmpl)
