@@ -4,6 +4,65 @@
 Changelog
 =========
 
+1.7.0 (**2013-05-XX**)
+----------------------
+
+news
+++++
+
+- Manage User’s Groups(teams): create, delete, rename, add/remove users inside.
+  by delegated user group admins.
+- Implemented simple Gist functionality.
+- External authentication got special flag to controll user activation.
+- Created whitelist for API access. Each view can now be accessed by api_key
+  if added to whitelist.
+- Added dedicated file history page.
+- Added compare option into bookmarks
+- Improved diff display for binary files and renames.
+- Archive downloading are now stored in main action journal.
+- Switch gravatar to always use ssl.
+- Implements #842 RhodeCode version disclosure.
+- Allow underscore to be the optionally first character of username.
+
+fixes
++++++
+
+- #818: Bookmarks Do Not Display on Changeset View.
+- Fixed default permissions population during upgrades.
+- Fixed overwrite default user group permission flag.
+- Fixed issue with h.person() function returned prematurly giving only email
+  info from changeset metadata.
+- get_changeset uses now mercurial revrange to filter out branches.
+  Switch to branch it's around 20% faster this way.
+- Fixed some issues with paginators on chrome.
+- Forbid changing of repository type.
+- Adde missing permission checks in list of forks in repository settings.
+- Fixes #834 hooks error on remote pulling.
+- Fixes issues #849. Web Commits functionality failed for non-ascii files.
+- Fixed #850. Whoosh indexer should use the default revision when doing index.
+- Fixed #851 and #563 make-index crashes on non-ascii files.
+- Fixes #852, flash messages had issies with non-ascii messages
+
+1.6.0 (**2013-05-12**)
+----------------------
+
+news
+++++
+
+fixes
++++++
+
+- #818: Bookmarks Do Not Display on Changeset View
+- Fixed issue with forks form errors rendering
+- #819 review status is showed in the main changelog
+- Permission update function is idempotent, and doesn't override default
+  permissions when doing upgrades
+- Fixed some unicode problems with git file path
+- Fixed broken handling of adding an htsts headers.
+- Fixed redirection loop on changelog for empty repository
+- Fixed issue with web-editor that didn't preserve executable bit
+  after editing files
+
 1.6.0rc1 (**2013-04-07**)
 -------------------------
 
