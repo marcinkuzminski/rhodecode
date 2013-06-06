@@ -2137,7 +2137,7 @@ class Gist(Base, BaseModel):
         Index('g_gist_access_id_idx', 'gist_access_id'),
         Index('g_created_on_idx', 'created_on'),
         {'extend_existing': True, 'mysql_engine': 'InnoDB',
-         'mysql_charset': 'utf8'}
+         'mysql_charset': 'utf8', 'sqlite_autoincrement': True}
     )
     GIST_PUBLIC = u'public'
     GIST_PRIVATE = u'private'
