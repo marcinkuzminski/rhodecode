@@ -35,12 +35,12 @@ from rhodecode.lib.auth import PasswordGenerator, AuthUser, \
     HasPermissionAnyApi, HasRepoPermissionAnyApi
 from rhodecode.lib.utils import map_groups, repo2db_mapper
 from rhodecode.lib.utils2 import str2bool, time_to_datetime, safe_int
-from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UserGroupModel
+from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap,\
     Permission, User, Gist
 from rhodecode.lib.compat import json
@@ -48,6 +48,15 @@ from rhodecode.lib.exceptions import DefaultUserException
 from rhodecode.model.gist import GistModel
 
 log = logging.getLogger(__name__)
+
+
+def store_update(updates, attr, name):
+    """
+    Stores param in updates dict if it's not instance of Optional
+    allows easy updates of passed in params
+    """
+    if not isinstance(attr, Optional):
+        updates[name] = attr
 
 
 class OptionalAttr(object):
@@ -122,6 +131,19 @@ def get_repo_or_error(repoid):
     if repo is None:
         raise JSONRPCError('repository `%s` does not exist' % (repoid))
     return repo
+
+
+def get_repo_group_or_error(repogroupid):
+    """
+    Get repo group by id or name or return JsonRPCError if not found
+
+    :param repogroupid:
+    """
+    repo_group = ReposGroupModel()._get_repo_group(repogroupid)
+    if repo_group is None:
+        raise JSONRPCError(
+            'repository group `%s` does not exist' % (repogroupid,))
+    return repo_group
 
 
 def get_users_group_or_error(usersgroupid):
@@ -828,6 +850,71 @@ class ApiController(JSONRPCController):
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository `%s`' % repo_name)
+
+    # permission check inside
+    def update_repo(self, apiuser, repoid, name=Optional(None),
+                    owner=Optional(OAttr('apiuser')),
+                    group=Optional(None),
+                    description=Optional(''), private=Optional(False),
+                    clone_uri=Optional(None), landing_rev=Optional('tip'),
+                    enable_statistics=Optional(False),
+                    enable_locking=Optional(False),
+                    enable_downloads=Optional(False)):
+
+        """
+        Updates repo
+
+        :param apiuser: filled automatically from apikey
+        :type apiuser: AuthUser
+        :param repoid: repository name or repository id
+        :type repoid: str or int
+        :param name:
+        :param owner:
+        :param group:
+        :param description:
+        :param private:
+        :param clone_uri:
+        :param landing_rev:
+        :param enable_statistics:
+        :param enable_locking:
+        :param enable_downloads:
+        """
+        repo = get_repo_or_error(repoid)
+        if not HasPermissionAnyApi('hg.admin')(user=apiuser):
+            # check if we have admin permission for this repo !
+            if not HasRepoPermissionAnyApi('repository.admin')(user=apiuser,
+                                                               repo_name=repo.repo_name):
+                raise JSONRPCError('repository `%s` does not exist' % (repoid,))
+
+        updates = {
+            # update function requires this.
+            'repo_name': repo.repo_name
+        }
+        repo_group = group
+        if not isinstance(repo_group, Optional):
+            repo_group = get_repo_group_or_error(repo_group)
+            repo_group = repo_group.group_id
+        try:
+            store_update(updates, name, 'repo_name')
+            store_update(updates, repo_group, 'repo_group')
+            store_update(updates, owner, 'user')
+            store_update(updates, description, 'repo_description')
+            store_update(updates, private, 'repo_private')
+            store_update(updates, clone_uri, 'clone_uri')
+            store_update(updates, landing_rev, 'repo_landing_rev')
+            store_update(updates, enable_statistics, 'repo_enable_statistics')
+            store_update(updates, enable_locking, 'repo_enable_locking')
+            store_update(updates, enable_downloads, 'repo_enable_downloads')
+
+            RepoModel().update(repo, **updates)
+            Session().commit()
+            return dict(
+                msg='updated repo ID:%s %s' % (repo.repo_id, repo.repo_name),
+                repository=repo.get_api_data()
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to update repo `%s`' % repoid)
 
     @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     def fork_repo(self, apiuser, repoid, fork_name, owner=Optional(OAttr('apiuser')),
