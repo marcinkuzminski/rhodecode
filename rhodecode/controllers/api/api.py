@@ -1069,18 +1069,17 @@ class ApiController(JSONRPCController):
             )
 
     def create_gist(self, apiuser, files, owner=Optional(OAttr('apiuser')),
-                    gist_type=Optional(Gist.GIST_PUBLIC),
-                    gist_lifetime=Optional(-1),
-                    gist_description=Optional('')):
+                    gist_type=Optional(Gist.GIST_PUBLIC), lifetime=Optional(-1),
+                    description=Optional('')):
 
         try:
             if isinstance(owner, Optional):
                 owner = apiuser.user_id
 
             owner = get_user_or_error(owner)
-            description = Optional.extract(gist_description)
+            description = Optional.extract(description)
             gist_type = Optional.extract(gist_type)
-            gist_lifetime = Optional.extract(gist_lifetime)
+            lifetime = Optional.extract(lifetime)
 
             # files: {
             #    'filename': {'content':'...', 'lexer': null},
@@ -1090,21 +1089,12 @@ class ApiController(JSONRPCController):
                                       owner=owner,
                                       gist_mapping=files,
                                       gist_type=gist_type,
-                                      lifetime=gist_lifetime)
+                                      lifetime=lifetime)
             Session().commit()
             return dict(
                 msg='created new gist',
-                gist_url=gist.gist_url(),
-                gist_id=gist.gist_access_id,
-                gist_type=gist.gist_type,
-                files=files.keys()
+                gist=gist.get_api_data()
             )
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create gist')
-
-    def update_gist(self, apiuser):
-        pass
-
-    def delete_gist(self, apiuser):
-        pass

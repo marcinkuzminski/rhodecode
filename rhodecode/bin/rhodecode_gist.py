@@ -135,8 +135,8 @@ def _run(argv):
         }
 
         margs = dict(
-            gist_lifetime=args.lifetime,
-            gist_description=args.description,
+            lifetime=args.lifetime,
+            description=args.description,
             gist_type='private' if args.private else 'public',
             files=files
         )
@@ -145,8 +145,9 @@ def _run(argv):
         if args.format == FORMAT_JSON:
             print json.dumps(json_data)
         elif args.format == FORMAT_PRETTY:
-            print 'Created %s gist %s' % (json_data['gist_type'],
-                                          json_data['gist_url'])
+            print json_data
+            print 'Created %s gist %s' % (json_data['gist']['type'],
+                                          json_data['gist']['url'])
     return 0
 
 
