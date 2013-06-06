@@ -1,4 +1,4 @@
-'''
+"""
 Module provides a class allowing to wrap communication over subprocess.Popen
 input, output, error streams into a meaningfull, non-blocking, concurrent
 stream processor exposing the output data as an iterator fitting to be a
@@ -21,10 +21,10 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with git_http_backend.py Project.
 If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 import os
 import subprocess
-from rhodecode.lib.compat import deque, Event, Thread, _bytes, _bytearray
+from rhodecode.lib.vcs.utils.compat import deque, Event, Thread, _bytes, _bytearray
 
 
 class StreamFeeder(Thread):
@@ -143,7 +143,7 @@ class InputStreamChunker(Thread):
 
 
 class BufferedGenerator():
-    '''
+    """
     Class behaves as a non-blocking, buffered pipe reader.
     Reads chunks of data (through a thread)
     from a blocking pipe, and attaches these to an array (Deque) of chunks.
@@ -153,7 +153,7 @@ class BufferedGenerator():
     to be sent or by not returning until there is some data to send
     When we get EOF from underlying source pipe we raise the marker to raise
     StopIteration after the last chunk of data is yielded.
-    '''
+    """
 
     def __init__(self, source, buffer_size=65536, chunk_size=4096,
                  starting_values=[], bottomless=False):
@@ -229,29 +229,29 @@ class BufferedGenerator():
 
     @property
     def done_reading_event(self):
-        '''
+        """
         Done_reding does not mean that the iterator's buffer is empty.
         Iterator might have done reading from underlying source, but the read
         chunks might still be available for serving through .next() method.
 
-        @return An Event class instance.
-        '''
+        :returns: An Event class instance.
+        """
         return self.worker.EOF
 
     @property
     def done_reading(self):
-        '''
+        """
         Done_reding does not mean that the iterator's buffer is empty.
         Iterator might have done reading from underlying source, but the read
         chunks might still be available for serving through .next() method.
 
-        @return An Bool value.
-        '''
+        :returns: An Bool value.
+        """
         return self.worker.EOF.is_set()
 
     @property
     def length(self):
-        '''
+        """
         returns int.
 
         This is the lenght of the que of chunks, not the length of
@@ -265,7 +265,7 @@ class BufferedGenerator():
         the responce's length will be set to that. In order not to
         confuse WSGI PEP3333 servers, we will not implement __len__
         at all.
-        '''
+        """
         return len(self.data)
 
     def prepend(self, x):
@@ -282,7 +282,7 @@ class BufferedGenerator():
 
 
 class SubprocessIOChunker(object):
-    '''
+    """
     Processor class wrapping handling of subprocess IO.
 
     In a way, this is a "communicate()" replacement with a twist.
@@ -324,10 +324,10 @@ class SubprocessIOChunker(object):
     #    return answer
 
 
-    '''
+    """
     def __init__(self, cmd, inputstream=None, buffer_size=65536,
                  chunk_size=4096, starting_values=[], **kwargs):
-        '''
+        """
         Initializes SubprocessIOChunker
 
         :param cmd: A Subprocess.Popen style "cmd". Can be string or array of strings
@@ -335,17 +335,17 @@ class SubprocessIOChunker(object):
         :param buffer_size: (Default: 65536) A size of total buffer per stream in bytes.
         :param chunk_size: (Default: 4096) A max size of a chunk. Actual chunk may be smaller.
         :param starting_values: (Default: []) An array of strings to put in front of output que.
-        '''
+        """
 
         if inputstream:
             input_streamer = StreamFeeder(inputstream)
             input_streamer.start()
             inputstream = input_streamer.output
 
+        _shell = kwargs.get('shell', True)
         if isinstance(cmd, (list, tuple)):
             cmd = ' '.join(cmd)
 
-        _shell = kwargs.get('shell') or True
         kwargs['shell'] = _shell
         _p = subprocess.Popen(cmd,
             bufsize=-1,
@@ -353,7 +353,7 @@ class SubprocessIOChunker(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             **kwargs
-            )
+        )
 
         bg_out = BufferedGenerator(_p.stdout, buffer_size, chunk_size, starting_values)
         bg_err = BufferedGenerator(_p.stderr, 16000, 1, bottomless=True)
@@ -368,7 +368,7 @@ class SubprocessIOChunker(object):
         # presence of stuff in stderr output) we error out.
         # Else, we are happy.
         _returncode = _p.poll()
-        if _returncode or (_returncode == None and bg_err.length):
+        if _returncode or (_returncode is None and bg_err.length):
             try:
                 _p.terminate()
             except:

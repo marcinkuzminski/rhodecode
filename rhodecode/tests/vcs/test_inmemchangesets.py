@@ -1,12 +1,14 @@
+# encoding: utf8
 """
 Tests so called "in memory changesets" commit API of vcs.
 """
 from __future__ import with_statement
 
-from rhodecode.lib import vcs
 import time
 import datetime
-from conf import SCM_TESTS, get_new_dir
+
+from rhodecode.lib import vcs
+from rhodecode.tests.vcs.conf import SCM_TESTS, get_new_dir
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError
 from rhodecode.lib.vcs.exceptions import NodeAlreadyAddedError
 from rhodecode.lib.vcs.exceptions import NodeAlreadyExistsError
@@ -17,6 +19,7 @@ from rhodecode.lib.vcs.exceptions import NodeNotChangedError
 from rhodecode.lib.vcs.nodes import DirNode
 from rhodecode.lib.vcs.nodes import FileNode
 from rhodecode.lib.vcs.utils.compat import unittest
+from rhodecode.lib.vcs.utils import safe_unicode
 
 
 class InMemoryChangesetTestMixin(object):
@@ -111,6 +114,28 @@ class InMemoryChangesetTestMixin(object):
         self.assertEqual(changeset.get_node('foobar/foobaz/file').content, 'foo')
         self.assertEqual(changeset.get_node('foobar/barbaz').content, 'foo')
 
+    def test_add_non_ascii_files(self):
+        rev_count = len(self.repo.revisions)
+        to_add = [
+            FileNode('żółwik/zwierzątko', content='ćććć'),
+            FileNode(u'żółwik/zwierzątko_uni', content=u'ćććć'),
+        ]
+        for node in to_add:
+            self.imc.add(node)
+        message = u'Added: %s' % ', '.join((node.path for node in self.nodes))
+        author = unicode(self.__class__)
+        changeset = self.imc.commit(message=message, author=author)
+
+        newtip = self.repo.get_changeset()
+        self.assertEqual(changeset, newtip)
+        self.assertEqual(rev_count + 1, len(self.repo.revisions))
+        self.assertEqual(newtip.message, message)
+        self.assertEqual(newtip.author, author)
+        self.assertTrue(not any((self.imc.added, self.imc.changed,
+            self.imc.removed)))
+        for node in to_add:
+            self.assertEqual(newtip.get_node(node.path).content, node.content)
+
     def test_add_raise_already_added(self):
         node = FileNode('foobar', content='baz')
         self.imc.add(node)
@@ -139,7 +164,37 @@ class InMemoryChangesetTestMixin(object):
         self.assertNotEqual(tip, newtip)
         self.assertNotEqual(tip.id, newtip.id)
         self.assertEqual(newtip.get_node('foo/bar/baz').content,
-            'My **changed** content')
+                        'My **changed** content')
+
+    def test_change_non_ascii(self):
+        to_add = [
+            FileNode('żółwik/zwierzątko', content='ćććć'),
+            FileNode(u'żółwik/zwierzątko_uni', content=u'ćććć'),
+        ]
+        for node in to_add:
+            self.imc.add(node)
+
+        tip = self.imc.commit(u'Initial', u'joe.doe@example.com')
+
+        # Change node's content
+        node = FileNode('żółwik/zwierzątko', content='My **changed** content')
+        self.imc.change(node)
+        self.imc.commit(u'Changed %s' % safe_unicode(node.path),
+                        u'joe.doe@example.com')
+
+        node = FileNode(u'żółwik/zwierzątko_uni', content=u'My **changed** content')
+        self.imc.change(node)
+        self.imc.commit(u'Changed %s' % safe_unicode(node.path),
+                        u'joe.doe@example.com')
+
+        newtip = self.repo.get_changeset()
+        self.assertNotEqual(tip, newtip)
+        self.assertNotEqual(tip.id, newtip.id)
+
+        self.assertEqual(newtip.get_node('żółwik/zwierzątko').content,
+                         'My **changed** content')
+        self.assertEqual(newtip.get_node('żółwik/zwierzątko_uni').content,
+                         'My **changed** content')
 
     def test_change_raise_empty_repository(self):
         node = FileNode('foobar')

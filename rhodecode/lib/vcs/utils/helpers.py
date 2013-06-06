@@ -4,10 +4,11 @@ Utitlites aimed to help achieve mostly basic tasks.
 from __future__ import division
 
 import re
+import os
 import time
 import datetime
-import os.path
 from subprocess import Popen, PIPE
+
 from rhodecode.lib.vcs.exceptions import VCSError
 from rhodecode.lib.vcs.exceptions import RepositoryError
 from rhodecode.lib.vcs.utils.paths import abspath
@@ -162,6 +163,7 @@ def parse_changesets(text):
             result['main'] = None
             return result
     raise ValueError("IDs not recognized")
+
 
 def parse_datetime(text):
     """

@@ -76,8 +76,8 @@ class FeedController(BaseRepoController):
             limited_diff = True
 
         for st in _parsed:
-            st.update({'added': st['stats'][0],
-                       'removed': st['stats'][1]})
+            st.update({'added': st['stats']['added'],
+                       'removed': st['stats']['deleted']})
             changes.append('\n %(operation)s %(filename)s '
                            '(%(added)s lines added, %(removed)s lines removed)'
                             % st)
@@ -87,9 +87,8 @@ class FeedController(BaseRepoController):
         return diff_processor, changes
 
     def __get_desc(self, cs):
-        desc_msg = []
-        desc_msg.append((_('%s committed on %s')
-                         % (h.person(cs.author), h.fmt_date(cs.date))) + '<br/>')
+        desc_msg = [(_('%s committed on %s')
+                     % (h.person(cs.author), h.fmt_date(cs.date))) + '<br/>']
         #branches, tags, bookmarks
         if cs.branch:
             desc_msg.append('branch: %s<br/>' % cs.branch)
@@ -118,7 +117,7 @@ class FeedController(BaseRepoController):
         """Produce an atom-1.0 feed via feedgenerator module"""
 
         @cache_region('long_term')
-        def _get_feed_from_cache(key):
+        def _get_feed_from_cache(key, kind):
             feed = Atom1Feed(
                  title=self.title % repo_name,
                  link=url('summary_home', repo_name=repo_name,
@@ -140,18 +139,17 @@ class FeedController(BaseRepoController):
             response.content_type = feed.mime_type
             return feed.writeString('utf-8')
 
-        key = repo_name + '_ATOM'
-        inv = CacheInvalidation.invalidate(key)
-        if inv is not None:
-            region_invalidate(_get_feed_from_cache, None, key)
-            CacheInvalidation.set_valid(inv.cache_key)
-        return _get_feed_from_cache(key)
+        kind = 'ATOM'
+        valid = CacheInvalidation.test_and_set_valid(repo_name, kind)
+        if not valid:
+            region_invalidate(_get_feed_from_cache, None, repo_name, kind)
+        return _get_feed_from_cache(repo_name, kind)
 
     def rss(self, repo_name):
         """Produce an rss2 feed via feedgenerator module"""
 
         @cache_region('long_term')
-        def _get_feed_from_cache(key):
+        def _get_feed_from_cache(key, kind):
             feed = Rss201rev2Feed(
                 title=self.title % repo_name,
                 link=url('summary_home', repo_name=repo_name,
@@ -173,9 +171,8 @@ class FeedController(BaseRepoController):
             response.content_type = feed.mime_type
             return feed.writeString('utf-8')
 
-        key = repo_name + '_RSS'
-        inv = CacheInvalidation.invalidate(key)
-        if inv is not None:
-            region_invalidate(_get_feed_from_cache, None, key)
-            CacheInvalidation.set_valid(inv.cache_key)
-        return _get_feed_from_cache(key)
+        kind = 'RSS'
+        valid = CacheInvalidation.test_and_set_valid(repo_name, kind)
+        if not valid:
+            region_invalidate(_get_feed_from_cache, None, repo_name, kind)
+        return _get_feed_from_cache(repo_name, kind)

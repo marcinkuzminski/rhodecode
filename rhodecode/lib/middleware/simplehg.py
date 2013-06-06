@@ -28,8 +28,6 @@ import os
 import logging
 import traceback
 
-from mercurial.error import RepoError
-from mercurial.hgweb import hgweb_mod
 
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError, \
@@ -41,6 +39,7 @@ from rhodecode.lib.base import BaseVCSController
 from rhodecode.lib.auth import get_container_username
 from rhodecode.lib.utils import make_ui, is_valid_repo, ui_sections
 from rhodecode.lib.compat import json
+from rhodecode.lib.vcs.utils.hgcompat import RepoError, hgweb_mod
 from rhodecode.model.db import User
 from rhodecode.lib.exceptions import HTTPLockedRC
 
@@ -185,8 +184,6 @@ class SimpleHg(BaseVCSController):
             extras.update({'make_lock': make_lock,
                            'locked_by': locked_by})
 
-        # set the environ variables for this request
-        os.environ['RC_SCM_DATA'] = json.dumps(extras)
         fix_PATH()
         log.debug('HOOKS extras is %s' % extras)
         baseui = make_ui('db')

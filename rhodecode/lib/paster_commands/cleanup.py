@@ -32,15 +32,14 @@ import shutil
 import logging
 import datetime
 
-from os.path import dirname as dn, join as jn
-#to get the rhodecode import
-rc_path = dn(dn(dn(os.path.realpath(__file__))))
-sys.path.append(rc_path)
 from rhodecode.lib.utils import BasePasterCommand, ask_ok, REMOVED_REPO_PAT
-
 from rhodecode.lib.utils2 import safe_str
 from rhodecode.model.db import RhodeCodeUi
 
+# fix rhodecode import
+from os.path import dirname as dn
+rc_path = dn(dn(dn(os.path.realpath(__file__))))
+sys.path.append(rc_path)
 
 log = logging.getLogger(__name__)
 

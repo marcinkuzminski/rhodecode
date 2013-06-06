@@ -3,36 +3,22 @@
 % for pr in c.pullrequests_pager:
   <div class="pr ${'pr-closed' if pr.is_closed() else ''}">
     <div class="pr-title">
-       %if pr.is_closed():
-         <div style="float:left;margin: -4px 0px;"><span class="pr-closed-tag">${_('Closed')}</span></div>
-       %endif
       <img src="${h.url('/images/icons/flag_status_%s.png' % str(pr.last_review_status))}" />
       <a href="${h.url('pullrequest_show',repo_name=c.repo_name,pull_request_id=pr.pull_request_id)}">
       ${_('Pull request #%s opened by %s on %s') % (pr.pull_request_id, pr.author.full_name, h.fmt_date(pr.created_on))}
       </a>
+       %if pr.is_closed():
+         <span class="pr-closed-tag">${_('Closed')}</span>
+       %endif
     </div>
     <h5 style="border:0px;padding-bottom:0px">${_('Title')}: ${pr.title}</h5>
     <div>${pr.description}</div>
   </div>
 % endfor
 
-<div class="pagination-wh pagination-left">
-<script type="text/javascript">
-YUE.onDOMReady(function(){
-    YUE.delegate("pullrequests","click",function(e, matchedEl, container){
-        ypjax(e.target.href,"pullrequests",function(){
-            show_more_event();
-            tooltip_activate();
-            show_changeset_tooltip();
-        });
-        YUE.preventDefault(e);
-    },'.pager_link');
-});
-</script>
+
 <div class="notification-paginator">
   <div class="pagination-wh pagination-left">
   ${c.pullrequests_pager.pager('$link_previous ~2~ $link_next')}
   </div>
-</div>
-
 </div>

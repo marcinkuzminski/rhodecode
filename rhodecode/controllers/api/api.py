@@ -25,6 +25,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+import time
 import traceback
 import logging
 
@@ -34,17 +35,28 @@ from rhodecode.lib.auth import PasswordGenerator, AuthUser, \
     HasPermissionAnyApi, HasRepoPermissionAnyApi
 from rhodecode.lib.utils import map_groups, repo2db_mapper
 from rhodecode.lib.utils2 import str2bool, time_to_datetime, safe_int
-from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.user import UserModel
 from rhodecode.model.users_group import UserGroupModel
+from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.model.db import Repository, RhodeCodeSetting, UserIpMap,\
-    Permission
+    Permission, User, Gist
 from rhodecode.lib.compat import json
+from rhodecode.lib.exceptions import DefaultUserException
+from rhodecode.model.gist import GistModel
 
 log = logging.getLogger(__name__)
+
+
+def store_update(updates, attr, name):
+    """
+    Stores param in updates dict if it's not instance of Optional
+    allows easy updates of passed in params
+    """
+    if not isinstance(attr, Optional):
+        updates[name] = attr
 
 
 class OptionalAttr(object):
@@ -113,12 +125,25 @@ def get_repo_or_error(repoid):
     """
     Get repo by id or name or return JsonRPCError if not found
 
-    :param userid:
+    :param repoid:
     """
     repo = RepoModel().get_repo(repoid)
     if repo is None:
         raise JSONRPCError('repository `%s` does not exist' % (repoid))
     return repo
+
+
+def get_repo_group_or_error(repogroupid):
+    """
+    Get repo group by id or name or return JsonRPCError if not found
+
+    :param repogroupid:
+    """
+    repo_group = ReposGroupModel()._get_repo_group(repogroupid)
+    if repo_group is None:
+        raise JSONRPCError(
+            'repository group `%s` does not exist' % (repogroupid,))
+    return repo_group
 
 
 def get_users_group_or_error(usersgroupid):
@@ -212,7 +237,7 @@ class ApiController(JSONRPCController):
         :param repoid:
         """
         repo = get_repo_or_error(repoid)
-        if HasPermissionAnyApi('hg.admin')(user=apiuser) is False:
+        if not HasPermissionAnyApi('hg.admin')(user=apiuser):
             # check if we have admin permission for this repo !
             if HasRepoPermissionAnyApi('repository.admin',
                                        'repository.write')(user=apiuser,
@@ -220,16 +245,15 @@ class ApiController(JSONRPCController):
                 raise JSONRPCError('repository `%s` does not exist' % (repoid))
 
         try:
-            invalidated_keys = ScmModel().mark_for_invalidation(repo.repo_name)
-            Session().commit()
-            return ('Cache for repository `%s` was invalidated: '
-                    'invalidated cache keys: %s' % (repoid, invalidated_keys))
+            ScmModel().mark_for_invalidation(repo.repo_name)
+            return ('Caches of repository `%s` was invalidated' % repoid)
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError(
                 'Error occurred during cache invalidation action'
             )
 
+    # permission check inside
     def lock(self, apiuser, repoid, locked=Optional(None),
              userid=Optional(OAttr('apiuser'))):
         """
@@ -266,27 +290,47 @@ class ApiController(JSONRPCController):
             lockobj = Repository.getlock(repo)
 
             if lockobj[0] is None:
-                return ('Repo `%s` not locked. Locked=`False`.'
-                        % (repo.repo_name))
+                _d = {
+                    'repo': repo.repo_name,
+                    'locked': False,
+                    'locked_since': None,
+                    'locked_by': None,
+                    'msg': 'Repo `%s` not locked.' % repo.repo_name
+                }
+                return _d
             else:
                 userid, time_ = lockobj
-                user = get_user_or_error(userid)
+                lock_user = get_user_or_error(userid)
+                _d = {
+                    'repo': repo.repo_name,
+                    'locked': True,
+                    'locked_since': time_,
+                    'locked_by': lock_user.username,
+                    'msg': ('Repo `%s` locked by `%s`. '
+                            % (repo.repo_name,
+                               json.dumps(time_to_datetime(time_))))
+                }
+                return _d
 
-                return ('Repo `%s` locked by `%s`. Locked=`True`. '
-                        'Locked since: `%s`'
-                    % (repo.repo_name, user.username,
-                       json.dumps(time_to_datetime(time_))))
-
+        # force locked state through a flag
         else:
             locked = str2bool(locked)
             try:
                 if locked:
-                    Repository.lock(repo, user.user_id)
+                    lock_time = time.time()
+                    Repository.lock(repo, user.user_id, lock_time)
                 else:
+                    lock_time = None
                     Repository.unlock(repo)
-
-                return ('User `%s` set lock state for repo `%s` to `%s`'
-                        % (user.username, repo.repo_name, locked))
+                _d = {
+                    'repo': repo.repo_name,
+                    'locked': locked,
+                    'locked_since': lock_time,
+                    'locked_by': user.username,
+                    'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                            % (user.username, repo.repo_name, locked))
+                }
+                return _d
             except Exception:
                 log.error(traceback.format_exc())
                 raise JSONRPCError(
@@ -302,9 +346,8 @@ class ApiController(JSONRPCController):
         :param apiuser:
         :param userid:
         """
-        if HasPermissionAnyApi('hg.admin')(user=apiuser):
-            pass
-        else:
+
+        if not HasPermissionAnyApi('hg.admin')(user=apiuser):
             #make sure normal user does not pass someone else userid,
             #he is not allowed to do that
             if not isinstance(userid, Optional) and userid != apiuser.user_id:
@@ -354,7 +397,7 @@ class ApiController(JSONRPCController):
         :param apiuser:
         :param userid:
         """
-        if HasPermissionAnyApi('hg.admin')(user=apiuser) is False:
+        if not HasPermissionAnyApi('hg.admin')(user=apiuser):
             #make sure normal user does not pass someone else userid,
             #he is not allowed to do that
             if not isinstance(userid, Optional) and userid != apiuser.user_id:
@@ -379,12 +422,15 @@ class ApiController(JSONRPCController):
         """
 
         result = []
-        for user in UserModel().get_all():
+        users_list = User.query().order_by(User.username)\
+                        .filter(User.username != User.DEFAULT_USER)\
+                        .all()
+        for user in users_list:
             result.append(user.get_api_data())
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_user(self, apiuser, username, email, password,
+    def create_user(self, apiuser, username, email, password=Optional(None),
                     firstname=Optional(None), lastname=Optional(None),
                     active=Optional(True), admin=Optional(False),
                     ldap_dn=Optional(None)):
@@ -479,6 +525,9 @@ class ApiController(JSONRPCController):
                 msg='updated user ID:%s %s' % (user.user_id, user.username),
                 user=user.get_api_data()
             )
+        except DefaultUserException:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('editing default user is forbidden')
         except Exception:
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to update user `%s`' % userid)
@@ -538,12 +587,15 @@ class ApiController(JSONRPCController):
         return result
 
     @HasPermissionAllDecorator('hg.admin')
-    def create_users_group(self, apiuser, group_name, active=Optional(True)):
+    def create_users_group(self, apiuser, group_name,
+                           owner=Optional(OAttr('apiuser')),
+                           active=Optional(True)):
         """
         Creates an new usergroup
 
         :param apiuser:
         :param group_name:
+        :param owner:
         :param active:
         """
 
@@ -551,8 +603,14 @@ class ApiController(JSONRPCController):
             raise JSONRPCError("user group `%s` already exist" % group_name)
 
         try:
+            if isinstance(owner, Optional):
+                owner = apiuser.user_id
+
+            owner = get_user_or_error(owner)
             active = Optional.extract(active)
-            ug = UserGroupModel().create(name=group_name, active=active)
+            ug = UserGroupModel().create(name=group_name,
+                                         owner=owner,
+                                         active=active)
             Session().commit()
             return dict(
                 msg='created new user group `%s`' % group_name,
@@ -633,10 +691,10 @@ class ApiController(JSONRPCController):
         """
         repo = get_repo_or_error(repoid)
 
-        if HasPermissionAnyApi('hg.admin')(user=apiuser) is False:
+        if not HasPermissionAnyApi('hg.admin')(user=apiuser):
             # check if we have admin permission for this repo !
-            if HasRepoPermissionAnyApi('repository.admin')(user=apiuser,
-                                            repo_name=repo.repo_name) is False:
+            if not HasRepoPermissionAnyApi('repository.admin')(user=apiuser,
+                                            repo_name=repo.repo_name):
                 raise JSONRPCError('repository `%s` does not exist' % (repoid))
 
         members = []
@@ -665,6 +723,7 @@ class ApiController(JSONRPCController):
         data['followers'] = followers
         return data
 
+    # permission check inside
     def get_repos(self, apiuser):
         """"
         Get all repositories
@@ -792,6 +851,71 @@ class ApiController(JSONRPCController):
             log.error(traceback.format_exc())
             raise JSONRPCError('failed to create repository `%s`' % repo_name)
 
+    # permission check inside
+    def update_repo(self, apiuser, repoid, name=Optional(None),
+                    owner=Optional(OAttr('apiuser')),
+                    group=Optional(None),
+                    description=Optional(''), private=Optional(False),
+                    clone_uri=Optional(None), landing_rev=Optional('tip'),
+                    enable_statistics=Optional(False),
+                    enable_locking=Optional(False),
+                    enable_downloads=Optional(False)):
+
+        """
+        Updates repo
+
+        :param apiuser: filled automatically from apikey
+        :type apiuser: AuthUser
+        :param repoid: repository name or repository id
+        :type repoid: str or int
+        :param name:
+        :param owner:
+        :param group:
+        :param description:
+        :param private:
+        :param clone_uri:
+        :param landing_rev:
+        :param enable_statistics:
+        :param enable_locking:
+        :param enable_downloads:
+        """
+        repo = get_repo_or_error(repoid)
+        if not HasPermissionAnyApi('hg.admin')(user=apiuser):
+            # check if we have admin permission for this repo !
+            if not HasRepoPermissionAnyApi('repository.admin')(user=apiuser,
+                                                               repo_name=repo.repo_name):
+                raise JSONRPCError('repository `%s` does not exist' % (repoid,))
+
+        updates = {
+            # update function requires this.
+            'repo_name': repo.repo_name
+        }
+        repo_group = group
+        if not isinstance(repo_group, Optional):
+            repo_group = get_repo_group_or_error(repo_group)
+            repo_group = repo_group.group_id
+        try:
+            store_update(updates, name, 'repo_name')
+            store_update(updates, repo_group, 'repo_group')
+            store_update(updates, owner, 'user')
+            store_update(updates, description, 'repo_description')
+            store_update(updates, private, 'repo_private')
+            store_update(updates, clone_uri, 'clone_uri')
+            store_update(updates, landing_rev, 'repo_landing_rev')
+            store_update(updates, enable_statistics, 'repo_enable_statistics')
+            store_update(updates, enable_locking, 'repo_enable_locking')
+            store_update(updates, enable_downloads, 'repo_enable_downloads')
+
+            RepoModel().update(repo, **updates)
+            Session().commit()
+            return dict(
+                msg='updated repo ID:%s %s' % (repo.repo_id, repo.repo_name),
+                repository=repo.get_api_data()
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to update repo `%s`' % repoid)
+
     @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     def fork_repo(self, apiuser, repoid, fork_name, owner=Optional(OAttr('apiuser')),
                   description=Optional(''), copy_permissions=Optional(False),
@@ -853,6 +977,7 @@ class ApiController(JSONRPCController):
                                                             fork_name)
             )
 
+    # perms handled inside
     def delete_repo(self, apiuser, repoid, forks=Optional(None)):
         """
         Deletes a given repository
@@ -874,9 +999,9 @@ class ApiController(JSONRPCController):
             _forks_msg = ''
             _forks = [f for f in repo.forks]
             if handle_forks == 'detach':
-                _forks_msg = ' ' + _('Detached %s forks') % len(_forks)
+                _forks_msg = ' ' + 'Detached %s forks' % len(_forks)
             elif handle_forks == 'delete':
-                _forks_msg = ' ' + _('Deleted %s forks') % len(_forks)
+                _forks_msg = ' ' + 'Deleted %s forks' % len(_forks)
             elif _forks:
                 raise JSONRPCError(
                     'Cannot delete `%s` it still contains attached forks'
@@ -1029,3 +1154,34 @@ class ApiController(JSONRPCController):
                     users_group.users_group_name, repo.repo_name
                 )
             )
+
+    def create_gist(self, apiuser, files, owner=Optional(OAttr('apiuser')),
+                    gist_type=Optional(Gist.GIST_PUBLIC), lifetime=Optional(-1),
+                    description=Optional('')):
+
+        try:
+            if isinstance(owner, Optional):
+                owner = apiuser.user_id
+
+            owner = get_user_or_error(owner)
+            description = Optional.extract(description)
+            gist_type = Optional.extract(gist_type)
+            lifetime = Optional.extract(lifetime)
+
+            # files: {
+            #    'filename': {'content':'...', 'lexer': null},
+            #    'filename2': {'content':'...', 'lexer': null}
+            #}
+            gist = GistModel().create(description=description,
+                                      owner=owner,
+                                      gist_mapping=files,
+                                      gist_type=gist_type,
+                                      lifetime=lifetime)
+            Session().commit()
+            return dict(
+                msg='created new gist',
+                gist=gist.get_api_data()
+            )
+        except Exception:
+            log.error(traceback.format_exc())
+            raise JSONRPCError('failed to create gist')

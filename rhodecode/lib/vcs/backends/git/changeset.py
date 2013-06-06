@@ -2,22 +2,21 @@ import re
 from itertools import chain
 from dulwich import objects
 from subprocess import Popen, PIPE
-import rhodecode
+
 from rhodecode.lib.vcs.conf import settings
-from rhodecode.lib.vcs.exceptions import RepositoryError
-from rhodecode.lib.vcs.exceptions import ChangesetError
-from rhodecode.lib.vcs.exceptions import NodeDoesNotExistError
-from rhodecode.lib.vcs.exceptions import VCSError
-from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
-from rhodecode.lib.vcs.exceptions import ImproperArchiveTypeError
 from rhodecode.lib.vcs.backends.base import BaseChangeset, EmptyChangeset
-from rhodecode.lib.vcs.nodes import FileNode, DirNode, NodeKind, RootNode, \
-    RemovedFileNode, SubModuleNode, ChangedFileNodesGenerator,\
-    AddedFileNodesGenerator, RemovedFileNodesGenerator
-from rhodecode.lib.vcs.utils import safe_unicode
-from rhodecode.lib.vcs.utils import date_fromtimestamp
+from rhodecode.lib.vcs.exceptions import (
+    RepositoryError, ChangesetError, NodeDoesNotExistError, VCSError,
+    ChangesetDoesNotExistError, ImproperArchiveTypeError
+)
+from rhodecode.lib.vcs.nodes import (
+    FileNode, DirNode, NodeKind, RootNode, RemovedFileNode, SubModuleNode,
+    ChangedFileNodesGenerator, AddedFileNodesGenerator, RemovedFileNodesGenerator
+)
+from rhodecode.lib.vcs.utils import (
+    safe_unicode, safe_str, safe_int, date_fromtimestamp
+)
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from rhodecode.lib.utils2 import safe_int, safe_str
 
 
 class GitChangeset(BaseChangeset):
@@ -30,7 +29,7 @@ class GitChangeset(BaseChangeset):
         self.repository = repository
 
         try:
-            commit = self.repository._repo.get_object(revision)
+            commit = self.repository._repo[revision]
             if isinstance(commit, objects.Tag):
                 revision = commit.object[1]
                 commit = self.repository._repo.get_object(commit.object[1])
@@ -40,7 +39,6 @@ class GitChangeset(BaseChangeset):
         self.id = self.raw_id
         self.short_id = self.raw_id[:12]
         self._commit = commit
-
         self._tree_id = commit.tree
         self._committer_property = 'committer'
         self._author_property = 'author'
@@ -48,10 +46,12 @@ class GitChangeset(BaseChangeset):
         self._date_tz_property = 'commit_timezone'
         self.revision = repository.revisions.index(revision)
 
-        self.message = safe_unicode(commit.message)
-
         self.nodes = {}
         self._paths = {}
+
+    @LazyProperty
+    def message(self):
+        return safe_unicode(self._commit.message)
 
     @LazyProperty
     def committer(self):
@@ -104,7 +104,7 @@ class GitChangeset(BaseChangeset):
         return path
 
     def _get_id_for_path(self, path):
-
+        path = safe_str(path)
         # FIXME: Please, spare a couple of minutes and make those codes cleaner;
         if not path in self._paths:
             path = path.strip('/')
@@ -154,7 +154,7 @@ class GitChangeset(BaseChangeset):
             if not path in self._paths:
                 raise NodeDoesNotExistError("There is no file nor directory "
                     "at the given path '%s' at revision %s"
-                    % (path, self.short_id))
+                    % (path, safe_str(self.short_id)))
         return self._paths[path]
 
     def _get_kind(self, path):
@@ -187,8 +187,7 @@ class GitChangeset(BaseChangeset):
         """
         Returns list of children changesets.
         """
-        rev_filter = _git_path = rhodecode.CONFIG.get('git_rev_filter',
-                                              '--all').strip()
+        rev_filter = _git_path = settings.GIT_REV_FILTER
         so, se = self.repository.run_git_command(
             "rev-list %s --children | grep '^%s'" % (rev_filter, self.raw_id)
         )
@@ -255,6 +254,7 @@ class GitChangeset(BaseChangeset):
         Returns stat mode of the file at the given ``path``.
         """
         # ensure path is traversed
+        path = safe_str(path)
         self._get_id_for_path(path)
         return self._stat_modes[path]
 
@@ -373,7 +373,7 @@ class GitChangeset(BaseChangeset):
             frmt = 'zip'
         else:
             frmt = 'tar'
-        _git_path = rhodecode.CONFIG.get('git_path', 'git')
+        _git_path = settings.GIT_EXECUTABLE_PATH
         cmd = '%s archive --format=%s --prefix=%s/ %s' % (_git_path,
                                                 frmt, prefix, self.raw_id)
         if kind == 'tgz':
@@ -472,8 +472,8 @@ class GitChangeset(BaseChangeset):
         """
         Get's a fast accessible file changes for given changeset
         """
-        a, m, d = self._changes_cache
-        return list(a.union(m).union(d))
+        added, modified, deleted = self._changes_cache
+        return list(added.union(modified).union(deleted))
 
     @LazyProperty
     def _diff_name_status(self):
@@ -516,11 +516,11 @@ class GitChangeset(BaseChangeset):
 
         :param status: one of: *added*, *modified* or *deleted*
         """
-        a, m, d = self._changes_cache
+        added, modified, deleted = self._changes_cache
         return sorted({
-            'added': list(a),
-            'modified': list(m),
-            'deleted': list(d)}[status]
+            'added': list(added),
+            'modified': list(modified),
+            'deleted': list(deleted)}[status]
         )
 
     @LazyProperty

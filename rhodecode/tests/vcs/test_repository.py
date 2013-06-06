@@ -1,8 +1,8 @@
 from __future__ import with_statement
 import datetime
-from base import BackendTestMixin
-from conf import SCM_TESTS
-from conf import TEST_USER_CONFIG_FILE
+from rhodecode.tests.vcs.base import BackendTestMixin
+from rhodecode.tests.vcs.conf import SCM_TESTS
+from rhodecode.tests.vcs.conf import TEST_USER_CONFIG_FILE
 from rhodecode.lib.vcs.nodes import FileNode
 from rhodecode.lib.vcs.utils.compat import unittest
 from rhodecode.lib.vcs.exceptions import ChangesetDoesNotExistError
@@ -31,6 +31,19 @@ class RepositoryBaseTest(BackendTestMixin):
         self.assertEqual(self.repo.get_user_email(TEST_USER_CONFIG_FILE),
             'foo.bar@example.com')
 
+    def test_repo_equality(self):
+        self.assertTrue(self.repo == self.repo)
+
+    def test_repo_equality_broken_object(self):
+        import copy
+        _repo = copy.copy(self.repo)
+        delattr(_repo, 'path')
+        self.assertTrue(self.repo != _repo)
+
+    def test_repo_equality_other_object(self):
+        class dummy(object):
+            path = self.repo.path
+        self.assertTrue(self.repo != dummy())
 
 
 class RepositoryGetDiffTest(BackendTestMixin):

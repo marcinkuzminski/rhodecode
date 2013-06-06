@@ -17,9 +17,11 @@
     <div class="title">
         ${self.breadcrumbs()}
         <ul class="links">
+         %if h.HasPermissionAny('hg.admin','hg.create.repository')():
           <li>
             <span>${h.link_to(_(u'Add repository'),h.url('new_repo'))}</span>
           </li>
+         %endif
         </ul>
     </div>
     <div class="table yui-skin-sam" id="repos_list_wrap"></div>
@@ -79,20 +81,7 @@
 
   var myDataTable = new YAHOO.widget.DataTable("repos_list_wrap", myColumnDefs, myDataSource,{
     sortedBy:{key:"name",dir:"asc"},
-    paginator: new YAHOO.widget.Paginator({
-        rowsPerPage: 25,
-        alwaysVisible: false,
-        template : "{PreviousPageLink} {FirstPageLink} {PageLinks} {LastPageLink} {NextPageLink}",
-        pageLinks: 5,
-        containerClass: 'pagination-wh',
-        currentPageClass: 'pager_curpage',
-        pageLinkClass: 'pager_link',
-        nextPageLinkLabel: '&gt;',
-        previousPageLinkLabel: '&lt;',
-        firstPageLinkLabel: '&lt;&lt;',
-        lastPageLinkLabel: '&gt;&gt;',
-        containers:['user-paginator']
-    }),
+    paginator: YUI_paginator(25, ['user-paginator']),
 
     MSG_SORTASC:"${_('Click to sort ascending')}",
     MSG_SORTDESC:"${_('Click to sort descending')}",

@@ -42,11 +42,11 @@ class ReposGroupModel(BaseModel):
 
     cls = RepoGroup
 
-    def __get_users_group(self, users_group):
+    def _get_user_group(self, users_group):
         return self._get_instance(UserGroup, users_group,
                                   callback=UserGroup.get_by_group_name)
 
-    def _get_repos_group(self, repos_group):
+    def _get_repo_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
 
@@ -61,21 +61,19 @@ class ReposGroupModel(BaseModel):
 
     def _create_default_perms(self, new_group):
         # create default permission
-        repo_group_to_perm = UserRepoGroupToPerm()
         default_perm = 'group.read'
-        for p in User.get_by_username('default').user_perms:
+        def_user = User.get_default_user()
+        for p in def_user.user_perms:
             if p.permission.permission_name.startswith('group.'):
                 default_perm = p.permission.permission_name
                 break
 
-        repo_group_to_perm.permission_id = self.sa.query(Permission)\
-                .filter(Permission.permission_name == default_perm)\
-                .one().permission_id
+        repo_group_to_perm = UserRepoGroupToPerm()
+        repo_group_to_perm.permission = Permission.get_by_key(default_perm)
 
         repo_group_to_perm.group = new_group
-        repo_group_to_perm.user_id = User.get_by_username('default').user_id
-
-        self.sa.add(repo_group_to_perm)
+        repo_group_to_perm.user_id = def_user.user_id
+        return repo_group_to_perm
 
     def __create_group(self, group_name):
         """
@@ -142,18 +140,22 @@ class ReposGroupModel(BaseModel):
 
     def create(self, group_name, group_description, owner, parent=None, just_db=False):
         try:
+            user = self._get_user(owner)
             new_repos_group = RepoGroup()
+            new_repos_group.user = user
             new_repos_group.group_description = group_description or group_name
-            new_repos_group.parent_group = self._get_repos_group(parent)
+            new_repos_group.parent_group = self._get_repo_group(parent)
             new_repos_group.group_name = new_repos_group.get_new_name(group_name)
 
             self.sa.add(new_repos_group)
-            self._create_default_perms(new_repos_group)
+            perm_obj = self._create_default_perms(new_repos_group)
+            self.sa.add(perm_obj)
 
-            #create an ADMIN permission for owner, later owner should go into
-            #the owner field of groups
-            self.grant_user_permission(repos_group=new_repos_group,
-                                       user=owner, perm='group.admin')
+            #create an ADMIN permission for owner except if we're super admin,
+            #later owner should go into the owner field of groups
+            if not user.is_admin:
+                self.grant_user_permission(repos_group=new_repos_group,
+                                           user=owner, perm='group.admin')
 
             if not just_db:
                 # we need to flush here, in order to check if database won't
@@ -167,8 +169,11 @@ class ReposGroupModel(BaseModel):
             raise
 
     def _update_permissions(self, repos_group, perms_new=None,
-                            perms_updates=None, recursive=False):
+                            perms_updates=None, recursive=False,
+                            check_perms=True):
         from rhodecode.model.repo import RepoModel
+        from rhodecode.lib.auth import HasUserGroupPermissionAny
+
         if not perms_new:
             perms_new = []
         if not perms_updates:
@@ -176,7 +181,7 @@ class ReposGroupModel(BaseModel):
 
         def _set_perm_user(obj, user, perm):
             if isinstance(obj, RepoGroup):
-                ReposGroupModel().grant_user_permission(
+                self.grant_user_permission(
                     repos_group=obj, user=user, perm=perm
                 )
             elif isinstance(obj, Repository):
@@ -193,7 +198,7 @@ class ReposGroupModel(BaseModel):
 
         def _set_perm_group(obj, users_group, perm):
             if isinstance(obj, RepoGroup):
-                ReposGroupModel().grant_users_group_permission(
+                self.grant_users_group_permission(
                     repos_group=obj, group_name=users_group, perm=perm
                 )
             elif isinstance(obj, Repository):
@@ -220,13 +225,19 @@ class ReposGroupModel(BaseModel):
                     _set_perm_user(obj, user=member, perm=perm)
                 ## set for user group
                 else:
-                    _set_perm_group(obj, users_group=member, perm=perm)
+                    #check if we have permissions to alter this usergroup
+                    req_perms = ('usergroup.read', 'usergroup.write', 'usergroup.admin')
+                    if not check_perms or HasUserGroupPermissionAny(*req_perms)(member):
+                        _set_perm_group(obj, users_group=member, perm=perm)
             # set new permissions
             for member, perm, member_type in perms_new:
                 if member_type == 'user':
                     _set_perm_user(obj, user=member, perm=perm)
                 else:
-                    _set_perm_group(obj, users_group=member, perm=perm)
+                    #check if we have permissions to alter this usergroup
+                    req_perms = ('usergroup.read', 'usergroup.write', 'usergroup.admin')
+                    if not check_perms or HasUserGroupPermissionAny(*req_perms)(member):
+                        _set_perm_group(obj, users_group=member, perm=perm)
             updates.append(obj)
             #if it's not recursive call
             # break the loop and don't proceed with other changes
@@ -237,14 +248,7 @@ class ReposGroupModel(BaseModel):
     def update(self, repos_group, form_data):
 
         try:
-            repos_group = self._get_repos_group(repos_group)
-            recursive = form_data['recursive']
-            # iterate over all members(if in recursive mode) of this groups and
-            # set the permissions !
-            # this can be potentially heavy operation
-            self._update_permissions(repos_group, form_data['perms_new'],
-                                     form_data['perms_updates'], recursive)
-
+            repos_group = self._get_repo_group(repos_group)
             old_path = repos_group.full_path
 
             # change properties
@@ -288,7 +292,7 @@ class ReposGroupModel(BaseModel):
             raise
 
     def delete(self, repos_group, force_delete=False):
-        repos_group = self._get_repos_group(repos_group)
+        repos_group = self._get_repo_group(repos_group)
         try:
             self.sa.delete(repos_group)
             self.__delete_group(repos_group, force_delete)
@@ -307,7 +311,7 @@ class ReposGroupModel(BaseModel):
         :param recursive: recurse to all children of group
         """
         from rhodecode.model.repo import RepoModel
-        repos_group = self._get_repos_group(repos_group)
+        repos_group = self._get_repo_group(repos_group)
 
         for el in repos_group.recursive_groups_and_repos():
             if not recursive:
@@ -346,7 +350,7 @@ class ReposGroupModel(BaseModel):
         :param perm: Instance of Permission, or permission_name
         """
 
-        repos_group = self._get_repos_group(repos_group)
+        repos_group = self._get_repo_group(repos_group)
         user = self._get_user(user)
         permission = self._get_perm(perm)
 
@@ -373,7 +377,7 @@ class ReposGroupModel(BaseModel):
         :param user: Instance of User, user_id or username
         """
 
-        repos_group = self._get_repos_group(repos_group)
+        repos_group = self._get_repo_group(repos_group)
         user = self._get_user(user)
 
         obj = self.sa.query(UserRepoGroupToPerm)\
@@ -395,8 +399,8 @@ class ReposGroupModel(BaseModel):
             or user group name
         :param perm: Instance of Permission, or permission_name
         """
-        repos_group = self._get_repos_group(repos_group)
-        group_name = self.__get_users_group(group_name)
+        repos_group = self._get_repo_group(repos_group)
+        group_name = self._get_user_group(group_name)
         permission = self._get_perm(perm)
 
         # check if we have that permission already
@@ -424,8 +428,8 @@ class ReposGroupModel(BaseModel):
         :param group_name: Instance of UserGroup, users_group_id,
             or user group name
         """
-        repos_group = self._get_repos_group(repos_group)
-        group_name = self.__get_users_group(group_name)
+        repos_group = self._get_repo_group(repos_group)
+        group_name = self._get_user_group(group_name)
 
         obj = self.sa.query(UserGroupRepoGroupToPerm)\
             .filter(UserGroupRepoGroupToPerm.group == repos_group)\

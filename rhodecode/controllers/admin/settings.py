@@ -41,13 +41,13 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasReposGroupPermissionAll, HasReposGroupPermissionAny, AuthUser
 from rhodecode.lib.base import BaseController, render
 from rhodecode.lib.celerylib import tasks, run_task
-from rhodecode.lib.utils import repo2db_mapper, invalidate_cache, \
-    set_rhodecode_config, repo_name_slug, check_git_version
+from rhodecode.lib.utils import repo2db_mapper, set_rhodecode_config, \
+    check_git_version
 from rhodecode.model.db import RhodeCodeUi, Repository, RepoGroup, \
     RhodeCodeSetting, PullRequest, PullRequestReviewers
 from rhodecode.model.forms import UserForm, ApplicationSettingsForm, \
     ApplicationUiSettingsForm, ApplicationVisualisationForm
-from rhodecode.model.scm import ScmModel, GroupList
+from rhodecode.model.scm import ScmModel, RepoGroupList
 from rhodecode.model.user import UserModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User
@@ -55,7 +55,6 @@ from rhodecode.model.notification import EmailNotificationModel
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils2 import str2bool, safe_unicode
 from rhodecode.lib.compat import json
-from webob.exc import HTTPForbidden
 log = logging.getLogger(__name__)
 
 
@@ -68,15 +67,13 @@ class SettingsController(BaseController):
 
     @LoginRequired()
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
+        super(SettingsController, self).__before__()
         c.modules = sorted([(p.project_name, p.version)
                             for p in pkg_resources.working_set]
                            + [('git', check_git_version())],
                            key=lambda k: k[0].lower())
         c.py_version = platform.python_version()
         c.platform = platform.platform()
-        super(SettingsController, self).__before__()
 
     @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
@@ -115,13 +112,17 @@ class SettingsController(BaseController):
 
         if setting_id == 'mapping':
             rm_obsolete = request.POST.get('destroy', False)
-            log.debug('Rescanning directories with destroy=%s' % rm_obsolete)
-            initial = ScmModel().repo_scan()
-            log.debug('invalidating all repositories')
-            for repo_name in initial.keys():
-                invalidate_cache('get_repo_cached_%s' % repo_name)
+            invalidate_cache = request.POST.get('invalidate', False)
+            log.debug('rescanning repo location with destroy obsolete=%s'
+                      % (rm_obsolete,))
 
-            added, removed = repo2db_mapper(initial, rm_obsolete)
+            if invalidate_cache:
+                log.debug('invalidating all repositories cache')
+                for repo in Repository.get_all():
+                    ScmModel().mark_for_invalidation(repo.repo_name)
+
+            filesystem_repos = ScmModel().repo_scan()
+            added, removed = repo2db_mapper(filesystem_repos, rm_obsolete)
             _repr = lambda l: ', '.join(map(safe_unicode, l)) or '-'
             h.flash(_('Repositories successfully '
                       'rescanned added: %s ; removed: %s') %
@@ -186,6 +187,7 @@ class SettingsController(BaseController):
                 )
 
             try:
+                #TODO: rewrite this to something less ugly
                 sett1 = RhodeCodeSetting.get_by_name_or_create('show_public_icon')
                 sett1.app_settings_value = \
                     form_result['rhodecode_show_public_icon']
@@ -201,15 +203,20 @@ class SettingsController(BaseController):
                     form_result['rhodecode_stylify_metatags']
                 Session().add(sett3)
 
-                sett4 = RhodeCodeSetting.get_by_name_or_create('lightweight_dashboard')
-                sett4.app_settings_value = \
-                    form_result['rhodecode_lightweight_dashboard']
-                Session().add(sett4)
-
                 sett4 = RhodeCodeSetting.get_by_name_or_create('repository_fields')
                 sett4.app_settings_value = \
                     form_result['rhodecode_repository_fields']
                 Session().add(sett4)
+
+                sett5 = RhodeCodeSetting.get_by_name_or_create('dashboard_items')
+                sett5.app_settings_value = \
+                    form_result['rhodecode_dashboard_items']
+                Session().add(sett5)
+
+                sett6 = RhodeCodeSetting.get_by_name_or_create('show_version')
+                sett6.app_settings_value = \
+                    form_result['rhodecode_show_version']
+                Session().add(sett6)
 
                 Session().commit()
                 set_rhodecode_config(config)
@@ -239,10 +246,10 @@ class SettingsController(BaseController):
                 sett = RhodeCodeUi.get_by_key('push_ssl')
                 sett.ui_value = form_result['web_push_ssl']
                 Session().add(sett)
-
-                sett = RhodeCodeUi.get_by_key('/')
-                sett.ui_value = form_result['paths_root_path']
-                Session().add(sett)
+                if c.visual.allow_repo_location_change:
+                    sett = RhodeCodeUi.get_by_key('/')
+                    sett.ui_value = form_result['paths_root_path']
+                    Session().add(sett)
 
                 #HOOKS
                 sett = RhodeCodeUi.get_by_key(RhodeCodeUi.HOOK_UPDATE)

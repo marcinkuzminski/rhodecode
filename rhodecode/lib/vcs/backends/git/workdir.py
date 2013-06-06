@@ -20,8 +20,8 @@ class GitWorkdir(BaseWorkdir):
             raise RepositoryError("Couldn't compute workdir's branch")
 
     def get_changeset(self):
-        return self.repository.get_changeset(
-            self.repository._repo.refs.as_dict().get('HEAD'))
+        wk_dir_id = self.repository._repo.refs.as_dict().get('HEAD')
+        return self.repository.get_changeset(wk_dir_id)
 
     def checkout_branch(self, branch=None):
         if branch is None:

@@ -19,10 +19,10 @@ function at ``tests/__init__.py``.
 .. _unittest: http://pypi.python.org/pypi/unittest
 
 """
-import os
-from rhodecode.lib import vcs
 from rhodecode.lib.vcs.utils.compat import unittest
-from utils import VCSTestError, SCMFetcher
+from rhodecode.tests.vcs.conf import *
+from rhodecode.tests.vcs.utils import VCSTestError, SCMFetcher
+
 from rhodecode.tests import *
 
 
@@ -36,7 +36,7 @@ def setup_package():
             'alias': 'hg',
             'test_repo_path': TEST_HG_REPO,
             'remote_repo': HG_REMOTE_REPO,
-            'clone_cmd': 'hg clone',
+            'clone_cmd': 'hg clone --insecure',
         },
         'git': {
             'alias': 'git',
@@ -52,5 +52,16 @@ def setup_package():
     except VCSTestError, err:
         raise RuntimeError(str(err))
 
-#start_dir = os.path.abspath(os.path.dirname(__file__))
-#unittest.defaultTestLoader.discover(start_dir)
+
+def collector():
+    setup_package()
+    start_dir = os.path.abspath(os.path.dirname(__file__))
+    return unittest.defaultTestLoader.discover(start_dir)
+
+
+def main():
+    collector()
+    unittest.main()
+
+#if __name__ == '__main__':
+#    main()

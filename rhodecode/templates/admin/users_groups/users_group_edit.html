@@ -18,7 +18,7 @@
 </%def>
 
 <%def name="main()">
-<div class="box box-left">
+<div class="box box-left" style="clear:left">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
@@ -92,64 +92,6 @@
             </div>
     </div>
 ${h.end_form()}
-</div>
-
-<div class="box box-right">
-    <!-- box / title -->
-    <div class="title">
-        <h5>${_('Permissions')}</h5>
-    </div>
-    ${h.form(url('users_group_perm', id=c.users_group.users_group_id), method='put')}
-    <div class="form">
-        <!-- fields -->
-        <div class="fields">
-             <div class="field">
-                <div class="label label-checkbox">
-                    <label for="inherit_permissions">${_('Inherit default permissions')}:</label>
-                </div>
-                <div class="checkboxes">
-                    ${h.checkbox('inherit_default_permissions',value=True)}
-                </div>
-                <span class="help-block">${h.literal(_('Select to inherit permissions from %s settings. '
-                                             'With this selected below options does not have any action') % h.link_to('default', url('edit_permission', id='default')))}</span>
-             </div>
-             <div id="inherit_overlay" style="${'opacity:0.3' if c.users_group.inherit_default_permissions else ''}" >
-             <div class="field">
-                <div class="label label-checkbox">
-                    <label for="create_repo_perm">${_('Create repositories')}:</label>
-                </div>
-                <div class="checkboxes">
-                    ${h.checkbox('create_repo_perm',value=True)}
-                </div>
-             </div>
-             <div class="field">
-                <div class="label label-checkbox">
-                    <label for="fork_repo_perm">${_('Fork repositories')}:</label>
-                </div>
-                <div class="checkboxes">
-                    ${h.checkbox('fork_repo_perm',value=True)}
-                </div>
-             </div>
-             </div>
-            <div class="buttons">
-              ${h.submit('save',_('Save'),class_="ui-btn large")}
-              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
-            </div>
-        </div>
-    </div>
-    ${h.end_form()}
-
-    ## permissions overview
-    <%namespace name="p" file="/base/perms_summary.html"/>
-    ${p.perms_summary(c.users_group.permissions)}
-</div>
-
-<div class="box box-right" style="clear:right">
-    <!-- box / title -->
-    <div class="title">
-        <h5>${_('Group members')}</h5>
-    </div>
-
     <div class="group_members_wrap">
     % if c.group_members_obj:
       <ul class="group_members">
@@ -167,6 +109,43 @@ ${h.end_form()}
         <span class="empty_data">${_('No members yet')}</span>
       %endif
     </div>
+</div>
+
+<div class="box box-right">
+    <!-- box / title -->
+    <div class="title">
+        <h5>${_('Global Permissions')}</h5>
+    </div>
+    <%namespace name="dpb" file="/base/default_perms_box.html"/>
+    ${dpb.default_perms_box(url('users_group_perm', id=c.users_group.users_group_id))}
+
+    ## permissions overview
+    <%namespace name="p" file="/base/perms_summary.html"/>
+    ${p.perms_summary(c.permissions)}
+</div>
+
+<div class="box box-right" style="clear:right">
+    <div class="title">
+        <h5>${_('Permissions')}</h5>
+    </div>
+    ${h.form(url('set_user_group_perm_member', id=c.users_group.users_group_id),method='post')}
+    <div class="form">
+       <div class="fields">
+            <div class="field">
+                <div class="label">
+                    <label for="input">${_('Permissions')}:</label>
+                </div>
+                <div class="input">
+                    <%include file="user_group_edit_perms.html"/>
+                </div>
+            </div>
+            <div class="buttons">
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            </div>
+       </div>
+    </div>
+    ${h.end_form()}
 </div>
 
 <script type="text/javascript">

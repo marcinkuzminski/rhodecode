@@ -10,16 +10,17 @@ class TestCompareController(TestController):
 
     def test_compare_tag_hg(self):
         self.log_user()
-        tag1 = '0.1.2'
-        tag2 = '0.1.3'
+        tag1 = 'v0.1.2'
+        tag2 = 'v0.1.3'
         response = self.app.get(url(controller='compare', action='index',
                                     repo_name=HG_REPO,
                                     org_ref_type="tag",
                                     org_ref=tag1,
                                     other_ref_type="tag",
                                     other_ref=tag2,
-                                    ))
+                                    ), status=200)
         response.mustcontain('%s@%s -&gt; %s@%s' % (HG_REPO, tag1, HG_REPO, tag2))
+
         ## outgoing changesets between tags
         response.mustcontain('''<a href="/%s/changeset/c5ddebc06eaaba3010c2d66ea6ec9d074eb0f678">r112:c5ddebc06eaa</a>''' % HG_REPO)
         response.mustcontain('''<a href="/%s/changeset/70d4cef8a37657ee4cf5aabb3bd9f68879769816">r115:70d4cef8a376</a>''' % HG_REPO)
@@ -54,7 +55,7 @@ class TestCompareController(TestController):
                                     org_ref=tag1,
                                     other_ref_type="tag",
                                     other_ref=tag2,
-                                    ))
+                                    ), status=200)
         response.mustcontain('%s@%s -&gt; %s@%s' % (GIT_REPO, tag1, GIT_REPO, tag2))
 
         ## outgoing changesets between tags

@@ -41,6 +41,7 @@ sys.path.append(project_path)
 
 from rhodecode.config.conf import INDEX_EXTENSIONS
 from rhodecode.model.scm import ScmModel
+from rhodecode.model.db import Repository
 from rhodecode.lib.utils2 import safe_unicode, safe_str
 from rhodecode.lib.indexers import SCHEMA, IDX_NAME, CHGSETS_SCHEMA, \
     CHGSET_IDX_NAME
@@ -98,16 +99,28 @@ class WhooshIndexingDaemon(object):
         self.initial = True
         if not os.path.isdir(self.index_location):
             os.makedirs(self.index_location)
-            log.info('Cannot run incremental index since it does not'
-                     ' yet exist running full build')
+            log.info('Cannot run incremental index since it does not '
+                     'yet exist running full build')
         elif not exists_in(self.index_location, IDX_NAME):
-            log.info('Running full index build as the file content'
-                     ' index does not exist')
+            log.info('Running full index build as the file content '
+                     'index does not exist')
         elif not exists_in(self.index_location, CHGSET_IDX_NAME):
-            log.info('Running full index build as the changeset'
-                     ' index does not exist')
+            log.info('Running full index build as the changeset '
+                     'index does not exist')
         else:
             self.initial = False
+
+    def _get_index_revision(self, repo):
+        db_repo = Repository.get_by_repo_name(repo.name)
+        landing_rev = 'tip'
+        if db_repo:
+            landing_rev = db_repo.landing_rev
+        return landing_rev
+
+    def _get_index_changeset(self, repo):
+        index_rev = self._get_index_revision(repo)
+        cs = repo.get_changeset(index_rev)
+        return cs
 
     def get_paths(self, repo):
         """
@@ -116,8 +129,8 @@ class WhooshIndexingDaemon(object):
         """
         index_paths_ = set()
         try:
-            tip = repo.get_changeset('tip')
-            for _topnode, _dirs, files in tip.walk('/'):
+            cs = self._get_index_changeset(repo)
+            for _topnode, _dirs, files in cs.walk('/'):
                 for f in files:
                     index_paths_.add(jn(safe_str(repo.path), safe_str(f.path)))
 
@@ -127,8 +140,18 @@ class WhooshIndexingDaemon(object):
         return index_paths_
 
     def get_node(self, repo, path):
-        n_path = path[len(repo.path) + 1:]
-        node = repo.get_changeset().get_node(n_path)
+        """
+        gets a filenode based on given full path.It operates on string for
+        hg git compatability.
+
+        :param repo: scm repo instance
+        :param path: full path including root location
+        :return: FileNode
+        """
+        root_path = safe_str(repo.path)+'/'
+        parts = safe_str(path).partition(root_path)
+        cs = self._get_index_changeset(repo)
+        node = cs.get_node(parts[-1])
         return node
 
     def get_node_mtime(self, node):
@@ -193,8 +216,10 @@ class WhooshIndexingDaemon(object):
                   (repo_name, start_rev))
 
         indexed = 0
-        for cs in repo.get_changesets(start=start_rev):
-            log.debug('    >> %s' % cs)
+        cs_iter = repo.get_changesets(start=start_rev)
+        total = len(cs_iter)
+        for cs in cs_iter:
+            log.debug('    >> %s/%s' % (cs, total))
             writer.add_document(
                 raw_id=unicode(cs.raw_id),
                 owner=unicode(repo.contact),
@@ -222,7 +247,8 @@ class WhooshIndexingDaemon(object):
         :param repo: instance of vcs repo
         """
         i_cnt = iwc_cnt = 0
-        log.debug('building index for [%s]' % repo.path)
+        log.debug('building index for %s @revision:%s' % (repo.path,
+                                                self._get_index_revision(repo)))
         for idx_path in self.get_paths(repo):
             i, iwc = self.add_doc(file_idx_writer, idx_path, repo, repo_name)
             i_cnt += i
@@ -276,7 +302,7 @@ class WhooshIndexingDaemon(object):
                                                 repo_name, repo, start_id)
                         writer_is_dirty = True
                 log.debug('indexed %s changesets for repo %s' % (
-                             indexed_total, repo_name)
+                          indexed_total, repo_name)
                 )
             finally:
                 if writer_is_dirty:
@@ -284,7 +310,6 @@ class WhooshIndexingDaemon(object):
                     writer.commit(merge=True)
                     log.debug('>>> FINISHED REBUILDING CHANGESET INDEX <<<')
                 else:
-                    writer.cancel
                     log.debug('>> NOTHING TO COMMIT TO CHANGESET INDEX<<')
 
     def update_file_index(self):

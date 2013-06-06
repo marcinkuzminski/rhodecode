@@ -28,30 +28,28 @@ import urllib
 from pylons.i18n.translation import _
 from pylons import request, config, tmpl_context as c
 
+from whoosh.index import open_dir, EmptyIndexError
+from whoosh.qparser import QueryParser, QueryParserError
+from whoosh.query import Phrase, Wildcard, Term, Prefix
+from webhelpers.util import update_params
+
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.indexers import CHGSETS_SCHEMA, SCHEMA, CHGSET_IDX_NAME, \
     IDX_NAME, WhooshResultWrapper
-
-from webhelpers.paginate import Page
-from webhelpers.util import update_params
-
-from whoosh.index import open_dir, EmptyIndexError
-from whoosh.qparser import QueryParser, QueryParserError
-from whoosh.query import Phrase, Wildcard, Term, Prefix
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.utils2 import safe_str, safe_int
-
+from rhodecode.lib.helpers import Page
 
 log = logging.getLogger(__name__)
 
 
 class SearchController(BaseRepoController):
 
-    @LoginRequired()
     def __before__(self):
         super(SearchController, self).__before__()
 
+    @LoginRequired()
     def index(self, repo_name=None):
         c.repo_name = repo_name
         c.formated_results = []

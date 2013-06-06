@@ -24,12 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
 import logging
 import datetime
 import traceback
 import hashlib
-import time
-from collections import defaultdict
+import collections
 
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -131,6 +131,11 @@ class BaseModel(object):
 
     @classmethod
     def getAll(cls):
+        # deprecated and left for backward compatibility
+        return cls.get_all()
+
+    @classmethod
+    def get_all(cls):
         return cls.query().all()
 
     @classmethod
@@ -265,6 +270,11 @@ class RhodeCodeUi(Base, BaseModel):
     ui_value = Column("ui_value", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     ui_active = Column("ui_active", Boolean(), nullable=True, unique=None, default=True)
 
+    # def __init__(self, section='', key='', value=''):
+    #     self.ui_section = section
+    #     self.ui_key = key
+    #     self.ui_value = value
+
     @classmethod
     def get_by_key(cls, key):
         return cls.query().filter(cls.ui_key == key).scalar()
@@ -315,10 +325,7 @@ class User(Base, BaseModel):
          'mysql_charset': 'utf8'}
     )
     DEFAULT_USER = 'default'
-    DEFAULT_PERMISSIONS = [
-        'hg.register.manual_activate', 'hg.create.repository',
-        'hg.fork.repository', 'repository.read', 'group.read'
-    ]
+
     user_id = Column("user_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     username = Column("username", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     password = Column("password", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
@@ -490,6 +497,20 @@ class User(Base, BaseModel):
         Session().add(self)
         log.debug('updated user %s lastlogin' % self.username)
 
+    @classmethod
+    def get_first_admin(cls):
+        user = User.query().filter(User.admin == True).first()
+        if user is None:
+            raise Exception('Missing administrative account!')
+        return user
+
+    @classmethod
+    def get_default_user(cls, cache=False):
+        user = User.get_by_username(User.DEFAULT_USER, cache=cache)
+        if user is None:
+            raise Exception('Missing default account!')
+        return user
+
     def get_api_data(self):
         """
         Common function for generating user related data for API
@@ -597,6 +618,11 @@ class UserLog(Base, BaseModel):
     action = Column("action", UnicodeText(1200000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     action_date = Column("action_date", DateTime(timezone=False), nullable=True, unique=None, default=None)
 
+    def __unicode__(self):
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                      self.repository_name,
+                                      self.action)
+
     @property
     def action_as_day(self):
         return datetime.date(*self.action_date.timetuple()[:3])
@@ -616,13 +642,21 @@ class UserGroup(Base, BaseModel):
     users_group_name = Column("users_group_name", String(255, convert_unicode=False, assert_unicode=None), nullable=False, unique=True, default=None)
     users_group_active = Column("users_group_active", Boolean(), nullable=True, unique=None, default=None)
     inherit_default_permissions = Column("users_group_inherit_default_permissions", Boolean(), nullable=False, unique=None, default=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
 
     members = relationship('UserGroupMember', cascade="all, delete, delete-orphan", lazy="joined")
     users_group_to_perm = relationship('UserGroupToPerm', cascade='all')
     users_group_repo_to_perm = relationship('UserGroupRepoToPerm', cascade='all')
+    users_group_repo_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
+    user_user_group_to_perm = relationship('UserUserGroupToPerm ', cascade='all')
+    user_group_user_group_to_perm = relationship('UserGroupUserGroupToPerm ', primaryjoin="UserGroupUserGroupToPerm.target_user_group_id==UserGroup.users_group_id", cascade='all')
+
+    user = relationship('User')
 
     def __unicode__(self):
-        return u'<userGroup(%s)>' % (self.users_group_name)
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__,
+                                      self.users_group_id,
+                                      self.users_group_name)
 
     @classmethod
     def get_by_group_name(cls, group_name, cache=False,
@@ -983,8 +1017,10 @@ class Repository(Base, BaseModel):
         return data
 
     @classmethod
-    def lock(cls, repo, user_id):
-        repo.locked = [user_id, time.time()]
+    def lock(cls, repo, user_id, lock_time=None):
+        if not lock_time:
+            lock_time = time.time()
+        repo.locked = [user_id, lock_time]
         Session().add(repo)
         Session().commit()
 
@@ -1094,7 +1130,7 @@ class Repository(Base, BaseModel):
             .filter(ChangesetComment.repo == self)
         if revisions:
             cmts = cmts.filter(ChangesetComment.revision.in_(revisions))
-        grouped = defaultdict(list)
+        grouped = collections.defaultdict(list)
         for cmt in cmts.all():
             grouped[cmt.revision].append(cmt)
         return grouped
@@ -1104,7 +1140,6 @@ class Repository(Base, BaseModel):
         Returns statuses for this repository
 
         :param revisions: list of revisions to get statuses for
-        :type revisions: list
         """
 
         statuses = ChangesetStatus.query()\
@@ -1141,20 +1176,16 @@ class Repository(Base, BaseModel):
     # SCM CACHE INSTANCE
     #==========================================================================
 
-    @property
-    def invalidate(self):
-        return CacheInvalidation.invalidate(self.repo_name)
-
     def set_invalidate(self):
         """
-        set a cache for invalidation for this instance
+        Mark caches of this repo as invalid.
         """
-        CacheInvalidation.set_invalidate(repo_name=self.repo_name)
+        CacheInvalidation.set_invalidate(self.repo_name)
 
     def scm_instance_no_cache(self):
         return self.__get_instance()
 
-    @LazyProperty
+    @property
     def scm_instance(self):
         import rhodecode
         full_cache = str2bool(rhodecode.CONFIG.get('vcs_full_cache'))
@@ -1162,27 +1193,18 @@ class Repository(Base, BaseModel):
             return self.scm_instance_cached()
         return self.__get_instance()
 
-    def scm_instance_cached(self, cache_map=None):
+    def scm_instance_cached(self, valid_cache_keys=None):
         @cache_region('long_term')
         def _c(repo_name):
             return self.__get_instance()
         rn = self.repo_name
-        log.debug('Getting cached instance of repo')
 
-        if cache_map:
-            # get using prefilled cache_map
-            invalidate_repo = cache_map[self.repo_name]
-            if invalidate_repo:
-                invalidate_repo = (None if invalidate_repo.cache_active
-                                   else invalidate_repo)
-        else:
-            # get from invalidate
-            invalidate_repo = self.invalidate
-
-        if invalidate_repo is not None:
+        valid = CacheInvalidation.test_and_set_valid(rn, None, valid_cache_keys=valid_cache_keys)
+        if not valid:
+            log.debug('Cache for %s invalidated, getting new object' % (rn))
             region_invalidate(_c, None, rn)
-            # update our cache
-            CacheInvalidation.set_valid(invalidate_repo.cache_key)
+        else:
+            log.debug('Getting obj for %s from cache' % (rn))
         return _c(rn)
 
     def __get_instance(self):
@@ -1227,19 +1249,20 @@ class RepoGroup(Base, BaseModel):
     group_parent_id = Column("group_parent_id", Integer(), ForeignKey('groups.group_id'), nullable=True, unique=None, default=None)
     group_description = Column("group_description", String(10000, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
     enable_locking = Column("enable_locking", Boolean(), nullable=False, unique=None, default=False)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=False, default=None)
 
     repo_group_to_perm = relationship('UserRepoGroupToPerm', cascade='all', order_by='UserRepoGroupToPerm.group_to_perm_id')
     users_group_to_perm = relationship('UserGroupRepoGroupToPerm', cascade='all')
-
     parent_group = relationship('RepoGroup', remote_side=group_id)
+    user = relationship('User')
 
     def __init__(self, group_name='', parent_group=None):
         self.group_name = group_name
         self.parent_group = parent_group
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__, self.group_id,
-                                  self.group_name)
+        return u"<%s('id:%s:%s')>" % (self.__class__.__name__, self.group_id,
+                                      self.group_name)
 
     @classmethod
     def groups_choices(cls, groups=None, show_empty_group=True):
@@ -1249,7 +1272,7 @@ class RepoGroup(Base, BaseModel):
 
         repo_groups = []
         if show_empty_group:
-            repo_groups = [('-1', '-- %s --' % _('top level'))]
+            repo_groups = [('-1', u'-- %s --' % _('top level'))]
         sep = ' &raquo; '
         _name = lambda k: _literal(sep.join(k))
 
@@ -1385,6 +1408,8 @@ class Permission(Base, BaseModel):
          'mysql_charset': 'utf8'},
     )
     PERMS = [
+        ('hg.admin', _('RhodeCode Administrator')),
+
         ('repository.none', _('Repository no access')),
         ('repository.read', _('Repository read access')),
         ('repository.write', _('Repository write access')),
@@ -1395,20 +1420,46 @@ class Permission(Base, BaseModel):
         ('group.write', _('Repository group write access')),
         ('group.admin', _('Repository group admin access')),
 
-        ('hg.admin', _('RhodeCode Administrator')),
+        ('usergroup.none', _('User group no access')),
+        ('usergroup.read', _('User group read access')),
+        ('usergroup.write', _('User group write access')),
+        ('usergroup.admin', _('User group admin access')),
+
+        ('hg.repogroup.create.false', _('Repository Group creation disabled')),
+        ('hg.repogroup.create.true', _('Repository Group creation enabled')),
+
+        ('hg.usergroup.create.false', _('User Group creation disabled')),
+        ('hg.usergroup.create.true', _('User Group creation enabled')),
+
         ('hg.create.none', _('Repository creation disabled')),
         ('hg.create.repository', _('Repository creation enabled')),
+
         ('hg.fork.none', _('Repository forking disabled')),
         ('hg.fork.repository', _('Repository forking enabled')),
-        ('hg.register.none', _('Register disabled')),
-        ('hg.register.manual_activate', _('Register new user with RhodeCode '
-                                          'with manual activation')),
 
-        ('hg.register.auto_activate', _('Register new user with RhodeCode '
-                                        'with auto activation')),
+        ('hg.register.none', _('Registration disabled')),
+        ('hg.register.manual_activate', _('User Registration with manual account activation')),
+        ('hg.register.auto_activate', _('User Registration with automatic account activation')),
+
+        ('hg.extern_activate.manual', _('Manual activation of external account')),
+        ('hg.extern_activate.auto', _('Automatic activation of external account')),
+
+    ]
+
+    #definition of system default permissions for DEFAULT user
+    DEFAULT_USER_PERMISSIONS = [
+        'repository.read',
+        'group.read',
+        'usergroup.read',
+        'hg.create.repository',
+        'hg.fork.repository',
+        'hg.register.manual_activate',
+        'hg.extern_activate.auto',
     ]
 
     # defines which permissions are more important higher the more important
+    # Weight defines which permissions are more important.
+    # The higher number the more important.
     PERM_WEIGHTS = {
         'repository.none': 0,
         'repository.read': 1,
@@ -1420,10 +1471,20 @@ class Permission(Base, BaseModel):
         'group.write': 3,
         'group.admin': 4,
 
+        'usergroup.none': 0,
+        'usergroup.read': 1,
+        'usergroup.write': 3,
+        'usergroup.admin': 4,
+        'hg.repogroup.create.false': 0,
+        'hg.repogroup.create.true': 1,
+
+        'hg.usergroup.create.false': 0,
+        'hg.usergroup.create.true': 1,
+
         'hg.fork.none': 0,
         'hg.fork.repository': 1,
         'hg.create.none': 0,
-        'hg.create.repository':1
+        'hg.create.repository': 1
     }
 
     permission_id = Column("permission_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
@@ -1457,6 +1518,15 @@ class Permission(Base, BaseModel):
 
         return q.all()
 
+    @classmethod
+    def get_default_user_group_perms(cls, default_user_id):
+        q = Session().query(UserUserGroupToPerm, UserGroup, cls)\
+         .join((UserGroup, UserUserGroupToPerm.user_group_id == UserGroup.users_group_id))\
+         .join((cls, UserUserGroupToPerm.permission_id == cls.permission_id))\
+         .filter(UserUserGroupToPerm.user_id == default_user_id)
+
+        return q.all()
+
 
 class UserRepoToPerm(Base, BaseModel):
     __tablename__ = 'repo_to_perm'
@@ -1484,7 +1554,36 @@ class UserRepoToPerm(Base, BaseModel):
         return n
 
     def __unicode__(self):
-        return u'<user:%s => %s >' % (self.user, self.repository)
+        return u'<%s => %s >' % (self.user, self.repository)
+
+
+class UserUserGroupToPerm(Base, BaseModel):
+    __tablename__ = 'user_user_group_to_perm'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'user_group_id', 'permission_id'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    user_user_group_to_perm_id = Column("user_user_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    user_id = Column("user_id", Integer(), ForeignKey('users.user_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+
+    user = relationship('User')
+    user_group = relationship('UserGroup')
+    permission = relationship('Permission')
+
+    @classmethod
+    def create(cls, user, user_group, permission):
+        n = cls()
+        n.user = user
+        n.user_group = user_group
+        n.permission = permission
+        Session().add(n)
+        return n
+
+    def __unicode__(self):
+        return u'<%s => %s >' % (self.user, self.user_group)
 
 
 class UserToPerm(Base, BaseModel):
@@ -1500,6 +1599,9 @@ class UserToPerm(Base, BaseModel):
 
     user = relationship('User')
     permission = relationship('Permission', lazy='joined')
+
+    def __unicode__(self):
+        return u'<%s => %s >' % (self.user, self.permission)
 
 
 class UserGroupRepoToPerm(Base, BaseModel):
@@ -1528,7 +1630,37 @@ class UserGroupRepoToPerm(Base, BaseModel):
         return n
 
     def __unicode__(self):
-        return u'<userGroup:%s => %s >' % (self.users_group, self.repository)
+        return u'<UserGroupRepoToPerm:%s => %s >' % (self.users_group, self.repository)
+
+
+class UserGroupUserGroupToPerm(Base, BaseModel):
+    __tablename__ = 'user_group_user_group_to_perm'
+    __table_args__ = (
+        UniqueConstraint('target_user_group_id', 'user_group_id', 'permission_id'),
+        CheckConstraint('target_user_group_id != user_group_id'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8'}
+    )
+    user_group_user_group_to_perm_id = Column("user_group_user_group_to_perm_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
+    target_user_group_id = Column("target_user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+    permission_id = Column("permission_id", Integer(), ForeignKey('permissions.permission_id'), nullable=False, unique=None, default=None)
+    user_group_id = Column("user_group_id", Integer(), ForeignKey('users_groups.users_group_id'), nullable=False, unique=None, default=None)
+
+    target_user_group = relationship('UserGroup', primaryjoin='UserGroupUserGroupToPerm.target_user_group_id==UserGroup.users_group_id')
+    user_group = relationship('UserGroup', primaryjoin='UserGroupUserGroupToPerm.user_group_id==UserGroup.users_group_id')
+    permission = relationship('Permission')
+
+    @classmethod
+    def create(cls, target_user_group, user_group, permission):
+        n = cls()
+        n.target_user_group = target_user_group
+        n.user_group = user_group
+        n.permission = permission
+        Session().add(n)
+        return n
+
+    def __unicode__(self):
+        return u'<UserGroupUserGroup:%s => %s >' % (self.target_user_group, self.user_group)
 
 
 class UserGroupToPerm(Base, BaseModel):
@@ -1636,146 +1768,115 @@ class CacheInvalidation(Base, BaseModel):
     cache_id = Column("cache_id", Integer(), nullable=False, unique=True, default=None, primary_key=True)
     # cache_key as created by _get_cache_key
     cache_key = Column("cache_key", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    # cache_args is usually a repo_name, possibly with _README/_RSS/_ATOM suffix
+    # cache_args is a repo_name
     cache_args = Column("cache_args", String(255, convert_unicode=False, assert_unicode=None), nullable=True, unique=None, default=None)
-    # instance sets cache_active True when it is caching, other instances set cache_active to False to invalidate
+    # instance sets cache_active True when it is caching,
+    # other instances set cache_active to False to indicate that this cache is invalid
     cache_active = Column("cache_active", Boolean(), nullable=True, unique=None, default=False)
 
-    def __init__(self, cache_key, cache_args=''):
+    def __init__(self, cache_key, repo_name=''):
         self.cache_key = cache_key
-        self.cache_args = cache_args
+        self.cache_args = repo_name
         self.cache_active = False
 
     def __unicode__(self):
-        return u"<%s('%s:%s')>" % (self.__class__.__name__,
-                                  self.cache_id, self.cache_key)
+        return u"<%s('%s:%s[%s]')>" % (self.__class__.__name__,
+                            self.cache_id, self.cache_key, self.cache_active)
+
+    def _cache_key_partition(self):
+        prefix, repo_name, suffix = self.cache_key.partition(self.cache_args)
+        return prefix, repo_name, suffix
 
     def get_prefix(self):
         """
-        Guess prefix that might have been used in _get_cache_key to generate self.cache_key .
-        Only used for informational purposes in repo_edit.html .
+        get prefix that might have been used in _get_cache_key to
+        generate self.cache_key. Only used for informational purposes
+        in repo_edit.html.
         """
-        _split = self.cache_key.split(self.cache_args, 1)
-        if len(_split) == 2:
-            return _split[0]
-        return ''
+        # prefix, repo_name, suffix
+        return self._cache_key_partition()[0]
+
+    def get_suffix(self):
+        """
+        get suffix that might have been used in _get_cache_key to
+        generate self.cache_key. Only used for informational purposes
+        in repo_edit.html.
+        """
+        # prefix, repo_name, suffix
+        return self._cache_key_partition()[2]
+
+    @classmethod
+    def clear_cache(cls):
+        """
+        Delete all cache keys from database.
+        Should only be run when all instances are down and all entries thus stale.
+        """
+        cls.query().delete()
+        Session().commit()
 
     @classmethod
     def _get_cache_key(cls, key):
         """
         Wrapper for generating a unique cache key for this instance and "key".
+        key must / will start with a repo_name which will be stored in .cache_args .
         """
         import rhodecode
         prefix = rhodecode.CONFIG.get('instance_id', '')
         return "%s%s" % (prefix, key)
 
     @classmethod
-    def _get_or_create_inv_obj(cls, key, repo_name, commit=True):
-        inv_obj = Session().query(cls).filter(cls.cache_key == key).scalar()
-        if not inv_obj:
-            try:
-                inv_obj = CacheInvalidation(key, repo_name)
-                Session().add(inv_obj)
-                if commit:
-                    Session().commit()
-            except Exception:
-                log.error(traceback.format_exc())
-                Session().rollback()
-        return inv_obj
-
-    @classmethod
-    def invalidate(cls, key):
+    def set_invalidate(cls, repo_name):
         """
-        Returns Invalidation object if this given key should be invalidated
-        None otherwise. `cache_active = False` means that this cache
-        state is not valid and needs to be invalidated
-
-        :param key:
+        Mark all caches of a repo as invalid in the database.
         """
-        repo_name = key
-        repo_name = remove_suffix(repo_name, '_README')
-        repo_name = remove_suffix(repo_name, '_RSS')
-        repo_name = remove_suffix(repo_name, '_ATOM')
-
-        cache_key = cls._get_cache_key(key)
-        inv = cls._get_or_create_inv_obj(cache_key, repo_name)
-
-        if inv and not inv.cache_active:
-            return inv
-
-    @classmethod
-    def set_invalidate(cls, key=None, repo_name=None):
-        """
-        Mark this Cache key for invalidation, either by key or whole
-        cache sets based on repo_name
-
-        :param key:
-        """
-        invalidated_keys = []
-        if key:
-            assert not repo_name
-            cache_key = cls._get_cache_key(key)
-            inv_objs = Session().query(cls).filter(cls.cache_key == cache_key).all()
-        else:
-            assert repo_name
-            inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
+        inv_objs = Session().query(cls).filter(cls.cache_args == repo_name).all()
 
         try:
             for inv_obj in inv_objs:
+                log.debug('marking %s key for invalidation based on repo_name=%s'
+                          % (inv_obj, safe_str(repo_name)))
                 inv_obj.cache_active = False
-                log.debug('marking %s key for invalidation based on key=%s,repo_name=%s'
-                  % (inv_obj, key, safe_str(repo_name)))
-                invalidated_keys.append(inv_obj.cache_key)
                 Session().add(inv_obj)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
             Session().rollback()
-        return invalidated_keys
 
     @classmethod
-    def set_valid(cls, key):
+    def test_and_set_valid(cls, repo_name, kind, valid_cache_keys=None):
         """
-        Mark this cache key as active and currently cached
+        Mark this cache key as active and currently cached.
+        Return True if the existing cache registration still was valid.
+        Return False to indicate that it had been invalidated and caches should be refreshed.
+        """
 
-        :param key:
-        """
-        inv_obj = cls.query().filter(cls.cache_key == key).scalar()
-        inv_obj.cache_active = True
-        Session().add(inv_obj)
-        Session().commit()
+        key = (repo_name + '_' + kind) if kind else repo_name
+        cache_key = cls._get_cache_key(key)
+
+        if valid_cache_keys and cache_key in valid_cache_keys:
+            return True
+
+        try:
+            inv_obj = cls.query().filter(cls.cache_key == cache_key).scalar()
+            if not inv_obj:
+                inv_obj = CacheInvalidation(cache_key, repo_name)
+            was_valid = inv_obj.cache_active
+            inv_obj.cache_active = True
+            Session().add(inv_obj)
+            Session().commit()
+            return was_valid
+        except Exception:
+            log.error(traceback.format_exc())
+            Session().rollback()
+            return False
 
     @classmethod
-    def get_cache_map(cls):
-
-        class cachemapdict(dict):
-
-            def __init__(self, *args, **kwargs):
-                self.fixkey = kwargs.pop('fixkey', False)
-                super(cachemapdict, self).__init__(*args, **kwargs)
-
-            def __getattr__(self, name):
-                cache_key = name
-                if self.fixkey:
-                    cache_key = cls._get_cache_key(name)
-                if cache_key in self.__dict__:
-                    return self.__dict__[cache_key]
-                else:
-                    return self[cache_key]
-
-            def __getitem__(self, name):
-                cache_key = name
-                if self.fixkey:
-                    cache_key = cls._get_cache_key(name)
-                try:
-                    return super(cachemapdict, self).__getitem__(cache_key)
-                except KeyError:
-                    return None
-
-        cache_map = cachemapdict(fixkey=True)
-        for obj in cls.query().all():
-            cache_map[obj.cache_key] = cachemapdict(obj.get_dict())
-        return cache_map
+    def get_valid_cache_keys(cls):
+        """
+        Return opaque object with information of which caches still are valid
+        and can be used without checking for invalidation.
+        """
+        return set(inv_obj.cache_key for inv_obj in cls.query().filter(cls.cache_active).all())
 
 
 class ChangesetComment(Base, BaseModel):
@@ -2028,6 +2129,92 @@ class UserNotification(Base, BaseModel):
     def mark_as_read(self):
         self.read = True
         Session().add(self)
+
+
+class Gist(Base, BaseModel):
+    __tablename__ = 'gists'
+    __table_args__ = (
+        Index('g_gist_access_id_idx', 'gist_access_id'),
+        Index('g_created_on_idx', 'created_on'),
+        {'extend_existing': True, 'mysql_engine': 'InnoDB',
+         'mysql_charset': 'utf8', 'sqlite_autoincrement': True}
+    )
+    GIST_PUBLIC = u'public'
+    GIST_PRIVATE = u'private'
+
+    gist_id = Column('gist_id', Integer(), primary_key=True)
+    gist_access_id = Column('gist_access_id', Unicode(250))
+    gist_description = Column('gist_description', UnicodeText(1024))
+    gist_owner = Column('user_id', Integer(), ForeignKey('users.user_id'), nullable=True)
+    gist_expires = Column('gist_expires', Float(), nullable=False)
+    gist_type = Column('gist_type', Unicode(128), nullable=False)
+    created_on = Column('created_on', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+    modified_at = Column('modified_at', DateTime(timezone=False), nullable=False, default=datetime.datetime.now)
+
+    owner = relationship('User')
+
+    @classmethod
+    def get_or_404(cls, id_):
+        res = cls.query().filter(cls.gist_access_id == id_).scalar()
+        if not res:
+            raise HTTPNotFound
+        return res
+
+    @classmethod
+    def get_by_access_id(cls, gist_access_id):
+        return cls.query().filter(cls.gist_access_id == gist_access_id).scalar()
+
+    def gist_url(self):
+        import rhodecode
+        alias_url = rhodecode.CONFIG.get('gist_alias_url')
+        if alias_url:
+            return alias_url.replace('{gistid}', self.gist_access_id)
+
+        from pylons import url
+        return url('gist', gist_id=self.gist_access_id, qualified=True)
+
+    @classmethod
+    def base_path(cls):
+        """
+        Returns base path when all gists are stored
+
+        :param cls:
+        """
+        from rhodecode.model.gist import GIST_STORE_LOC
+        q = Session().query(RhodeCodeUi)\
+            .filter(RhodeCodeUi.ui_key == URL_SEP)
+        q = q.options(FromCache("sql_cache_short", "repository_repo_path"))
+        return os.path.join(q.one().ui_value, GIST_STORE_LOC)
+
+    def get_api_data(self):
+        """
+        Common function for generating gist related data for API
+        """
+        gist = self
+        data = dict(
+            gist_id=gist.gist_id,
+            type=gist.gist_type,
+            access_id=gist.gist_access_id,
+            description=gist.gist_description,
+            url=gist.gist_url(),
+            expires=gist.gist_expires,
+            created_on=gist.created_on,
+        )
+        return data
+
+    def __json__(self):
+        data = dict(
+        )
+        data.update(self.get_api_data())
+        return data
+    ## SCM functions
+
+    @property
+    def scm_instance(self):
+        from rhodecode.lib.vcs import get_repo
+        base_path = self.base_path()
+        return get_repo(os.path.join(*map(safe_str,
+                                          [base_path, self.gist_access_id])))
 
 
 class DbMigrateVersion(Base, BaseModel):

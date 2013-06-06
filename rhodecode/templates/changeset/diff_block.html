@@ -9,13 +9,12 @@
 </div>
 <div class="diff-container" id="${'diff-container-%s' % (id(change))}">
 %for FID,(cs1, cs2, change, path, diff, stats) in change.iteritems():
-    ##%if op !='removed':
     <div id="${FID}_target" style="clear:both;margin-top:25px"></div>
     <div id="${FID}" class="diffblock  margined comm">
         <div class="code-header">
             <div class="changeset_header">
                 <div class="changeset_file">
-                    ${h.link_to_if(change!='removed',h.safe_unicode(path),h.url('files_home',repo_name=c.repo_name,
+                    ${h.link_to_if(change!='D',h.safe_unicode(path),h.url('files_home',repo_name=c.repo_name,
                     revision=cs2,f_path=h.safe_unicode(path)))}
                 </div>
                 <div class="diff-actions">
@@ -38,7 +37,6 @@
             ${diff|n}
         </div>
     </div>
-    ##%endif
 %endfor
 </div>
 </%def>

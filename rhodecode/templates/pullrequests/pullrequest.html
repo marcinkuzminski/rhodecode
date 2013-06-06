@@ -19,80 +19,22 @@ ${self.context_bar('showpullrequest')}
     <div class="title">
         ${self.breadcrumbs()}
     </div>
+
     ${h.form(url('pullrequest', repo_name=c.repo_name), method='post', id='pull_request_form')}
-    <div style="float:left;padding:0px 30px 30px 30px">
-        ##ORG
-        <div style="float:left">
-            <div>
-                <span style="font-size: 20px">
-                ${h.select('org_repo','',c.org_repos,class_='refs')}:${h.select('org_ref',c.default_org_ref,c.org_refs,class_='refs')}
-                </span>
-                 <div style="padding:5px 3px 3px 20px;">${c.rhodecode_db_repo.description}</div>
-            </div>
-            <div style="clear:both;padding-top: 10px"></div>
-        </div>
-          <div style="float:left;font-size:24px;padding:0px 20px">
-          <img height=32 width=32 src="${h.url('/images/arrow_right_64.png')}"/>
-          </div>
 
-        ##OTHER, most Probably the PARENT OF THIS FORK
-        <div style="float:left">
-            <div>
-                <span style="font-size: 20px">
-                ${h.select('other_repo',c.default_other_repo,c.other_repos,class_='refs')}:${c.default_other_repo_info['revs']}
-                </span>
-                 <div id="other_repo_desc" style="padding:5px 3px 3px 20px;"></div>
-            </div>
-            <div style="clear:both;padding-top: 10px"></div>
-        </div>
-       <div style="clear:both;padding-top: 10px"></div>
-       ## overview pulled by ajax
-       <div style="float:left" id="pull_request_overview"></div>
-       <div style="float:left;clear:both;padding:10px 10px 10px 0px;display:none">
-            <a id="pull_request_overview_url" href="#">${_('Detailed compare view')}</a>
-       </div>
-     </div>
-    <div style="float:left; border-left:1px dashed #eee">
-        <h4>${_('Pull request reviewers')}</h4>
-        <div id="reviewers" style="padding:0px 0px 0px 15px">
-          ## members goes here !
-          <div class="group_members_wrap">
-            <ul id="review_members" class="group_members">
-            %for member in [c.default_other_repo_info['user']]:
-              <li id="reviewer_${member['user_id']}">
-                <div class="reviewers_member">
-                  <div class="gravatar"><img alt="gravatar" src="${member['gravatar_link']}"/> </div>
-                  <div style="float:left">${member['firstname']} ${member['lastname']} (${_('owner')})</div>
-                  <input type="hidden" value="${member['user_id']}" name="review_members" />
-                  <span class="delete_icon action_button" onclick="removeReviewMember(${member['user_id']})"></span>
-                </div>
-              </li>
-            %endfor
-            </ul>
-          </div>
-
-          <div class='ac'>
-            <div class="reviewer_ac">
-               ${h.text('user', class_='yui-ac-input')}
-               <span class="help-block">${_('Add reviewer to this pull request.')}</span>
-               <div id="reviewers_container"></div>
-            </div>
-          </div>
-        </div>
-    </div>
     <h3>${_('Create new pull request')}</h3>
 
     <div class="form">
         <!-- fields -->
 
-        <div class="fields">
+        <div class="fields" style="float:left;width:50%;padding-right:30px;">
 
              <div class="field">
                 <div class="label">
                     <label for="pullrequest_title">${_('Title')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('pullrequest_title',size=30)}
+                    ${h.text('pullrequest_title', class_="large")}
                 </div>
              </div>
 
@@ -101,16 +43,96 @@ ${self.context_bar('showpullrequest')}
                     <label for="pullrequest_desc">${_('Description')}:</label>
                 </div>
                 <div class="textarea text-area editor">
-                    ${h.textarea('pullrequest_desc',size=30)}
+                    ${h.textarea('pullrequest_desc',size=30, style="height:100px")}
+                    <span class="help-block">${_('Write a short description on this pull request')}</span>
                 </div>
             </div>
 
-            <div class="buttons">
-                ${h.submit('save',_('Send pull request'),class_="ui-btn large")}
-                ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            <div class="field">
+                <div class="label label-textarea">
+                    <label for="pullrequest_desc">${_('Changeset flow')}:</label>
+                </div>
+                <div class="input">
+                    ##ORG
+                    <div>
+                        <div>
+                            <div style="padding:5px 3px 3px 3px;">
+                            <b>${_('Origin repository')}:</b> ${c.rhodecode_db_repo.description}
+                            </div>
+                            <span style="font-size: 20px">
+                            ${h.select('org_repo','',c.org_repos,class_='refs')}:${h.select('org_ref',c.default_org_ref,c.org_refs,class_='refs')}
+                            </span>
+                        </div>
+                    </div>
+
+                    ##OTHER, most Probably the PARENT OF THIS FORK
+                    <div style="border-top: 1px solid #EEE; margin: 5px 0px 0px 0px">
+                        <div>
+                            ## filled with JS
+                            <div id="other_repo_desc" style="padding:5px 3px 3px 3px;">
+                            </div>
+                            <span style="font-size: 20px">
+                            ${h.select('other_repo',c.default_other_repo,c.other_repos,class_='refs')}:${c.default_other_repo_info['revs']}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="clear:both"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="buttons">
+                    ${h.submit('save',_('Send pull request'),class_="ui-btn large")}
+                    ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+               </div>
+            </div>
+
+        </div>
+
+        ## Reviewers
+        <div style="float:left; border-left:1px dashed #eee">
+            <h4>${_('Pull request reviewers')}</h4>
+            <div id="reviewers" style="padding:0px 0px 0px 15px">
+              ## members goes here !
+              <div class="group_members_wrap">
+                <ul id="review_members" class="group_members">
+                %for member in [c.default_other_repo_info['user']]:
+                  <li id="reviewer_${member['user_id']}">
+                    <div class="reviewers_member">
+                      <div class="gravatar"><img alt="gravatar" src="${member['gravatar_link']}"/> </div>
+                      <div style="float:left">${member['firstname']} ${member['lastname']} (${_('owner')})</div>
+                      <input type="hidden" value="${member['user_id']}" name="review_members" />
+                      <span class="delete_icon action_button" onclick="removeReviewMember(${member['user_id']})"></span>
+                    </div>
+                  </li>
+                %endfor
+                </ul>
+              </div>
+
+              <div class='ac'>
+                <div class="reviewer_ac">
+                   ${h.text('user', class_='yui-ac-input')}
+                   <span class="help-block">${_('Add reviewer to this pull request.')}</span>
+                   <div id="reviewers_container"></div>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <div style="clear:both;padding: 0 0 30px 0;"></div>
+
+        <h4>${_('Changesets')}</h4>
+        <div style="float:left;padding:0px 30px 30px 30px">
+           ## overview pulled by ajax
+           <div style="float:left" id="pull_request_overview"></div>
+           <div style="float:left;clear:both;padding:10px 10px 10px 0px;display:none">
+                <a id="pull_request_overview_url" href="#">${_('Detailed compare view')}</a>
            </div>
         </div>
+        <div style="clear:both;"></div>
+
     </div>
+
     ${h.end_form()}
 
 </div>
@@ -125,8 +147,8 @@ ${self.context_bar('showpullrequest')}
   var otherrepoChanged = function(){
       var sel_box = YUQ('#pull_request_form #other_repo')[0];
       var repo_name = sel_box.options[sel_box.selectedIndex].value;
-
-      YUD.get('other_repo_desc').innerHTML = other_repos_info[repo_name]['description'];
+      var _tmpl = "<b>${_('Destination repository')}</b>: {0}".format(other_repos_info[repo_name]['description']);
+      YUD.get('other_repo_desc').innerHTML = _tmpl
       // replace options of other_ref with the ones for the current other_repo
       var other_ref_selector = YUD.get('other_ref');
       var new_select = YUD.createElementFromMarkup(other_repos_info[repo_name]['revs']);

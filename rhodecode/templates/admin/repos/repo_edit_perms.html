@@ -29,7 +29,7 @@
             </td>
             <td>
               %if r2p.user.username !='default':
-                <span class="delete_icon action_button" onclick="ajaxActionUser(${r2p.user.user_id},'${'id%s'%id(r2p.user.username)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${r2p.user.user_id}, 'user', '${'id%s'%id(r2p.user.username)}')">
                 ${_('revoke')}
                 </span>
               %endif
@@ -54,7 +54,7 @@
                 %endif
             </td>
             <td>
-                <span class="delete_icon action_button" onclick="ajaxActionUserGroup(${g2p.users_group.users_group_id},'${'id%s'%id(g2p.users_group.users_group_name)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${g2p.users_group.users_group_id}, 'user_group', '${'id%s'%id(g2p.users_group.users_group_name)}')">
                 ${_('revoke')}
                 </span>
             </td>
@@ -86,34 +86,9 @@
     </tr>
 </table>
 <script type="text/javascript">
-function ajaxActionUser(user_id, field_id) {
-    var sUrl = "${h.url('delete_repo_user',repo_name=c.repo_name)}";
-    var callback = {
-        success: function (o) {
-            var tr = YUD.get(String(field_id));
-            tr.parentNode.removeChild(tr);
-        },
-        failure: function (o) {
-            alert("${_('Failed to remove user')}");
-        },
-    };
-    var postData = '_method=delete&user_id=' + user_id;
-    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
-};
-
-function ajaxActionUserGroup(users_group_id,field_id){
-    var sUrl = "${h.url('delete_repo_users_group',repo_name=c.repo_name)}";
-    var callback = {
-        success:function(o){
-            var tr = YUD.get(String(field_id));
-            tr.parentNode.removeChild(tr);
-        },
-        failure:function(o){
-            alert("${_('Failed to remove user group')}");
-        },
-    };
-    var postData = '_method=delete&users_group_id='+users_group_id;
-    var request = YAHOO.util.Connect.asyncRequest('POST', sUrl, callback, postData);
+function ajaxActionRevoke(obj_id, obj_type, field_id) {
+    url = "${h.url('delete_repo_perm_member',repo_name=c.repo_name)}";
+    ajaxActionRevokePermission(url, obj_id, obj_type, field_id);
 };
 
 YUE.onDOMReady(function () {

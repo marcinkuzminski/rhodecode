@@ -36,12 +36,12 @@ log = logging.getLogger(__name__)
 
 class BookmarksController(BaseRepoController):
 
-    @LoginRequired()
-    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
-                                   'repository.admin')
     def __before__(self):
         super(BookmarksController, self).__before__()
 
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
     def index(self):
         if c.rhodecode_repo.alias != 'hg':
             raise HTTPNotFound()

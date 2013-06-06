@@ -14,12 +14,12 @@ div.codeblock {
 div.codeblock .code-header {
     border-bottom: 1px solid #CCCCCC;
     background: #EEEEEE;
-    padding: 10px 0 10px 0;
+    padding: 10px 0 5px 0;
 }
 
 div.codeblock .code-header .stats {
     clear: both;
-    padding: 6px 8px 6px 10px;
+    padding: 2px 8px 2px 14px;
     border-bottom: 1px solid rgb(204, 204, 204);
     height: 23px;
     margin-bottom: 6px;
@@ -47,7 +47,7 @@ div.codeblock .code-header .stats .buttons {
 }
 
 div.codeblock .code-header .author {
-    margin-left: 25px;
+    margin-left: 15px;
     font-weight: bold;
     height: 25px;
 }
@@ -55,18 +55,22 @@ div.codeblock .code-header .author .user {
     padding-top: 3px;
 }
 div.codeblock .code-header .commit {
-    margin-left: 25px;
+    margin-left: 15px;
     font-weight: normal;
     white-space: pre;
 }
 
+.code-highlighttable,
 div.codeblock .code-body table {
     width: 0 !important;
     border: 0px !important;
 }
+
+.code-highlighttable,
 div.codeblock .code-body table td {
     border: 0px !important;
 }
+
 div.code-body {
     background-color: #FFFFFF;
 }
@@ -97,19 +101,19 @@ div.annotatediv {
     padding: 0px;
     margin-top: 5px;
     margin-bottom: 5px;
-    border-left: 2px solid #ccc;
+    border-left: 1px solid #ccc;
 }
 .code-highlight pre, .linenodiv pre {
-    padding: 5px;
+    padding: 5px 2px 0px 5px;
     margin: 0;
 }
 .code-highlight pre div:target {
     background-color: #FFFFBE !important;
 }
-
+.linenos { padding: 0px !important; border:0px !important;}
 .linenos a { text-decoration: none; }
 
-.code { display: block; }
+.code { display: block; border:0px !important; }
 .code-highlight .hll, .codehilite .hll { background-color: #ffffcc }
 .code-highlight .c, .codehilite .c { color: #408080; font-style: italic } /* Comment */
 .code-highlight .err, .codehilite .err { border: 1px solid #FF0000 } /* Error */

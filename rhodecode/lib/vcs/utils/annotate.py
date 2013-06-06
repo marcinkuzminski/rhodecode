@@ -1,9 +1,10 @@
-from rhodecode.lib.vcs.exceptions import VCSError
-from rhodecode.lib.vcs.nodes import FileNode
+import StringIO
+
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 
-import StringIO
+from rhodecode.lib.vcs.exceptions import VCSError
+from rhodecode.lib.vcs.nodes import FileNode
 
 
 def annotate_highlight(filenode, annotate_from_changeset_func=None,

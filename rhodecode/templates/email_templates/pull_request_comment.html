@@ -1,18 +1,17 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="main.html"/>
-${_('Pull request #%s for repository %s') % (pr_id, pr_target_repo) |n}
-##message from user goes here
-<p>
-${pr_comment_user}: <br/>
-${body}
-</p>
-<div>${_('View this comment here')}: ${pr_comment_url}</div>
+
+<p>${_('URL')}: <a href="${pr_comment_url}">${pr_comment_url}</a></p>
+
+<h4>${_('%s commented on pull request "%s"') % (pr_comment_user,pr_title) |n}</h4>
 
 %if status_change:
     %if closing_pr:
-       <span>${_('Closing pull request with status')} -&gt; ${status_change}</span>
+       <p>${_('Pull request was closed with status')}: <b>${status_change}</b></p>
     %else:
-       <span>${_('New status')} -&gt; ${status_change}</span>
+       <p>${_('Pull request changed status')}: <b>${status_change}</b></p>
     %endif
 %endif
-</p>
+
+<p>${_('Comment')}:</p>
+<p>${body}</p>

@@ -40,6 +40,12 @@
                         <span class="tooltip" title="${h.tooltip(_('In case a repository was deleted from filesystem and there are leftovers in the database check this option to scan obsolete data in database and remove it.'))}">
                         ${_('Destroy old data')}</span> </label>
                     </div>
+                    <div class="checkbox">
+                        ${h.checkbox('invalidate',True)}
+                        <label for="invalidate">
+                        <span class="tooltip" title="${h.tooltip(_('Invalidate cache for all repositories during scan'))}">
+                        ${_('Invalidate cache for all repositories')}</span> </label>
+                    </div>
                     <span class="help-block">${_('Rescan repositories location for new repositories. Also deletes obsolete if `destroy` flag is checked ')}</span>
                 </div>
             </div>
@@ -130,18 +136,26 @@
                 </div>
                 <div class="checkboxes">
                     <div class="checkbox">
-                        ${h.checkbox('rhodecode_lightweight_dashboard','True')}
-                        <label for="rhodecode_lightweight_dashboard">${_('Use lightweight dashboard')}</label>
-                    </div>
-                </div>
-                <div class="checkboxes">
-                    <div class="checkbox">
                         ${h.checkbox('rhodecode_repository_fields','True')}
                         <label for="rhodecode_repository_fields">${_('Use repository extra fields')}</label>
                     </div>
+                    <span class="help-block">${_('Allows storing additional customized fields per repository.')}</span>
+                    <div class="checkbox">
+                        ${h.checkbox('rhodecode_show_version','True')}
+                        <label for="rhodecode_show_version">${_('Show RhodeCode version')}</label>
+                    </div>
+                    <span class="help-block">${_('Shows or hides displayed version of RhodeCode in the footer')}</span>
                 </div>
              </div>
-
+            <div class="field">
+                <div class="label">
+                    <label for="rhodecode_realm">${_('Dashboard items')}:</label>
+                </div>
+                <div class="input">
+                    ${h.text('rhodecode_dashboard_items',size=5)}
+                    <span class="help-block">${_('Number of items displayed in lightweight dashboard before pagination is shown.')}</span>
+                </div>
+            </div>
              <div class="field">
                 <div class="label label-checkbox">
                     <label>${_('Icons')}:</label>
@@ -155,6 +169,7 @@
                         ${h.checkbox('rhodecode_show_private_icon','True')}
                         <label for="rhodecode_show_private_icon">${_('Show private repo icon on repositories')}</label>
                     </div>
+                    <span class="help-block">${_('Show public/private icons next to repositories names')}</span>
                  </div>
              </div>
 
@@ -259,20 +274,21 @@
                     ##<span class="help-block">${_('Requires hg-git library installed. Allows cloning from git remote locations')}</span>
                 </div>
             </div>
+            %if c.visual.allow_repo_location_change:
             <div class="field">
                 <div class="label">
                     <label for="paths_root_path">${_('Repositories location')}:</label>
                 </div>
                 <div class="input">
-                    ${h.text('paths_root_path',size=30,readonly="readonly")}
-                    <span id="path_unlock" class="tooltip"
-                            title="${h.tooltip(_('This a crucial application setting. If you are really sure you need to change this, you must restart application in order to make this setting take effect. Click this label to unlock.'))}">
+                    ${h.text('paths_root_path',size=30,readonly="readonly", class_="disabled")}
+                    <span id="path_unlock" class="tooltip" style="cursor: pointer"
+                            title="${h.tooltip(_('Click to unlock. You must restart RhodeCode in order to make this setting take effect.'))}">
                         ${_('Unlock')}
                     </span>
                     <span class="help-block">${_('Location where repositories are stored. After changing this value a restart, and rescan is required')}</span>
                 </div>
             </div>
-
+            %endif
             <div class="buttons">
                 ${h.submit('save',_('Save settings'),class_="ui-btn large")}
                 ${h.reset('reset',_('Reset'),class_="ui-btn large")}
@@ -283,8 +299,9 @@
 
     <script type="text/javascript">
         YAHOO.util.Event.onDOMReady(function(){
-            YAHOO.util.Event.addListener('path_unlock','click',function(){
-                YAHOO.util.Dom.get('paths_root_path').removeAttribute('readonly');
+            YUE.on('path_unlock','click',function(){
+                YUD.get('paths_root_path').removeAttribute('readonly');
+                YUD.removeClass('paths_root_path', 'disabled')
             });
         });
     </script>

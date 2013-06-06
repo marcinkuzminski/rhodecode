@@ -16,7 +16,7 @@ import textwrap
 from datetime import datetime
 from pygments.formatters.html import HtmlFormatter
 from pygments import highlight as code_highlight
-from pylons import url, request, config
+from pylons import url
 from pylons.i18n.translation import _, ungettext
 from hashlib import md5
 
@@ -36,7 +36,7 @@ from webhelpers.text import chop_at, collapse, convert_accented_entities, \
     convert_misc_entities, lchop, plural, rchop, remove_formatting, \
     replace_whitespace, urlify, truncate, wrap_paragraphs
 from webhelpers.date import time_ago_in_words
-from webhelpers.paginate import Page
+from webhelpers.paginate import Page as _Page
 from webhelpers.html.tags import _set_input_attrs, _set_id_attr, \
     convert_boolean_attrs, NotGiven, _make_safe_id_component
 
@@ -355,7 +355,41 @@ def is_following_repo(repo_name, user_id):
     from rhodecode.model.scm import ScmModel
     return ScmModel().is_following_repo(repo_name, user_id)
 
-flash = _Flash()
+class _Message(object):
+    """A message returned by ``Flash.pop_messages()``.
+
+    Converting the message to a string returns the message text. Instances
+    also have the following attributes:
+
+    * ``message``: the message text.
+    * ``category``: the category specified when the message was created.
+    """
+
+    def __init__(self, category, message):
+        self.category=category
+        self.message=message
+
+    def __str__(self):
+        return self.message
+
+    __unicode__ = __str__
+
+    def __html__(self):
+        return escape(safe_unicode(self.message))
+
+class Flash(_Flash):
+
+    def pop_messages(self):
+        """Return all accumulated messages and delete them from the session.
+
+        The return value is a list of ``Message`` objects.
+        """
+        from pylons import session
+        messages = session.pop(self.session_key, [])
+        session.save()
+        return [_Message(*m) for m in messages]
+
+flash = Flash()
 
 #==============================================================================
 # SCM FILTERS available via h.
@@ -391,7 +425,7 @@ def show_id(cs):
 
 def fmt_date(date):
     if date:
-        _fmt = _(u"%a, %d %b %Y %H:%M:%S").encode('utf8')
+        _fmt = u"%a, %d %b %Y %H:%M:%S".encode('utf8')
         return date.strftime(_fmt).decode('utf8')
 
     return ""
@@ -448,7 +482,6 @@ def person(author, show_attr="username_and_name"):
         user = User.get_by_email(_email, case_insensitive=True, cache=True)
         if user is not None:
             return person_getter(user)
-        return _email
 
     # Maybe it's a username?
     _author = author_name(author)
@@ -457,8 +490,8 @@ def person(author, show_attr="username_and_name"):
     if user is not None:
         return person_getter(user)
 
-    # Still nothing?  Just pass back the author name then
-    return _author
+    # Still nothing?  Just pass back the author name if any, else the email
+    return _author or _email
 
 
 def person_by_id(id_, show_attr="username_and_name"):
@@ -599,11 +632,9 @@ def action_parser(user_log, feed=False, parse_cs=False):
                         'ref_name': _name
                     })
                     revs.append(_rev)
-        cs_links = []
-        cs_links.append(" " + ', '.join(
+        cs_links = [" " + ', '.join(
             [lnk(rev, repo_name) for rev in revs[:revs_limit]]
-            )
-        )
+        )]
         _op1, _name1 = _get_op(revs_ids[0])
         _op2, _name2 = _get_op(revs_ids[-1])
 
@@ -685,6 +716,10 @@ def action_parser(user_log, feed=False, parse_cs=False):
                     url('pullrequest_show', repo_name=repo_name,
                     pull_request_id=pull_request_id))
 
+    def get_archive_name():
+        archive_name = action_params
+        return archive_name
+
     # action : translated str, callback(extractor), icon
     action_map = {
     'user_deleted_repo':           (_('[deleted] repository'),
@@ -697,6 +732,8 @@ def action_parser(user_log, feed=False, parse_cs=False):
                                     get_fork_name, 'arrow_divide.png'),
     'user_updated_repo':           (_('[updated] repository'),
                                     None, 'database_edit.png'),
+    'user_downloaded_archive':      (_('[downloaded] archive from repository'),
+                                    get_archive_name, 'page_white_compressed.png'),
     'admin_deleted_repo':          (_('[delete] repository'),
                                     None, 'database_delete.png'),
     'admin_created_repo':          (_('[created] repository'),
@@ -775,17 +812,20 @@ HasReposGroupPermissionAny
 # GRAVATAR URL
 #==============================================================================
 
-def gravatar_url(email_address, size=30):
+def gravatar_url(email_address, size=30, ssl_enabled=True):
     from pylons import url  # doh, we need to re-import url to mock it later
-    _def = 'anonymous@rhodecode.org'
-    use_gravatar = str2bool(config['app_conf'].get('use_gravatar'))
+    from rhodecode import CONFIG
+
+    _def = 'anonymous@rhodecode.org'  # default gravatar
+    use_gravatar = str2bool(CONFIG.get('use_gravatar'))
+    alternative_gravatar_url = CONFIG.get('alternative_gravatar_url', '')
     email_address = email_address or _def
-    if (not use_gravatar or not email_address or email_address == _def):
+    if not use_gravatar or not email_address or email_address == _def:
         f = lambda a, l: min(l, key=lambda x: abs(x - a))
         return url("/images/user%s.png" % f(size, [14, 16, 20, 24, 30]))
 
-    if use_gravatar and config['app_conf'].get('alternative_gravatar_url'):
-        tmpl = config['app_conf'].get('alternative_gravatar_url', '')
+    if use_gravatar and alternative_gravatar_url:
+        tmpl = alternative_gravatar_url
         parsed_url = urlparse.urlparse(url.current(qualified=True))
         tmpl = tmpl.replace('{email}', email_address)\
                    .replace('{md5email}', hashlib.md5(email_address.lower()).hexdigest()) \
@@ -794,7 +834,6 @@ def gravatar_url(email_address, size=30):
                    .replace('{size}', str(size))
         return tmpl
 
-    ssl_enabled = 'https' == request.environ.get('wsgi.url_scheme')
     default = 'identicon'
     baseurl_nossl = "http://www.gravatar.com/avatar/"
     baseurl_ssl = "https://secure.gravatar.com/avatar/"
@@ -808,6 +847,145 @@ def gravatar_url(email_address, size=30):
     gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
 
     return gravatar_url
+
+
+class Page(_Page):
+    """
+    Custom pager to match rendering style with YUI paginator
+    """
+
+    def _get_pos(self, cur_page, max_page, items):
+        edge = (items / 2) + 1
+        if (cur_page <= edge):
+            radius = max(items / 2, items - cur_page)
+        elif (max_page - cur_page) < edge:
+            radius = (items - 1) - (max_page - cur_page)
+        else:
+            radius = items / 2
+
+        left = max(1, (cur_page - (radius)))
+        right = min(max_page, cur_page + (radius))
+        return left, cur_page, right
+
+    def _range(self, regexp_match):
+        """
+        Return range of linked pages (e.g. '1 2 [3] 4 5 6 7 8').
+
+        Arguments:
+
+        regexp_match
+            A "re" (regular expressions) match object containing the
+            radius of linked pages around the current page in
+            regexp_match.group(1) as a string
+
+        This function is supposed to be called as a callable in
+        re.sub.
+
+        """
+        radius = int(regexp_match.group(1))
+
+        # Compute the first and last page number within the radius
+        # e.g. '1 .. 5 6 [7] 8 9 .. 12'
+        # -> leftmost_page  = 5
+        # -> rightmost_page = 9
+        leftmost_page, _cur, rightmost_page = self._get_pos(self.page,
+                                                            self.last_page,
+                                                            (radius * 2) + 1)
+        nav_items = []
+
+        # Create a link to the first page (unless we are on the first page
+        # or there would be no need to insert '..' spacers)
+        if self.page != self.first_page and self.first_page < leftmost_page:
+            nav_items.append(self._pagerlink(self.first_page, self.first_page))
+
+        # Insert dots if there are pages between the first page
+        # and the currently displayed page range
+        if leftmost_page - self.first_page > 1:
+            # Wrap in a SPAN tag if nolink_attr is set
+            text = '..'
+            if self.dotdot_attr:
+                text = HTML.span(c=text, **self.dotdot_attr)
+            nav_items.append(text)
+
+        for thispage in xrange(leftmost_page, rightmost_page + 1):
+            # Hilight the current page number and do not use a link
+            if thispage == self.page:
+                text = '%s' % (thispage,)
+                # Wrap in a SPAN tag if nolink_attr is set
+                if self.curpage_attr:
+                    text = HTML.span(c=text, **self.curpage_attr)
+                nav_items.append(text)
+            # Otherwise create just a link to that page
+            else:
+                text = '%s' % (thispage,)
+                nav_items.append(self._pagerlink(thispage, text))
+
+        # Insert dots if there are pages between the displayed
+        # page numbers and the end of the page range
+        if self.last_page - rightmost_page > 1:
+            text = '..'
+            # Wrap in a SPAN tag if nolink_attr is set
+            if self.dotdot_attr:
+                text = HTML.span(c=text, **self.dotdot_attr)
+            nav_items.append(text)
+
+        # Create a link to the very last page (unless we are on the last
+        # page or there would be no need to insert '..' spacers)
+        if self.page != self.last_page and rightmost_page < self.last_page:
+            nav_items.append(self._pagerlink(self.last_page, self.last_page))
+
+        ## prerender links
+        nav_items.append(literal('<link rel="prerender" href="/rhodecode/changelog/1?page=%s">' % str(int(self.page)+1)))
+        return self.separator.join(nav_items)
+
+    def pager(self, format='~2~', page_param='page', partial_param='partial',
+        show_if_single_page=False, separator=' ', onclick=None,
+        symbol_first='<<', symbol_last='>>',
+        symbol_previous='<', symbol_next='>',
+        link_attr={'class': 'pager_link', 'rel': 'prerender'},
+        curpage_attr={'class': 'pager_curpage'},
+        dotdot_attr={'class': 'pager_dotdot'}, **kwargs):
+
+        self.curpage_attr = curpage_attr
+        self.separator = separator
+        self.pager_kwargs = kwargs
+        self.page_param = page_param
+        self.partial_param = partial_param
+        self.onclick = onclick
+        self.link_attr = link_attr
+        self.dotdot_attr = dotdot_attr
+
+        # Don't show navigator if there is no more than one page
+        if self.page_count == 0 or (self.page_count == 1 and not show_if_single_page):
+            return ''
+
+        from string import Template
+        # Replace ~...~ in token format by range of pages
+        result = re.sub(r'~(\d+)~', self._range, format)
+
+        # Interpolate '%' variables
+        result = Template(result).safe_substitute({
+            'first_page': self.first_page,
+            'last_page': self.last_page,
+            'page': self.page,
+            'page_count': self.page_count,
+            'items_per_page': self.items_per_page,
+            'first_item': self.first_item,
+            'last_item': self.last_item,
+            'item_count': self.item_count,
+            'link_first': self.page > self.first_page and \
+                    self._pagerlink(self.first_page, symbol_first) or '',
+            'link_last': self.page < self.last_page and \
+                    self._pagerlink(self.last_page, symbol_last) or '',
+            'link_previous': self.previous_page and \
+                    self._pagerlink(self.previous_page, symbol_previous) \
+                    or HTML.span(symbol_previous, class_="yui-pg-previous"),
+            'link_next': self.next_page and \
+                    self._pagerlink(self.next_page, symbol_next) \
+                    or HTML.span(symbol_next, class_="yui-pg-next")
+        })
+
+        return literal(result)
 
 
 #==============================================================================
@@ -942,6 +1120,9 @@ def fancy_file_stats(stats):
 
     :param stats: two element list of added/deleted lines of code
     """
+    from rhodecode.lib.diffs import NEW_FILENODE, DEL_FILENODE, \
+        MOD_FILENODE, RENAMED_FILENODE, CHMOD_FILENODE, BIN_FILENODE
+
     def cgen(l_type, a_v, d_v):
         mapping = {'tr': 'top-right-rounded-corner-mid',
                    'tl': 'top-left-rounded-corner-mid',
@@ -962,16 +1143,41 @@ def fancy_file_stats(stats):
         if l_type == 'd' and not a_v:
             return ' '.join(map(map_getter, ['tr', 'br', 'tl', 'bl']))
 
-    a, d = stats[0], stats[1]
+    a, d = stats['added'], stats['deleted']
     width = 100
 
-    if a == 'b':
+    if stats['binary']:
         #binary mode
-        b_d = '<div class="bin%s %s" style="width:100%%">%s</div>' % (d, cgen('a', a_v='', d_v=0), 'bin')
-        b_a = '<div class="bin1" style="width:0%%">%s</div>' % ('bin')
+        lbl = ''
+        bin_op = 1
+
+        if BIN_FILENODE in stats['ops']:
+            lbl = 'bin+'
+
+        if NEW_FILENODE in stats['ops']:
+            lbl += _('new file')
+            bin_op = NEW_FILENODE
+        elif MOD_FILENODE in stats['ops']:
+            lbl += _('mod')
+            bin_op = MOD_FILENODE
+        elif DEL_FILENODE in stats['ops']:
+            lbl += _('del')
+            bin_op = DEL_FILENODE
+        elif RENAMED_FILENODE in stats['ops']:
+            lbl += _('rename')
+            bin_op = RENAMED_FILENODE
+
+        #chmod can go with other operations
+        if CHMOD_FILENODE in stats['ops']:
+            _org_lbl = _('chmod')
+            lbl += _org_lbl if lbl.endswith('+') else '+%s' % _org_lbl
+
+        #import ipdb;ipdb.set_trace()
+        b_d = '<div class="bin bin%s %s" style="width:100%%">%s</div>' % (bin_op, cgen('a', a_v='', d_v=0), lbl)
+        b_a = '<div class="bin bin1" style="width:0%%"></div>'
         return literal('<div style="width:%spx">%s%s</div>' % (width, b_a, b_d))
 
-    t = stats[0] + stats[1]
+    t = stats['added'] + stats['deleted']
     unit = float(width) / (t or 1)
 
     # needs > 9% of width to be visible or 0 to be hidden

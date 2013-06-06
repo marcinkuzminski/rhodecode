@@ -1,0 +1,97 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('gist')}:${c.gist.gist_access_id} &middot; ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('Gist')} &middot; gist:${c.gist.gist_access_id}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('gists')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        %if c.rhodecode_user.username != 'default':
+        <ul class="links">
+          <li>
+             <span>${h.link_to(_(u'Create new gist'), h.url('new_gist'))}</span>
+          </li>
+        </ul>
+        %endif
+    </div>
+    <div class="table">
+        <div id="files_data">
+            <div id="body" class="codeblock">
+                <div class="code-header">
+                    <div class="stats">
+                        <div class="left" style="margin: -4px 0px 0px 0px">
+                          %if c.gist.gist_type == 'public':
+                            <div class="ui-btn green badge">${_('Public gist')}</div>
+                          %else:
+                            <div class="ui-btn yellow badge">${_('Private gist')}</div>
+                          %endif
+                        </div>
+                        <div class="left item ${'' if c.gist.gist_description else 'last'}" style="color: #AAA">
+                         %if c.gist.gist_expires == -1:
+                          ${_('Expires')}: ${_('never')}
+                         %else:
+                          ${_('Expires')}: ${h.age(h.time_to_datetime(c.gist.gist_expires))}
+                         %endif
+                       </div>
+                       <div class="left item last">
+                            ${c.gist.gist_description}
+                       </div>
+                       %if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
+                        <div style="float:right;margin:-4px 0px 0px 0px">
+                            ${h.form(url('gist', gist_id=c.gist.gist_id),method='delete')}
+                                ${h.submit('remove_gist', _('Delete'),class_="ui-btn red",onclick="return confirm('"+_('Confirm to delete this gist')+"');")}
+                            ${h.end_form()}
+                        </div>
+                       %endif
+                        <div class="buttons">
+                          ## only owner should see that
+                          ##%if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
+                            ##${h.link_to(_('Edit'),h.url(''),class_="ui-btn")}
+                          ##%endif
+                          ${h.link_to(_('Show as raw'),h.url('formatted_gist', gist_id=c.gist.gist_id, format='raw'),class_="ui-btn")}
+                        </div>
+                    </div>
+
+                    <div class="author">
+                        <div class="gravatar">
+                            <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.file_changeset.author),16)}"/>
+                        </div>
+                        <div title="${c.file_changeset.author}" class="user">${h.person(c.file_changeset.author)} - ${_('created')} ${h.age(c.file_changeset.date)}</div>
+                    </div>
+                    <div class="commit">${h.urlify_commit(c.file_changeset.message,c.repo_name)}</div>
+                </div>
+            </div>
+
+               ## iterate over the files
+               % for file in c.files:
+               <div style="border: 1px solid #EEE;margin-top:20px">
+                <div id="${h.FID('G', file.path)}" class="stats" style="border-bottom: 1px solid #DDD;padding: 8px 14px;">
+                    <a href="${c.gist.gist_url()}">¶</a>
+                    <b style="margin:0px 0px 0px 4px">${file.path}</b>
+                    <div style="float:right">
+                       ${h.link_to(_('Show as raw'),h.url('formatted_gist_file', gist_id=c.gist.gist_id, format='raw', revision=file.changeset.raw_id, f_path=file.path),class_="ui-btn")}
+                    </div>
+                </div>
+                <div class="code-body">
+                    ${h.pygmentize(file,linenos=True,anchorlinenos=True,lineanchors='L',cssclass="code-highlight")}
+                </div>
+              </div>
+               %endfor
+        </div>
+    </div>
+
+
+</div>
+</%def>

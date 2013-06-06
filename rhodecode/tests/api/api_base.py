@@ -11,7 +11,8 @@ from rhodecode.model.users_group import UserGroupModel
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.meta import Session
 from rhodecode.model.scm import ScmModel
-from rhodecode.model.db import Repository
+from rhodecode.model.db import Repository, User
+from rhodecode.lib.utils2 import  time_to_datetime
 
 
 API_URL = '/_admin/api'
@@ -25,7 +26,6 @@ def _build_data(apikey, method, **kw):
     Builds API data with given random ID
 
     :param random_id:
-    :type random_id:
     """
     random_id = random.randrange(1, 9999)
     return random_id, json.dumps({
@@ -50,9 +50,9 @@ def api_call(test_obj, params):
 
 ## helpers
 def make_users_group(name=TEST_USER_GROUP):
-    gr = UserGroupModel().create(name=name)
+    gr = fixture.create_user_group(name, cur_user=TEST_USER_ADMIN_LOGIN)
     UserGroupModel().add_user_to_group(users_group=gr,
-                                        user=TEST_USER_ADMIN_LOGIN)
+                                       user=TEST_USER_ADMIN_LOGIN)
     Session().commit()
     return gr
 
@@ -67,10 +67,10 @@ class BaseTestApi(object):
     REPO_TYPE = None
 
     @classmethod
-    def setUpClass(self):
-        self.usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
-        self.apikey = self.usr.api_key
-        self.test_user = UserModel().create_or_update(
+    def setUpClass(cls):
+        cls.usr = UserModel().get_by_username(TEST_USER_ADMIN_LOGIN)
+        cls.apikey = cls.usr.api_key
+        cls.test_user = UserModel().create_or_update(
             username='test-api',
             password='test',
             email='test@api.rhodecode.org',
@@ -78,11 +78,11 @@ class BaseTestApi(object):
             lastname='last'
         )
         Session().commit()
-        self.TEST_USER_LOGIN = self.test_user.username
-        self.apikey_regular = self.test_user.api_key
+        cls.TEST_USER_LOGIN = cls.test_user.username
+        cls.apikey_regular = cls.test_user.api_key
 
     @classmethod
-    def teardownClass(self):
+    def teardownClass(cls):
         pass
 
     def setUp(self):
@@ -164,7 +164,9 @@ class BaseTestApi(object):
         id_, params = _build_data(self.apikey, 'get_users',)
         response = api_call(self, params)
         ret_all = []
-        for usr in UserModel().get_all():
+        _users = User.query().filter(User.username != User.DEFAULT_USER)\
+                             .order_by(User.username).all()
+        for usr in _users:
             ret = usr.get_api_data()
             ret_all.append(jsonify(ret))
         expected = ret_all
@@ -264,13 +266,14 @@ class BaseTestApi(object):
         self._compare_error(id_, expected, given=response.body)
 
     def test_api_invalidate_cache(self):
+        repo = RepoModel().get_by_repo_name(self.REPO)
+        repo.scm_instance_cached() # seed cache
+
         id_, params = _build_data(self.apikey, 'invalidate_cache',
                                   repoid=self.REPO)
         response = api_call(self, params)
 
-        expected = ("Cache for repository `%s` was invalidated: "
-                    "invalidated cache keys: %s" % (self.REPO,
-                                                    [unicode(self.REPO)]))
+        expected = ("Caches of repository `%s` was invalidated" % (self.REPO))
         self._compare_ok(id_, expected, given=response.body)
 
     @mock.patch.object(ScmModel, 'mark_for_invalidation', crash)
@@ -288,8 +291,15 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   locked=True)
         response = api_call(self, params)
-        expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                   % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        expected = {
+            'repo': self.REPO,
+            'locked': True,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        }
+        expected['locked_since'] = json.loads(response.body)['result']['locked_since']
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_aquire_by_non_admin(self):
@@ -301,8 +311,15 @@ class BaseTestApi(object):
                                       repoid=repo_name,
                                       locked=True)
             response = api_call(self, params)
-            expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                       % (self.TEST_USER_LOGIN, repo_name, True))
+            expected = {
+                'repo': repo_name,
+                'locked': True,
+                'locked_since': None,
+                'locked_by': self.TEST_USER_LOGIN,
+                'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                        % (self.TEST_USER_LOGIN, repo_name, True))
+            }
+            expected['locked_since'] = json.loads(response.body)['result']['locked_since']
             self._compare_ok(id_, expected, given=response.body)
         finally:
             fixture.destroy_repo(repo_name)
@@ -336,8 +353,14 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   locked=False)
         response = api_call(self, params)
-        expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                   % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
+        expected = {
+            'repo': self.REPO,
+            'locked': False,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (TEST_USER_ADMIN_LOGIN, self.REPO, False))
+        }
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_aquire_optional_userid(self):
@@ -345,19 +368,33 @@ class BaseTestApi(object):
                                   repoid=self.REPO,
                                   locked=True)
         response = api_call(self, params)
-        expected = ('User `%s` set lock state for repo `%s` to `%s`'
-                   % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        expected = {
+            'repo': self.REPO,
+            'locked': True,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('User `%s` set lock state for repo `%s` to `%s`'
+                    % (TEST_USER_ADMIN_LOGIN, self.REPO, True))
+        }
+        expected['locked_since'] = json.loads(response.body)['result']['locked_since']
         self._compare_ok(id_, expected, given=response.body)
 
     def test_api_lock_repo_lock_optional_locked(self):
-        from rhodecode.lib.utils2 import  time_to_datetime
-        _locked_since = json.dumps(time_to_datetime(Repository\
-                                    .get_by_repo_name(self.REPO).locked[1]))
         id_, params = _build_data(self.apikey, 'lock',
                                   repoid=self.REPO)
         response = api_call(self, params)
-        expected = ('Repo `%s` locked by `%s`. Locked=`True`. Locked since: `%s`'
-                   % (self.REPO, TEST_USER_ADMIN_LOGIN, _locked_since))
+        time_ = json.loads(response.body)['result']['locked_since']
+        expected = {
+            'repo': self.REPO,
+            'locked': True,
+            'locked_since': None,
+            'locked_by': TEST_USER_ADMIN_LOGIN,
+            'msg': ('Repo `%s` locked by `%s`. '
+                            % (self.REPO,
+                               json.dumps(time_to_datetime(time_))))
+
+        }
+        expected['locked_since'] = time_
         self._compare_ok(id_, expected, given=response.body)
 
     @mock.patch.object(Repository, 'lock', crash)
@@ -425,6 +462,27 @@ class BaseTestApi(object):
                                   username=username,
                                   email=email,
                                   password='trololo')
+        response = api_call(self, params)
+
+        usr = UserModel().get_by_username(username)
+        ret = dict(
+            msg='created new user `%s`' % username,
+            user=jsonify(usr.get_api_data())
+        )
+
+        expected = ret
+        self._compare_ok(id_, expected, given=response.body)
+
+        UserModel().delete(usr.user_id)
+        Session().commit()
+
+    def test_api_create_user_without_password(self):
+        username = 'test_new_api_user_passwordless'
+        email = username + "@foo.com"
+
+        id_, params = _build_data(self.apikey, 'create_user',
+                                  username=username,
+                                  email=email)
         response = api_call(self, params)
 
         usr = UserModel().get_by_username(username)
@@ -1084,8 +1142,7 @@ class BaseTestApi(object):
 
     def test_api_add_user_to_users_group(self):
         gr_name = 'test_group'
-        UserGroupModel().create(gr_name)
-        Session().commit()
+        fixture.create_user_group(gr_name)
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -1113,8 +1170,7 @@ class BaseTestApi(object):
     @mock.patch.object(UserGroupModel, 'add_user_to_group', crash)
     def test_api_add_user_to_users_group_exception_occurred(self):
         gr_name = 'test_group'
-        UserGroupModel().create(gr_name)
-        Session().commit()
+        fixture.create_user_group(gr_name)
         id_, params = _build_data(self.apikey, 'add_user_to_users_group',
                                   usersgroupid=gr_name,
                                   userid=TEST_USER_ADMIN_LOGIN)
@@ -1128,7 +1184,7 @@ class BaseTestApi(object):
 
     def test_api_remove_user_from_users_group(self):
         gr_name = 'test_group_3'
-        gr = UserGroupModel().create(gr_name)
+        gr = fixture.create_user_group(gr_name)
         UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',
@@ -1149,7 +1205,7 @@ class BaseTestApi(object):
     @mock.patch.object(UserGroupModel, 'remove_user_from_group', crash)
     def test_api_remove_user_from_users_group_exception_occurred(self):
         gr_name = 'test_group_3'
-        gr = UserGroupModel().create(gr_name)
+        gr = fixture.create_user_group(gr_name)
         UserGroupModel().add_user_to_group(gr, user=TEST_USER_ADMIN_LOGIN)
         Session().commit()
         id_, params = _build_data(self.apikey, 'remove_user_from_users_group',

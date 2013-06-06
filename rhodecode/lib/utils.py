@@ -39,13 +39,12 @@ from os.path import dirname as dn, join as jn
 
 from paste.script.command import Command, BadCommand
 
-from mercurial import ui, config
-
 from webhelpers.text import collapse, remove_formatting, strip_tags
 
 from rhodecode.lib.vcs import get_backend
 from rhodecode.lib.vcs.backends.base import BaseChangeset
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils.hgcompat import ui, config
 from rhodecode.lib.vcs.utils.helpers import get_scm
 from rhodecode.lib.vcs.exceptions import VCSError
 
@@ -53,11 +52,12 @@ from rhodecode.lib.caching_query import FromCache
 
 from rhodecode.model import meta
 from rhodecode.model.db import Repository, User, RhodeCodeUi, \
-    UserLog, RepoGroup, RhodeCodeSetting, CacheInvalidation
+    UserLog, RepoGroup, RhodeCodeSetting, CacheInvalidation, UserGroup
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
 from rhodecode.lib.utils2 import safe_str, safe_unicode
 from rhodecode.lib.vcs.utils.fakemod import create_module
+from rhodecode.model.users_group import UserGroupModel
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +100,9 @@ def repo_name_slug(value):
     return slug
 
 
+#==============================================================================
+# PERM DECORATOR HELPERS FOR EXTRACTING NAMES FOR PERM CHECKS
+#==============================================================================
 def get_repo_slug(request):
     _repo = request.environ['pylons.routes_dict'].get('repo_name')
     if _repo:
@@ -111,6 +114,20 @@ def get_repos_group_slug(request):
     _group = request.environ['pylons.routes_dict'].get('group_name')
     if _group:
         _group = _group.rstrip('/')
+    return _group
+
+
+def get_user_group_slug(request):
+    _group = request.environ['pylons.routes_dict'].get('id')
+    try:
+        _group = UserGroup.get(_group)
+        if _group:
+            _group = _group.users_group_name
+    except Exception:
+        log.debug(traceback.format_exc())
+        #catch all failures here
+        pass
+
     return _group
 
 
@@ -356,17 +373,24 @@ def set_rhodecode_config(config):
         config[k] = v
 
 
-def invalidate_cache(cache_key, *args):
+def set_vcs_config(config):
     """
-    Puts cache invalidation task into db for
-    further global cache invalidation
+    Patch VCS config with some RhodeCode specific stuff
+
+    :param config: rhodecode.CONFIG
     """
+    import rhodecode
+    from rhodecode.lib.vcs import conf
+    from rhodecode.lib.utils2 import aslist
+    conf.settings.BACKENDS = {
+        'hg': 'rhodecode.lib.vcs.backends.hg.MercurialRepository',
+        'git': 'rhodecode.lib.vcs.backends.git.GitRepository',
+    }
 
-    from rhodecode.model.scm import ScmModel
-
-    if cache_key.startswith('get_repo_cached_'):
-        name = cache_key.split('get_repo_cached_')[-1]
-        ScmModel().mark_for_invalidation(name)
+    conf.settings.GIT_EXECUTABLE_PATH = config.get('git_path', 'git')
+    conf.settings.GIT_REV_FILTER = config.get('git_rev_filter', '--all').strip()
+    conf.settings.DEFAULT_ENCODINGS = aslist(config.get('default_encoding',
+                                                        'utf8'), sep=',')
 
 
 def map_groups(path):
@@ -385,6 +409,7 @@ def map_groups(path):
     # last element is repo in nested groups structure
     groups = groups[:-1]
     rgm = ReposGroupModel(sa)
+    owner = User.get_first_admin()
     for lvl, group_name in enumerate(groups):
         group_name = '/'.join(groups[:lvl] + [group_name])
         group = RepoGroup.get_by_group_name(group_name)
@@ -395,13 +420,16 @@ def map_groups(path):
             break
 
         if group is None:
-            log.debug('creating group level: %s group_name: %s' % (lvl,
-                                                                   group_name))
+            log.debug('creating group level: %s group_name: %s'
+                      % (lvl, group_name))
             group = RepoGroup(group_name, parent)
             group.group_description = desc
+            group.user = owner
             sa.add(group)
-            rgm._create_default_perms(group)
+            perm_obj = rgm._create_default_perms(group)
+            sa.add(perm_obj)
             sa.flush()
+
         parent = group
     return group
 
@@ -422,9 +450,7 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
     from rhodecode.model.scm import ScmModel
     sa = meta.Session()
     rm = RepoModel()
-    user = sa.query(User).filter(User.admin == True).first()
-    if user is None:
-        raise Exception('Missing administrative account!')
+    user = User.get_first_admin()
     added = []
 
     ##creation defaults
@@ -465,11 +491,6 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
         elif install_git_hook:
             if db_repo.repo_type == 'git':
                 ScmModel().install_git_hook(db_repo.scm_instance)
-        # during starting install all cache keys for all repositories in the
-        # system, this will register all repos and multiple instances
-        cache_key = CacheInvalidation._get_cache_key(name)
-        log.debug("Creating invalidation cache key for %s: %s", name, cache_key)
-        CacheInvalidation.invalidate(name)
 
     sa.commit()
     removed = []
@@ -480,9 +501,9 @@ def repo2db_mapper(initial_repo_list, remove_obsolete=False,
                 log.debug("Removing non-existing repository found in db `%s`" %
                           repo.repo_name)
                 try:
-                    sa.delete(repo)
-                    sa.commit()
                     removed.append(repo.repo_name)
+                    RepoModel(sa).delete(repo, forks='detach', fs_remove=False)
+                    sa.commit()
                 except Exception:
                     #don't hold further removals on error
                     log.error(traceback.format_exc())
@@ -533,7 +554,7 @@ def load_rcextensions(root_path):
 
         #OVERRIDE OUR EXTENSIONS FROM RC-EXTENSIONS (if present)
 
-        if getattr(EXT, 'INDEX_EXTENSIONS', []) != []:
+        if getattr(EXT, 'INDEX_EXTENSIONS', []):
             log.debug('settings custom INDEX_EXTENSIONS')
             conf.INDEX_EXTENSIONS = getattr(EXT, 'INDEX_EXTENSIONS', [])
 
@@ -635,12 +656,12 @@ def create_test_env(repos_test_path, config):
 
     #CREATE DEFAULT TEST REPOS
     cur_dir = dn(dn(abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_hg.tar.gz"))
+    tar = tarfile.open(jn(cur_dir, 'tests', 'fixtures', "vcs_test_hg.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, HG_REPO))
     tar.close()
 
     cur_dir = dn(dn(abspath(__file__)))
-    tar = tarfile.open(jn(cur_dir, 'tests', "vcs_test_git.tar.gz"))
+    tar = tarfile.open(jn(cur_dir, 'tests', 'fixtures', "vcs_test_git.tar.gz"))
     tar.extractall(jn(TESTS_TMP_PATH, GIT_REPO))
     tar.close()
 
@@ -737,6 +758,7 @@ def check_git_version():
     """
     from rhodecode import BACKENDS
     from rhodecode.lib.vcs.backends.git.repository import GitRepository
+    from rhodecode.lib.vcs.conf import settings
     from distutils.version import StrictVersion
 
     stdout, stderr = GitRepository._run_git_command('--version', _bare=True,
@@ -758,7 +780,8 @@ def check_git_version():
         to_old_git = True
 
     if 'git' in BACKENDS:
-        log.debug('GIT version detected: %s' % stdout)
+        log.debug('GIT executable: "%s" version detected: %s'
+                  % (settings.GIT_EXECUTABLE_PATH, stdout))
         if stderr:
             log.warning('Unable to detect git version, org error was: %r' % stderr)
         elif to_old_git:
@@ -778,7 +801,7 @@ def jsonify(func, *args, **kwargs):
 
     """
     from pylons.decorators.util import get_pylons
-    from rhodecode.lib.ext_json import json
+    from rhodecode.lib.compat import json
     pylons = get_pylons(args)
     pylons.response.headers['Content-Type'] = 'application/json; charset=utf-8'
     data = func(*args, **kwargs)

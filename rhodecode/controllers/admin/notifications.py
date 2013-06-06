@@ -30,15 +30,13 @@ from pylons import request
 from pylons import tmpl_context as c, url
 from pylons.controllers.util import redirect, abort
 
-from webhelpers.paginate import Page
-
-from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Notification
-
 from rhodecode.model.notification import NotificationModel
-from rhodecode.lib.auth import LoginRequired, NotAnonymous
-from rhodecode.lib import helpers as h
 from rhodecode.model.meta import Session
+from rhodecode.lib.auth import LoginRequired, NotAnonymous
+from rhodecode.lib.base import BaseController, render
+from rhodecode.lib import helpers as h
+from rhodecode.lib.helpers import Page
 from rhodecode.lib.utils2 import safe_int
 
 

@@ -30,10 +30,10 @@ __url__ = _get_meta_var('__url__', _metadata)
 # defines current platform
 __platform__ = platform.system()
 
-is_windows = __platform__ in _get_meta_var('PLATFORM_WIN', _metadata)
+is_windows = __platform__ in ['Windows']
 
 requirements = [
-    "waitress==0.8.2",
+    "waitress==0.8.4",
     "webob==1.0.8",
     "webtest==1.4.3",
     "Pylons==1.0.0",
@@ -62,10 +62,10 @@ if sys.version_info < (2, 7):
     requirements.append("argparse")
 
 if is_windows:
-    requirements.append("mercurial==2.5.4")
+    requirements.append("mercurial==2.6.2")
 else:
     requirements.append("py-bcrypt")
-    requirements.append("mercurial==2.5.4")
+    requirements.append("mercurial==2.6.2")
 
 
 dependency_links = [
@@ -151,6 +151,7 @@ setup(
     entry_points="""
     [console_scripts]
     rhodecode-api =  rhodecode.bin.rhodecode_api:main
+    rhodecode-gist =  rhodecode.bin.rhodecode_gist:main
 
     [paste.app_factory]
     main = rhodecode.config.middleware:make_app
@@ -166,7 +167,7 @@ setup(
     repo-scan=rhodecode.lib.paster_commands.repo_scan:Command
     cache-keys=rhodecode.lib.paster_commands.cache_keys:Command
     ishell=rhodecode.lib.paster_commands.ishell:Command
-    make-index=rhodecode.lib.indexers:MakeIndex
+    make-index=rhodecode.lib.paster_commands.make_index:Command
     upgrade-db=rhodecode.lib.dbmigrate:UpgradeDb
     celeryd=rhodecode.lib.celerypylons.commands:CeleryDaemonCommand
     """,

@@ -318,9 +318,7 @@ class StackedConfig(Config):
         specified), the users' home directory and the system
         configuration.
         """
-        paths = []
-        paths.append(os.path.expanduser("~/.gitconfig"))
-        paths.append("/etc/gitconfig")
+        paths = [os.path.expanduser("~/.gitconfig"), "/etc/gitconfig"]
         backends = []
         for path in paths:
             try:

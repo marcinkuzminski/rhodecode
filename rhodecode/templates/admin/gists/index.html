@@ -1,0 +1,71 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('Gists')} &middot; ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    %if c.show_private:
+        ${_('Private Gists for user %s') % c.rhodecode_user.username}
+    %elif c.show_public:
+        ${_('Public Gists for user %s') % c.rhodecode_user.username}
+    %else:
+        ${_('Public Gists')}
+    %endif
+    - ${c.gists_pager.item_count}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('gists')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+        %if c.rhodecode_user.username != 'default':
+        <ul class="links">
+          <li>
+             <span>${h.link_to(_(u'Create new gist'), h.url('new_gist'))}</span>
+          </li>
+        </ul>
+        %endif
+    </div>
+    %if c.gists_pager.item_count>0:
+        % for gist in c.gists_pager:
+          <div class="gist-item" style="padding:10px 20px 10px 15px">
+
+            <div class="gravatar">
+               <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(gist.owner.full_contact),28)}"/>
+            </div>
+            <div title="${gist.owner.full_contact}" class="user" style="font-size: 16px">
+                <b>${h.person(gist.owner.full_contact)}</b> /
+                <b><a href="${h.url('gist',gist_id=gist.gist_access_id)}">gist:${gist.gist_access_id}</a></b>
+            </div>
+            <div style="padding: 4px 0px 0px 0px">
+                ${_('Created')} ${h.age(gist.created_on)} /
+                <span style="color: #AAA">
+                  %if gist.gist_expires == -1:
+                   ${_('Expires')}: ${_('never')}
+                  %else:
+                   ${_('Expires')}: ${h.age(h.time_to_datetime(gist.gist_expires))}
+                  %endif
+                </span>
+            </div>
+
+            <div style="border:0px;padding:10px 0px 0px 40px;color:#AAA">${gist.gist_description}</div>
+          </div>
+        % endfor
+
+        <div class="notification-paginator">
+          <div class="pagination-wh pagination-left">
+          ${c.gists_pager.pager('$link_previous ~2~ $link_next')}
+          </div>
+        </div>
+    %else:
+        <div class="table">${_('There are no gists yet')}</div>
+    %endif
+</div>
+</%def>

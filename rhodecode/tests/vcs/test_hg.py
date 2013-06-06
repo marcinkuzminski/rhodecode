@@ -4,13 +4,13 @@ import os
 from rhodecode.lib.vcs.backends.hg import MercurialRepository, MercurialChangeset
 from rhodecode.lib.vcs.exceptions import RepositoryError, VCSError, NodeDoesNotExistError
 from rhodecode.lib.vcs.nodes import NodeKind, NodeState
-from conf import PACKAGE_DIR, TEST_HG_REPO, TEST_HG_REPO_CLONE, \
+from rhodecode.tests.vcs.conf import PACKAGE_DIR, TEST_HG_REPO, TEST_HG_REPO_CLONE, \
     TEST_HG_REPO_PULL
 from rhodecode.lib.vcs.utils.compat import unittest
 
 
 # Use only clean mercurial's ui
-import mercurial.scmutil
+from rhodecode.lib.vcs.utils.hgcompat import mercurial
 mercurial.scmutil.rcpath()
 if mercurial.scmutil._rcpath:
     mercurial.scmutil._rcpath = mercurial.scmutil._rcpath[:1]
@@ -156,9 +156,10 @@ class MercurialRepositoryTest(unittest.TestCase):
 
         #active branches
         self.assertTrue('default' in self.repo.branches)
-        self.assertTrue('git' in self.repo.branches)
+        self.assertTrue('stable' in self.repo.branches)
 
         # closed
+        self.assertTrue('git' in self.repo._get_branches(closed=True))
         self.assertTrue('web' in self.repo._get_branches(closed=True))
 
         for name, id in self.repo.branches.items():

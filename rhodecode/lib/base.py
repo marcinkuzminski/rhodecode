@@ -21,7 +21,7 @@ from rhodecode.lib.utils2 import str2bool, safe_unicode, AttributeDict,\
     safe_str, safe_int
 from rhodecode.lib.auth import AuthUser, get_container_username, authfunc,\
     HasPermissionAnyMiddleware, CookieStoreWrapper
-from rhodecode.lib.utils import get_repo_slug, invalidate_cache
+from rhodecode.lib.utils import get_repo_slug
 from rhodecode.model import meta
 
 from rhodecode.model.db import Repository, RhodeCodeUi, User, RhodeCodeSetting
@@ -149,7 +149,7 @@ class BaseVCSController(object):
 
         :param repo_name: full repo name, also a cache key
         """
-        invalidate_cache('get_repo_cached_%s' % repo_name)
+        ScmModel().mark_for_invalidation(repo_name)
 
     def _check_permission(self, action, user, repo_name, ip_addr=None):
         """
@@ -267,19 +267,22 @@ class BaseController(WSGIController):
         # Visual options
         c.visual = AttributeDict({})
         rc_config = RhodeCodeSetting.get_app_settings()
-
+        ## DB stored
         c.visual.show_public_icon = str2bool(rc_config.get('rhodecode_show_public_icon'))
         c.visual.show_private_icon = str2bool(rc_config.get('rhodecode_show_private_icon'))
         c.visual.stylify_metatags = str2bool(rc_config.get('rhodecode_stylify_metatags'))
-        c.visual.lightweight_dashboard = str2bool(rc_config.get('rhodecode_lightweight_dashboard'))
-        c.visual.lightweight_dashboard_items = safe_int(config.get('dashboard_items', 100))
+        c.visual.dashboard_items = safe_int(rc_config.get('rhodecode_dashboard_items', 100))
         c.visual.repository_fields = str2bool(rc_config.get('rhodecode_repository_fields'))
+        c.visual.show_version = str2bool(rc_config.get('rhodecode_show_version'))
+
+        ## INI stored
+        self.cut_off_limit = int(config.get('cut_off_limit'))
+        c.visual.allow_repo_location_change = str2bool(config.get('allow_repo_location_change', True))
+
         c.repo_name = get_repo_slug(request)  # can be empty
         c.backends = BACKENDS.keys()
         c.unread_notifications = NotificationModel()\
                         .get_unread_cnt_for_user(c.rhodecode_user.user_id)
-        self.cut_off_limit = int(config.get('cut_off_limit'))
-
         self.sa = meta.Session
         self.scm_model = ScmModel(self.sa)
 

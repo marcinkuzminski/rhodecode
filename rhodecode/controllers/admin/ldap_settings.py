@@ -71,8 +71,6 @@ class LdapSettingsController(BaseController):
     @LoginRequired()
     @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
         c.search_scope_choices = self.search_scope_choices
         c.tls_reqcert_choices = self.tls_reqcert_choices
         c.tls_kind_choices = self.tls_kind_choices

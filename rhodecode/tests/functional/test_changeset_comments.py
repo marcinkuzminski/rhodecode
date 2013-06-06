@@ -1,27 +1,28 @@
 from rhodecode.tests import *
 from rhodecode.model.db import ChangesetComment, Notification, User, \
     UserNotification
+from rhodecode.model.meta import Session
 
 
 class TestChangeSetCommentsController(TestController):
 
     def setUp(self):
         for x in ChangesetComment.query().all():
-            self.Session.delete(x)
-        self.Session.commit()
+            Session().delete(x)
+        Session().commit()
 
         for x in Notification.query().all():
-            self.Session.delete(x)
-        self.Session.commit()
+            Session().delete(x)
+        Session().commit()
 
     def tearDown(self):
         for x in ChangesetComment.query().all():
-            self.Session.delete(x)
-        self.Session.commit()
+            Session().delete(x)
+        Session().commit()
 
         for x in Notification.query().all():
-            self.Session.delete(x)
-        self.Session.commit()
+            Session().delete(x)
+        Session().commit()
 
     def test_create(self):
         self.log_user()

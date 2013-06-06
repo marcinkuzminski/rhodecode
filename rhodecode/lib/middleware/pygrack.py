@@ -7,7 +7,7 @@ import traceback
 from webob import Request, Response, exc
 
 import rhodecode
-from rhodecode.lib import subprocessio
+from rhodecode.lib.vcs import subprocessio
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +59,6 @@ class GitRepository(object):
         Small fix for repo_path
 
         :param path:
-        :type path:
         """
         return path.split(self.repo_name, 1)[-1].strip('/')
 

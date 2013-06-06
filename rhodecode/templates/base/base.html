@@ -39,12 +39,17 @@
    <div id="footer-inner" class="title">
        <div>
            <p class="footer-link">
-                <a href="${h.url('bugtracker')}">${_('Submit a bug')}</a>
+               ${_('Server instance: %s') % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}
            </p>
            <p class="footer-link-right">
-               <a href="${h.url('rhodecode_official')}">RhodeCode ${c.rhodecode_version}</a>
+               <a href="${h.url('rhodecode_official')}">
+               RhodeCode
+               %if c.visual.show_version:
+                   ${c.rhodecode_version}
+               %endif
+               </a>
                &copy; 2010-${h.datetime.today().year} by Marcin Kuzminski and others
-               ${'(%s)' % c.rhodecode_instanceid if c.rhodecode_instanceid else ''}
+               &ndash; <a href="${h.url('bugtracker')}">${_('Report a bug')}</a>
            </p>
        </div>
    </div>
@@ -77,9 +82,17 @@
   </ul>
 </%def>
 
-<%def name="admin_menu_simple()">
+<%def name="admin_menu_simple(repositories=None, repository_groups=None, user_groups=None)">
   <ul>
+   %if repositories:
+      <li>${h.link_to(_('Repositories'),h.url('repos'),class_='repos')}</li>
+   %endif
+   %if repository_groups:
       <li>${h.link_to(_('Repository groups'),h.url('repos_groups'),class_='repos_groups')}</li>
+   %endif
+   %if user_groups:
+      <li>${h.link_to(_('User groups'),h.url('users_groups'),class_='groups')}</li>
+   %endif
   </ul>
 </%def>
 
@@ -123,7 +136,6 @@
               %if c.rhodecode_db_repo.fork:
                <li>${h.link_to(_('Compare fork'),h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default', merge=1),class_='compare_request')}</li>
               %endif
-              <li>${h.link_to(_('Lightweight changelog'),h.url('shortlog_home',repo_name=c.repo_name),class_='shortlog')}</li>
               <li>${h.link_to(_('Search'),h.url('search_repo',repo_name=c.repo_name),class_='search')}</li>
 
               %if h.HasRepoPermissionAny('repository.write','repository.admin')(c.repo_name) and c.rhodecode_db_repo.enable_locking:
@@ -282,6 +294,19 @@
               </a>
             </li>
           %endif
+            <li ${is_current('gists')}>
+              <a class="menu_link gists childs" title="${_('Show public gists')}"  href="${h.url('gists')}">
+              ${_('Gists')}
+              </a>
+                <ul class="admin_menu">
+                  <li>${h.link_to(_('Create new gist'),h.url('new_gist'),class_='gists-new ')}</li>
+                  <li>${h.link_to(_('All public gists'),h.url('gists'),class_='gists ')}</li>
+                  %if c.rhodecode_user.username != 'default':
+                    <li>${h.link_to(_('My public gists'),h.url('gists', public=1),class_='gists')}</li>
+                    <li>${h.link_to(_('My private gists'),h.url('gists', private=1),class_='gists-private ')}</li>
+                  %endif
+                </ul>
+            </li>
           <li ${is_current('search')}>
               <a class="menu_link search" title="${_('Search in repositories')}"  href="${h.url('search')}">
               ${_('Search')}
@@ -294,12 +319,14 @@
               </a>
               ${admin_menu()}
             </li>
-          % elif c.rhodecode_user.groups_admin:
+          % elif c.rhodecode_user.repositories_admin or c.rhodecode_user.repository_groups_admin or c.rhodecode_user.user_groups_admin:
           <li ${is_current('admin')}>
               <a class="menu_link admin childs" title="${_('Admin')}">
                 ${_('Admin')}
               </a>
-              ${admin_menu_simple()}
+              ${admin_menu_simple(c.rhodecode_user.repositories_admin,
+                                  c.rhodecode_user.repository_groups_admin,
+                                  c.rhodecode_user.user_groups_admin or h.HasPermissionAny('hg.usergroup.create.true')())}
           </li>
           % endif
           ${usermenu()}

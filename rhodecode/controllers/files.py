@@ -32,7 +32,7 @@ import shutil
 from pylons import request, response, tmpl_context as c, url
 from pylons.i18n.translation import _
 from pylons.controllers.util import redirect
-from rhodecode.lib.utils import jsonify
+from rhodecode.lib.utils import jsonify, action_logger
 
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
@@ -57,6 +57,7 @@ from rhodecode.model.db import Repository
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
 from webob.exc import HTTPNotFound
+from rhodecode.lib.exceptions import NonRelativePathError
 
 
 log = logging.getLogger(__name__)
@@ -303,7 +304,7 @@ class FilesController(BaseRepoController):
             first_line = sl[0] if sl else ''
             # modes:  0 - Unix, 1 - Mac, 2 - DOS
             mode = detect_mode(first_line, 0)
-            content = convert_line_endings(r_post.get('content'), mode)
+            content = convert_line_endings(r_post.get('content', ''), mode)
 
             message = r_post.get('message') or c.default_message
             author = self.rhodecode_user.full_contact
@@ -352,11 +353,11 @@ class FilesController(BaseRepoController):
 
         if r_post:
             unix_mode = 0
-            content = convert_line_endings(r_post.get('content'), unix_mode)
+            content = convert_line_endings(r_post.get('content', ''), unix_mode)
 
             message = r_post.get('message') or c.default_message
             filename = r_post.get('filename')
-            location = r_post.get('location')
+            location = r_post.get('location', '')
             file_obj = r_post.get('upload_file', None)
 
             if file_obj is not None and hasattr(file_obj, 'filename'):
@@ -371,25 +372,32 @@ class FilesController(BaseRepoController):
                 h.flash(_('No filename'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
                                     revision='tip'))
-            if location.startswith('/') or location.startswith('.') or '../' in location:
-                h.flash(_('Location must be relative path and must not '
-                          'contain .. in path'), category='warning')
-                return redirect(url('changeset_home', repo_name=c.repo_name,
-                                    revision='tip'))
-            if location:
-                location = os.path.normpath(location)
+            #strip all crap out of file, just leave the basename
             filename = os.path.basename(filename)
             node_path = os.path.join(location, filename)
             author = self.rhodecode_user.full_contact
 
             try:
-                self.scm_model.create_node(repo=c.rhodecode_repo,
-                                           repo_name=repo_name, cs=c.cs,
-                                           user=self.rhodecode_user.user_id,
-                                           author=author, message=message,
-                                           content=content, f_path=node_path)
+                nodes = {
+                    node_path: {
+                        'content': content
+                    }
+                }
+                self.scm_model.create_nodes(
+                    user=c.rhodecode_user.user_id, repo=c.rhodecode_db_repo,
+                    message=message,
+                    nodes=nodes,
+                    parent_cs=c.cs,
+                    author=author,
+                )
+
                 h.flash(_('Successfully committed to %s') % node_path,
                         category='success')
+            except NonRelativePathError, e:
+                h.flash(_('Location must be relative path and must not '
+                          'contain .. in path'), category='warning')
+                return redirect(url('changeset_home', repo_name=c.repo_name,
+                                    revision='tip'))
             except (NodeError, NodeAlreadyExistsError), e:
                 h.flash(_(e), category='error')
             except Exception:
@@ -484,7 +492,10 @@ class FilesController(BaseRepoController):
                         os.remove(archive)
                     break
                 yield data
-
+        # store download action
+        action_logger(user=c.rhodecode_user,
+                      action='user_downloaded_archive:%s' % (archive_name),
+                      repo=repo_name, ipaddr=self.ip_addr, commit=True)
         response.content_disposition = str('attachment; filename=%s' % (archive_name))
         response.content_type = str(content_type)
         return get_chunked_archive(archive)

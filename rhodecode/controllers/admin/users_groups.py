@@ -33,19 +33,23 @@ from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
 
 from rhodecode.lib import helpers as h
-from rhodecode.lib.exceptions import UserGroupsAssignedException
-from rhodecode.lib.utils2 import safe_unicode, str2bool
-from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
+from rhodecode.lib.exceptions import UserGroupsAssignedException,\
+    RepoGroupAssignmentError
+from rhodecode.lib.utils2 import safe_unicode, str2bool, safe_int
+from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator,\
+    HasUserGroupPermissionAnyDecorator, HasPermissionAnyDecorator
 from rhodecode.lib.base import BaseController, render
-
+from rhodecode.model.scm import UserGroupList
 from rhodecode.model.users_group import UserGroupModel
-
+from rhodecode.model.repo import RepoModel
 from rhodecode.model.db import User, UserGroup, UserGroupToPerm,\
     UserGroupRepoToPerm, UserGroupRepoGroupToPerm
-from rhodecode.model.forms import UserGroupForm
+from rhodecode.model.forms import UserGroupForm, UserGroupPermsForm,\
+    CustomDefaultPermissionsForm
 from rhodecode.model.meta import Session
 from rhodecode.lib.utils import action_logger
 from sqlalchemy.orm import joinedload
+from webob.exc import HTTPInternalServerError
 
 log = logging.getLogger(__name__)
 
@@ -57,19 +61,89 @@ class UsersGroupsController(BaseController):
     #     map.resource('users_group', 'users_groups')
 
     @LoginRequired()
-    @HasPermissionAllDecorator('hg.admin')
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
         super(UsersGroupsController, self).__before__()
         c.available_permissions = config['available_permissions']
+
+    def __load_data(self, user_group_id):
+        permissions = {
+            'repositories': {},
+            'repositories_groups': {}
+        }
+        ugroup_repo_perms = UserGroupRepoToPerm.query()\
+            .options(joinedload(UserGroupRepoToPerm.permission))\
+            .options(joinedload(UserGroupRepoToPerm.repository))\
+            .filter(UserGroupRepoToPerm.users_group_id == user_group_id)\
+            .all()
+
+        for gr in ugroup_repo_perms:
+            permissions['repositories'][gr.repository.repo_name]  \
+                = gr.permission.permission_name
+
+        ugroup_group_perms = UserGroupRepoGroupToPerm.query()\
+            .options(joinedload(UserGroupRepoGroupToPerm.permission))\
+            .options(joinedload(UserGroupRepoGroupToPerm.group))\
+            .filter(UserGroupRepoGroupToPerm.users_group_id == user_group_id)\
+            .all()
+
+        for gr in ugroup_group_perms:
+            permissions['repositories_groups'][gr.group.group_name] \
+                = gr.permission.permission_name
+        c.permissions = permissions
+        c.group_members_obj = sorted((x.user for x in c.users_group.members),
+                                     key=lambda u: u.username.lower())
+
+        c.group_members = [(x.user_id, x.username) for x in c.group_members_obj]
+        c.available_members = sorted(((x.user_id, x.username) for x in
+                                      User.query().all()),
+                                     key=lambda u: u[1].lower())
+        repo_model = RepoModel()
+        c.users_array = repo_model.get_users_js()
+        c.users_groups_array = repo_model.get_users_groups_js()
+        c.available_permissions = config['available_permissions']
+
+    def __load_defaults(self, user_group_id):
+        """
+        Load defaults settings for edit, and update
+
+        :param user_group_id:
+        """
+        user_group = UserGroup.get_or_404(user_group_id)
+        data = user_group.get_dict()
+
+        ug_model = UserGroupModel()
+
+        data.update({
+            'create_repo_perm': ug_model.has_perm(user_group,
+                                                  'hg.create.repository'),
+            'create_user_group_perm': ug_model.has_perm(user_group,
+                                                  'hg.usergroup.create.true'),
+            'fork_repo_perm': ug_model.has_perm(user_group,
+                                                'hg.fork.repository'),
+        })
+
+        # fill user group users
+        for p in user_group.user_user_group_to_perm:
+            data.update({'u_perm_%s' % p.user.username:
+                             p.permission.permission_name})
+
+        for p in user_group.user_group_user_group_to_perm:
+            data.update({'g_perm_%s' % p.user_group.users_group_name:
+                             p.permission.permission_name})
+
+        return data
 
     def index(self, format='html'):
         """GET /users_groups: All items in the collection"""
         # url('users_groups')
-        c.users_groups_list = UserGroup().query().all()
+
+        group_iter = UserGroupList(UserGroup().query().all(),
+                                   perm_set=['usergroup.admin'])
+        sk = lambda g: g.users_group_name
+        c.users_groups_list = sorted(group_iter, key=sk)
         return render('admin/users_groups/users_groups.html')
 
+    @HasPermissionAnyDecorator('hg.admin', 'hg.usergroup.create.true')
     def create(self):
         """POST /users_groups: Create a new item"""
         # url('users_groups')
@@ -78,7 +152,9 @@ class UsersGroupsController(BaseController):
         try:
             form_result = users_group_form.to_python(dict(request.POST))
             UserGroupModel().create(name=form_result['users_group_name'],
-                                     active=form_result['users_group_active'])
+                                    owner=self.rhodecode_user.user_id,
+                                    active=form_result['users_group_active'])
+
             gr = form_result['users_group_name']
             action_logger(self.rhodecode_user,
                           'admin_created_users_group:%s' % gr,
@@ -99,45 +175,13 @@ class UsersGroupsController(BaseController):
 
         return redirect(url('users_groups'))
 
+    @HasPermissionAnyDecorator('hg.admin', 'hg.usergroup.create.true')
     def new(self, format='html'):
         """GET /users_groups/new: Form to create a new item"""
         # url('new_users_group')
         return render('admin/users_groups/users_group_add.html')
 
-    def _load_data(self, id):
-        c.users_group.permissions = {
-            'repositories': {},
-            'repositories_groups': {}
-        }
-
-        ugroup_repo_perms = UserGroupRepoToPerm.query()\
-            .options(joinedload(UserGroupRepoToPerm.permission))\
-            .options(joinedload(UserGroupRepoToPerm.repository))\
-            .filter(UserGroupRepoToPerm.users_group_id == id)\
-            .all()
-
-        for gr in ugroup_repo_perms:
-            c.users_group.permissions['repositories'][gr.repository.repo_name]  \
-                = gr.permission.permission_name
-
-        ugroup_group_perms = UserGroupRepoGroupToPerm.query()\
-            .options(joinedload(UserGroupRepoGroupToPerm.permission))\
-            .options(joinedload(UserGroupRepoGroupToPerm.group))\
-            .filter(UserGroupRepoGroupToPerm.users_group_id == id)\
-            .all()
-
-        for gr in ugroup_group_perms:
-            c.users_group.permissions['repositories_groups'][gr.group.group_name] \
-                = gr.permission.permission_name
-
-        c.group_members_obj = sorted((x.user for x in c.users_group.members),
-                                     key=lambda u: u.username.lower())
-        c.group_members = [(x.user_id, x.username) for x in
-                           c.group_members_obj]
-        c.available_members = sorted(((x.user_id, x.username) for x in
-                                      User.query().all()),
-                                     key=lambda u: u[1].lower())
-
+    @HasUserGroupPermissionAnyDecorator('usergroup.admin')
     def update(self, id):
         """PUT /users_groups/id: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -148,7 +192,7 @@ class UsersGroupsController(BaseController):
         # url('users_group', id=ID)
 
         c.users_group = UserGroup.get_or_404(id)
-        self._load_data(id)
+        self.__load_data(id)
 
         available_members = [safe_unicode(x[0]) for x in c.available_members]
 
@@ -190,6 +234,7 @@ class UsersGroupsController(BaseController):
 
         return redirect(url('edit_users_group', id=id))
 
+    @HasUserGroupPermissionAnyDecorator('usergroup.admin')
     def delete(self, id):
         """DELETE /users_groups/id: Delete an existing item"""
         # Forms posted to this method should contain a hidden field:
@@ -211,25 +256,76 @@ class UsersGroupsController(BaseController):
                     category='error')
         return redirect(url('users_groups'))
 
+    @HasUserGroupPermissionAnyDecorator('usergroup.admin')
+    def set_user_group_perm_member(self, id):
+        """
+        grant permission for given usergroup
+
+        :param id:
+        """
+        user_group = UserGroup.get_or_404(id)
+        form = UserGroupPermsForm()().to_python(request.POST)
+
+        # set the permissions !
+        try:
+            UserGroupModel()._update_permissions(user_group, form['perms_new'],
+                                                 form['perms_updates'])
+        except RepoGroupAssignmentError:
+            h.flash(_('Target group cannot be the same'), category='error')
+            return redirect(url('edit_users_group', id=id))
+        #TODO: implement this
+        #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
+        #              repo_name, self.ip_addr, self.sa)
+        Session().commit()
+        h.flash(_('User Group permissions updated'), category='success')
+        return redirect(url('edit_users_group', id=id))
+
+    @HasUserGroupPermissionAnyDecorator('usergroup.admin')
+    def delete_user_group_perm_member(self, id):
+        """
+        DELETE an existing repository group permission user
+
+        :param group_name:
+        """
+        try:
+            obj_type = request.POST.get('obj_type')
+            obj_id = None
+            if obj_type == 'user':
+                obj_id = safe_int(request.POST.get('user_id'))
+            elif obj_type == 'user_group':
+                obj_id = safe_int(request.POST.get('user_group_id'))
+
+            if not c.rhodecode_user.is_admin:
+                if obj_type == 'user' and c.rhodecode_user.user_id == obj_id:
+                    msg = _('Cannot revoke permission for yourself as admin')
+                    h.flash(msg, category='warning')
+                    raise Exception('revoke admin permission on self')
+            if obj_type == 'user':
+                UserGroupModel().revoke_user_permission(user_group=id,
+                                                        user=obj_id)
+            elif obj_type == 'user_group':
+                UserGroupModel().revoke_users_group_permission(target_user_group=id,
+                                                               user_group=obj_id)
+            Session().commit()
+        except Exception:
+            log.error(traceback.format_exc())
+            h.flash(_('An error occurred during revoking of permission'),
+                    category='error')
+            raise HTTPInternalServerError()
+
     def show(self, id, format='html'):
         """GET /users_groups/id: Show a specific item"""
         # url('users_group', id=ID)
 
+    @HasUserGroupPermissionAnyDecorator('usergroup.admin')
     def edit(self, id, format='html'):
         """GET /users_groups/id/edit: Form to edit an existing item"""
         # url('edit_users_group', id=ID)
 
         c.users_group = UserGroup.get_or_404(id)
-        self._load_data(id)
+        self.__load_data(id)
 
-        ug_model = UserGroupModel()
-        defaults = c.users_group.get_dict()
-        defaults.update({
-            'create_repo_perm': ug_model.has_perm(c.users_group,
-                                                  'hg.create.repository'),
-            'fork_repo_perm': ug_model.has_perm(c.users_group,
-                                                'hg.fork.repository'),
-        })
+        defaults = self.__load_defaults(id)
 
         return htmlfill.render(
             render('admin/users_groups/users_group_edit.html'),
@@ -238,43 +334,42 @@ class UsersGroupsController(BaseController):
             force_defaults=False
         )
 
+    @HasUserGroupPermissionAnyDecorator('usergroup.admin')
     def update_perm(self, id):
         """PUT /users_perm/id: Update an existing item"""
         # url('users_group_perm', id=ID, method='put')
 
         users_group = UserGroup.get_or_404(id)
-        grant_create_perm = str2bool(request.POST.get('create_repo_perm'))
-        grant_fork_perm = str2bool(request.POST.get('fork_repo_perm'))
-        inherit_perms = str2bool(request.POST.get('inherit_default_permissions'))
-
-        usergroup_model = UserGroupModel()
 
         try:
+            form = CustomDefaultPermissionsForm()()
+            form_result = form.to_python(request.POST)
+
+            inherit_perms = form_result['inherit_default_permissions']
             users_group.inherit_default_permissions = inherit_perms
             Session().add(users_group)
+            usergroup_model = UserGroupModel()
 
-            if grant_create_perm:
-                usergroup_model.revoke_perm(id, 'hg.create.none')
+            defs = UserGroupToPerm.query()\
+                .filter(UserGroupToPerm.users_group == users_group)\
+                .all()
+            for ug in defs:
+                Session().delete(ug)
+
+            if form_result['create_repo_perm']:
                 usergroup_model.grant_perm(id, 'hg.create.repository')
-                h.flash(_("Granted 'repository create' permission to user group"),
-                        category='success')
             else:
-                usergroup_model.revoke_perm(id, 'hg.create.repository')
                 usergroup_model.grant_perm(id, 'hg.create.none')
-                h.flash(_("Revoked 'repository create' permission to user group"),
-                        category='success')
-
-            if grant_fork_perm:
-                usergroup_model.revoke_perm(id, 'hg.fork.none')
-                usergroup_model.grant_perm(id, 'hg.fork.repository')
-                h.flash(_("Granted 'repository fork' permission to user group"),
-                        category='success')
+            if form_result['create_user_group_perm']:
+                usergroup_model.grant_perm(id, 'hg.usergroup.create.true')
             else:
-                usergroup_model.revoke_perm(id, 'hg.fork.repository')
+                usergroup_model.grant_perm(id, 'hg.usergroup.create.false')
+            if form_result['fork_repo_perm']:
+                usergroup_model.grant_perm(id, 'hg.fork.repository')
+            else:
                 usergroup_model.grant_perm(id, 'hg.fork.none')
-                h.flash(_("Revoked 'repository fork' permission to user group"),
-                        category='success')
 
+            h.flash(_("Updated permissions"), category='success')
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())

@@ -27,17 +27,17 @@ import logging
 
 from pylons import request, tmpl_context as c, url
 from sqlalchemy.orm import joinedload
-from webhelpers.paginate import Page
 from whoosh.qparser.default import QueryParser
+from whoosh.qparser.dateparse import DateParserPlugin
 from whoosh import query
 from sqlalchemy.sql.expression import or_, and_, func
 
+from rhodecode.model.db import UserLog, User
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator
 from rhodecode.lib.base import BaseController, render
-from rhodecode.model.db import UserLog, User
 from rhodecode.lib.utils2 import safe_int, remove_prefix, remove_suffix
 from rhodecode.lib.indexers import JOURNAL_SCHEMA
-from whoosh.qparser.dateparse import DateParserPlugin
+from rhodecode.lib.helpers import Page
 
 
 log = logging.getLogger(__name__)

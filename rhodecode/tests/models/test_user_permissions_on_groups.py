@@ -1,5 +1,3 @@
-import os
-import unittest
 import functools
 from rhodecode.tests import *
 
@@ -10,7 +8,6 @@ from rhodecode.model.meta import Session
 from nose.tools import with_setup
 from rhodecode.tests.models.common import _create_project_tree, check_tree_perms, \
     _get_perms, _check_expected_count, expected_count, _destroy_project_tree
-from rhodecode.model.repo import RepoModel
 
 
 test_u1_id = None
@@ -28,7 +25,8 @@ def permissions_setup_func(group_name='g0', perm='group.read', recursive=True):
     perms_updates = [[test_u1_id, perm, 'user']]
     ReposGroupModel()._update_permissions(repos_group,
                                           perms_updates=perms_updates,
-                                          recursive=recursive)
+                                          recursive=recursive,
+                                          check_perms=False)
     Session().commit()
 
 

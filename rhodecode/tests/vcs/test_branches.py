@@ -1,13 +1,12 @@
 from __future__ import with_statement
 
-from rhodecode.lib import vcs
 import datetime
+from rhodecode.lib import vcs
 from rhodecode.lib.vcs.utils.compat import unittest
-
-from base import BackendTestMixin
-from conf import SCM_TESTS
-
 from rhodecode.lib.vcs.nodes import FileNode
+
+from rhodecode.tests.vcs.base import BackendTestMixin
+from rhodecode.tests.vcs.conf import SCM_TESTS
 
 
 class BranchesTestCaseMixin(BackendTestMixin):

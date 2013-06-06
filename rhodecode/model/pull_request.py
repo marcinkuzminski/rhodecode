@@ -25,21 +25,17 @@
 
 import logging
 import datetime
-import re
 
 from pylons.i18n.translation import _
 
 from rhodecode.model.meta import Session
-from rhodecode.lib import helpers as h, unionrepo
+from rhodecode.lib import helpers as h
 from rhodecode.model import BaseModel
 from rhodecode.model.db import PullRequest, PullRequestReviewers, Notification,\
     ChangesetStatus
 from rhodecode.model.notification import NotificationModel
 from rhodecode.lib.utils2 import safe_unicode
 
-from rhodecode.lib.vcs.utils.hgcompat import scmutil
-from rhodecode.lib.vcs.utils import safe_str
-from rhodecode.lib.vcs.backends.base import EmptyChangeset
 
 log = logging.getLogger(__name__)
 
@@ -93,8 +89,6 @@ class PullRequestModel(BaseModel):
         revision_data = [(x.raw_id, x.message)
                          for x in map(org_repo.get_changeset, revisions)]
         #notification to reviewers
-        notif = NotificationModel()
-
         pr_url = h.url('pullrequest_show', repo_name=other_repo.repo_name,
                        pull_request_id=new.pull_request_id,
                        qualified=True,
@@ -118,9 +112,9 @@ class PullRequestModel(BaseModel):
             'pr_revisions': revision_data
         }
 
-        notif.create(created_by=created_by_user, subject=subject, body=body,
-                     recipients=reviewers,
-                     type_=Notification.TYPE_PULL_REQUEST, email_kwargs=kwargs)
+        NotificationModel().create(created_by=created_by_user, subject=subject, body=body,
+                                   recipients=reviewers,
+                                   type_=Notification.TYPE_PULL_REQUEST, email_kwargs=kwargs)
         return new
 
     def update_reviewers(self, pull_request, reviewers_ids):
@@ -160,102 +154,3 @@ class PullRequestModel(BaseModel):
         pull_request.status = PullRequest.STATUS_CLOSED
         pull_request.updated_on = datetime.datetime.now()
         Session().add(pull_request)
-
-    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref, merge):
-        """
-        Returns a list of changesets that can be merged from org_repo@org_ref
-        to other_repo@other_ref ... and the ancestor that would be used for merge
-
-        :param org_repo:
-        :param org_ref:
-        :param other_repo:
-        :param other_ref:
-        :param tmp:
-        """
-
-        ancestor = None
-
-        if alias == 'hg':
-            # lookup up the exact node id
-            _revset_predicates = {
-                    'branch': 'branch',
-                    'book': 'bookmark',
-                    'tag': 'tag',
-                    'rev': 'id',
-                }
-
-            org_rev_spec = "%s('%s')" % (_revset_predicates[org_ref[0]],
-                                         safe_str(org_ref[1]))
-            if org_ref[1] == EmptyChangeset().raw_id:
-                org_rev = org_ref[1]
-            else:
-                org_rev = org_repo._repo[scmutil.revrange(org_repo._repo,
-                                                          [org_rev_spec])[-1]]
-            other_rev_spec = "%s('%s')" % (_revset_predicates[other_ref[0]],
-                                           safe_str(other_ref[1]))
-            if other_ref[1] == EmptyChangeset().raw_id:
-                other_rev = other_ref[1]
-            else:
-                other_rev = other_repo._repo[scmutil.revrange(other_repo._repo,
-                                                        [other_rev_spec])[-1]]
-
-            #case two independent repos
-            if org_repo != other_repo:
-                hgrepo = unionrepo.unionrepository(other_repo.baseui,
-                                                   other_repo.path,
-                                                   org_repo.path)
-                # all the changesets we are looking for will be in other_repo,
-                # so rev numbers from hgrepo can be used in other_repo
-
-            #no remote compare do it on the same repository
-            else:
-                hgrepo = other_repo._repo
-
-            if merge:
-                revs = ["ancestors(id('%s')) and not ancestors(id('%s')) and not id('%s')" %
-                        (other_rev, org_rev, org_rev)]
-
-                ancestors = scmutil.revrange(hgrepo,
-                     ["ancestor(id('%s'), id('%s'))" % (org_rev, other_rev)])
-                if len(ancestors) == 1:
-                    ancestor = hgrepo[ancestors[0]].hex()
-            else:
-                # TODO: have both + and - changesets
-                revs = ["id('%s') :: id('%s') - id('%s')" %
-                        (org_rev, other_rev, org_rev)]
-
-            changesets = [other_repo.get_changeset(cs)
-                          for cs in scmutil.revrange(hgrepo, revs)]
-
-        elif alias == 'git':
-            assert org_repo == other_repo, (org_repo, other_repo) # no git support for different repos
-            so, se = org_repo.run_git_command(
-                'log --reverse --pretty="format: %%H" -s -p %s..%s' % (org_ref[1],
-                                                                       other_ref[1])
-            )
-            changesets = [org_repo.get_changeset(cs)
-                          for cs in re.findall(r'[0-9a-fA-F]{40}', so)]
-
-        return changesets, ancestor
-
-    def get_compare_data(self, org_repo, org_ref, other_repo, other_ref, merge):
-        """
-        Returns incoming changesets for mercurial repositories
-
-        :param org_repo:
-        :param org_ref:
-        :param other_repo:
-        :param other_ref:
-        """
-
-        if len(org_ref) != 2 or not isinstance(org_ref, (list, tuple)):
-            raise Exception('org_ref must be a two element list/tuple')
-
-        if len(other_ref) != 2 or not isinstance(org_ref, (list, tuple)):
-            raise Exception('other_ref must be a two element list/tuple')
-
-        cs_ranges, ancestor = self._get_changesets(org_repo.scm_instance.alias,
-                                                   org_repo.scm_instance, org_ref,
-                                                   other_repo.scm_instance, other_ref,
-                                                   merge)
-        return cs_ranges, ancestor

@@ -1,0 +1,15 @@
+diff --git a/README.rst b/README
+old mode 100755
+new mode 100644
+rename from README.rst
+rename to README
+--- a/README.rst
++++ b/README
+@@ -1,4 +1,7 @@
+ readme2
+ line 1
+  line2
+
++line 1
++ line2
++

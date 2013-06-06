@@ -1,0 +1,64 @@
+## -*- coding: utf-8 -*-
+<%inherit file="/base/base.html"/>
+
+<%def name="title()">
+    ${_('New gist')} &middot; ${c.rhodecode_name}
+</%def>
+
+<%def name="js_extra()">
+<script type="text/javascript" src="${h.url('/js/codemirror.js')}"></script>
+</%def>
+<%def name="css_extra()">
+<link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('New gist')}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('gists')}
+</%def>
+
+<%def name="main()">
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+
+    <div class="table">
+        <div id="files_data">
+          ${h.form(h.url('gists'), method='post',id='eform')}
+            <div>
+                <div class="gravatar">
+                   <img alt="gravatar" src="${h.gravatar_url(h.email_or_none(c.rhodecode_user.full_contact),32)}"/>
+                </div>
+                <textarea style="resize:vertical; width:400px;border: 1px solid #ccc;border-radius: 3px;" id="description" name="description" placeholder="${_('Gist description ...')}"></textarea>
+            </div>
+            <div id="body" class="codeblock">
+                <div style="padding: 10px 10px 10px 22px;color:#666666">
+                    ##<input type="text" value="" size="30" name="filename" id="filename" placeholder="gistfile1.txt">
+                    ${h.text('filename', size=30, placeholder='gistfile1.txt')}
+                    ##<input type="text" value="" size="30" name="filename" id="filename" placeholder="gistfile1.txt">
+                    ${h.select('lifetime', '', c.lifetime_options)}
+                </div>
+                <div id="editor_container">
+                    <pre id="editor_pre"></pre>
+                    <textarea id="editor" name="content" style="display:none"></textarea>
+                </div>
+            </div>
+            <div style="padding-top: 5px">
+            ${h.submit('private',_('Create private gist'),class_="ui-btn yellow")}
+            ${h.submit('public',_('Create public gist'),class_="ui-btn")}
+            ${h.reset('reset',_('Reset'),class_="ui-btn")}
+            </div>
+            ${h.end_form()}
+            <script type="text/javascript">
+            initCodeMirror('editor','');
+            </script>
+        </div>
+    </div>
+
+</div>
+</%def>

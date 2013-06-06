@@ -1,11 +1,12 @@
 ## -*- coding: utf-8 -*-
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>${self.title()}</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <meta name="robots" content="index, nofollow"/>
-        <link rel="icon" href="${h.url('/images/icons/database_gear.png')}" type="image/png" />
+        <link rel="icon" href="${h.url('/images/favicon.ico')}" type="image/png" />
 
         ## CSS ###
         <%def name="css()">
@@ -15,8 +16,8 @@
             ## EXTRA FOR CSS
             ${self.css_extra()}
         </%def>
-        <%def name="css_extra()">
-        </%def>
+
+        <%def name="css_extra()"></%def>
 
         ${self.css()}
 
@@ -54,12 +55,17 @@
                 'Show selected changeset __S': "${_('Show selected changeset __S')}",
                 'Selection link': "${_('Selection link')}",
                 'Collapse diff': "${_('Collapse diff')}",
-                'Expand diff': "${_('Expand diff')}"
+                'Expand diff': "${_('Expand diff')}",
+                'Failed to revoke permission': "${_('Failed to revoke permission')}"
             };
             var _TM = TRANSLATION_MAP;
 
             var TOGGLE_FOLLOW_URL  = "${h.url('toggle_following')}";
 
+            var REPO_NAME = "";
+            %if hasattr(c, 'repo_name'):
+                var REPO_NAME = "${c.repo_name}";
+            %endif
             </script>
             <script type="text/javascript" src="${h.url('/js/yui.2.9.js', ver=c.rhodecode_version)}"></script>
             <!--[if lt IE 9]>
@@ -90,6 +96,7 @@
               pyroutes.register('toggle_following', "${h.url('toggle_following')}");
               pyroutes.register('changeset_info', "${h.url('changeset_info', repo_name='%(repo_name)s', revision='%(revision)s')}", ['repo_name', 'revision']);
               pyroutes.register('repo_size', "${h.url('repo_size', repo_name='%(repo_name)s')}", ['repo_name']);
+              pyroutes.register('changeset_comment_preview', "${h.url('changeset_comment_preview', repo_name='%(repo_name)s')}", ['repo_name']);
            })
             </script>
         </%def>

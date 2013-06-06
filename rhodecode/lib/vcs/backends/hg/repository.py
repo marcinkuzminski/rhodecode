@@ -1,25 +1,46 @@
+# -*- coding: utf-8 -*-
+"""
+    vcs.backends.hg.repository
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Mercurial repository implementation.
+
+    :created_on: Apr 8, 2010
+    :copyright: (c) 2010-2011 by Marcin Kuzminski, Lukasz Balcerzak.
+"""
+
 import os
 import time
-import datetime
 import urllib
 import urllib2
+import logging
+import datetime
 
-from rhodecode.lib.vcs.backends.base import BaseRepository
-from .workdir import MercurialWorkdir
-from .changeset import MercurialChangeset
-from .inmemory import MercurialInMemoryChangeset
 
-from rhodecode.lib.vcs.exceptions import BranchDoesNotExistError, \
-    ChangesetDoesNotExistError, EmptyRepositoryError, RepositoryError, \
-    VCSError, TagAlreadyExistError, TagDoesNotExistError
-from rhodecode.lib.vcs.utils import author_email, author_name, date_fromtimestamp, \
-    makedate, safe_unicode
+from rhodecode.lib.vcs.backends.base import BaseRepository, CollectionGenerator
+from rhodecode.lib.vcs.conf import settings
+
+from rhodecode.lib.vcs.exceptions import (
+    BranchDoesNotExistError, ChangesetDoesNotExistError, EmptyRepositoryError,
+    RepositoryError, VCSError, TagAlreadyExistError, TagDoesNotExistError
+)
+from rhodecode.lib.vcs.utils import (
+    author_email, author_name, date_fromtimestamp, makedate, safe_unicode
+)
 from rhodecode.lib.vcs.utils.lazy import LazyProperty
 from rhodecode.lib.vcs.utils.ordered_dict import OrderedDict
 from rhodecode.lib.vcs.utils.paths import abspath
+from rhodecode.lib.vcs.utils.hgcompat import (
+    ui, nullid, match, patch, diffopts, clone, get_contact, pull,
+    localrepository, RepoLookupError, Abort, RepoError, hex, scmutil, hg_url,
+    httpbasicauthhandler, httpdigestauthhandler, peer
+)
 
-from rhodecode.lib.vcs.utils.hgcompat import ui, nullid, match, patch, diffopts, clone, \
-    get_contact, pull, localrepository, RepoLookupError, Abort, RepoError, hex
+from .changeset import MercurialChangeset
+from .inmemory import MercurialInMemoryChangeset
+from .workdir import MercurialWorkdir
+
+log = logging.getLogger(__name__)
 
 
 class MercurialRepository(BaseRepository):
@@ -57,7 +78,7 @@ class MercurialRepository(BaseRepository):
     @property
     def _empty(self):
         """
-        Checks if repository is empty without any changesets
+        Checks if repository is empty ie. without any changesets
         """
         # TODO: Following raises errors when using InMemoryChangeset...
         # return len(self._repo.changelog) == 0
@@ -271,12 +292,6 @@ class MercurialRepository(BaseRepository):
         is valid or True if it's a local path
         """
 
-        from mercurial.util import url as Url
-
-        # those authnadlers are patched for python 2.6.5 bug an
-        # infinit looping when given invalid resources
-        from mercurial.url import httpbasicauthhandler, httpdigestauthhandler
-
         # check first if it's not an local url
         if os.path.isdir(url) or url.startswith('file:'):
             return True
@@ -285,7 +300,7 @@ class MercurialRepository(BaseRepository):
             url = url[url.find('+') + 1:]
 
         handlers = []
-        test_uri, authinfo = Url(url).authinfo()
+        test_uri, authinfo = hg_url(url).authinfo()
 
         if authinfo:
             #create a password manager
@@ -472,20 +487,27 @@ class MercurialRepository(BaseRepository):
                                   ' this repository' % branch_name)
         if end_pos is not None:
             end_pos += 1
+        #filter branches
+        filter_ = []
+        if branch_name:
+            filter_.append('branch("%s")' % (branch_name))
 
-        slice_ = reversed(self.revisions[start_pos:end_pos]) if reverse else \
-            self.revisions[start_pos:end_pos]
+        if start_date and not end_date:
+            filter_.append('date(">%s")' % start_date)
+        if end_date and not start_date:
+            filter_.append('date("<%s")' % end_date)
+        if start_date and end_date:
+            filter_.append('date(">%s") and date("<%s")' % (start_date, end_date))
+        if filter_:
+            revisions = scmutil.revrange(self._repo, filter_)
+        else:
+            revisions = self.revisions
 
-        for id_ in slice_:
-            cs = self.get_changeset(id_)
-            if branch_name and cs.branch != branch_name:
-                continue
-            if start_date and cs.date < start_date:
-                continue
-            if end_date and cs.date > end_date:
-                continue
+        revs = revisions[start_pos:end_pos]
+        if reverse:
+            revs = reversed(revs)
 
-            yield cs
+        return CollectionGenerator(self, revs)
 
     def pull(self, url):
         """
@@ -493,7 +515,8 @@ class MercurialRepository(BaseRepository):
         """
         url = self._get_url(url)
         try:
-            pull(self.baseui, self._repo, url)
+            other = peer(self._repo, {}, url)
+            self._repo.pull(other, heads=None, force=None)
         except Abort, err:
             # Propagate error but with vcs's type
             raise RepositoryError(str(err))

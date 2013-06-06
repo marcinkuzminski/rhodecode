@@ -8,7 +8,7 @@ from rhodecode.lib.vcs.exceptions import RepositoryError, VCSError, NodeDoesNotE
 from rhodecode.lib.vcs.nodes import NodeKind, FileNode, DirNode, NodeState
 from rhodecode.lib.vcs.utils.compat import unittest
 from rhodecode.tests.vcs.base import BackendTestMixin
-from conf import TEST_GIT_REPO, TEST_GIT_REPO_CLONE, get_new_dir
+from rhodecode.tests.vcs.conf import TEST_GIT_REPO, TEST_GIT_REPO_CLONE, get_new_dir
 
 
 class GitRepositoryTest(unittest.TestCase):
@@ -257,7 +257,7 @@ class GitChangesetTest(unittest.TestCase):
             .get_node('index.rst'))
 
     def test_branch_and_tags(self):
-        '''
+        """
         rev0 = self.repo.revisions[0]
         chset0 = self.repo.get_changeset(rev0)
         self.assertEqual(chset0.branch, 'master')
@@ -274,7 +274,7 @@ class GitChangesetTest(unittest.TestCase):
 
         tip = self.repo.get_changeset('tip')
         self.assertTrue('tip' in tip.tags)
-        '''
+        """
         # Those tests would fail - branches are now going
         # to be changed at main API in order to support git backend
         pass

@@ -1,5 +1,6 @@
 from rhodecode.tests import *
 from rhodecode.model.db import UserGroup, UserGroupToPerm, Permission
+from rhodecode.model.meta import Session
 
 TEST_USER_GROUP = 'admins_test'
 
@@ -48,13 +49,13 @@ class TestAdminUsersGroupsController(TestController):
         self.checkSessionFlash(response,
                                'Created user group %s' % users_group_name)
 
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).one()
 
         response = self.app.delete(url('users_group', id=gr.users_group_id))
 
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).scalar()
 
@@ -78,16 +79,18 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.repository')
-        p2 = Permission.get_by_key('hg.fork.none')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.none')
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
             .filter(UserGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         ## DISABLE REPO CREATE ON A GROUP
@@ -97,7 +100,9 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.none')
-        p2 = Permission.get_by_key('hg.fork.none')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.none')
+
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
@@ -106,7 +111,8 @@ class TestAdminUsersGroupsController(TestController):
         self.assertEqual(
             sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
             sorted([[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]])
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         # DELETE !
@@ -114,7 +120,7 @@ class TestAdminUsersGroupsController(TestController):
         ugid = ug.users_group_id
         response = self.app.delete(url('users_group', id=ug.users_group_id))
         response = response.follow()
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).scalar()
 
@@ -147,16 +153,18 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.none')
-        p2 = Permission.get_by_key('hg.fork.repository')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.repository')
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
             .filter(UserGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         ## DISABLE REPO CREATE ON A GROUP
@@ -166,16 +174,18 @@ class TestAdminUsersGroupsController(TestController):
         response.follow()
         ug = UserGroup.get_by_group_name(users_group_name)
         p = Permission.get_by_key('hg.create.none')
-        p2 = Permission.get_by_key('hg.fork.none')
+        p2 = Permission.get_by_key('hg.usergroup.create.false')
+        p3 = Permission.get_by_key('hg.fork.none')
         # check if user has this perms, they should be here since
         # defaults are on
         perms = UserGroupToPerm.query()\
             .filter(UserGroupToPerm.users_group == ug).all()
 
         self.assertEqual(
-            [[x.users_group_id, x.permission_id, ] for x in perms],
-            [[ug.users_group_id, p.permission_id],
-             [ug.users_group_id, p2.permission_id]]
+            sorted([[x.users_group_id, x.permission_id, ] for x in perms]),
+            sorted([[ug.users_group_id, p.permission_id],
+                    [ug.users_group_id, p2.permission_id],
+                    [ug.users_group_id, p3.permission_id]])
         )
 
         # DELETE !
@@ -183,7 +193,7 @@ class TestAdminUsersGroupsController(TestController):
         ugid = ug.users_group_id
         response = self.app.delete(url('users_group', id=ug.users_group_id))
         response = response.follow()
-        gr = self.Session.query(UserGroup)\
+        gr = Session().query(UserGroup)\
                            .filter(UserGroup.users_group_name ==
                                    users_group_name).scalar()
 

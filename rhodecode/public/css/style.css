@@ -218,6 +218,8 @@ div.options a {
 
 a.permalink {
     visibility: hidden;
+    position: absolute;
+    margin: 3px 4px;
 }
 
 a.permalink:hover {
@@ -365,7 +367,6 @@ div:hover > a.permalink {
     height: 40px;
     width: 46px;
     display: block;
-    background: url("../images/button_home.png");
     background-position: 0 0;
     margin: 0;
     padding: 0;
@@ -540,10 +541,6 @@ div:hover > a.permalink {
 
 #header #header-inner #quick li ul li a.search, #header #header-inner #quick li ul li a.search:hover {
     background-image: url("../images/icons/search_16.png");
-}
-
-#header #header-inner #quick li ul li a.shortlog, #header #header-inner #quick li ul li a.shortlog:hover {
-    background-image: url("../images/icons/clock_16.png");
 }
 
 #header #header-inner #quick li ul li a.delete, #header #header-inner #quick li ul li a.delete:hover {
@@ -1567,7 +1564,8 @@ div.form div.fields div.field div.button {
     padding: 6px;
 }
 
-#content div.box div.pagination ul.pager li a:hover, #content div.box div.pagination ul.pager li a:active {
+#content div.box div.pagination ul.pager li a:hover,
+#content div.box div.pagination ul.pager li a:active {
     background: #b4b4b4 url("../images/pager_selected.png") repeat-x;
     border-top: 1px solid #ccc;
     border-left: 1px solid #bebebe;
@@ -1576,17 +1574,25 @@ div.form div.fields div.field div.button {
     margin: -1px;
 }
 
+#content div.box div.pagination-right {
+    float: right;
+}
+
 #content div.box div.pagination-wh {
     height: 1%;
-    clear: both;
     overflow: hidden;
     text-align: right;
     margin: 10px 0 0;
     padding: 0;
 }
 
-#content div.box div.pagination-right {
-    float: right;
+#content div.box div.pagination-wh > :first-child {
+    border-radius: 4px 0px 0px 4px;
+}
+
+#content div.box div.pagination-wh > :last-child {
+    border-radius: 0px 4px 4px 0px;
+    border-right: 1px solid #cfcfcf;
 }
 
 #content div.box div.pagination-wh a,
@@ -1600,11 +1606,9 @@ div.form div.fields div.field div.button {
     background: #ebebeb url("../images/pager.png") repeat-x;
     border-top: 1px solid #dedede;
     border-left: 1px solid #cfcfcf;
-    border-right: 1px solid #c4c4c4;
     border-bottom: 1px solid #c4c4c4;
     color: #4A4A4A;
     font-weight: 700;
-    margin: 0 0 0 4px;
     padding: 6px;
 }
 
@@ -1614,11 +1618,9 @@ div.form div.fields div.field div.button {
     background: #b4b4b4 url("../images/pager_selected.png") repeat-x;
     border-top: 1px solid #ccc;
     border-left: 1px solid #bebebe;
-    border-right: 1px solid #b1b1b1;
     border-bottom: 1px solid #afafaf;
     color: #515151;
     font-weight: 700;
-    margin: 0 0 0 4px;
     padding: 6px;
 }
 
@@ -1626,7 +1628,6 @@ div.form div.fields div.field div.button {
     background: #b4b4b4 url("../images/pager_selected.png") repeat-x;
     border-top: 1px solid #ccc;
     border-left: 1px solid #bebebe;
-    border-right: 1px solid #b1b1b1;
     border-bottom: 1px solid #afafaf;
     text-decoration: none;
 }
@@ -1736,7 +1737,7 @@ div.form div.fields div.field div.button {
 
 #summary-menu-stats a span {
     background-color: #DEDEDE;
-    color: 888 !important;
+    color: #888 !important;
     border-radius: 4px;
     padding: 2px 4px;
     font-size: 10px;
@@ -2304,6 +2305,11 @@ h3.files_location {
     padding: 5px !important;
 }
 
+#files_data .codeblock #editor_container .error-message {
+    color: red;
+    padding: 10px 10px 10px 26px
+}
+
 .file_history {
     padding-top: 10px;
     font-size: 16px;
@@ -2402,42 +2408,49 @@ h3.files_location {
     font-size: 9px;
     padding: 2px 0px 2px 0px;
 }
-/*new binary*/
-.cs_files .changes .bin1 {
+/*new binary
+NEW_FILENODE = 1
+DEL_FILENODE = 2
+MOD_FILENODE = 3
+RENAMED_FILENODE = 4
+CHMOD_FILENODE = 5
+BIN_FILENODE = 6
+*/
+.cs_files .changes .bin {
     background-color: #BBFFBB;
     float: left;
     text-align: center;
     font-size: 9px;
     padding: 2px 0px 2px 0px;
 }
+.cs_files .changes .bin.bin1 {
+    background-color: #BBFFBB;
+}
 
 /*deleted binary*/
-.cs_files .changes .bin2 {
+.cs_files .changes .bin.bin2 {
     background-color: #FF8888;
-    float: left;
-    text-align: center;
-    font-size: 9px;
-    padding: 2px 0px 2px 0px;
 }
 
 /*mod binary*/
-.cs_files .changes .bin3 {
+.cs_files .changes .bin.bin3 {
     background-color: #DDDDDD;
-    float: left;
-    text-align: center;
-    font-size: 9px;
-    padding: 2px 0px 2px 0px;
 }
 
 /*rename file*/
-.cs_files .changes .bin4 {
+.cs_files .changes .bin.bin4 {
     background-color: #6D99FF;
-    float: left;
-    text-align: center;
-    font-size: 9px;
-    padding: 2px 0px 2px 0px;
 }
 
+/*rename file*/
+.cs_files .changes .bin.bin4 {
+    background-color: #6D99FF;
+}
+
+/*chmod file*/
+.cs_files .changes .bin.bin5 {
+    background-color: #6D99FF;
+}
 
 .cs_files .cs_added, .cs_files .cs_A {
     background: url("../images/icons/page_white_add.png") no-repeat scroll
@@ -2592,6 +2605,7 @@ h3.files_location {
 }
 
 #graph_content .comments-container,
+#shortlog_data .comments-container,
 #graph_content .logtags {
     display: block;
     float: left;
@@ -2635,7 +2649,7 @@ h3.files_location {
     left: initial;
 }
 
-#graph_content .logtags .bookbook,
+#graph_content .logtags .booktag,
 #graph_content .logtags .tagtag {
     float: left;
     line-height: 1em;
@@ -2690,7 +2704,13 @@ h3.files_location {
     padding: 5px 0;
 }
 
-#graph_content .comments-cnt a {
+#shortlog_data .comments-cnt {
+    color: rgb(136, 136, 136);
+    padding: 3px 0;
+}
+
+#graph_content .comments-cnt a,
+#shortlog_data .comments-cnt a {
     background-image: url('../images/icons/comments.png');
     background-repeat: no-repeat;
     background-position: 100% 50%;
@@ -2761,7 +2781,7 @@ h3.files_location {
 
 .branchtag,
 .tagtag,
-.bookbook,
+.booktag,
 .spantag {
     padding: 1px 3px 1px 3px;
     font-size: 10px;
@@ -2775,14 +2795,14 @@ h3.files_location {
 
 #graph_content .branchtag,
 #graph_content .tagtag,
-#graph_content .bookbook {
+#graph_content .booktag {
     margin: 1.1em 0;
     margin-right: 0.5em;
 }
 
 .branchtag,
 .tagtag,
-.bookbook {
+.booktag {
     float: left;
 }
 
@@ -2796,7 +2816,7 @@ h3.files_location {
     display: block;
 }
 
-.bookbook {
+.booktag {
     border-color: #46A546;
     color: #46A546;
 }
@@ -2830,7 +2850,7 @@ h3.files_location {
     text-decoration: none;
     color: inherit;
 }
-.logbooks .bookbook, .logbooks .bookbook, .logtags .bookbook, .logtags .bookbook {
+.logbooks .booktag, .logbooks .booktag, .logtags .booktag, .logtags .booktag {
     padding: 1px 3px 1px 3px;
     background-color: #46A546;
     font-size: 10px;
@@ -2839,14 +2859,14 @@ h3.files_location {
     -webkit-border-radius: 3px;
     border-radius: 3px;
 }
-.logbooks .bookbook, .logbooks .bookbook a, .right .logtags .bookbook, .logtags .bookbook a {
+.logbooks .booktag, .logbooks .booktag a, .right .logtags .booktag, .logtags .booktag a {
     color: #ffffff;
 }
 
-.logbooks .bookbook, .logbooks .bookbook a:hover,
-.logtags .bookbook, .logtags .bookbook a:hover,
-.bookbook a,
-.bookbook a:hover {
+.logbooks .booktag, .logbooks .booktag a:hover,
+.logtags .booktag, .logtags .booktag a:hover,
+.booktag a,
+.booktag a:hover {
     text-decoration: none;
     color: inherit;
 }
@@ -3452,7 +3472,7 @@ table.code-browser .submodule-dir {
 }
 
 #msg_close {
-    background: transparent url("../icons/cross_grey_small.png") no-repeat scroll 0 0;
+    background: transparent url("../images/cross_grey_small.png") no-repeat scroll 0 0;
     cursor: pointer;
     height: 16px;
     position: absolute;
@@ -3550,8 +3570,12 @@ div.gravatar img {
     border-radius: 4px 4px 4px 4px !important;
     cursor: pointer !important;
     padding: 3px 3px 3px 3px;
-    background-position: 0 -15px;
+    background-position: 0 -100px;
 
+}
+
+.ui-btn.badge {
+    cursor: default !important;
 }
 
 .ui-btn.disabled {
@@ -3582,12 +3606,14 @@ div.gravatar img {
     outline: none;
 }
 .ui-btn:hover {
-    background-position: 0 -15px;
+    background-position: 0 -100px;
     text-decoration: none;
     color: #515151;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 3px #FFFFFF !important;
 }
-
+.ui-btn.badge:hover {
+    box-shadow: none !important;
+}
 .ui-btn.disabled:hover {
     background-position: 0;
     color: #999;
@@ -3629,6 +3655,7 @@ div.gravatar img {
 }
 
 .ui-btn.green {
+    color: #fff;
     background-color: #57a957;
     background-repeat: repeat-x;
     background-image: -khtml-gradient(linear, left top, left bottom, from(#62c462), to(#57a957));
@@ -3640,6 +3667,22 @@ div.gravatar img {
     background-image: linear-gradient(to bottom, #62c462, #57a957);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#62c462', endColorstr='#57a957', GradientType=0);
     border-color: #57a957 #57a957 #3d773d;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+}
+
+.ui-btn.yellow {
+    color: #fff;
+    background-color: #faa732;
+    background-repeat: repeat-x;
+    background-image: -khtml-gradient(linear, left top, left bottom, from(#fbb450), to(#f89406));
+    background-image: -moz-linear-gradient(top, #fbb450, #f89406);
+    background-image: -ms-linear-gradient(top, #fbb450, #f89406);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fbb450), color-stop(100%, #f89406));
+    background-image: -webkit-linear-gradient(top, #fbb450, #f89406);
+    background-image: -o-linear-gradient(top, #fbb450, #f89406);
+    background-image: linear-gradient(to bottom, #fbb450, #f89406);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fbb450', endColorstr='#f89406', GradientType=0);
+    border-color: #f89406 #f89406 #ad6704;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 
@@ -4298,12 +4341,6 @@ div.rst-block  pre {
     clear: both
 }
 
-.comment-form .clearfix {
-    background: #EEE;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    padding: 10px;
-}
 
 div.comment-form {
     margin-top: 20px;
@@ -4325,6 +4362,13 @@ form.comment-form {
     margin-left: 10px;
 }
 
+.comment-inline-form .comment-block-ta,
+.comment-form .comment-block-ta {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
 .comment-form-submit {
     margin-top: 5px;
     margin-left: 525px;
@@ -4339,8 +4383,21 @@ form.comment-form {
 }
 
 .comment-form .comment-help {
-    padding: 0px 0px 5px 0px;
+    padding: 5px 5px 5px 5px;
     color: #666;
+}
+.comment-form .comment-help .preview-btn,
+.comment-form .comment-help .edit-btn {
+    float: right;
+    margin: -6px 0px 0px 0px;
+}
+
+.comment-form .preview-box.unloaded,
+.comment-inline-form .preview-box.unloaded {
+    height: 50px;
+    text-align: center;
+    padding: 20px;
+    background-color: #fafafa;
 }
 
 .comment-form .comment-button {
@@ -4355,7 +4412,7 @@ form.comment-form {
 
 .comment .buttons {
     float: right;
-    padding: 2px 2px 0px 0px;
+    margin: -1px 0px 0px 0px;
 }
 
 
@@ -4365,6 +4422,9 @@ form.comment-form {
 }
 
 /** comment inline form **/
+.comment-inline-form {
+    margin: 4px;
+}
 .comment-inline-form .overlay {
     display: none;
 }
@@ -4383,11 +4443,13 @@ form.comment-form {
     margin-top: 5%;
 }
 
-.comment-inline-form .clearfix {
+.comment-inline-form .clearfix,
+.comment-form .clearfix {
     background: #EEE;
     -webkit-border-radius: 4px;
     border-radius: 4px;
     padding: 5px;
+    margin: 0px;
 }
 
 div.comment-inline-form {
@@ -4424,9 +4486,14 @@ form.comment-inline-form {
 }
 
 .comment-inline-form .comment-help {
-    padding: 0px 0px 2px 0px;
-    color: #666666;
-    font-size: 10px;
+    padding: 5px 5px 5px 5px;
+    color: #666;
+}
+
+.comment-inline-form .comment-help .preview-btn,
+.comment-inline-form .comment-help .edit-btn {
+    float: right;
+    margin: -6px 0px 0px 0px;
 }
 
 .comment-inline-form .comment-button {

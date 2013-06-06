@@ -126,10 +126,17 @@
 </%def>
 
 <%def name="user_actions(user_id, username)">
+ <div style="float:left">
+   <a href="${h.url('edit_user',id=user_id)}" title="${_('edit')}">
+     ${h.submit('edit_%s' % username,_('edit'),class_="edit_icon action_button")}
+   </a>
+ </div>
+ <div style="float:left">
   ${h.form(h.url('delete_user', id=user_id),method='delete')}
       ${h.submit('remove_',_('delete'),id="remove_user_%s" % user_id,
       class_="delete_icon action_button",onclick="return confirm('"+_('Confirm to delete this user: %s') % username+"');")}
   ${h.end_form()}
+ </div>
 </%def>
 
 <%def name="user_name(user_id, username)">

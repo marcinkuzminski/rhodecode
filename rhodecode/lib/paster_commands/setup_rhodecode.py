@@ -4,8 +4,8 @@ from paste.script.appinstall import AbstractInstallCommand
 from paste.script.command import BadCommand
 from paste.deploy import appconfig
 
-from os.path import dirname as dn, join as jn
-#to get the rhodecode import
+# fix rhodecode import
+from os.path import dirname as dn
 rc_path = dn(dn(dn(os.path.realpath(__file__))))
 sys.path.append(rc_path)
 

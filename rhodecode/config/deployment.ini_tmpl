@@ -29,24 +29,38 @@ pdebug = false
 #smtp_auth = 
 
 [server:main]
-## PASTE
-## nr of threads to spawn
+## PASTE ##
+#use = egg:Paste#http
+## nr of worker threads to spawn
 #threadpool_workers = 5
-
 ## max request before thread respawn
 #threadpool_max_requests = 10
-
 ## option to use threads of process
 #use_threadpool = true
 
-#use = egg:Paste#http
-
-## WAITRESS
-threads = 5
-## 100GB
-max_request_body_size = 107374182400
+## WAITRESS ##
 use = egg:waitress#main
+## number of worker threads
+threads = 5
+## MAX BODY SIZE 100GB
+max_request_body_size = 107374182400
+## use poll instead of select, fixes fd limits, may not work on old
+## windows systems.
+#asyncore_use_poll = True
 
+## GUNICORN ##
+#use = egg:gunicorn#main
+## number of process workers. You must set `instance_id = *` when this option
+## is set to more than one worker
+#workers = 1
+## process name
+#proc_name = rhodecode
+## type of worker class, one of sync, eventlet, gevent, tornado
+## recommended for bigger setup is using of of other than sync one
+#worker_class = sync
+#max_requests = 5
+
+## COMMON ##
 host = 127.0.0.1
 port = 5000
 
@@ -67,6 +81,10 @@ static_files = true
 lang = en
 cache_dir = %(here)s/data
 index_dir = %(here)s/data/index
+
+## perform a full repository scan on each server start, this should be
+## set to false after first startup, to allow faster server restarts.
+initial_repo_scan = true
 
 ## uncomment and set this path to use archive download cache
 #archive_cache_dir = /tmp/tarballcache
@@ -89,9 +107,6 @@ use_htsts = false
 ## number of commits stats will parse on each iteration
 commit_parse_limit = 25
 
-## number of items displayed in lightweight dashboard before paginating is shown
-dashboard_items = 100
-
 ## use gravatar service to display avatars
 use_gravatar = true
 
@@ -111,6 +126,18 @@ rss_include_diff = false
 show_sha_length = 12
 show_revision_number = true
 
+## gist URL alias, used to create nicer urls for gist. This should be an
+## url that does rewrites to _admin/gists/<gistid>. 
+## example: http://gist.rhodecode.org/{gistid}. Empty means use the internal
+## RhodeCode url, ie. http[s]://rhodecode.server/_admin/gists/<gistid>
+gist_alias_url =
+
+## white list of API enabled controllers. This allows to add list of
+## controllers to which access will be enabled by api_key. eg: to enable
+## api access to raw_files put `FilesController:raw`, to enable access to patches
+## add `ChangesetController:changeset_patch`. This list should be "," separated
+## Syntax is <ControllerClass>:<function>. Check debug logs for generated names
+api_access_controllers_whitelist =
 
 ## alternative_gravatar_url allows you to use your own avatar server application
 ## the following parts of the URL will be replaced
@@ -186,6 +213,7 @@ auth_ret_code =
 ## codes don't break the transactions while 4XX codes do
 lock_ret_code = 423
 
+allow_repo_location_change = True
 
 ####################################
 ###        CELERY CONFIG        ####

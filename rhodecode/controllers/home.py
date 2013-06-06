@@ -32,7 +32,7 @@ from sqlalchemy.sql.expression import func
 
 import rhodecode
 from rhodecode.lib import helpers as h
-from rhodecode.lib.ext_json import json
+from rhodecode.lib.compat import json
 from rhodecode.lib.auth import LoginRequired
 from rhodecode.lib.base import BaseController, render
 from rhodecode.model.db import Repository
@@ -44,30 +44,27 @@ log = logging.getLogger(__name__)
 
 class HomeController(BaseController):
 
-    @LoginRequired()
     def __before__(self):
         super(HomeController, self).__before__()
 
+    @LoginRequired()
     def index(self):
         c.groups = self.scm_model.get_repos_groups()
         c.group = None
 
-        if not c.visual.lightweight_dashboard:
-            c.repos_list = self.scm_model.get_repos()
-        ## lightweight version of dashboard
-        else:
-            c.repos_list = Repository.query()\
-                            .filter(Repository.group_id == None)\
-                            .order_by(func.lower(Repository.repo_name))\
-                            .all()
+        c.repos_list = Repository.query()\
+                        .filter(Repository.group_id == None)\
+                        .order_by(func.lower(Repository.repo_name))\
+                        .all()
 
-            repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
-                                                       admin=False)
-            #json used to render the grid
-            c.data = json.dumps(repos_data)
+        repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
+                                                   admin=False)
+        #json used to render the grid
+        c.data = json.dumps(repos_data)
 
         return render('/index.html')
 
+    @LoginRequired()
     def repo_switcher(self):
         if request.is_xhr:
             all_repos = Repository.query().order_by(Repository.repo_name).all()
@@ -78,6 +75,7 @@ class HomeController(BaseController):
         else:
             raise HTTPBadRequest()
 
+    @LoginRequired()
     def branch_tag_switcher(self, repo_name):
         if request.is_xhr:
             c.rhodecode_db_repo = Repository.get_by_repo_name(c.repo_name)

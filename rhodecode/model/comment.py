@@ -91,7 +91,7 @@ class ChangesetCommentsModel(BaseModel):
                           {'desc': desc, 'line': line},
                           _url)
             )
-            email_subject = 'User %s commented on changeset %s' % \
+            email_subject = '%s commented on changeset %s' % \
                 (user.username, h.short_id(revision))
             # get the current participants of this changeset
             recipients = ChangesetComment.get_users(revision=revision)
@@ -127,7 +127,7 @@ class ChangesetCommentsModel(BaseModel):
                            'line': line},
                           _url)
             )
-            email_subject = 'User %s commented on pull request #%s' % \
+            email_subject = '%s commented on pull request #%s' % \
                     (user.username, comment.pull_request.pull_request_id)
             # get the current participants of this pull request
             recipients = ChangesetComment.get_users(pull_request_id=
@@ -140,6 +140,7 @@ class ChangesetCommentsModel(BaseModel):
 
             #set some variables for email notification
             email_kwargs = {
+                'pr_title': pull_request.title,
                 'pr_id': pull_request.pull_request_id,
                 'status_change': status_change,
                 'closing_pr': closing_pr,

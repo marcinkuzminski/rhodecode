@@ -11,7 +11,7 @@ from webhelpers.pylonslib.secure_form import authentication_token
 
 from formencode.validators import (
     UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set,
-    NotEmpty, IPAddress, CIDR
+    NotEmpty, IPAddress, CIDR, String, FancyValidator
 )
 from rhodecode.lib.compat import OrderedSet
 from rhodecode.lib import ipaddr
@@ -25,7 +25,7 @@ from rhodecode.lib.auth import HasReposGroupPermissionAny, HasPermissionAny
 
 # silence warnings and pylint
 UnicodeString, OneOf, Int, Number, Regex, Email, Bool, StringBoolean, Set, \
-    NotEmpty, IPAddress, CIDR
+    NotEmpty, IPAddress, CIDR, String, FancyValidator
 
 log = logging.getLogger(__name__)
 
@@ -87,8 +87,8 @@ def ValidUsername(edit=False, old_data={}):
                 _(u'Username "%(username)s" is forbidden'),
             'invalid_username':
                 _(u'Username may only contain alphanumeric characters '
-                  'underscores, periods or dashes and must begin with '
-                  'alphanumeric character')
+                    'underscores, periods or dashes and must begin with '
+                    'alphanumeric character or underscore')
         }
 
         def validate_python(self, value, state):
@@ -105,7 +105,7 @@ def ValidUsername(edit=False, old_data={}):
                     msg = M(self, 'username_exists', state, username=value)
                     raise formencode.Invalid(msg, value, state)
 
-            if re.match(r'^[a-zA-Z0-9]{1}[a-zA-Z0-9\-\_\.]*$', value) is None:
+            if re.match(r'^[a-zA-Z0-9\_]{1}[a-zA-Z0-9\-\_\.]*$', value) is None:
                 msg = M(self, 'invalid_username', state)
                 raise formencode.Invalid(msg, value, state)
     return _validator
@@ -406,7 +406,7 @@ def ValidCloneUri():
     def url_handler(repo_type, url, ui=None):
         if repo_type == 'hg':
             from rhodecode.lib.vcs.backends.hg.repository import MercurialRepository
-            from mercurial.httppeer import httppeer
+            from rhodecode.lib.vcs.utils.hgcompat import httppeer
             if url.startswith('http'):
                 ## initially check if it's at least the proper URL
                 ## or does it pass basic auth
@@ -418,7 +418,7 @@ def ValidCloneUri():
             elif url.startswith('git+http'):
                 raise NotImplementedError()
             else:
-                raise Exception('clone from URI %s not allowed' % (url))
+                raise Exception('clone from URI %s not allowed' % (url,))
 
         elif repo_type == 'git':
             from rhodecode.lib.vcs.backends.git.repository import GitRepository
@@ -546,10 +546,12 @@ def CanCreateGroup(can_create_in_root=False):
 
 
 def ValidPerms(type_='repo'):
-    if type_ == 'group':
+    if type_ == 'repo_group':
         EMPTY_PERM = 'group.none'
     elif type_ == 'repo':
         EMPTY_PERM = 'repository.none'
+    elif type_ == 'user_group':
+        EMPTY_PERM = 'usergroup.none'
 
     class _validator(formencode.validators.FancyValidator):
         messages = {
@@ -766,7 +768,8 @@ def ValidIp():
         messages = dict(
             badFormat=_('Please enter a valid IPv4 or IpV6 address'),
             illegalBits=_('The network size (bits) must be within the range'
-                ' of 0-32 (not %(bits)r)'))
+                ' of 0-32 (not %(bits)r)')
+        )
 
         def to_python(self, value, state):
             v = super(_validator, self).to_python(value, state)
@@ -798,10 +801,27 @@ def FieldKey():
     class _validator(formencode.validators.FancyValidator):
         messages = dict(
             badFormat=_('Key name can only consist of letters, '
-                        'underscore, dash or numbers'),)
+                        'underscore, dash or numbers')
+        )
 
         def validate_python(self, value, state):
             if not re.match('[a-zA-Z0-9_-]+$', value):
                 raise formencode.Invalid(self.message('badFormat', state),
+                                         value, state)
+    return _validator
+
+
+def BasePath():
+    class _validator(formencode.validators.FancyValidator):
+        messages = dict(
+            badPath=_('Filename cannot be inside a directory')
+        )
+
+        def _to_python(self, value, state):
+            return value
+
+        def validate_python(self, value, state):
+            if value != os.path.basename(value):
+                raise formencode.Invalid(self.message('badPath', state),
                                          value, state)
     return _validator

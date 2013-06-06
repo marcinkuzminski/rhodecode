@@ -1,17 +1,18 @@
 ## -*- coding: utf-8 -*-
 <%inherit file="main.html"/>
-##message from user goes here
-<p>
-${cs_comment_user}: <br/>
+
+<p>${_('URL')}: <a href="${cs_comment_url}">${cs_comment_url}</a></p>
+
+<h4>${_('%s commented on a %s changeset.') % (cs_comment_user,cs_target_repo) |n}</h4>
+
+<p>${_('Changeset')}: ${h.short_id(raw_id)}</p>
+<p>${_('Description')}:<br/>
+${h.shorter(message, 256)}
+</p>
+
+%if status_change:
+    <p>${_('The changeset status was changed to')}: <b>${status_change}</b></p>
+%endif
+<p>${_('Comment')}:<br/>
 ${body}
 </p>
-%if status_change:
-    <span>${_('New status')} -&gt; ${status_change}</span>
-%endif
-<div>${_('View this comment here')}: ${cs_comment_url}</div>
-
-<pre>
-${_('Repo')}: ${cs_target_repo}
-${_('Changeset')}: ${h.short_id(raw_id)}
-${_('desc')}: ${h.shorter(message, 256)}
-</pre>

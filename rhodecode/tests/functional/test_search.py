@@ -25,14 +25,14 @@ class TestSearchController(TestController):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
                                 {'q': 'def repo'})
-        response.mustcontain('39 results')
+        response.mustcontain('58 results')
 
     def test_repo_search(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
                                 {'q': 'repository:%s def test' % HG_REPO})
 
-        response.mustcontain('4 results')
+        response.mustcontain('18 results')
 
     def test_search_last(self):
         self.log_user()
@@ -67,7 +67,7 @@ class TestSearchController(TestController):
                                 {'q': 'changed:tests/utils.py',
                                  'type': 'commit'})
 
-        response.mustcontain('20 results')
+        response.mustcontain('29 results')
 
     def test_search_commit_changed_files_get_commit(self):
         self.log_user()
@@ -75,7 +75,7 @@ class TestSearchController(TestController):
                                 {'q': 'changed:vcs/utils/lazy.py',
                                  'type': 'commit'})
 
-        response.mustcontain('7 results')
+        response.mustcontain('11 results')
         response.mustcontain('36e0fc9d2808c5022a24f49d6658330383ed8666')
         response.mustcontain('af182745859d779f17336241a0815d15166ae1ee')
         response.mustcontain('17438a11f72b93f56d0e08e7d1fa79a378578a82')

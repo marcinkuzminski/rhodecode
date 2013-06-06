@@ -29,9 +29,7 @@ import binascii
 import traceback
 from inspect import isfunction
 
-from mercurial.scmutil import revrange
-from mercurial.node import nullrev
-
+from rhodecode.lib.vcs.utils.hgcompat import nullrev, revrange
 from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
@@ -306,11 +304,8 @@ def handle_git_receive(repo_path, revs, env, hook_type='post'):
     connect to database and run the logging code. Hacky as sh*t but works.
 
     :param repo_path:
-    :type repo_path:
     :param revs:
-    :type revs:
     :param env:
-    :type env:
     """
     from paste.deploy import appconfig
     from sqlalchemy import engine_from_config

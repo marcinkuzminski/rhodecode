@@ -3,12 +3,20 @@
 <%inherit file="/base/base.html"/>
 
 <%def name="title()">
-${_('%s Changelog') % c.repo_name} &middot; ${c.rhodecode_name}
+${_('%s Changelog') % c.repo_name} &middot;
+%if c.changelog_for_path:
+  /${c.changelog_for_path} &middot;
+%endif
+${c.rhodecode_name}
 </%def>
 
 <%def name="breadcrumbs_links()">
     <% size = c.size if c.size <= c.total_cs else c.total_cs %>
-    ${_('Changelog')} - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
+    ${_('Changelog')}
+    %if c.changelog_for_path:
+     - /${c.changelog_for_path}
+    %endif
+    - ${ungettext('showing %d out of %d revision', 'showing %d out of %d revisions', size) % (size, c.total_cs)}
 </%def>
 
 <%def name="page_nav()">
@@ -25,26 +33,28 @@ ${self.context_bar('changelog')}
     <div class="table">
         % if c.pagination:
             <div id="graph">
-                <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
-                    <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
-                    <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
+                <div style="display:${'none' if c.changelog_for_path else ''}">
+                    <div class="info_box" style="clear: both;padding: 10px 6px;min-height: 12px;text-align: right;">
+                        <a href="#" class="ui-btn small" id="rev_range_container" style="display:none"></a>
+                        <a href="#" class="ui-btn small" id="rev_range_clear" style="display:none">${_('Clear selection')}</a>
 
-                    %if c.rhodecode_db_repo.fork:
-                        <a id="compare_fork" title="${_('Compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default',merge=1)}" class="ui-btn small">${_('Compare fork with parent')}</a>
-                    %endif
-                    %if h.is_hg(c.rhodecode_repo):
-                    <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
-                    %endif
-                </div>
-                <div class="container_header">
-                    ${h.form(h.url.current(),method='get')}
-                    <div style="float:left">
-                        ${h.submit('set',_('Show'),class_="ui-btn")}
-                        ${h.text('size',size=1,value=c.size)}
-                        ${_('revisions')}
+                        %if c.rhodecode_db_repo.fork:
+                            <a id="compare_fork" title="${_('Compare fork with %s' % c.rhodecode_db_repo.fork.repo_name)}" href="${h.url('compare_url',repo_name=c.rhodecode_db_repo.fork.repo_name,org_ref_type='branch',org_ref='default',other_repo=c.repo_name,other_ref_type='branch',other_ref=request.GET.get('branch') or 'default',merge=1)}" class="ui-btn small">${_('Compare fork with parent')}</a>
+                        %endif
+                        %if h.is_hg(c.rhodecode_repo):
+                        <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}" class="ui-btn small">${_('Open new pull request')}</a>
+                        %endif
                     </div>
-                    ${h.end_form()}
-                    <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
+                    <div class="container_header">
+                        ${h.form(h.url.current(),method='get')}
+                        <div style="float:left">
+                            ${h.submit('set',_('Show'),class_="ui-btn")}
+                            ${h.text('size',size=1,value=c.size)}
+                            ${_('revisions')}
+                        </div>
+                        ${h.end_form()}
+                        <div style="float:right">${h.select('branch_filter',c.branch_name,c.branch_filters)}</div>
+                    </div>
                 </div>
                 <div id="graph_nodes">
                     <canvas id="graph_canvas"></canvas>
@@ -56,7 +66,11 @@ ${self.context_bar('changelog')}
                 %for cnt,cs in enumerate(c.pagination):
                     <tr id="chg_${cnt+1}" class="container ${'tablerow%s' % (cnt%2)}">
                         <td class="checkbox">
-                            ${h.checkbox(cs.raw_id,class_="changeset_range")}
+                            %if c.changelog_for_path:
+                                ${h.checkbox(cs.raw_id,class_="changeset_range", disabled="disabled")}
+                            %else:
+                                ${h.checkbox(cs.raw_id,class_="changeset_range")}
+                            %endif
                         <td class="status">
                           %if c.statuses.get(cs.raw_id):
                             <div class="changeset-status-ico">
@@ -87,7 +101,7 @@ ${self.context_bar('changelog')}
                                 <div class="message">${h.urlify_commit(cs.message, c.repo_name,h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id))}</div>
                                 <div class="expand"><span class="expandtext">&darr; ${_('Show more')} &darr;</span></div>
                                 <div class="extra-container">
-                                    %if c.comments.get(cs.raw_id,[]):
+                                    %if c.comments.get(cs.raw_id):
                                         <div class="comments-container">
                                             <div class="comments-cnt" title="${('comments')}">
                                                 <a href="${h.url('changeset_home',repo_name=c.repo_name,revision=cs.raw_id,anchor='comment-%s' % c.comments[cs.raw_id][0].comment_id)}">
@@ -98,7 +112,7 @@ ${self.context_bar('changelog')}
                                     %endif
                                     %if h.is_hg(c.rhodecode_repo):
                                         %for book in cs.bookmarks:
-                                            <div class="bookbook" title="${_('Bookmark %s') % book}">
+                                            <div class="booktag" title="${_('Bookmark %s') % book}">
                                                 ${h.link_to(h.shorter(book),h.url('files_home',repo_name=c.repo_name,revision=cs.raw_id))}
                                             </div>
                                         %endfor
@@ -135,7 +149,6 @@ ${self.context_bar('changelog')}
                 //ranges
                 var checkboxes = YUD.getElementsByClassName('changeset_range');
                 var url_tmpl = "${h.url('changeset_home',repo_name=c.repo_name,revision='__REVRANGE__')}";
-                var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
 
                 var checkbox_checker = function(e){
                     var checked_checkboxes = [];
@@ -174,14 +187,17 @@ ${self.context_bar('changelog')}
                         YUD.setStyle('rev_range_container','display','');
                         YUD.setStyle('rev_range_clear','display','');
 
-                        YUD.get('open_new_pr').href = pr_tmpl + '?rev_start={0}&rev_end={1}'.format(rev_start,rev_end);
+                        var pr_tmpl = "${h.url('pullrequest_home',repo_name=c.repo_name,rev_start='{0}',rev_end='{1}')}";
+                        YUD.get('open_new_pr').href = pr_tmpl.format(rev_start,rev_end);
                         YUD.setStyle('compare_fork','display','none');
                     }else{
                         YUD.setStyle('rev_range_container','display','none');
                         YUD.setStyle('rev_range_clear','display','none');
-                        if (checkboxes){
-                            YUD.get('open_new_pr').href = pr_tmpl + '?rev_end={0}'.format(checkboxes[0].name);
-                        }
+                        %if c.branch_name:
+                            YUD.get('open_new_pr').href = "${h.url('pullrequest_home',repo_name=c.repo_name,branch=c.branch_name)}";
+                        %else:
+                            YUD.get('open_new_pr').href = "${h.url('pullrequest_home',repo_name=c.repo_name)}";
+                        %endif
                         YUD.setStyle('compare_fork','display','');
                     }
                 };
@@ -230,7 +246,7 @@ ${self.context_bar('changelog')}
                     var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
                     var url_main = "${h.url('changelog_home',repo_name=c.repo_name)}";
                     var url = "${h.url('changelog_home',repo_name=c.repo_name,branch='__BRANCH__')}";
-                    var url = url.replace('__BRANCH__',selected_branch);
+                    var url = url.replace('__BRANCH__', encodeURIComponent(selected_branch));
                     if(selected_branch != ''){
                         window.location = url;
                     }else{

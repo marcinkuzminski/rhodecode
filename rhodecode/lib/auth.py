@@ -39,10 +39,11 @@ from sqlalchemy.orm.exc import ObjectDeletedError
 from rhodecode import __platform__, is_windows, is_unix
 from rhodecode.model.meta import Session
 
-from rhodecode.lib.utils2 import str2bool, safe_unicode
+from rhodecode.lib.utils2 import str2bool, safe_unicode, aslist
 from rhodecode.lib.exceptions import LdapPasswordError, LdapUsernameError,\
     LdapImportError
-from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug
+from rhodecode.lib.utils import get_repo_slug, get_repos_group_slug,\
+    get_user_group_slug
 from rhodecode.lib.auth_ldap import AuthLdap
 
 from rhodecode.model import meta
@@ -227,8 +228,8 @@ def authenticate(username, password):
                  'name': safe_unicode(get_ldap_attr('ldap_attr_firstname')),
                  'lastname': safe_unicode(get_ldap_attr('ldap_attr_lastname')),
                  'email': get_ldap_attr('ldap_attr_email'),
-                 'active': 'hg.register.auto_activate' in User\
-                    .get_by_username('default').AuthUser.permissions['global']
+                 'active': 'hg.extern_activate.auto' in User.get_default_user()\
+                                                .AuthUser.permissions['global']
                 }
 
                 # don't store LDAP password since we don't need it. Override
@@ -257,8 +258,8 @@ def login_container_auth(username):
             'name': username,
             'lastname': None,
             'email': None,
-            'active': 'hg.register.auto_activate' in User\
-               .get_by_username('default').AuthUser.permissions['global']
+            'active': 'hg.extern_activate.auto' in User.get_default_user()\
+                                            .AuthUser.permissions['global']
         }
         user = UserModel().create_for_container_auth(username, user_attrs)
         if not user:
@@ -402,7 +403,7 @@ class  AuthUser(object):
         return self.admin
 
     @property
-    def repos_admin(self):
+    def repositories_admin(self):
         """
         Returns list of repositories you're an admin of
         """
@@ -410,12 +411,20 @@ class  AuthUser(object):
                 if x[1] == 'repository.admin']
 
     @property
-    def groups_admin(self):
+    def repository_groups_admin(self):
         """
         Returns list of repository groups you're an admin of
         """
         return [x[0] for x in self.permissions['repositories_groups'].iteritems()
                 if x[1] == 'group.admin']
+
+    @property
+    def user_groups_admin(self):
+        """
+        Returns list of user groups you're an admin of
+        """
+        return [x[0] for x in self.permissions['user_groups'].iteritems()
+                if x[1] == 'usergroup.admin']
 
     @property
     def ip_allowed(self):
@@ -436,8 +445,8 @@ class  AuthUser(object):
             return False
 
     def __repr__(self):
-        return "<AuthUser('id:%s:%s|%s')>" % (self.user_id, self.username,
-                                              self.is_authenticated)
+        return "<AuthUser('id:%s[%s] ip:%s auth:%s')>"\
+            % (self.user_id, self.username, self.ip_addr, self.is_authenticated)
 
     def set_authenticated(self, authenticated=True):
         if self.user_id != self.anonymous_user.user_id:
@@ -522,7 +531,12 @@ class LoginRequired(object):
         cls = fargs[0]
         user = cls.rhodecode_user
         loc = "%s:%s" % (cls.__class__.__name__, func.__name__)
-
+        # defined whitelist of controllers which API access will be enabled
+        whitelist = aslist(config.get('api_access_controllers_whitelist'),
+                           sep=',')
+        api_access_whitelist = loc in whitelist
+        log.debug('loc:%s is in API whitelist:%s:%s' % (loc, whitelist,
+                                                        api_access_whitelist))
         #check IP
         ip_access_ok = True
         if not user.ip_allowed:
@@ -532,7 +546,7 @@ class LoginRequired(object):
             ip_access_ok = False
 
         api_access_ok = False
-        if self.api_access:
+        if self.api_access or api_access_whitelist:
             log.debug('Checking API KEY access for %s' % cls)
             if user.api_key == request.GET.get('api_key'):
                 api_access_ok = True
@@ -693,7 +707,7 @@ class HasRepoPermissionAnyDecorator(PermsDecorator):
 class HasReposGroupPermissionAllDecorator(PermsDecorator):
     """
     Checks for access permission for all given predicates for specific
-    repository. All of them have to be meet in order to fulfill the request
+    repository group. All of them have to be meet in order to fulfill the request
     """
 
     def check_permissions(self):
@@ -711,13 +725,49 @@ class HasReposGroupPermissionAllDecorator(PermsDecorator):
 class HasReposGroupPermissionAnyDecorator(PermsDecorator):
     """
     Checks for access permission for any of given predicates for specific
-    repository. In order to fulfill the request any of predicates must be meet
+    repository group. In order to fulfill the request any of predicates must be meet
     """
 
     def check_permissions(self):
         group_name = get_repos_group_slug(request)
         try:
             user_perms = set([self.user_perms['repositories_groups'][group_name]])
+        except KeyError:
+            return False
+
+        if self.required_perms.intersection(user_perms):
+            return True
+        return False
+
+
+class HasUserGroupPermissionAllDecorator(PermsDecorator):
+    """
+    Checks for access permission for all given predicates for specific
+    user group. All of them have to be meet in order to fulfill the request
+    """
+
+    def check_permissions(self):
+        group_name = get_user_group_slug(request)
+        try:
+            user_perms = set([self.user_perms['user_groups'][group_name]])
+        except KeyError:
+            return False
+
+        if self.required_perms.issubset(user_perms):
+            return True
+        return False
+
+
+class HasUserGroupPermissionAnyDecorator(PermsDecorator):
+    """
+    Checks for access permission for any of given predicates for specific
+    user group. In order to fulfill the request any of predicates must be meet
+    """
+
+    def check_permissions(self):
+        group_name = get_user_group_slug(request)
+        try:
+            user_perms = set([self.user_perms['user_groups'][group_name]])
         except KeyError:
             return False
 
@@ -864,6 +914,39 @@ class HasReposGroupPermissionAll(PermsFunction):
             return True
         return False
 
+
+class HasUserGroupPermissionAny(PermsFunction):
+    def __call__(self, user_group_name=None, check_location=''):
+        self.user_group_name = user_group_name
+        return super(HasUserGroupPermissionAny, self).__call__(check_location)
+
+    def check_permissions(self):
+        try:
+            self._user_perms = set(
+                [self.user_perms['user_groups'][self.user_group_name]]
+            )
+        except KeyError:
+            return False
+        if self.required_perms.intersection(self._user_perms):
+            return True
+        return False
+
+
+class HasUserGroupPermissionAll(PermsFunction):
+    def __call__(self, user_group_name=None, check_location=''):
+        self.user_group_name = user_group_name
+        return super(HasUserGroupPermissionAll, self).__call__(check_location)
+
+    def check_permissions(self):
+        try:
+            self._user_perms = set(
+                [self.user_perms['user_groups'][self.user_group_name]]
+            )
+        except KeyError:
+            return False
+        if self.required_perms.issubset(self._user_perms):
+            return True
+        return False
 
 #==============================================================================
 # SPECIAL VERSION TO HANDLE MIDDLEWARE AUTH

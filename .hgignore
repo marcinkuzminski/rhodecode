@@ -12,6 +12,7 @@ syntax: regexp
 ^docs/build/
 ^docs/_build/
 ^data$
+^sql_dumps/
 ^\.settings$
 ^\.project$
 ^\.pydevproject$
@@ -22,3 +23,4 @@ syntax: regexp
 ^rc.*\.ini$
 ^fabfile.py
 ^\.rhodecode$
+^\.idea$

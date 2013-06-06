@@ -134,9 +134,7 @@ def ReposGroupForm(edit=False, old_data={}, available_groups=[],
                                       testValueList=True,
                                       if_missing=None, not_empty=True))
         enable_locking = v.StringBoolean(if_missing=False)
-        recursive = v.StringBoolean(if_missing=False)
-        chained_validators = [v.ValidReposGroup(edit, old_data),
-                              v.ValidPerms('group')]
+        chained_validators = [v.ValidReposGroup(edit, old_data)]
 
     return _ReposGroupForm
 
@@ -208,8 +206,25 @@ def RepoPermsForm():
     class _RepoPermsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = False
-        chained_validators = [v.ValidPerms()]
+        chained_validators = [v.ValidPerms(type_='repo')]
     return _RepoPermsForm
+
+
+def RepoGroupPermsForm():
+    class _RepoGroupPermsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        recursive = v.StringBoolean(if_missing=False)
+        chained_validators = [v.ValidPerms(type_='repo_group')]
+    return _RepoGroupPermsForm
+
+
+def UserGroupPermsForm():
+    class _UserPermsForm(formencode.Schema):
+        allow_extra_fields = True
+        filter_extra_fields = False
+        chained_validators = [v.ValidPerms(type_='user_group')]
+    return _UserPermsForm
 
 
 def RepoFieldForm():
@@ -268,9 +283,10 @@ def ApplicationVisualisationForm():
         rhodecode_show_private_icon = v.StringBoolean(if_missing=False)
         rhodecode_stylify_metatags = v.StringBoolean(if_missing=False)
 
-        rhodecode_lightweight_dashboard = v.StringBoolean(if_missing=False)
         rhodecode_repository_fields = v.StringBoolean(if_missing=False)
         rhodecode_lightweight_journal = v.StringBoolean(if_missing=False)
+        rhodecode_dashboard_items = v.Int(min=5, not_empty=True)
+        rhodecode_show_version = v.StringBoolean(if_missing=False)
 
     return _ApplicationVisualisationForm
 
@@ -297,20 +313,43 @@ def ApplicationUiSettingsForm():
 
 
 def DefaultPermissionsForm(repo_perms_choices, group_perms_choices,
-                           register_choices, create_choices, fork_choices):
+                           user_group_perms_choices, create_choices,
+                           repo_group_create_choices, user_group_create_choices,
+                           fork_choices, register_choices, extern_activate_choices):
     class _DefaultPermissionsForm(formencode.Schema):
         allow_extra_fields = True
         filter_extra_fields = True
         overwrite_default_repo = v.StringBoolean(if_missing=False)
         overwrite_default_group = v.StringBoolean(if_missing=False)
+        overwrite_default_user_group = v.StringBoolean(if_missing=False)
         anonymous = v.StringBoolean(if_missing=False)
         default_repo_perm = v.OneOf(repo_perms_choices)
         default_group_perm = v.OneOf(group_perms_choices)
-        default_register = v.OneOf(register_choices)
-        default_create = v.OneOf(create_choices)
+        default_user_group_perm = v.OneOf(user_group_perms_choices)
+
+        default_repo_create = v.OneOf(create_choices)
+        default_user_group_create = v.OneOf(user_group_create_choices)
+        #default_repo_group_create = v.OneOf(repo_group_create_choices) #not impl. yet
         default_fork = v.OneOf(fork_choices)
 
+        default_register = v.OneOf(register_choices)
+        default_extern_activate = v.OneOf(extern_activate_choices)
     return _DefaultPermissionsForm
+
+
+def CustomDefaultPermissionsForm():
+    class _CustomDefaultPermissionsForm(formencode.Schema):
+        filter_extra_fields = True
+        allow_extra_fields = True
+        inherit_default_permissions = v.StringBoolean(if_missing=False)
+
+        create_repo_perm = v.StringBoolean(if_missing=False)
+        create_user_group_perm = v.StringBoolean(if_missing=False)
+        #create_repo_group_perm Impl. later
+
+        fork_repo_perm = v.StringBoolean(if_missing=False)
+
+    return _CustomDefaultPermissionsForm
 
 
 def DefaultsForm(edit=False, old_data={}, supported_backends=BACKENDS.keys()):
@@ -383,3 +422,17 @@ def PullRequestForm(repo_id):
         merge_rev = v.UnicodeString(strip=True, required=True)
 
     return _PullRequestForm
+
+
+def GistForm(lifetime_options):
+    class _GistForm(formencode.Schema):
+
+        filename = All(v.BasePath()(),
+                       v.UnicodeString(strip=True, required=False))
+        description = v.UnicodeString(required=False, if_missing='')
+        lifetime = v.OneOf(lifetime_options)
+        content = v.UnicodeString(required=True, not_empty=True)
+        public = v.UnicodeString(required=False, if_missing='')
+        private = v.UnicodeString(required=False, if_missing='')
+
+    return _GistForm

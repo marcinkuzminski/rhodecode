@@ -13,13 +13,10 @@ import stat
 import posixpath
 import mimetypes
 
-from pygments import lexers
-
-from rhodecode.lib.vcs.utils.lazy import LazyProperty
-from rhodecode.lib.vcs.utils import safe_unicode
-from rhodecode.lib.vcs.exceptions import NodeError
-from rhodecode.lib.vcs.exceptions import RemovedFileNodeError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
+from rhodecode.lib.vcs.exceptions import NodeError, RemovedFileNodeError
+from rhodecode.lib.vcs.utils.lazy import LazyProperty
+from rhodecode.lib.vcs.utils import safe_unicode, safe_str
 
 
 class NodeKind:
@@ -103,8 +100,8 @@ class Node(object):
     def __init__(self, path, kind):
         if path.startswith('/'):
             raise NodeError("Cannot initialize Node objects with slash at "
-                "the beginning as only relative paths are supported")
-        self.path = path.rstrip('/')
+                            "the beginning as only relative paths are supported")
+        self.path = safe_str(path.rstrip('/'))  # we store paths as str
         if path == '' and kind != NodeKind.DIR:
             raise NodeError("Only DirNode and its subclasses may be "
                             "initialized with empty path")
@@ -353,7 +350,6 @@ class FileNode(Node):
 
     @LazyProperty
     def mimetype_main(self):
-        return ['', '']
         return self.mimetype.split('/')[0]
 
     @LazyProperty
@@ -362,7 +358,7 @@ class FileNode(Node):
         Returns pygment's lexer class. Would try to guess lexer taking file's
         content, name and mimetype.
         """
-
+        from pygments import lexers
         try:
             lexer = lexers.guess_lexer_for_filename(self.name, self.content, stripnl=False)
         except lexers.ClassNotFound:

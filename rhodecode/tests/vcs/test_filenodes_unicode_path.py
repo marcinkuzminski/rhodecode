@@ -5,8 +5,8 @@ from __future__ import with_statement
 import datetime
 from rhodecode.lib.vcs.nodes import FileNode
 from rhodecode.lib.vcs.utils.compat import unittest
-from test_inmemchangesets import BackendBaseTestCase
-from conf import SCM_TESTS
+from rhodecode.tests.vcs.test_inmemchangesets import BackendBaseTestCase
+from rhodecode.tests.vcs.conf import SCM_TESTS
 
 
 class FileNodeUnicodePathTestsMixin(object):

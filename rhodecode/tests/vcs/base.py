@@ -3,14 +3,13 @@ Module providing backend independent mixin class. It requires that
 InMemoryChangeset class is working properly at backend class.
 """
 import os
-from rhodecode.lib import vcs
 import time
 import shutil
 import datetime
+from rhodecode.tests.vcs.conf import SCM_TESTS, get_new_dir
+
+from rhodecode.lib import vcs
 from rhodecode.lib.vcs.utils.compat import unittest
-
-from conf import SCM_TESTS, get_new_dir
-
 from rhodecode.lib.vcs.nodes import FileNode
 
 
@@ -68,6 +67,7 @@ class BackendTestMixin(object):
         cls.repo_path = get_new_dir(str(time.time()))
         cls.repo = Backend(cls.repo_path, create=True)
         cls.imc = cls.repo.in_memory_changeset
+        cls.default_branch = cls.repo.DEFAULT_BRANCH_NAME
 
         for commit in cls._get_commits():
             for node in commit.get('added', []):

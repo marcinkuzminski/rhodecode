@@ -39,7 +39,7 @@ class TestAdminUsersController(TestController):
 
         self.checkSessionFlash(response, '''Created user %s''' % (username))
 
-        new_user = self.Session.query(User).\
+        new_user = Session().query(User).\
             filter(User.username == username).one()
 
         self.assertEqual(new_user.username, username)
@@ -74,7 +74,7 @@ class TestAdminUsersController(TestController):
         response.mustcontain("""<span class="error-message">An email address must contain a single @</span>""")
 
         def get_user():
-            self.Session.query(User).filter(User.username == username).one()
+            Session().query(User).filter(User.username == username).one()
 
         self.assertRaises(NoResultFound, get_user), 'found user in database'
 
@@ -100,7 +100,7 @@ class TestAdminUsersController(TestController):
         uname = 'testme'
         usr = UserModel().create_or_update(username=uname, password='qweqwe',
                                            email='testme@rhodecod.org')
-        self.Session().commit()
+        Session().commit()
         params = usr.get_api_data()
         params.update({name: expected})
         params.update({'password_confirmation': ''})
@@ -146,7 +146,7 @@ class TestAdminUsersController(TestController):
 
         response = response.follow()
 
-        new_user = self.Session.query(User)\
+        new_user = Session().query(User)\
             .filter(User.username == username).one()
         response = self.app.delete(url('user', id=new_user.user_id))
 

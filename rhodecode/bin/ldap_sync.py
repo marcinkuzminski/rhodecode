@@ -14,7 +14,14 @@
 import ldap
 import urllib2
 import uuid
-import json
+
+try:
+    from rhodecode.lib.compat import json
+except ImportError:
+    try:
+        import simplejson as json
+    except ImportError:
+        import json
 
 from ConfigParser import ConfigParser
 
@@ -72,7 +79,7 @@ class RhodecodeAPI():
         if uid != response["id"]:
             raise InvalidResponseIDError("UUID does not match.")
 
-        if response["error"] != None:
+        if response["error"] is not None:
             raise RhodecodeResponseError(response["error"])
 
         return response["result"]

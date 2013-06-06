@@ -42,7 +42,7 @@ from rhodecode.model.db import Repository, RepoGroup, UserFollowing, User,\
     RhodeCodeUi
 from rhodecode.model.repo import RepoModel
 from rhodecode.model.forms import RepoForkForm
-from rhodecode.model.scm import ScmModel, GroupList
+from rhodecode.model.scm import ScmModel, RepoGroupList
 from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
@@ -50,12 +50,11 @@ log = logging.getLogger(__name__)
 
 class ForksController(BaseRepoController):
 
-    @LoginRequired()
     def __before__(self):
         super(ForksController, self).__before__()
 
     def __load_defaults(self):
-        acl_groups = GroupList(RepoGroup.query().all(),
+        acl_groups = RepoGroupList(RepoGroup.query().all(),
                                perm_set=['group.write', 'group.admin'])
         c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
@@ -78,7 +77,7 @@ class ForksController(BaseRepoController):
             h.not_mapped_error(repo_name)
             return redirect(url('repos'))
 
-        c.default_user_id = User.get_by_username('default').user_id
+        c.default_user_id = User.get_default_user().user_id
         c.in_public_journal = UserFollowing.query()\
             .filter(UserFollowing.user_id == c.default_user_id)\
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
@@ -107,6 +106,7 @@ class ForksController(BaseRepoController):
 
         return defaults
 
+    @LoginRequired()
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
                                    'repository.admin')
     def forks(self, repo_name):
@@ -128,6 +128,7 @@ class ForksController(BaseRepoController):
 
         return render('/forks/forks.html')
 
+    @LoginRequired()
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
@@ -147,6 +148,7 @@ class ForksController(BaseRepoController):
             force_defaults=False
         )
 
+    @LoginRequired()
     @NotAnonymous()
     @HasPermissionAnyDecorator('hg.admin', 'hg.fork.repository')
     @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',

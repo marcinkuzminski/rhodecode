@@ -85,17 +85,17 @@ ${self.context_bar('summary')}
                   ##FORK
                   %if c.dbrepo.fork:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}"><img class="icon" alt="${_('Public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
-                        ${_('Fork of')} ${c.dbrepo.fork.repo_name}
-                    </a>
+                        <img class="icon" alt="${_('Public')}" title="${_('Fork of')} ${c.dbrepo.fork.repo_name}" src="${h.url('/images/icons/arrow_divide.png')}"/>
+                        ${_('Fork of')}
+                        <a href="${h.url('summary_home',repo_name=c.dbrepo.fork.repo_name)}">${c.dbrepo.fork.repo_name}</a>
                     </div>
                   %endif
                   ##REMOTE
                   %if c.dbrepo.clone_uri:
                     <div style="margin-top:5px;clear:both">
-                    <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}"><img class="icon" alt="${_('Remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
-                        ${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}
-                    </a>
+                        ${_('Clone from')}
+                        <img class="icon" alt="${_('Remote clone')}" title="${_('Clone from')} ${h.hide_credentials(c.dbrepo.clone_uri)}" src="${h.url('/images/icons/connect.png')}"/>
+                        <a href="${h.url(str(h.hide_credentials(c.dbrepo.clone_uri)))}">${h.hide_credentials(c.dbrepo.clone_uri)}</a>
                     </div>
                   %endif
               </div>
@@ -148,7 +148,7 @@ ${self.context_bar('summary')}
                 %else:
                    ${_('Statistics are disabled for this repository')}
                    %if h.HasPermissionAll('hg.admin')('enable stats on from summary'):
-                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
+                        ${h.link_to(_('Enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                    %endif
                 %endif
               </div>
@@ -164,14 +164,14 @@ ${self.context_bar('summary')}
                 %elif not c.enable_downloads:
                   ${_('Downloads are disabled for this repository')}
                     %if h.HasPermissionAll('hg.admin')('enable downloads on from summary'):
-                        ${h.link_to(_('enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
+                        ${h.link_to(_('Enable'),h.url('edit_repo',repo_name=c.repo_name),class_="ui-btn")}
                     %endif
                 %else:
+                    <span id="${'zip_link'}">${h.link_to(_('Download as zip'), h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     ${h.select('download_options',c.rhodecode_repo.get_changeset().raw_id,c.download_options)}
-                         <span id="${'zip_link'}">${h.link_to(_('Download as zip'), h.url('files_archive_home',repo_name=c.dbrepo.repo_name,fname='tip.zip'),class_="archive_icon ui-btn")}</span>
                     <span style="vertical-align: bottom">
-                        <input id="archive_subrepos" type="checkbox" name="subrepos" />
-                        <label for="archive_subrepos" class="tooltip" title="${h.tooltip(_('Check this to download archive with subrepos'))}" >${_('with subrepos')}</label>
+                      <input id="archive_subrepos" type="checkbox" name="subrepos" />
+                      <label for="archive_subrepos" class="tooltip" title="${h.tooltip(_('Check this to download archive with subrepos'))}" >${_('with subrepos')}</label>
                     </span>
                 %endif
               </div>
@@ -261,7 +261,7 @@ ${self.context_bar('summary')}
     </div>
     <div class="table">
         <div id="shortlog_data">
-            <%include file='../shortlog/shortlog_data.html'/>
+            <%include file='../changelog/changelog_summary_data.html'/>
         </div>
     </div>
 </div>
@@ -269,10 +269,9 @@ ${self.context_bar('summary')}
 %if c.readme_data:
 <div id="readme" class="anchor">
 <div class="box" style="background-color: #FAFAFA">
-    <div class="title" title="${_("Readme file at revision '%s'" % c.rhodecode_db_repo.landing_rev)}">
+    <div class="title" title="${_('Readme file from revision %s') % c.rhodecode_db_repo.landing_rev}">
         <div class="breadcrumbs">
             <a href="${h.url('files_home',repo_name=c.repo_name,revision='tip',f_path=c.readme_file)}">${c.readme_file}</a>
-            <a class="permalink" href="#readme" title="${_('Permalink to this readme')}">&para;</a>
         </div>
     </div>
     <div class="readme">

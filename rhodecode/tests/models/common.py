@@ -1,6 +1,3 @@
-import os
-import unittest
-import functools
 from rhodecode.tests import *
 from rhodecode.tests.fixture import Fixture
 

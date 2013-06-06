@@ -18,7 +18,7 @@
 </%def>
 
 <%def name="main()">
-<div class="box">
+<div class="box box-left">
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
@@ -60,14 +60,6 @@
                 </div>
             </div>
             <div class="field">
-                <div class="label">
-                    <label for="input">${_('Permissions')}:</label>
-                </div>
-                <div class="input">
-                    <%include file="repos_group_edit_perms.html"/>
-                </div>
-            </div>
-            <div class="field">
                 <div class="label label-checkbox">
                     <label for="enable_locking">${_('Enable locking')}:</label>
                 </div>
@@ -81,6 +73,30 @@
               ${h.reset('reset',_('Reset'),class_="ui-btn large")}
             </div>
         </div>
+    </div>
+    ${h.end_form()}
+</div>
+<div class="box box-right">
+    <div class="title">
+        <h5>${_('Permissions')}</h5>
+    </div>
+    ${h.form(url('set_repo_group_perm_member', group_name=c.repos_group.group_name),method='post')}
+    <div class="form">
+       <div class="fields">
+            <div class="field">
+                <div class="label">
+                    <label for="input">${_('Permissions')}:</label>
+                </div>
+                <div class="input">
+                    ${h.hidden('repo_private')}
+                    <%include file="repos_group_edit_perms.html"/>
+                </div>
+            </div>
+            <div class="buttons">
+              ${h.submit('save',_('Save'),class_="ui-btn large")}
+              ${h.reset('reset',_('Reset'),class_="ui-btn large")}
+            </div>
+       </div>
     </div>
     ${h.end_form()}
 </div>

@@ -21,26 +21,34 @@
     <div class="title">
         ${self.breadcrumbs()}
         <ul class="links">
+        %if h.HasPermissionAny('hg.admin', 'hg.usergroup.create.true')():
           <li>
             <span>${h.link_to(_(u'Add new user group'),h.url('new_users_group'))}</span>
           </li>
-
+        %endif
         </ul>
     </div>
     <!-- end box / title -->
+
     <div class="table">
+    %if c.users_groups_list:
         <table class="table_disp">
         <tr class="header">
             <th class="left">${_('Group name')}</th>
             <th class="left">${_('Members')}</th>
             <th class="left">${_('Active')}</th>
-            <th class="left">${_('Action')}</th>
+            <th class="left" colspan="2">${_('Action')}</th>
         </tr>
             %for cnt,u_group in enumerate(c.users_groups_list):
                 <tr class="parity${cnt%2}">
                     <td>${h.link_to(u_group.users_group_name,h.url('edit_users_group', id=u_group.users_group_id))}</td>
                     <td><span class="tooltip" title="${h.tooltip(', '.join(map(h.safe_unicode,[x.user.username for x in u_group.members[:50]])))}">${len(u_group.members)}</span></td>
                     <td>${h.boolicon(u_group.users_group_active)}</td>
+                    <td>
+                     <a href="${h.url('edit_users_group', id=u_group.users_group_id)}" title="${_('Edit')}">
+                       ${h.submit('edit_%s' % u_group.users_group_name,_('edit'),class_="edit_icon action_button")}
+                     </a>
+                    </td>
                     <td>
                         ${h.form(url('users_group', id=u_group.users_group_id),method='delete')}
                             ${h.submit('remove_',_('delete'),id="remove_group_%s" % u_group.users_group_id,
@@ -50,6 +58,9 @@
                 </tr>
             %endfor
         </table>
+    %else:
+        ${_('There are no user groups yet')}
+    %endif
     </div>
 </div>
 </%def>

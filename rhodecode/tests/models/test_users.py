@@ -1,4 +1,3 @@
-import unittest
 from rhodecode.tests import *
 
 from rhodecode.model.db import User, UserGroup, UserGroupMember, UserEmailMap,\
@@ -7,9 +6,12 @@ from rhodecode.model.user import UserModel
 
 from rhodecode.model.meta import Session
 from rhodecode.model.users_group import UserGroupModel
+from rhodecode.tests.fixture import Fixture
+
+fixture = Fixture()
 
 
-class TestUser(unittest.TestCase):
+class TestUser(BaseTestCase):
     def __init__(self, methodName='runTest'):
         Session.remove()
         super(TestUser, self).__init__(methodName=methodName)
@@ -26,7 +28,7 @@ class TestUser(unittest.TestCase):
         self.assertEqual(User.get_by_username(u'test_user'), usr)
 
         # make user group
-        users_group = UserGroupModel().create('some_example_group')
+        users_group = fixture.create_user_group('some_example_group')
         Session().commit()
 
         UserGroupModel().add_user_to_group(users_group, usr)
@@ -84,7 +86,7 @@ class TestUser(unittest.TestCase):
         Session().commit()
 
 
-class TestUsers(unittest.TestCase):
+class TestUsers(BaseTestCase):
 
     def __init__(self, methodName='runTest'):
         super(TestUsers, self).__init__(methodName=methodName)

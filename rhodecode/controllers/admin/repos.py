@@ -40,17 +40,18 @@ from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     HasPermissionAnyDecorator, HasRepoPermissionAllDecorator, NotAnonymous,\
     HasPermissionAny, HasReposGroupPermissionAny, HasRepoPermissionAnyDecorator
 from rhodecode.lib.base import BaseRepoController, render
-from rhodecode.lib.utils import invalidate_cache, action_logger, repo_name_slug
+from rhodecode.lib.utils import action_logger, repo_name_slug
 from rhodecode.lib.helpers import get_token
 from rhodecode.model.meta import Session
 from rhodecode.model.db import User, Repository, UserFollowing, RepoGroup,\
     RhodeCodeSetting, RepositoryField
 from rhodecode.model.forms import RepoForm, RepoFieldForm, RepoPermsForm
-from rhodecode.model.scm import ScmModel, GroupList
+from rhodecode.model.scm import ScmModel, RepoGroupList, RepoList
 from rhodecode.model.repo import RepoModel
 from rhodecode.lib.compat import json
 from sqlalchemy.sql.expression import func
 from rhodecode.lib.exceptions import AttachedForksError
+from rhodecode.lib.utils2 import safe_int
 
 log = logging.getLogger(__name__)
 
@@ -64,12 +65,10 @@ class ReposController(BaseRepoController):
 
     @LoginRequired()
     def __before__(self):
-        c.admin_user = session.get('admin_user')
-        c.admin_username = session.get('admin_username')
         super(ReposController, self).__before__()
 
     def __load_defaults(self):
-        acl_groups = GroupList(RepoGroup.query().all(),
+        acl_groups = RepoGroupList(RepoGroup.query().all(),
                                perm_set=['group.write', 'group.admin'])
         c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
@@ -99,7 +98,7 @@ class ReposController(BaseRepoController):
         choices, c.landing_revs = ScmModel().get_repo_landing_revs(c.repo_info)
         c.landing_revs_choices = choices
 
-        c.default_user_id = User.get_by_username('default').user_id
+        c.default_user_id = User.get_default_user().user_id
         c.in_public_journal = UserFollowing.query()\
             .filter(UserFollowing.user_id == c.default_user_id)\
             .filter(UserFollowing.follows_repository == c.repo_info).scalar()
@@ -124,23 +123,24 @@ class ReposController(BaseRepoController):
 
         defaults = RepoModel()._get_defaults(repo_name)
 
+        _repos = Repository.query().order_by(Repository.repo_name).all()
+        read_access_repos = RepoList(_repos)
         c.repos_list = [('', _('--REMOVE FORK--'))]
-        c.repos_list += [(x.repo_id, x.repo_name) for x in
-                    Repository.query().order_by(Repository.repo_name).all()
-                    if x.repo_id != c.repo_info.repo_id]
+        c.repos_list += [(x.repo_id, x.repo_name)
+                         for x in read_access_repos
+                         if x.repo_id != c.repo_info.repo_id]
 
         defaults['id_fork_of'] = db_repo.fork.repo_id if db_repo.fork else ''
         return defaults
 
-    @HasPermissionAllDecorator('hg.admin')
     def index(self, format='html'):
         """GET /repos: All items in the collection"""
         # url('repos')
+        repo_list = Repository.query()\
+                                .order_by(func.lower(Repository.repo_name))\
+                                .all()
 
-        c.repos_list = Repository.query()\
-                        .order_by(func.lower(Repository.repo_name))\
-                        .all()
-
+        c.repos_list = RepoList(repo_list, perm_set=['repository.admin'])
         repos_data = RepoModel().get_repos_as_dict(repos_list=c.repos_list,
                                                    admin=True,
                                                    super_user_actions=True)
@@ -216,7 +216,7 @@ class ReposController(BaseRepoController):
             if not HasReposGroupPermissionAny('group.admin', 'group.write')(group_name=gr_name):
                 raise HTTPForbidden
 
-        acl_groups = GroupList(RepoGroup.query().all(),
+        acl_groups = RepoGroupList(RepoGroup.query().all(),
                                perm_set=['group.write', 'group.admin'])
         c.repo_groups = RepoGroup.groups_choices(groups=acl_groups)
         c.repo_groups_choices = map(lambda k: unicode(k[0]), c.repo_groups)
@@ -266,7 +266,7 @@ class ReposController(BaseRepoController):
         try:
             form_result = _form.to_python(dict(request.POST))
             repo = repo_model.update(repo_name, **form_result)
-            invalidate_cache('get_repo_cached_%s' % repo_name)
+            ScmModel().mark_for_invalidation(repo_name)
             h.flash(_('Repository %s updated successfully') % repo_name,
                     category='success')
             changed_name = repo.repo_name
@@ -319,7 +319,7 @@ class ReposController(BaseRepoController):
             repo_model.delete(repo, forks=handle_forks)
             action_logger(self.rhodecode_user, 'admin_deleted_repo',
                   repo_name, self.ip_addr, self.sa)
-            invalidate_cache('get_repo_cached_%s' % repo_name)
+            ScmModel().mark_for_invalidation(repo_name)
             h.flash(_('Deleted repository %s') % repo_name, category='success')
             Session().commit()
         except AttachedForksError:
@@ -336,32 +336,8 @@ class ReposController(BaseRepoController):
     @HasRepoPermissionAllDecorator('repository.admin')
     def set_repo_perm_member(self, repo_name):
         form = RepoPermsForm()().to_python(request.POST)
-
-        perms_new = form['perms_new']
-        perms_updates = form['perms_updates']
-        cur_repo = repo_name
-
-        # update permissions
-        for member, perm, member_type in perms_updates:
-            if member_type == 'user':
-                # this updates existing one
-                RepoModel().grant_user_permission(
-                    repo=cur_repo, user=member, perm=perm
-                )
-            else:
-                RepoModel().grant_users_group_permission(
-                    repo=cur_repo, group_name=member, perm=perm
-                )
-        # set new permissions
-        for member, perm, member_type in perms_new:
-            if member_type == 'user':
-                RepoModel().grant_user_permission(
-                    repo=cur_repo, user=member, perm=perm
-                )
-            else:
-                RepoModel().grant_users_group_permission(
-                    repo=cur_repo, group_name=member, perm=perm
-                )
+        RepoModel()._update_permissions(repo_name, form['perms_new'],
+                                        form['perms_updates'])
         #TODO: implement this
         #action_logger(self.rhodecode_user, 'admin_changed_repo_permissions',
         #              repo_name, self.ip_addr, self.sa)
@@ -370,42 +346,33 @@ class ReposController(BaseRepoController):
         return redirect(url('edit_repo', repo_name=repo_name))
 
     @HasRepoPermissionAllDecorator('repository.admin')
-    def delete_perm_user(self, repo_name):
+    def delete_repo_perm_member(self, repo_name):
         """
         DELETE an existing repository permission user
 
         :param repo_name:
         """
         try:
-            RepoModel().revoke_user_permission(repo=repo_name,
-                                               user=request.POST['user_id'])
+            obj_type = request.POST.get('obj_type')
+            obj_id = None
+            if obj_type == 'user':
+                obj_id = safe_int(request.POST.get('user_id'))
+            elif obj_type == 'user_group':
+                obj_id = safe_int(request.POST.get('user_group_id'))
+
+            if obj_type == 'user':
+                RepoModel().revoke_user_permission(repo=repo_name, user=obj_id)
+            elif obj_type == 'user_group':
+                RepoModel().revoke_users_group_permission(
+                    repo=repo_name, group_name=obj_id
+                )
             #TODO: implement this
             #action_logger(self.rhodecode_user, 'admin_revoked_repo_permissions',
             #              repo_name, self.ip_addr, self.sa)
             Session().commit()
         except Exception:
             log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of repository user'),
-                    category='error')
-            raise HTTPInternalServerError()
-
-    @HasRepoPermissionAllDecorator('repository.admin')
-    def delete_perm_users_group(self, repo_name):
-        """
-        DELETE an existing repository permission user group
-
-        :param repo_name:
-        """
-
-        try:
-            RepoModel().revoke_users_group_permission(
-                repo=repo_name, group_name=request.POST['users_group_id']
-            )
-            Session().commit()
-        except Exception:
-            log.error(traceback.format_exc())
-            h.flash(_('An error occurred during deletion of repository'
-                      ' user groups'),
+            h.flash(_('An error occurred during revoking of permission'),
                     category='error')
             raise HTTPInternalServerError()
 
@@ -504,7 +471,7 @@ class ReposController(BaseRepoController):
         if cur_token == token:
             try:
                 repo_id = Repository.get_by_repo_name(repo_name).repo_id
-                user_id = User.get_by_username('default').user_id
+                user_id = User.get_default_user().user_id
                 self.scm_model.toggle_following_repo(repo_id, user_id)
                 h.flash(_('Updated repository visibility in public journal'),
                         category='success')
@@ -530,6 +497,7 @@ class ReposController(BaseRepoController):
             ScmModel().pull_changes(repo_name, self.rhodecode_user.username)
             h.flash(_('Pulled from remote location'), category='success')
         except Exception, e:
+            log.error(traceback.format_exc())
             h.flash(_('An error occurred during pull from remote location'),
                     category='error')
 

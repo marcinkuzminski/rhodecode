@@ -17,23 +17,26 @@ class TestHomeController(TestController):
         response = self.app.get(url(controller='home', action='index'))
         #if global permission is set
         response.mustcontain('Add repository')
-        response.mustcontain('href="/%s"' % HG_REPO)
+        # html in javascript variable:
+        response.mustcontain("""var data = {"totalRecords": %s"""
+                             % len(Repository.getAll()))
+        response.mustcontain(r'href=\"/%s\"' % HG_REPO)
 
-        response.mustcontain("""<img class="icon" title="Mercurial repository" """
-                        """alt="Mercurial repository" src="/images/icons/hg"""
-                        """icon.png"/>""")
-        response.mustcontain("""<img class="icon" title="Public repository" """
-                        """alt="Public repository" src="/images/icons/lock_"""
-                        """open.png"/>""")
+        response.mustcontain(r"""<img class=\"icon\" title=\"Mercurial repository\" """
+                        r"""alt=\"Mercurial repository\" src=\"/images/icons/hg"""
+                        r"""icon.png\"/>""")
+        response.mustcontain(r"""<img class=\"icon\" title=\"Public repository\" """
+                        r"""alt=\"Public repository\" src=\"/images/icons/lock_"""
+                        r"""open.png\"/>""")
 
-        response.mustcontain(
-"""<a title="Marcin Kuzminski &amp;lt;marcin@python-works.com&amp;gt;:\n
-merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
-"""dffcd24178a07ffeb5dfc">r173:27cd5cce30c9</a>"""
-)
+        response.mustcontain("""fixes issue with having custom format for git-log""")
+        response.mustcontain("""/%s/changeset/5f2c6ee195929b0be80749243c18121c9864a3b3""" % GIT_REPO)
+
+        response.mustcontain("""disable security checks on hg clone for travis""")
+        response.mustcontain("""/%s/changeset/96507bd11ecc815ebc6270fdf6db110928c09c1e""" % HG_REPO)
 
     def test_repo_summary_with_anonymous_access_disabled(self):
-        anon = User.get_by_username('default')
+        anon = User.get_default_user()
         anon.active = False
         Session().add(anon)
         Session().commit()
@@ -45,13 +48,13 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
             assert 'login' in response.location
 
         finally:
-            anon = User.get_by_username('default')
+            anon = User.get_default_user()
             anon.active = True
             Session().add(anon)
             Session().commit()
 
     def test_index_with_anonymous_access_disabled(self):
-        anon = User.get_by_username('default')
+        anon = User.get_default_user()
         anon.active = False
         Session().add(anon)
         Session().commit()
@@ -61,26 +64,10 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
                                     status=302)
             assert 'login' in response.location
         finally:
-            anon = User.get_by_username('default')
+            anon = User.get_default_user()
             anon.active = True
             Session().add(anon)
             Session().commit()
-
-    def _set_l_dash(self, set_to):
-        self.app.post(url('admin_setting', setting_id='visual'),
-                      params=dict(_method='put',
-                                  rhodecode_lightweight_dashboard=set_to,))
-
-    def test_index_with_lightweight_dashboard(self):
-        self.log_user()
-        self._set_l_dash(True)
-
-        try:
-            response = self.app.get(url(controller='home', action='index'))
-            response.mustcontain("""var data = {"totalRecords": %s"""
-                                 % len(Repository.getAll()))
-        finally:
-            self._set_l_dash(False)
 
     def test_index_page_on_groups(self):
         self.log_user()
@@ -91,21 +78,6 @@ merge" class="tooltip" href="/vcs_test_hg/changeset/27cd5cce30c96924232"""
         try:
             response.mustcontain("gr1/repo_in_group")
         finally:
-            RepoModel().delete('gr1/repo_in_group')
-            ReposGroupModel().delete(repos_group='gr1', force_delete=True)
-            Session().commit()
-
-    def test_index_page_on_groups_with_lightweight_dashboard(self):
-        self.log_user()
-        self._set_l_dash(True)
-        fixture.create_repo(name='gr1/repo_in_group',
-                            repos_group=fixture.create_group('gr1'))
-        response = self.app.get(url('repos_group_home', group_name='gr1'))
-
-        try:
-            response.mustcontain("""gr1/repo_in_group""")
-        finally:
-            self._set_l_dash(False)
             RepoModel().delete('gr1/repo_in_group')
             ReposGroupModel().delete(repos_group='gr1', force_delete=True)
             Session().commit()

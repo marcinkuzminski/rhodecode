@@ -41,8 +41,9 @@ from rhodecode.model.db import Repository, UserRepoToPerm, User, Permission, \
     Statistics, UserGroup, UserGroupRepoToPerm, RhodeCodeUi, RepoGroup,\
     RhodeCodeSetting, RepositoryField
 from rhodecode.lib import helpers as h
-from rhodecode.lib.auth import HasRepoPermissionAny
+from rhodecode.lib.auth import HasRepoPermissionAny, HasUserGroupPermissionAny
 from rhodecode.lib.exceptions import AttachedForksError
+from rhodecode.model.scm import UserGroupList
 
 log = logging.getLogger(__name__)
 
@@ -52,13 +53,32 @@ class RepoModel(BaseModel):
     cls = Repository
     URL_SEPARATOR = Repository.url_sep()
 
-    def __get_users_group(self, users_group):
+    def _get_user_group(self, users_group):
         return self._get_instance(UserGroup, users_group,
                                   callback=UserGroup.get_by_group_name)
 
-    def _get_repos_group(self, repos_group):
+    def _get_repo_group(self, repos_group):
         return self._get_instance(RepoGroup, repos_group,
                                   callback=RepoGroup.get_by_group_name)
+
+    def _create_default_perms(self, repository, private):
+        # create default permission
+        default = 'repository.read'
+        def_user = User.get_default_user()
+        for p in def_user.user_perms:
+            if p.permission.permission_name.startswith('repository.'):
+                default = p.permission.permission_name
+                break
+
+        default_perm = 'repository.none' if private else default
+
+        repo_to_perm = UserRepoToPerm()
+        repo_to_perm.permission = Permission.get_by_key(default_perm)
+
+        repo_to_perm.repository = repository
+        repo_to_perm.user_id = def_user.user_id
+
+        return repo_to_perm
 
     @LazyProperty
     def repos_path(self):
@@ -95,7 +115,6 @@ class RepoModel(BaseModel):
         Get's all repositories that user have at least read access
 
         :param user:
-        :type user:
         """
         from rhodecode.lib.auth import AuthUser
         user = self._get_user(user)
@@ -121,7 +140,9 @@ class RepoModel(BaseModel):
     def get_users_groups_js(self):
         users_groups = self.sa.query(UserGroup)\
             .filter(UserGroup.users_group_active == True).all()
-
+        users_groups = UserGroupList(users_groups, perm_set=['usergroup.read',
+                                                             'usergroup.write',
+                                                             'usergroup.admin'])
         return json.dumps([
             {
              'id': gr.users_group_id,
@@ -153,6 +174,7 @@ class RepoModel(BaseModel):
     def get_repos_as_dict(self, repos_list=None, admin=False, perm_check=True,
                           super_user_actions=False):
         _render = self._render_datatable
+        from pylons import tmpl_context as c
 
         def quick_menu(repo_name):
             return _render('quick_menu', repo_name)
@@ -176,7 +198,6 @@ class RepoModel(BaseModel):
                            cs_cache.get('message'))
 
         def desc(desc):
-            from pylons import tmpl_context as c
             if c.visual.stylify_metatags:
                 return h.urlify_text(h.desc_stylize(h.truncate(desc, 60)))
             else:
@@ -336,7 +357,7 @@ class RepoModel(BaseModel):
 
         owner = self._get_user(owner)
         fork_of = self._get_repo(fork_of)
-        repos_group = self._get_repos_group(repos_group)
+        repos_group = self._get_repo_group(repos_group)
         try:
 
             # repo name is just a name of repository
@@ -369,26 +390,6 @@ class RepoModel(BaseModel):
 
             self.sa.add(new_repo)
 
-            def _create_default_perms():
-                # create default permission
-                repo_to_perm = UserRepoToPerm()
-                default = 'repository.read'
-                for p in User.get_by_username('default').user_perms:
-                    if p.permission.permission_name.startswith('repository.'):
-                        default = p.permission.permission_name
-                        break
-
-                default_perm = 'repository.none' if private else default
-
-                repo_to_perm.permission_id = self.sa.query(Permission)\
-                        .filter(Permission.permission_name == default_perm)\
-                        .one().permission_id
-
-                repo_to_perm.repository = new_repo
-                repo_to_perm.user_id = User.get_by_username('default').user_id
-
-                self.sa.add(repo_to_perm)
-
             if fork_of:
                 if copy_fork_permissions:
                     repo = fork_of
@@ -405,9 +406,11 @@ class RepoModel(BaseModel):
                         UserGroupRepoToPerm.create(perm.users_group, new_repo,
                                                     perm.permission)
                 else:
-                    _create_default_perms()
+                    perm_obj = self._create_default_perms(new_repo, private)
+                    self.sa.add(perm_obj)
             else:
-                _create_default_perms()
+                perm_obj = self._create_default_perms(new_repo, private)
+                self.sa.add(perm_obj)
 
             if not just_db:
                 self.__create_repo(repo_name, repo_type,
@@ -456,6 +459,41 @@ class RepoModel(BaseModel):
             enable_statistics, enable_locking, enable_downloads
         )
 
+    def _update_permissions(self, repo, perms_new=None, perms_updates=None,
+                            check_perms=True):
+        if not perms_new:
+            perms_new = []
+        if not perms_updates:
+            perms_updates = []
+
+        # update permissions
+        for member, perm, member_type in perms_updates:
+            if member_type == 'user':
+                # this updates existing one
+                self.grant_user_permission(
+                    repo=repo, user=member, perm=perm
+                )
+            else:
+                #check if we have permissions to alter this usergroup
+                req_perms = ('usergroup.read', 'usergroup.write', 'usergroup.admin')
+                if not check_perms or HasUserGroupPermissionAny(*req_perms)(member):
+                    self.grant_users_group_permission(
+                        repo=repo, group_name=member, perm=perm
+                    )
+        # set new permissions
+        for member, perm, member_type in perms_new:
+            if member_type == 'user':
+                self.grant_user_permission(
+                    repo=repo, user=member, perm=perm
+                )
+            else:
+                #check if we have permissions to alter this usergroup
+                req_perms = ('usergroup.read', 'usergroup.write', 'usergroup.admin')
+                if not check_perms or HasUserGroupPermissionAny(*req_perms)(member):
+                    self.grant_users_group_permission(
+                        repo=repo, group_name=member, perm=perm
+                    )
+
     def create_fork(self, form_data, cur_user):
         """
         Simple wrapper into executing celery task for fork creation
@@ -466,7 +504,7 @@ class RepoModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         run_task(tasks.create_repo_fork, form_data, cur_user)
 
-    def delete(self, repo, forks=None):
+    def delete(self, repo, forks=None, fs_remove=True):
         """
         Delete given repository, forks parameter defines what do do with
         attached forks. Throws AttachedForksError if deleted repo has attached
@@ -474,6 +512,7 @@ class RepoModel(BaseModel):
 
         :param repo:
         :param forks: str 'delete' or 'detach'
+        :param fs_remove: remove(archive) repo from filesystem
         """
         repo = self._get_repo(repo)
         if repo:
@@ -491,7 +530,10 @@ class RepoModel(BaseModel):
             owner = repo.user
             try:
                 self.sa.delete(repo)
-                self.__delete_repo(repo)
+                if fs_remove:
+                    self.__delete_repo(repo)
+                else:
+                    log.debug('skipping removal from filesystem')
                 log_delete_repository(old_repo_dict,
                                       deleted_by=owner.username)
             except Exception:
@@ -555,7 +597,7 @@ class RepoModel(BaseModel):
         :param perm: Instance of Permission, or permission_name
         """
         repo = self._get_repo(repo)
-        group_name = self.__get_users_group(group_name)
+        group_name = self._get_user_group(group_name)
         permission = self._get_perm(perm)
 
         # check if we have that permission already
@@ -583,7 +625,7 @@ class RepoModel(BaseModel):
             or user group name
         """
         repo = self._get_repo(repo)
-        group_name = self.__get_users_group(group_name)
+        group_name = self._get_user_group(group_name)
 
         obj = self.sa.query(UserGroupRepoToPerm)\
             .filter(UserGroupRepoToPerm.repository == repo)\
@@ -609,7 +651,13 @@ class RepoModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def __create_repo(self, repo_name, alias, parent, clone_uri=False):
+    def _create_repo(self, repo_name, alias, parent, clone_uri=False,
+                     repo_store_location=None):
+        return self.__create_repo(repo_name, alias, parent, clone_uri,
+                                  repo_store_location)
+
+    def __create_repo(self, repo_name, alias, parent, clone_uri=False,
+                      repo_store_location=None):
         """
         makes repository on filesystem. It's group aware means it'll create
         a repository within a group, and alter the paths accordingly of
@@ -619,6 +667,7 @@ class RepoModel(BaseModel):
         :param alias:
         :param parent_id:
         :param clone_uri:
+        :param repo_path:
         """
         from rhodecode.lib.utils import is_valid_repo, is_valid_repos_group
         from rhodecode.model.scm import ScmModel
@@ -627,10 +676,12 @@ class RepoModel(BaseModel):
             new_parent_path = os.sep.join(parent.full_path_splitted)
         else:
             new_parent_path = ''
-
+        if repo_store_location:
+            _paths = [repo_store_location]
+        else:
+            _paths = [self.repos_path, new_parent_path, repo_name]
         # we need to make it str for mercurial
-        repo_path = os.path.join(*map(lambda x: safe_str(x),
-                                [self.repos_path, new_parent_path, repo_name]))
+        repo_path = os.path.join(*map(lambda x: safe_str(x), _paths))
 
         # check if this path is not a repository
         if is_valid_repo(repo_path, self.repos_path):
@@ -647,13 +698,14 @@ class RepoModel(BaseModel):
         )
         backend = get_backend(alias)
         if alias == 'hg':
-            backend(repo_path, create=True, src_url=clone_uri)
+            repo = backend(repo_path, create=True, src_url=clone_uri)
         elif alias == 'git':
-            r = backend(repo_path, create=True, src_url=clone_uri, bare=True)
+            repo = backend(repo_path, create=True, src_url=clone_uri, bare=True)
             # add rhodecode hook into this repo
-            ScmModel().install_git_hook(repo=r)
+            ScmModel().install_git_hook(repo=repo)
         else:
             raise Exception('Undefined alias %s' % alias)
+        return repo
 
     def __rename_repo(self, old, new):
         """

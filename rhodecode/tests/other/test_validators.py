@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import unittest
 import formencode
 
 from rhodecode.tests import *
@@ -9,12 +8,14 @@ from rhodecode.model.users_group import UserGroupModel
 
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
-from rhodecode.config.routing import ADMIN_PREFIX
 from rhodecode.model.db import ChangesetStatus, Repository
 from rhodecode.model.changeset_status import ChangesetStatusModel
+from rhodecode.tests.fixture import Fixture
+
+fixture = Fixture()
 
 
-class TestReposGroups(unittest.TestCase):
+class TestReposGroups(BaseTestCase):
 
     def setUp(self):
         pass
@@ -55,11 +56,11 @@ class TestReposGroups(unittest.TestCase):
         self.assertRaises(formencode.Invalid, validator.to_python, 'default')
         self.assertRaises(formencode.Invalid, validator.to_python, '.,')
 
-        gr = UserGroupModel().create('test')
-        gr2 = UserGroupModel().create('tes2')
-        Session.commit()
+        gr = fixture.create_user_group('test')
+        gr2 = fixture.create_user_group('tes2')
+        Session().commit()
         self.assertRaises(formencode.Invalid, validator.to_python, 'test')
-        assert gr.users_group_id != None
+        assert gr.users_group_id is not None
         validator = v.ValidUserGroup(edit=True,
                                     old_data={'users_group_id':
                                               gr2.users_group_id})
@@ -69,7 +70,7 @@ class TestReposGroups(unittest.TestCase):
         self.assertRaises(formencode.Invalid, validator.to_python, 'TEST')
         UserGroupModel().delete(gr)
         UserGroupModel().delete(gr2)
-        Session.commit()
+        Session().commit()
 
     def test_ValidReposGroup(self):
         validator = v.ValidReposGroup()

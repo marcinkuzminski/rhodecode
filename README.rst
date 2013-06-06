@@ -74,10 +74,12 @@ RhodeCode Features
   Proven to work with 1000s of repositories and users
 - Supports http/https, LDAP, AD, proxy-pass authentication.
 - Full permissions (private/read/write/admin) together with IP restrictions for each repository,
-  additional explicit forking and repository creation permissions.
-- User groups for easier permission management
-- Repository groups let you group repos and manage them easier.
+  additional explicit forking, repositories group and repository creation permissions.
+- User groups for easier permission management.
+- Repository groups let you group repos and manage them easier. They come with
+  permission delegation features, so you can delegate groups management.
 - Users can fork other users repos, and compare them at any time.
+- Built in Gist functionality for sharing code snippets.
 - Integrates easily with other systems, with custom created mappers you can connect it to almost
   any issue tracker, and with an JSON-RPC API you can make much more
 - Build in commit-api let's you add, edit and commit files right from RhodeCode
@@ -118,7 +120,6 @@ Incoming / Plans
 - Simple issue tracker
 - SSH based authentication with server side key management
 - Commit based built in wiki system
-- Gist server
 - More statistics and graph (global annotation + some more statistics)
 - Other advancements as development continues (or you can of course make
   additions and or requests)

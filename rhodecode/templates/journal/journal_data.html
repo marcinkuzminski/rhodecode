@@ -2,7 +2,7 @@
 
 %if c.journal_day_aggreagate:
     %for day,items in c.journal_day_aggreagate:
-    <div class="journal_day">${day}</div>
+     <div class="journal_day">${day}</div>
         % for user,entries in items:
             <div class="journal_container">
                 <div class="gravatar">
@@ -35,7 +35,9 @@
         %endfor
     %endfor
 
-  <div class="pagination-wh pagination-left">
+  <div class="pagination-wh pagination-left" style="padding: 0px 0px 0px 10px;">
+  ${c.journal_pager.pager('$link_previous ~2~ $link_next')}
+  </div>
     <script type="text/javascript">
     YUE.onDOMReady(function(){
         YUE.delegate("journal","click",function(e, matchedEl, container){
@@ -48,8 +50,6 @@
         },'.pager_link');
     });
     </script>
-  ${c.journal_pager.pager('$link_previous ~2~ $link_next')}
-  </div>
 %else:
   <div style="padding:5px 0px 10px 10px;">
       ${_('No entries yet')}
