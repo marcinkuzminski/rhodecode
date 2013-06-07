@@ -72,14 +72,15 @@ class TestSearchController(TestController):
     def test_search_commit_changed_files_get_commit(self):
         self.log_user()
         response = self.app.get(url(controller='search', action='index'),
-                                {'q': 'changed:vcs/utils/lazy.py',
+                                {'q': 'changed:vcs/utils/archivers.py',
                                  'type': 'commit'})
 
-        response.mustcontain('11 results')
-        response.mustcontain('36e0fc9d2808c5022a24f49d6658330383ed8666')
-        response.mustcontain('af182745859d779f17336241a0815d15166ae1ee')
-        response.mustcontain('17438a11f72b93f56d0e08e7d1fa79a378578a82')
-        response.mustcontain('33fa3223355104431402a888fa77a4e9956feb3e')
+        response.mustcontain('8 results')
+        response.mustcontain('25213a5fbb048dff8ba65d21e466a835536e5b70')
+        response.mustcontain('47aedd538bf616eedcb0e7d630ea476df0e159c7')
+        response.mustcontain('f5d23247fad4856a1dabd5838afade1e0eed24fb')
+        response.mustcontain('04ad456aefd6461aea24f90b63954b6b1ce07b3e')
+        response.mustcontain('c994f0de03b2a0aa848a04fc2c0d7e737dba31fc')
         response.mustcontain('d1f898326327e20524fe22417c22d71064fe54a1')
         response.mustcontain('fe568b4081755c12abf6ba673ba777fc02a415f3')
         response.mustcontain('bafe786f0d8c2ff7da5c1dcfcfa577de0b5e92f1')
