@@ -504,7 +504,7 @@ var show_changeset_tooltip = function(){
         }
         if(rid && !YUD.hasClass(target, 'tooltip')){
             YUD.setAttribute(target,'id',ttid);
-            YUD.setAttribute(target, 'title',_TM['loading...']);
+            YUD.setAttribute(target, 'title',_TM['loading ...']);
             YAHOO.yuitip.main.set_listeners(target);
             YAHOO.yuitip.main.show_yuitip(e, target);
             var url = pyroutes.url('changeset_info', {"repo_name":repo_name, "revision": rid});
