@@ -1,26 +1,24 @@
-# Japanese translations for RhodeCode.
-# Copyright (C) 2011 ORGANIZATION
+# Translations template for RhodeCode.
+# Copyright (C) 2013 Marcin Kuzminski RhodeCode
 # This file is distributed under the same license as the RhodeCode project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
-# Takumi IINO <trot.thunder@gmail.com> 2012
-# WAKAYAMA Shirou <shirou.faw@gmail.com> 2012
-#
-# Mercurial Japanese Translation.
-# - http://selenic.com/repo/hg/file/stable/i18n/ja.po
-# ========================================
+# Translators:
+# しろう <>, 2013
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2011
+# Takumi IINO <trot.thunder@gmail.com>, 2013
 msgid ""
 msgstr ""
-"Project-Id-Version: RhodeCode 1.2.0\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-06-01 18:38+0200\n"
-"PO-Revision-Date: 2013-04-06 21:38+0900\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: ja <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0\n"
+"Project-Id-Version: RhodeCode\n"
+"Report-Msgid-Bugs-To: marcin@maq.io\n"
+"POT-Creation-Date: 2013-06-05 19:55+0200\n"
+"PO-Revision-Date: 2013-06-05 07:39+0000\n"
+"Last-Translator: Takumi IINO <trot.thunder@gmail.com>\n"
+"Language-Team: Japanese (http://www.transifex.com/projects/p/RhodeCode/language/ja/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: rhodecode/controllers/changelog.py:149
 msgid "All Branches"
@@ -40,19 +38,19 @@ msgid "%s line context"
 msgstr ""
 
 #: rhodecode/controllers/changeset.py:345
-#: rhodecode/controllers/pullrequests.py:481
+#: rhodecode/controllers/pullrequests.py:478
 #, python-format
 msgid "Status change -> %s"
 msgstr "ステータス変更 -> %s"
 
 #: rhodecode/controllers/changeset.py:376
 msgid ""
-"Changing status on a changeset associated with a closed pull request is "
-"not allowed"
+"Changing status on a changeset associated with a closed pull request is not "
+"allowed"
 msgstr "クローズしたプルリクエストに関連するチェンジセットのステータスを変更することは許可されていません"
 
 #: rhodecode/controllers/compare.py:74
-#: rhodecode/controllers/pullrequests.py:259
+#: rhodecode/controllers/pullrequests.py:256
 msgid "There are no changesets yet"
 msgstr "まだ変更がありません"
 
@@ -61,7 +59,8 @@ msgid "Home page"
 msgstr "ホームページ"
 
 #: rhodecode/controllers/error.py:98
-msgid "The request could not be understood by the server due to malformed syntax."
+msgid ""
+"The request could not be understood by the server due to malformed syntax."
 msgstr "形式が間違っているため、サーバーはリクエストを処理出来ませんでした"
 
 #: rhodecode/controllers/error.py:101
@@ -80,7 +79,7 @@ msgstr "リソースが見つかりません"
 msgid ""
 "The server encountered an unexpected condition which prevented it from "
 "fulfilling the request."
-msgstr ""
+msgstr "サーバーが不正な状態になったため、リクエストに答えることができませんでした。"
 
 #: rhodecode/controllers/feed.py:52
 #, python-format
@@ -183,14 +182,16 @@ msgstr "未知のアーカイブ種別です"
 msgid "Changesets"
 msgstr "チェンジセット"
 
-#: rhodecode/controllers/files.py:632 rhodecode/controllers/pullrequests.py:152
+#: rhodecode/controllers/files.py:632
+#: rhodecode/controllers/pullrequests.py:149
 #: rhodecode/controllers/summary.py:76 rhodecode/model/scm.py:682
 #: rhodecode/templates/switch_to_list.html:3
 #: rhodecode/templates/branches/branches.html:10
 msgid "Branches"
 msgstr "ブランチ"
 
-#: rhodecode/controllers/files.py:633 rhodecode/controllers/pullrequests.py:153
+#: rhodecode/controllers/files.py:633
+#: rhodecode/controllers/pullrequests.py:150
 #: rhodecode/controllers/summary.py:77 rhodecode/model/scm.py:693
 #: rhodecode/templates/switch_to_list.html:15
 #: rhodecode/templates/tags/tags.html:10
@@ -226,56 +227,56 @@ msgstr "パスワードリセットのリンクを送信しました"
 
 #: rhodecode/controllers/login.py:179
 msgid ""
-"Your password reset was successful, new password has been sent to your "
-"email"
+"Your password reset was successful, new password has been sent to your email"
 msgstr "パスワードをリセットしました。新しいパスワードをあなたのメールアドレスに送りました"
 
-#: rhodecode/controllers/pullrequests.py:139
+#: rhodecode/controllers/pullrequests.py:136
 #: rhodecode/templates/changeset/changeset.html:10
 #: rhodecode/templates/email_templates/changeset_comment.html:8
 msgid "Changeset"
 msgstr "チェンジセット"
 
-#: rhodecode/controllers/pullrequests.py:149
+#: rhodecode/controllers/pullrequests.py:146
 msgid "Special"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:150
+#: rhodecode/controllers/pullrequests.py:147
 msgid "Peer branches"
 msgstr "相手のブランチ"
 
-#: rhodecode/controllers/pullrequests.py:151 rhodecode/model/scm.py:688
+#: rhodecode/controllers/pullrequests.py:148 rhodecode/model/scm.py:688
 #: rhodecode/templates/switch_to_list.html:28
 #: rhodecode/templates/bookmarks/bookmarks.html:10
 msgid "Bookmarks"
 msgstr "ブックマーク"
 
-#: rhodecode/controllers/pullrequests.py:324
+#: rhodecode/controllers/pullrequests.py:321
 msgid "Pull request requires a title with min. 3 chars"
 msgstr "プルリクエストには3文字以上のタイトルが必要です"
 
-#: rhodecode/controllers/pullrequests.py:326
+#: rhodecode/controllers/pullrequests.py:323
 msgid "Error creating pull request"
 msgstr "プルリクエストの作成中にエラーが発生しました"
 
-#: rhodecode/controllers/pullrequests.py:346
+#: rhodecode/controllers/pullrequests.py:343
 msgid "Successfully opened new pull request"
 msgstr "新しいプルリクエストを作成しました"
 
-#: rhodecode/controllers/pullrequests.py:349
+#: rhodecode/controllers/pullrequests.py:346
 msgid "Error occurred during sending pull request"
 msgstr "プルリクエストの作成中にエラーが発生しました"
 
-#: rhodecode/controllers/pullrequests.py:388
+#: rhodecode/controllers/pullrequests.py:385
 msgid "Successfully deleted pull request"
 msgstr "プルリクエストを削除しました"
 
-#: rhodecode/controllers/pullrequests.py:484
+#: rhodecode/controllers/pullrequests.py:481
 msgid "Closing with"
 msgstr ""
 
-#: rhodecode/controllers/pullrequests.py:521
-msgid "Closing pull request on other statuses than rejected or approved forbidden"
+#: rhodecode/controllers/pullrequests.py:518
+msgid ""
+"Closing pull request on other statuses than rejected or approved forbidden"
 msgstr ""
 
 #: rhodecode/controllers/search.py:132
@@ -308,43 +309,37 @@ msgid "Error occurred during update of defaults"
 msgstr "デフォルト設定の更新中にエラーが発生しました"
 
 #: rhodecode/controllers/admin/gists.py:56
-#, fuzzy
 msgid "forever"
-msgstr "レビュアー"
+msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:57
-#, fuzzy
 msgid "5 minutes"
-msgstr "%d 分"
+msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:58
-#, fuzzy
 msgid "1 hour"
-msgstr "%d 時間"
+msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:59
-#, fuzzy
 msgid "1 day"
-msgstr "%d 日"
+msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:60
-#, fuzzy
 msgid "1 month"
-msgstr "%d ヶ月"
+msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:62
 msgid "Lifetime"
 msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:127
-#, fuzzy
 msgid "Error occurred during gist creation"
-msgstr "フックの作成中にエラーが発生しました"
+msgstr ""
 
 #: rhodecode/controllers/admin/gists.py:165
-#, fuzzy, python-format
+#, python-format
 msgid "Deleted gist %s"
-msgstr "リポジトリ %s を削除しました"
+msgstr ""
 
 #: rhodecode/controllers/admin/ldap_settings.py:50
 msgid "BASE"
@@ -552,9 +547,8 @@ msgstr "リポジトリ権限を更新しました"
 #: rhodecode/controllers/admin/repos.py:375
 #: rhodecode/controllers/admin/repos_groups.py:332
 #: rhodecode/controllers/admin/users_groups.py:312
-#, fuzzy
 msgid "An error occurred during revoking of permission"
-msgstr "権限の更新中にエラーが発生しました"
+msgstr ""
 
 #: rhodecode/controllers/admin/repos.py:392
 msgid "An error occurred during deletion of repository stats"
@@ -660,8 +654,8 @@ msgstr "リポジトリグループ %s を削除しました"
 
 #: rhodecode/controllers/admin/repos_groups.py:268
 #, python-format
-msgid "Error occurred during deletion of repos group %s"
-msgstr "リポジトリグループ %s の削除中にエラーが発生しました"
+msgid "Error occurred during deletion of repository group %s"
+msgstr ""
 
 #: rhodecode/controllers/admin/repos_groups.py:279
 #: rhodecode/controllers/admin/repos_groups.py:314
@@ -670,9 +664,8 @@ msgid "Cannot revoke permission for yourself as admin"
 msgstr ""
 
 #: rhodecode/controllers/admin/repos_groups.py:294
-#, fuzzy
 msgid "Repository Group permissions updated"
-msgstr "リポジトリ権限を更新しました"
+msgstr ""
 
 #: rhodecode/controllers/admin/settings.py:123
 #, python-format
@@ -762,9 +755,8 @@ msgstr "このユーザーは編集できません"
 
 #: rhodecode/controllers/admin/users.py:293
 #: rhodecode/controllers/admin/users_groups.py:372
-#, fuzzy
 msgid "Updated permissions"
-msgstr "権限のコピー"
+msgstr ""
 
 #: rhodecode/controllers/admin/users.py:297
 #: rhodecode/controllers/admin/users_groups.py:376
@@ -830,9 +822,8 @@ msgid "Target group cannot be the same"
 msgstr ""
 
 #: rhodecode/controllers/admin/users_groups.py:280
-#, fuzzy
 msgid "User Group permissions updated"
-msgstr "リポジトリ権限を更新しました"
+msgstr ""
 
 #: rhodecode/lib/auth.py:544
 #, python-format
@@ -852,17 +843,13 @@ msgid "Binary file"
 msgstr "バイナリファイル"
 
 #: rhodecode/lib/diffs.py:82
-msgid "Changeset was too big and was cut off, use diff menu to display this diff"
+msgid ""
+"Changeset was too big and was cut off, use diff menu to display this diff"
 msgstr "チェンジセットが大きすぎるため省略しました。差分を表示する場合は差分メニューを使用してください"
 
 #: rhodecode/lib/diffs.py:92
 msgid "No changes detected"
 msgstr "検出された変更はありません"
-
-#: rhodecode/lib/helpers.py:428
-#, python-format
-msgid "%a, %d %b %Y %H:%M:%S"
-msgstr "%a, %d %b %Y %H:%M:%S"
 
 #: rhodecode/lib/helpers.py:539
 msgid "True"
@@ -904,7 +891,8 @@ msgstr "と"
 msgid "%s more"
 msgstr "%s 以上"
 
-#: rhodecode/lib/helpers.py:674 rhodecode/templates/changelog/changelog.html:53
+#: rhodecode/lib/helpers.py:674
+#: rhodecode/templates/changelog/changelog.html:53
 msgid "revisions"
 msgstr "リビジョン"
 
@@ -940,9 +928,8 @@ msgid "[updated] repository"
 msgstr "リポジトリを[更新]"
 
 #: rhodecode/lib/helpers.py:735
-#, fuzzy
 msgid "[downloaded] archive from repository"
-msgstr "このリポジトリのダウンロードは無効化されています"
+msgstr ""
 
 #: rhodecode/lib/helpers.py:737
 msgid "[delete] repository"
@@ -1010,24 +997,20 @@ msgid "No Files"
 msgstr "ファイルなし"
 
 #: rhodecode/lib/helpers.py:1158
-#, fuzzy
 msgid "new file"
-msgstr "新しいファイルを追加"
+msgstr ""
 
 #: rhodecode/lib/helpers.py:1161
-#, fuzzy
 msgid "mod"
-msgstr "削除"
+msgstr ""
 
 #: rhodecode/lib/helpers.py:1164
-#, fuzzy
 msgid "del"
-msgstr "削除"
+msgstr ""
 
 #: rhodecode/lib/helpers.py:1167
-#, fuzzy
 msgid "rename"
-msgstr "ユーザー名"
+msgstr ""
 
 #: rhodecode/lib/helpers.py:1172
 msgid "chmod"
@@ -1036,12 +1019,9 @@ msgstr ""
 #: rhodecode/lib/helpers.py:1404
 #, python-format
 msgid ""
-"%s repository is not mapped to db perhaps it was created or renamed from "
-"the filesystem please run the application again in order to rescan "
-"repositories"
-msgstr ""
-"%s "
-"リポジトリはDB内に見つかりませんでした。おそらくファイルシステム上で作られたか名前が変更されたためです。リポジトリをもう一度チェックするためにアプリケーションを立ち上げ直してください。"
+"%s repository is not mapped to db perhaps it was created or renamed from the"
+" filesystem please run the application again in order to rescan repositories"
+msgstr "%s リポジトリはDB内に見つかりませんでした。おそらくファイルシステム上で作られたか名前が変更されたためです。リポジトリをもう一度チェックするためにアプリケーションを立ち上げ直してください。"
 
 #: rhodecode/lib/unionrepo.py:193
 msgid "cannot create new union repository"
@@ -1282,57 +1262,48 @@ msgid "Repository group admin access"
 msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1418 rhodecode/model/db.py:1423
-#, fuzzy
 msgid "User group no access"
-msgstr "不正なユーザーグループ名です"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1419 rhodecode/model/db.py:1424
-#, fuzzy
 msgid "User group read access"
-msgstr "ユーザーグループ"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1420 rhodecode/model/db.py:1425
 msgid "User group write access"
 msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1421 rhodecode/model/db.py:1426
-#, fuzzy
 msgid "User group admin access"
-msgstr "ユーザーグループ管理"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1423 rhodecode/model/db.py:1428
-#, fuzzy
 msgid "Repository Group creation disabled"
-msgstr "リポジトリ作成"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1424 rhodecode/model/db.py:1429
-#, fuzzy
 msgid "Repository Group creation enabled"
-msgstr "リポジトリ作成"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1426 rhodecode/model/db.py:1431
 msgid "User Group creation disabled"
 msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1427 rhodecode/model/db.py:1432
-#, fuzzy
 msgid "User Group creation enabled"
-msgstr "ユーザーグループ管理"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1435 rhodecode/model/db.py:1440
-#, fuzzy
 msgid "Registration disabled"
-msgstr "登録"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1436 rhodecode/model/db.py:1441
-#, fuzzy
 msgid "User Registration with manual account activation"
-msgstr "手動でアカウントを有効にする"
+msgstr ""
 
 #: rhodecode/lib/dbmigrate/schema/db_1_7_0.py:1437 rhodecode/model/db.py:1442
-#, fuzzy
 msgid "User Registration with automatic account activation"
-msgstr "自動でアカウントを有効にする"
+msgstr ""
 
 #: rhodecode/model/comment.py:75
 #, python-format
@@ -1415,8 +1386,8 @@ msgstr "アプリケーション全体にとって重要なユーザなため、
 #: rhodecode/model/user.py:309
 #, python-format
 msgid ""
-"user \"%s\" still owns %s repositories and cannot be removed. Switch "
-"owners or remove those repositories. %s"
+"user \"%s\" still owns %s repositories and cannot be removed. Switch owners "
+"or remove those repositories. %s"
 msgstr ""
 
 #: rhodecode/model/user.py:334
@@ -1447,11 +1418,10 @@ msgid "Username \"%(username)s\" is forbidden"
 msgstr "ユーザー名 \"%(username)s\" は許可されていません"
 
 #: rhodecode/model/validators.py:89
-#, fuzzy
 msgid ""
-"Username may only contain alphanumeric characters underscores, periods or"
-" dashes and must begin with alphanumeric character or underscore"
-msgstr "ユーザー名はアルファベット、アンダースコア(_)、ピリオド(.)、ダッシュ(-)しか使えません。また、アルファベットから始まる必要があります"
+"Username may only contain alphanumeric characters underscores, periods or "
+"dashes and must begin with alphanumeric character or underscore"
+msgstr ""
 
 #: rhodecode/model/validators.py:117
 #, python-format
@@ -1471,9 +1441,7 @@ msgstr "ユーザーグループ \"%(usergroup)s\" はすでに存在します"
 msgid ""
 "user group name may only contain alphanumeric characters underscores, "
 "periods or dashes and must begin with alphanumeric character"
-msgstr ""
-"ユーザーグループ名はアルファベット、アンダースコア(_)、ピリオド(.)、ダッシュ(-)しか使えません。また、アルファベットから始まる必要があります"
-" "
+msgstr "ユーザーグループ名はアルファベット、アンダースコア(_)、ピリオド(.)、ダッシュ(-)しか使えません。また、アルファベットから始まる必要があります "
 
 #: rhodecode/model/validators.py:177
 msgid "Cannot assign this group as parent"
@@ -1572,8 +1540,8 @@ msgstr "メールアドレス \"%(email)s\" は存在しません"
 
 #: rhodecode/model/validators.py:724
 msgid ""
-"The LDAP Login attribute of the CN must be specified - this is the name "
-"of the attribute that is equivalent to \"username\""
+"The LDAP Login attribute of the CN must be specified - this is the name of "
+"the attribute that is equivalent to \"username\""
 msgstr "LDAPのこのCNに対するログイン属性は必須です。 - これは \"ユーザー名\" と同じです"
 
 #: rhodecode/model/validators.py:737
@@ -1587,7 +1555,8 @@ msgstr "有効なIPv4かIPv6のアドレスを入力してください"
 
 #: rhodecode/model/validators.py:770
 #, python-format
-msgid "The network size (bits) must be within the range of 0-32 (not %(bits)r)"
+msgid ""
+"The network size (bits) must be within the range of 0-32 (not %(bits)r)"
 msgstr ""
 
 #: rhodecode/model/validators.py:803
@@ -1624,19 +1593,19 @@ msgstr "リポジトリ"
 #: rhodecode/templates/index_base.html:13
 #: rhodecode/templates/index_base.html:18
 #: rhodecode/templates/admin/repos/repo_add.html:5
-#: rhodecode/templates/admin/repos/repos.html:21
+#: rhodecode/templates/admin/repos/repos.html:22
 msgid "Add repository"
-msgstr "リポジトリの追加"
+msgstr "リポジトリを追加"
 
 #: rhodecode/templates/index_base.html:15
 #: rhodecode/templates/index_base.html:20
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:31
 msgid "Add group"
-msgstr "グループの追加"
+msgstr "グループを追加"
 
 #: rhodecode/templates/index_base.html:27
 msgid "Edit group"
-msgstr "グループの編集"
+msgstr "グループを編集"
 
 #: rhodecode/templates/index_base.html:27
 msgid "You have admin right to this group, and can edit it"
@@ -1656,7 +1625,7 @@ msgstr "グループ名"
 #: rhodecode/templates/index_base.html:123
 #: rhodecode/templates/admin/repos/repo_add_base.html:56
 #: rhodecode/templates/admin/repos/repo_edit.html:68
-#: rhodecode/templates/admin/repos/repos.html:73
+#: rhodecode/templates/admin/repos/repos.html:75
 #: rhodecode/templates/admin/repos_groups/repos_groups_add.html:42
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:47
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:44
@@ -1681,7 +1650,7 @@ msgstr "リポジトリグループ"
 #: rhodecode/templates/index_base.html:121
 #: rhodecode/templates/admin/repos/repo_add_base.html:9
 #: rhodecode/templates/admin/repos/repo_edit.html:32
-#: rhodecode/templates/admin/repos/repos.html:71
+#: rhodecode/templates/admin/repos/repos.html:73
 #: rhodecode/templates/admin/users/user_edit_my_account.html:172
 #: rhodecode/templates/base/perms_summary.html:37
 #: rhodecode/templates/bookmarks/bookmarks.html:48
@@ -1703,7 +1672,7 @@ msgid "Last Change"
 msgstr "最後の変更点"
 
 #: rhodecode/templates/index_base.html:126
-#: rhodecode/templates/admin/repos/repos.html:74
+#: rhodecode/templates/admin/repos/repos.html:76
 #: rhodecode/templates/admin/users/user_edit_my_account.html:174
 #: rhodecode/templates/journal/journal.html:195
 #: rhodecode/templates/journal/journal.html:285
@@ -1712,12 +1681,12 @@ msgstr "Tip"
 
 #: rhodecode/templates/index_base.html:128
 #: rhodecode/templates/admin/repos/repo_edit.html:114
-#: rhodecode/templates/admin/repos/repos.html:76
+#: rhodecode/templates/admin/repos/repos.html:78
 msgid "Owner"
 msgstr "所有者"
 
 #: rhodecode/templates/index_base.html:136
-#: rhodecode/templates/admin/repos/repos.html:84
+#: rhodecode/templates/admin/repos/repos.html:86
 #: rhodecode/templates/admin/users/user_edit_my_account.html:183
 #: rhodecode/templates/admin/users/users.html:107
 #: rhodecode/templates/bookmarks/bookmarks.html:74
@@ -1729,7 +1698,7 @@ msgid "Click to sort ascending"
 msgstr "昇順で並び換え"
 
 #: rhodecode/templates/index_base.html:137
-#: rhodecode/templates/admin/repos/repos.html:85
+#: rhodecode/templates/admin/repos/repos.html:87
 #: rhodecode/templates/admin/users/user_edit_my_account.html:184
 #: rhodecode/templates/admin/users/users.html:108
 #: rhodecode/templates/bookmarks/bookmarks.html:75
@@ -1745,7 +1714,7 @@ msgid "No repositories found."
 msgstr "リポジトリが見つかりません"
 
 #: rhodecode/templates/index_base.html:139
-#: rhodecode/templates/admin/repos/repos.html:87
+#: rhodecode/templates/admin/repos/repos.html:89
 #: rhodecode/templates/admin/users/user_edit_my_account.html:186
 #: rhodecode/templates/admin/users/users.html:110
 #: rhodecode/templates/bookmarks/bookmarks.html:77
@@ -1757,7 +1726,7 @@ msgid "Data error."
 msgstr "データエラー"
 
 #: rhodecode/templates/index_base.html:140
-#: rhodecode/templates/admin/repos/repos.html:88
+#: rhodecode/templates/admin/repos/repos.html:90
 #: rhodecode/templates/admin/users/user_edit_my_account.html:58
 #: rhodecode/templates/admin/users/user_edit_my_account.html:187
 #: rhodecode/templates/admin/users/users.html:111
@@ -1927,7 +1896,7 @@ msgid_plural "%s entries"
 msgstr[0] "%s エントリ"
 
 #: rhodecode/templates/admin/admin_log.html:6
-#: rhodecode/templates/admin/repos/repos.html:77
+#: rhodecode/templates/admin/repos/repos.html:79
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:46
 #: rhodecode/templates/admin/users/user_edit_my_account.html:176
 #: rhodecode/templates/admin/users/users.html:87
@@ -2039,9 +2008,9 @@ msgid "Gists"
 msgstr ""
 
 #: rhodecode/templates/admin/gists/index.html:10
-#, fuzzy, python-format
+#, python-format
 msgid "Private Gists for user %s"
-msgstr "ユーザー %s を作成しました"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/index.html:12
 #, python-format
@@ -2055,33 +2024,28 @@ msgstr ""
 #: rhodecode/templates/admin/gists/index.html:31
 #: rhodecode/templates/admin/gists/show.html:24
 #: rhodecode/templates/base/base.html:302
-#, fuzzy
 msgid "Create new gist"
-msgstr "新しいファイルを作成"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/index.html:48
-#, fuzzy
 msgid "Created"
-msgstr "読込"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/index.html:51
 #: rhodecode/templates/admin/gists/index.html:53
 #: rhodecode/templates/admin/gists/show.html:43
 #: rhodecode/templates/admin/gists/show.html:45
-#, fuzzy
 msgid "Expires"
-msgstr "リポジトリ"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/index.html:51
 #: rhodecode/templates/admin/gists/show.html:43
-#, fuzzy
 msgid "never"
-msgstr "レビュアー"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/index.html:68
-#, fuzzy
 msgid "There are no gists yet"
-msgstr "まだタグがありません"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/new.html:5
 #: rhodecode/templates/admin/gists/new.html:16
@@ -2089,9 +2053,8 @@ msgid "New gist"
 msgstr ""
 
 #: rhodecode/templates/admin/gists/new.html:37
-#, fuzzy
 msgid "Gist description ..."
-msgstr "説明"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/new.html:52
 msgid "Create private gist"
@@ -2137,9 +2100,8 @@ msgid "Public gist"
 msgstr ""
 
 #: rhodecode/templates/admin/gists/show.html:38
-#, fuzzy
 msgid "Private gist"
-msgstr "非公開リポジトリ"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/show.html:54
 #: rhodecode/templates/admin/repos/repo_edit.html:299
@@ -2148,9 +2110,8 @@ msgid "Delete"
 msgstr "削除"
 
 #: rhodecode/templates/admin/gists/show.html:54
-#, fuzzy
 msgid "Confirm to delete this gist"
-msgstr "このIPアドレスを削除してよろしいですか: %s"
+msgstr ""
 
 #: rhodecode/templates/admin/gists/show.html:63
 #: rhodecode/templates/admin/gists/show.html:84
@@ -2161,9 +2122,8 @@ msgid "Show as raw"
 msgstr "元のファイルを表示"
 
 #: rhodecode/templates/admin/gists/show.html:71
-#, fuzzy
 msgid "created"
-msgstr "読込"
+msgstr ""
 
 #: rhodecode/templates/admin/ldap/ldap.html:5
 msgid "LDAP administration"
@@ -2302,8 +2262,8 @@ msgstr "匿名アクセス"
 #: rhodecode/templates/admin/permissions/permissions.html:49
 msgid ""
 "All default permissions on each repository will be reset to chosen "
-"permission, note that all custom default permission on repositories will "
-"be lost"
+"permission, note that all custom default permission on repositories will be "
+"lost"
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:50
@@ -2320,9 +2280,8 @@ msgid ""
 msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:69
-#, fuzzy
 msgid "User group"
-msgstr "ユーザーグループ"
+msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:76
 msgid ""
@@ -2336,9 +2295,8 @@ msgid "Repository creation"
 msgstr "リポジトリ作成"
 
 #: rhodecode/templates/admin/permissions/permissions.html:91
-#, fuzzy
 msgid "User group creation"
-msgstr "ユーザーグループ管理"
+msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:99
 msgid "Repository forking"
@@ -2349,9 +2307,8 @@ msgid "Registration"
 msgstr "登録"
 
 #: rhodecode/templates/admin/permissions/permissions.html:115
-#, fuzzy
 msgid "External auth account activation"
-msgstr "自動でアカウントを有効にする"
+msgstr ""
 
 #: rhodecode/templates/admin/permissions/permissions.html:133
 msgid "Default User Permissions"
@@ -2444,7 +2401,8 @@ msgstr "ファイルページ、ダウンロード、検索、READMEのデフォ
 #: rhodecode/templates/admin/repos/repo_add_base.html:60
 #: rhodecode/templates/admin/repos/repo_edit.html:72
 #: rhodecode/templates/forks/fork.html:60
-msgid "Keep it short and to the point. Use a README file for longer descriptions."
+msgid ""
+"Keep it short and to the point. Use a README file for longer descriptions."
 msgstr "短く要点を絞ってください。長い説明にはREADMEファイルを利用してください。"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:8
@@ -2454,15 +2412,15 @@ msgstr "リポジトリを編集"
 #: rhodecode/templates/admin/repos/repo_edit.html:12
 #: rhodecode/templates/admin/settings/hooks.html:9
 #: rhodecode/templates/admin/settings/settings.html:11
-#: rhodecode/templates/base/base.html:81 rhodecode/templates/base/base.html:134
+#: rhodecode/templates/base/base.html:81
+#: rhodecode/templates/base/base.html:134
 #: rhodecode/templates/summary/summary.html:212
 msgid "Settings"
 msgstr "設定"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:36
-#, fuzzy
 msgid "Non-changeable id"
-msgstr "変更不能ID %s"
+msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:41
 msgid "Clone uri"
@@ -2526,8 +2484,8 @@ msgstr "リポジトリのキャッシュを無効化してもよろしいです
 
 #: rhodecode/templates/admin/repos/repo_edit.html:218
 msgid ""
-"Manually invalidate cache for this repository. On first access repository"
-" will be cached again"
+"Manually invalidate cache for this repository. On first access repository "
+"will be cached again"
 msgstr "このリポジトリのキャッシュを手動で無効化します。リポジトリへの初回アクセス時に再びキャッシュされます。"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:223
@@ -2568,8 +2526,8 @@ msgstr "公開ジャーナルに追加する"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:256
 msgid ""
-"All actions made on this repository will be accessible to everyone in "
-"public journal"
+"All actions made on this repository will be accessible to everyone in public"
+" journal"
 msgstr "公開ジャーナルでは、このリポジトリに対して行った操作のすべてが公開されます"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:263
@@ -2585,9 +2543,8 @@ msgid "Confirm to unlock repository"
 msgstr "このリポジトリのロックを外しますか？"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:271
-#, fuzzy
 msgid "Lock repo"
-msgstr "リポジトリのロック"
+msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:271
 msgid "Confirm to lock repository"
@@ -2598,7 +2555,8 @@ msgid "Repository is not locked"
 msgstr "リポジトリはロックされていません"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:277
-msgid "Force locking on repository. Works only when anonymous access is disabled"
+msgid ""
+"Force locking on repository. Works only when anonymous access is disabled"
 msgstr "リポジトリを強制ロックします。匿名アクセスが無効になっている場合のみ動作します。"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:284
@@ -2606,9 +2564,8 @@ msgid "Set as fork of"
 msgstr "フォーク元の設定"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:289
-#, fuzzy
 msgid "Set"
-msgstr "保存"
+msgstr ""
 
 #: rhodecode/templates/admin/repos/repo_edit.html:293
 msgid "Manually set this repository as a fork of another from the list"
@@ -2638,12 +2595,10 @@ msgstr "フォークも削除"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:315
 msgid ""
-"This repository will be renamed in a special way in order to be "
-"unaccesible for RhodeCode and VCS systems. If you need to fully delete it"
-" from file system please do it manually"
-msgstr ""
-"このリポジトリはRhodeCodeとVCSシステムからアクセス出来ないようにするために特別な方法でリネームされます。\n"
-"完全な削除が必要な場合はファイルシステムから手動で削除してください"
+"This repository will be renamed in a special way in order to be unaccesible "
+"for RhodeCode and VCS systems. If you need to fully delete it from file "
+"system please do it manually"
+msgstr "このリポジトリはRhodeCodeとVCSシステムからアクセス出来ないようにするために特別な方法でリネームされます。\n完全な削除が必要な場合はファイルシステムから手動で削除してください"
 
 #: rhodecode/templates/admin/repos/repo_edit.html:329
 msgid "Extra fields"
@@ -2736,7 +2691,7 @@ msgstr "別のメンバーを追加"
 msgid "Repositories administration"
 msgstr "リポジトリ管理"
 
-#: rhodecode/templates/admin/repos/repos.html:86
+#: rhodecode/templates/admin/repos/repos.html:88
 #: rhodecode/templates/admin/users/user_edit_my_account.html:185
 #: rhodecode/templates/admin/users/users.html:109
 #: rhodecode/templates/bookmarks/bookmarks.html:76
@@ -2772,7 +2727,7 @@ msgstr "と"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_add.html:5
 msgid "Add repository group"
-msgstr "リポジトリグループの追加"
+msgstr "リポジトリグループを追加"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_add.html:11
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:11
@@ -2805,12 +2760,12 @@ msgstr "リポジトリグループを編集 %s"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:27
 msgid "Add child group"
-msgstr "子グループの追加"
+msgstr "子グループを追加"
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_edit.html:68
 msgid ""
-"Enable lock-by-pulling on group. This option will be applied to all other"
-" groups and repositories inside"
+"Enable lock-by-pulling on group. This option will be applied to all other "
+"groups and repositories inside"
 msgstr ""
 
 #: rhodecode/templates/admin/repos_groups/repos_groups_show.html:5
@@ -2881,9 +2836,9 @@ msgstr "再スキャンオプション"
 
 #: rhodecode/templates/admin/settings/settings.html:40
 msgid ""
-"In case a repository was deleted from filesystem and there are leftovers "
-"in the database check this option to scan obsolete data in database and "
-"remove it."
+"In case a repository was deleted from filesystem and there are leftovers in "
+"the database check this option to scan obsolete data in database and remove "
+"it."
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:41
@@ -2892,8 +2847,8 @@ msgstr "古いデータを削除する"
 
 #: rhodecode/templates/admin/settings/settings.html:43
 msgid ""
-"Rescan repositories location for new repositories. Also deletes obsolete "
-"if `destroy` flag is checked "
+"Rescan repositories location for new repositories. Also deletes obsolete if "
+"`destroy` flag is checked "
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:48
@@ -2963,9 +2918,8 @@ msgid "Shows or hides displayed version of RhodeCode in the footer"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:146
-#, fuzzy
 msgid "Dashboard items"
-msgstr "ダッシュボード"
+msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:150
 msgid ""
@@ -2986,9 +2940,8 @@ msgid "Show private repo icon on repositories"
 msgstr "非公開リポジトリのアイコンを表示"
 
 #: rhodecode/templates/admin/settings/settings.html:166
-#, fuzzy
 msgid "Show public/private icons next to repositories names"
-msgstr "公開リポジトリのアイコンを表示"
+msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:172
 msgid "Meta-Tagging"
@@ -3012,11 +2965,9 @@ msgstr "VCSの操作にSSLを必須とする"
 
 #: rhodecode/templates/admin/settings/settings.html:220
 msgid ""
-"RhodeCode will require SSL for pushing or pulling. If SSL is missing it "
-"will return HTTP Error 406: Not Acceptable"
-msgstr ""
-"RhodeCodeはPushとPullにSSLを要求します。もしSSLでない場合、HTTP Error 406: Not "
-"Acceptalbeを返します"
+"RhodeCode will require SSL for pushing or pulling. If SSL is missing it will"
+" return HTTP Error 406: Not Acceptable"
+msgstr "RhodeCodeはPushとPullにSSLを要求します。もしSSLでない場合、HTTP Error 406: Not Acceptalbeを返します"
 
 #: rhodecode/templates/admin/settings/settings.html:226
 msgid "Hooks"
@@ -3066,8 +3017,8 @@ msgstr "リポジトリロケーション"
 
 #: rhodecode/templates/admin/settings/settings.html:279
 msgid ""
-"Click to unlock. You must restart RhodeCode in order to make this setting"
-" take effect."
+"Click to unlock. You must restart RhodeCode in order to make this setting "
+"take effect."
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:280
@@ -3077,8 +3028,8 @@ msgstr "アンロック"
 
 #: rhodecode/templates/admin/settings/settings.html:282
 msgid ""
-"Location where repositories are stored. After changing this value a "
-"restart, and rescan is required"
+"Location where repositories are stored. After changing this value a restart,"
+" and rescan is required"
 msgstr ""
 
 #: rhodecode/templates/admin/settings/settings.html:303
@@ -3115,7 +3066,7 @@ msgstr "ユーザー"
 #: rhodecode/templates/admin/users/user_add.html:12
 #: rhodecode/templates/admin/users/users.html:23
 msgid "Add new user"
-msgstr "新しいユーザーの追加"
+msgstr "新しいユーザーを追加"
 
 #: rhodecode/templates/admin/users/user_add.html:50
 msgid "Password confirmation"
@@ -3123,7 +3074,7 @@ msgstr "パスワード再入力"
 
 #: rhodecode/templates/admin/users/user_edit.html:5
 msgid "Edit user"
-msgstr "ユーザー編集"
+msgstr "ユーザーを編集"
 
 #: rhodecode/templates/admin/users/user_edit.html:13
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:13
@@ -3263,7 +3214,7 @@ msgstr "最終ログイン日時"
 
 #: rhodecode/templates/admin/users_groups/users_group_add.html:5
 msgid "Add user group"
-msgstr "ユーザーグループの追加"
+msgstr "ユーザーグループを追加"
 
 #: rhodecode/templates/admin/users_groups/users_group_add.html:10
 #: rhodecode/templates/admin/users_groups/users_groups.html:11
@@ -3274,7 +3225,7 @@ msgstr "ユーザーグループ"
 #: rhodecode/templates/admin/users_groups/users_group_add.html:12
 #: rhodecode/templates/admin/users_groups/users_groups.html:26
 msgid "Add new user group"
-msgstr "新しいユーザーグループの追加"
+msgstr "新しいユーザーグループを追加"
 
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:5
 msgid "Edit user group"
@@ -3310,9 +3261,8 @@ msgid "No members yet"
 msgstr "まだメンバーがいません"
 
 #: rhodecode/templates/admin/users_groups/users_group_edit.html:117
-#, fuzzy
 msgid "Global Permissions"
-msgstr "権限のコピー"
+msgstr ""
 
 #: rhodecode/templates/admin/users_groups/users_groups.html:5
 msgid "User groups administration"
@@ -3324,9 +3274,8 @@ msgid "Confirm to delete this user group: %s"
 msgstr "ユーザグループを削除しますか？: %s"
 
 #: rhodecode/templates/admin/users_groups/users_groups.html:62
-#, fuzzy
 msgid "There are no user groups yet"
-msgstr "まだリポジトリグループがありません"
+msgstr ""
 
 #: rhodecode/templates/base/base.html:42
 #, python-format
@@ -3488,9 +3437,8 @@ msgid "Select this option to allow repository creation for this user"
 msgstr ""
 
 #: rhodecode/templates/base/default_perms_box.html:35
-#, fuzzy
 msgid "Create user groups"
-msgstr "ユーザーグループを[作成]"
+msgstr ""
 
 #: rhodecode/templates/base/default_perms_box.html:39
 msgid "Select this option to allow user group creation for this user"
@@ -3516,76 +3464,75 @@ msgstr "権限"
 #: rhodecode/templates/base/perms_summary.html:20
 #: rhodecode/templates/base/perms_summary.html:39
 msgid "Edit Permission"
-msgstr "権限の編集"
+msgstr "権限を編集"
 
-#: rhodecode/templates/base/root.html:43
+#: rhodecode/templates/base/root.html:44
 msgid "Add another comment"
 msgstr "別のコメントを追加"
 
-#: rhodecode/templates/base/root.html:44
+#: rhodecode/templates/base/root.html:45
 #: rhodecode/templates/data_table/_dt_elements.html:147
 msgid "Stop following this repository"
 msgstr "このリポジトリのフォローをやめる"
 
-#: rhodecode/templates/base/root.html:45
+#: rhodecode/templates/base/root.html:46
 msgid "Start following this repository"
 msgstr "このリポジトリのフォローする"
 
-#: rhodecode/templates/base/root.html:46
+#: rhodecode/templates/base/root.html:47
 msgid "Group"
 msgstr "グループ"
 
-#: rhodecode/templates/base/root.html:47
+#: rhodecode/templates/base/root.html:48
 msgid "members"
 msgstr "メンバー"
 
-#: rhodecode/templates/base/root.html:48
+#: rhodecode/templates/base/root.html:49
 #: rhodecode/templates/pullrequests/pullrequest.html:203
 msgid "Loading ..."
 msgstr "読み込み中..."
 
-#: rhodecode/templates/base/root.html:49
+#: rhodecode/templates/base/root.html:50
 msgid "Search truncated"
 msgstr "検索結果は省略されています"
 
-#: rhodecode/templates/base/root.html:50
+#: rhodecode/templates/base/root.html:51
 msgid "No matching files"
 msgstr "マッチするファイルはありません"
 
-#: rhodecode/templates/base/root.html:51
+#: rhodecode/templates/base/root.html:52
 #: rhodecode/templates/changelog/changelog.html:45
 msgid "Open new pull request"
 msgstr "新しいプルリクエストを作成"
 
-#: rhodecode/templates/base/root.html:52
+#: rhodecode/templates/base/root.html:53
 msgid "Open new pull request for selected changesets"
 msgstr "選択したチェンジセットから新しいプルリクエストを作成"
 
-#: rhodecode/templates/base/root.html:53
+#: rhodecode/templates/base/root.html:54
 msgid "Show selected changesets __S -> __E"
 msgstr "選択した変更 __S -> __E を表示"
 
-#: rhodecode/templates/base/root.html:54
+#: rhodecode/templates/base/root.html:55
 msgid "Show selected changeset __S"
 msgstr "選択した変更 __S を表示"
 
-#: rhodecode/templates/base/root.html:55
+#: rhodecode/templates/base/root.html:56
 msgid "Selection link"
 msgstr ""
 
-#: rhodecode/templates/base/root.html:56
+#: rhodecode/templates/base/root.html:57
 #: rhodecode/templates/changeset/diff_block.html:8
 msgid "Collapse diff"
 msgstr "差分を折りたたむ"
 
-#: rhodecode/templates/base/root.html:57
+#: rhodecode/templates/base/root.html:58
 msgid "Expand diff"
 msgstr "差分を表示"
 
-#: rhodecode/templates/base/root.html:58
-#, fuzzy
-msgid "Failed to remoke permission"
-msgstr "ユーザーの削除に失敗しました"
+#: rhodecode/templates/base/root.html:59
+msgid "Failed to revoke permission"
+msgstr ""
 
 #: rhodecode/templates/bookmarks/bookmarks.html:5
 #, python-format
@@ -3593,9 +3540,8 @@ msgid "%s Bookmarks"
 msgstr "%s ブックマーク"
 
 #: rhodecode/templates/bookmarks/bookmarks.html:26
-#, fuzzy
 msgid "Compare bookmarks"
-msgstr "フォークを比較"
+msgstr ""
 
 #: rhodecode/templates/bookmarks/bookmarks.html:51
 #: rhodecode/templates/bookmarks/bookmarks_data.html:8
@@ -3735,9 +3681,8 @@ msgid "Age"
 msgstr "経過時間"
 
 #: rhodecode/templates/changelog/changelog_summary_data.html:9
-#, fuzzy
 msgid "Refs"
-msgstr "プレフィックス"
+msgstr ""
 
 #: rhodecode/templates/changelog/changelog_summary_data.html:86
 msgid "Add or upload files directly via RhodeCode"
@@ -3867,20 +3812,19 @@ msgstr "コメントには %s 構文 ( %s サポートつき ) が利用出来�
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:61
 #: rhodecode/templates/changeset/changeset_file_comment.html:147
-msgid "Use @username inside this text to send notification to this RhodeCode user"
+msgid ""
+"Use @username inside this text to send notification to this RhodeCode user"
 msgstr "テキスト内で @username を使うと、この RhodeCode のユーザーに通知を送信します"
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:65
 #: rhodecode/templates/changeset/changeset_file_comment.html:152
-#, fuzzy
 msgid "Preview"
-msgstr "レビュアー"
+msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:72
 #: rhodecode/templates/changeset/changeset_file_comment.html:170
-#, fuzzy
 msgid "Comment preview"
-msgstr "比較の表示"
+msgstr ""
 
 #: rhodecode/templates/changeset/changeset_file_comment.html:80
 #: rhodecode/templates/changeset/changeset_file_comment.html:177
@@ -4016,14 +3960,13 @@ msgstr "このユーザーを本当に削除してよろしいですか？: %s"
 #: rhodecode/templates/email_templates/changeset_comment.html:4
 #: rhodecode/templates/email_templates/pull_request.html:4
 #: rhodecode/templates/email_templates/pull_request_comment.html:4
-#, fuzzy
 msgid "URL"
-msgstr "ジャーナル"
+msgstr ""
 
 #: rhodecode/templates/email_templates/changeset_comment.html:6
-#, fuzzy, python-format
+#, python-format
 msgid "%s commented on a %s changeset."
-msgstr "%s がコミットにコメント %s"
+msgstr ""
 
 #: rhodecode/templates/email_templates/changeset_comment.html:14
 msgid "The changeset status was changed to"
@@ -4053,8 +3996,7 @@ msgstr ""
 #: rhodecode/templates/email_templates/pull_request.html:6
 #, python-format
 msgid ""
-"%s opened a pull request for repository %s and wants you to review "
-"changes."
+"%s opened a pull request for repository %s and wants you to review changes."
 msgstr "ユーザ %s がリポジトリ %s で新しいプルリクエストを作成しました。変更をレビューしてください。"
 
 #: rhodecode/templates/email_templates/pull_request.html:8
@@ -4065,19 +4007,17 @@ msgid "Title"
 msgstr "タイトル"
 
 #: rhodecode/templates/email_templates/pull_request_comment.html:6
-#, fuzzy, python-format
+#, python-format
 msgid "%s commented on pull request \"%s\""
-msgstr "%s プルリクエストにコメント #%s"
+msgstr ""
 
 #: rhodecode/templates/email_templates/pull_request_comment.html:10
-#, fuzzy
 msgid "Pull request was closed with status"
-msgstr "このステータスでプルリクエストをクローズ"
+msgstr ""
 
 #: rhodecode/templates/email_templates/pull_request_comment.html:12
-#, fuzzy
 msgid "Pull request changed status"
-msgstr "プルリクエストステータス"
+msgstr ""
 
 #: rhodecode/templates/email_templates/registration.html:6
 msgid "View this user here"
@@ -4401,14 +4341,12 @@ msgid "Create new pull request"
 msgstr "新しいプルリクエストを作成"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:47
-#, fuzzy
 msgid "Write a short description on this pull request"
-msgstr "このプルリクエストを削除しますか？"
+msgstr ""
 
 #: rhodecode/templates/pullrequests/pullrequest.html:53
-#, fuzzy
 msgid "Changeset flow"
-msgstr "チェンジセット"
+msgstr ""
 
 #: rhodecode/templates/pullrequests/pullrequest.html:60
 #: rhodecode/templates/pullrequests/pullrequest_show.html:65
@@ -4438,9 +4376,8 @@ msgid "Detailed compare view"
 msgstr "比較ビュー詳細"
 
 #: rhodecode/templates/pullrequests/pullrequest.html:150
-#, fuzzy
 msgid "Destination repository"
-msgstr "リポジトリを編集"
+msgstr ""
 
 #: rhodecode/templates/pullrequests/pullrequest_show.html:4
 #, python-format
@@ -4593,9 +4530,8 @@ msgstr "トレンドファイル"
 
 #: rhodecode/templates/summary/summary.html:151
 #: rhodecode/templates/summary/summary.html:167
-#, fuzzy
 msgid "Enable"
-msgstr "有効にする"
+msgstr ""
 
 #: rhodecode/templates/summary/summary.html:159
 msgid "Download"
@@ -4651,9 +4587,9 @@ msgid "Quick start"
 msgstr "クイックスタート"
 
 #: rhodecode/templates/summary/summary.html:272
-#, fuzzy, python-format
+#, python-format
 msgid "Readme file from revision %s"
-msgstr "リビジョン '%s' のReadmeファイル"
+msgstr ""
 
 #: rhodecode/templates/summary/summary.html:332
 #, python-format
@@ -4704,4 +4640,3 @@ msgstr "%s タグ"
 #: rhodecode/templates/tags/tags.html:26
 msgid "Compare tags"
 msgstr "タグの比較"
-
