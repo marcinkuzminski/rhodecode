@@ -293,9 +293,11 @@ beaker.cache.sql_cache_long.key_length = 256
 ## file based cookies (default) ##
 #beaker.session.type = file
 
-
 beaker.session.key = rhodecode
-## secure cookie requires AES python libraries
+beaker.session.secret = ${app_instance_uuid}
+
+## Secure encrypted cookie. Requires AES and AES python libraries
+## you must disable beaker.session.secret to use this
 #beaker.session.encrypt_key = <key_for_encryption>
 #beaker.session.validate_key = <validation_key>
 
