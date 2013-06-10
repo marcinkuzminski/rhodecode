@@ -744,9 +744,12 @@ class ScmModel(BaseModel):
 
             if _rhodecode_hook or force_create:
                 log.debug('writing %s hook file !' % (h_type,))
-                with open(_hook_file, 'wb') as f:
-                    tmpl = tmpl.replace('_TMPL_', rhodecode.__version__)
-                    f.write(tmpl)
-                os.chmod(_hook_file, 0755)
+                try:
+                    with open(_hook_file, 'wb') as f:
+                        tmpl = tmpl.replace('_TMPL_', rhodecode.__version__)
+                        f.write(tmpl)
+                    os.chmod(_hook_file, 0755)
+                except IOError, e:
+                    log.error('error writing %s: %s' % (_hook_file, e))
             else:
                 log.debug('skipping writing hook file')

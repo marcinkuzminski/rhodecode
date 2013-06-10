@@ -614,16 +614,24 @@ class DbManage(object):
         # check proper dir
         if not os.path.isdir(path):
             path_ok = False
-            log.error('Given path %s is not a valid directory' % path)
+            log.error('Given path %s is not a valid directory' % (path,))
 
         elif not os.path.isabs(path):
             path_ok = False
-            log.error('Given path %s is not an absolute path' % path)
+            log.error('Given path %s is not an absolute path' % (path,))
 
-        # check write access
-        elif not os.access(path, os.W_OK) and path_ok:
+        # check if path is at least readable.
+        if not os.access(path, os.R_OK):
             path_ok = False
-            log.error('No write permission to given path %s' % path)
+            log.error('Given path %s is not readable' % (path,))
+
+        # check write access, warn user about non writeable paths
+        elif not os.access(path, os.W_OK) and path_ok:
+            log.warn('No write permission to given path %s' % (path,))
+            if not ask_ok('Given path %s is not writeable, do you want to '
+                          'continue with read only mode ? [y/n]' % (path,)):
+                log.error('Canceled by user')
+                sys.exit(-1)
 
         if retries == 0:
             sys.exit('max retries reached')
@@ -635,7 +643,7 @@ class DbManage(object):
 
         if real_path != os.path.normpath(path):
             if not ask_ok(('Path looks like a symlink, Rhodecode will store '
-                           'given path as %s ? [y/n]') % (real_path)):
+                           'given path as %s ? [y/n]') % (real_path,)):
                 log.error('Canceled by user')
                 sys.exit(-1)
 
