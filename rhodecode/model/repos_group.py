@@ -185,8 +185,9 @@ class ReposGroupModel(BaseModel):
                     repos_group=obj, user=user, perm=perm
                 )
             elif isinstance(obj, Repository):
-                #we do this ONLY IF repository is non-private
-                if obj.private:
+                # private repos will not allow to change the default permissions
+                # using recursive mode
+                if obj.private and user == User.DEFAULT_USER:
                     return
 
                 # we set group permission but we have to switch to repo
@@ -208,6 +209,8 @@ class ReposGroupModel(BaseModel):
                 RepoModel().grant_users_group_permission(
                     repo=obj, group_name=users_group, perm=perm
                 )
+
+        # start updates
         updates = []
         log.debug('Now updating permissions for %s in recursive mode:%s'
                   % (repos_group, recursive))
