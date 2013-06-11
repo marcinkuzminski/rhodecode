@@ -2039,4 +2039,3 @@ class DbMigrateVersion(Base, BaseModel):
     repository_id = Column('repository_id', String(250), primary_key=True)
     repository_path = Column('repository_path', Text)
     version = Column('version', Integer)
-

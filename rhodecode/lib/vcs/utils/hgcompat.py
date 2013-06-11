@@ -9,6 +9,7 @@ mercurial.demandimport.enable = lambda *args, **kwargs: 1
 from mercurial import archival, merge as hg_merge, patch, ui
 from mercurial import discovery
 from mercurial import localrepo
+from mercurial import unionrepo
 from mercurial import scmutil
 from mercurial import config
 from mercurial.commands import clone, nullid, pull

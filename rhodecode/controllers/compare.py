@@ -35,11 +35,11 @@ from pylons.i18n.translation import _
 
 from rhodecode.lib.vcs.exceptions import EmptyRepositoryError, RepositoryError
 from rhodecode.lib.vcs.utils import safe_str
-from rhodecode.lib.vcs.utils.hgcompat import scmutil
+from rhodecode.lib.vcs.utils.hgcompat import scmutil, unionrepo
 from rhodecode.lib import helpers as h
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
-from rhodecode.lib import diffs, unionrepo
+from rhodecode.lib import diffs
 
 from rhodecode.model.db import Repository
 from webob.exc import HTTPBadRequest
