@@ -58,9 +58,9 @@ class Command(BasePasterCommand):
         log.info('Now scanning root location for new repos...')
         added, removed = repo2db_mapper(ScmModel().repo_scan(),
                                         remove_obsolete=rm_obsolete)
-        added = ','.join(added) or '-'
-        removed = ','.join(removed) or '-'
-        log.info('Scan completed added:%s removed:%s' % (added, removed))
+        added = ', '.join(added) or '-'
+        removed = ', '.join(removed) or '-'
+        log.info('Scan completed added: %s removed:%s' % (added, removed))
 
     def update_parser(self):
         self.parser.add_option('--delete-obsolete',

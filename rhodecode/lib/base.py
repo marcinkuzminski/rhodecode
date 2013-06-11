@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 
 def _filter_proxy(ip):
     """
-    HEADERS can have mutliple ips inside the left-most being the original
+    HEADERS can have multiple ips inside the left-most being the original
     client, and each successive proxy that passed the request adding the IP
     address where it received the request from.
 
