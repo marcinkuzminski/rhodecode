@@ -2684,7 +2684,6 @@ BIN_FILENODE = 6
     padding: 2px 0px 0px 2px;
 }
 .changeset-status-container .changeset-status-lbl {
-    color: rgb(136, 136, 136);
     float: left;
     padding: 3px 4px 0px 0px
 }
