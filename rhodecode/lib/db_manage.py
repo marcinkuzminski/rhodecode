@@ -30,6 +30,7 @@ import time
 import uuid
 import logging
 from os.path import dirname as dn, join as jn
+import datetime
 
 from rhodecode import __dbversion__, __py_version__
 
@@ -216,6 +217,13 @@ class UpgradeSteps(object):
     def step_13(self):
         pass
 
+    def step_14(self):
+        # fix nullable columns on last_update
+        for r in RepoModel().get_all():
+            if r.updated_on is None:
+                r.updated_on = datetime.datetime.fromtimestamp(0)
+                Session().add(r)
+        Session().commit()
 
 class DbManage(object):
     def __init__(self, log_sql, dbconf, root, tests=False, cli_args={}):
