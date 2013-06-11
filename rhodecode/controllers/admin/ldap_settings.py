@@ -115,7 +115,7 @@ class LdapSettingsController(BaseController):
                 for k, v in form_result.items():
                     if k.startswith('ldap_'):
                         if k == 'ldap_active':
-                            v = ldap_active
+                            v = v if ldap_active else False
                         setting = RhodeCodeSetting.get_by_name(k)
                         setting.app_settings_value = v
                         Session().add(setting)
@@ -125,8 +125,8 @@ class LdapSettingsController(BaseController):
                         category='success')
                 if not ldap_active:
                     #if ldap is missing send an info to user
-                    h.flash(_('Unable to activate ldap. The "python-ldap" library '
-                              'is missing.'), category='warning')
+                    h.flash(_('Unable to activate ldap. The "python-ldap" '
+                              'library is missing.'), category='warning')
 
             except (DatabaseError,):
                 raise
