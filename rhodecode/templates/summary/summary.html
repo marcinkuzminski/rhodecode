@@ -33,7 +33,7 @@ window.onhashchange = function() {
 </%def>
 
 <%def name="main()">
-${self.context_bar('summary')}
+${self.repo_context_bar('summary')}
     <%
     summary = lambda n:{False:'summary-short'}.get(n)
     %>
