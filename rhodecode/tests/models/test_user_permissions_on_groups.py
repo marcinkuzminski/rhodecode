@@ -15,14 +15,17 @@ _get_repo_perms = None
 _get_group_perms = None
 
 
-def permissions_setup_func(group_name='g0', perm='group.read', recursive=True):
+def permissions_setup_func(group_name='g0', perm='group.read', recursive=True,
+                           user_id=None):
     """
     Resets all permissions to perm attribute
     """
+    if not user_id:
+        user_id = test_u1_id
     repos_group = RepoGroup.get_by_group_name(group_name=group_name)
     if not repos_group:
         raise Exception('Cannot get group %s' % group_name)
-    perms_updates = [[test_u1_id, perm, 'user']]
+    perms_updates = [[user_id, perm, 'user']]
     ReposGroupModel()._update_permissions(repos_group,
                                           perms_updates=perms_updates,
                                           recursive=recursive,
@@ -99,10 +102,35 @@ def test_user_permissions_on_group_with_recursive_mode():
     _check_expected_count(items, repo_items, expected_count(group, True))
 
     for name, perm in repo_items:
-        if name == 'g0/g0_3/g0_3_r1_private':
-            yield check_tree_perms, name, perm, group, 'repository.none'
-        else:
-            yield check_tree_perms, name, perm, group, 'repository.write'
+        yield check_tree_perms, name, perm, group, 'repository.write'
+
+    for name, perm in items:
+        yield check_tree_perms, name, perm, group, 'group.write'
+
+
+@with_setup(permissions_setup_func)
+def test_user_permissions_on_group_with_recursive_mode_for_default_user():
+
+    # set permission to g0 recursive mode, all children including
+    # other repos and groups should have this permission now set !
+    recursive = True
+    group = 'g0'
+    default_user_id = User.get_default_user().user_id
+    permissions_setup_func(group, 'group.write', recursive=recursive,
+                           user_id=default_user_id)
+
+    # change default to get perms for default user
+    _get_repo_perms = functools.partial(_get_perms, key='repositories',
+                                        test_u1_id=default_user_id)
+    _get_group_perms = functools.partial(_get_perms, key='repositories_groups',
+                                         test_u1_id=default_user_id)
+
+    repo_items = [x for x in _get_repo_perms(group, recursive)]
+    items = [x for x in _get_group_perms(group, recursive)]
+    _check_expected_count(items, repo_items, expected_count(group, True))
+
+    for name, perm in repo_items:
+        yield check_tree_perms, name, perm, group, 'repository.write'
 
     for name, perm in items:
         yield check_tree_perms, name, perm, group, 'group.write'
