@@ -322,10 +322,10 @@ class PullrequestsController(BaseRepoController):
             elif errors.error_dict.get('pullrequest_title'):
                 msg = _('Pull request requires a title with min. 3 chars')
             else:
-                msg = _('Error creating pull request')
+                msg = _('Error creating pull request: %s') % errors.msg
 
             h.flash(msg, 'error')
-            return redirect(url('pullrequest_home', repo_name=repo_name))
+            return redirect(url('pullrequest_home', repo_name=repo_name)) ## would rather just go back to form ...
 
         org_repo = _form['org_repo']
         org_ref = _form['org_ref'] # will end with merge_rev but have symbolic name
