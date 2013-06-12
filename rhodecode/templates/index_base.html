@@ -1,4 +1,4 @@
-<%page args="parent" />
+<%page args="parent,group_name=''" />
     <div class="box">
         <!-- box / title -->
         <div class="title">
@@ -104,7 +104,7 @@
             if (req) {
                 req = req.toLowerCase();
                 for (i = 0; i<data.length; i++) {
-                    var pos = data[i].raw_name.toLowerCase().indexOf(req)
+                    var pos = data[i].raw_name.toLowerCase().indexOf(req, ${len(group_name)})
                     if (pos != -1) {
                         filtered.push(data[i]);
                     }
