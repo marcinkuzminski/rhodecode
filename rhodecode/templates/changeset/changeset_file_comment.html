@@ -14,27 +14,35 @@
           <div class="date">
               ${h.age(co.modified_at)}
           </div>
-        %if co.status_change:
-           <div  style="float:left" class="changeset-status-container">
-             <div style="float:left;padding:0px 2px 0px 2px"><span style="font-size: 18px;">&rsaquo;</span></div>
-             <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change[0].status_lbl}</div>
-             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change[0].status))}" /></div>
-           </div>
-        %endif
 
        <div style="float:left;padding:4px 0px 0px 5px">
         <span class="">
          %if co.pull_request:
             <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">
             %if co.status_change:
-              ${_('Status change on pull request #%s') % co.pull_request.pull_request_id}
+              ${_('Status change on pull request #%s') % co.pull_request.pull_request_id}:
             %else:
               ${_('Comment on pull request #%s') % co.pull_request.pull_request_id}
             %endif
             </a>
+         %else:
+            %if co.status_change:
+              ${_('Status change on changeset')}:
+            %else:
+              ${_('Comment on changeset')}
+            %endif
          %endif
         </span>
        </div>
+
+        %if co.status_change:
+           <div  style="float:left" class="changeset-status-container">
+             <div style="float:left;padding:10px 2px 0px 2px"></div>
+             <div title="${_('Changeset status')}" class="changeset-status-lbl"> ${co.status_change[0].status_lbl}</div>
+             <div class="changeset-status-ico"><img src="${h.url(str('/images/icons/flag_status_%s.png' % co.status_change[0].status))}" /></div>
+           </div>
+        %endif
+
       <a class="permalink" href="#comment-${co.comment_id}">&para;</a>
       %if h.HasPermissionAny('hg.admin', 'repository.admin')() or co.author.user_id == c.rhodecode_user.user_id:
           <div onClick="deleteComment(${co.comment_id})" class="buttons delete-comment ui-btn small">${_('Delete')}</div>
