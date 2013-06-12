@@ -3698,6 +3698,10 @@ div.gravatar img {
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 
+label.disabled {
+    color: #aaa;
+}
+
 .ui-btn.blue.hidden {
     display: none;
 }

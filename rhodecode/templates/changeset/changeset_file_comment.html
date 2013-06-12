@@ -159,6 +159,10 @@
                         <label for="${status}">${lbl}</label>
                     </div>
                 %endfor
+                %if close_btn and change_status:
+                <input id="save_close" type="checkbox" name="save_close" disabled="${'1' if cur_status in ['not_reviewed','under_review'] else ''}">
+                <label id="save_close_label" for="save_close" class="${'disabled' if cur_status in ['not_reviewed','under_review'] else ''}">${_("Close (when approved or rejected)")}</label>
+                %endif
             </div>
             %endif
             <div class="mentions-container" id="mentions_container"></div>
@@ -175,9 +179,6 @@
 
         <div class="comment-button">
         ${h.submit('save', _('Comment'), class_="ui-btn large")}
-        %if close_btn and change_status:
-           ${h.submit('save_close', _('Comment and close'), class_='ui-btn blue large %s' % ('hidden' if cur_status in ['not_reviewed','under_review'] else ''))}
-        %endif
         </div>
         ${h.end_form()}
     </div>
@@ -196,9 +197,11 @@ YUE.onDOMReady(function () {
    YUE.on(YUQ('.status_change_radio'), 'change',function(e){
        var val = e.currentTarget.value;
        if (val == 'approved' || val == 'rejected') {
-           YUD.removeClass('save_close', 'hidden');
+           YUD.removeClass('save_close_label', 'disabled');
+           YUD.get('save_close').disabled = false;
        }else{
-           YUD.addClass('save_close', 'hidden');
+           YUD.addClass('save_close_label', 'disabled');
+           YUD.get('save_close').disabled = true;
        }
    })
    YUE.on('preview-btn', 'click', function(e){
