@@ -255,7 +255,7 @@ ${self.repo_context_bar('changelog')}
                     var selected_branch = e.currentTarget.options[e.currentTarget.selectedIndex].value;
                     if(selected_branch != ''){
                         window.location = pyroutes.url('changelog_home', {'repo_name': '${c.repo_name}',
-                                                                          'branch':encodeURIComponent(selected_branch)});
+                                                                          'branch':selected_branch});
                     }else{
                         window.location = pyroutes.url('changelog_home', {'repo_name': '${c.repo_name}'});
                     }
