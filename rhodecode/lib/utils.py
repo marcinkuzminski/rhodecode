@@ -202,10 +202,10 @@ def get_filesystem_repos(path, recursive=False, skip_removed_repos=True):
 
     def _get_repos(p):
         if not os.access(p, os.R_OK) or not os.access(p, os.X_OK):
-            log.warn('ignoring repo path without access: %s', p)
+            log.warn('ignoring repo path without access: %s' % (p,))
             return
         if not os.access(p, os.W_OK):
-            log.warn('repo path without write access: %s', p)
+            log.warn('repo path without write access: %s' % (p,))
         for dirpath in os.listdir(p):
             if os.path.isfile(os.path.join(p, dirpath)):
                 continue
