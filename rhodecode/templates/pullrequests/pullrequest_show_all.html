@@ -41,6 +41,11 @@ ${self.repo_context_bar('showpullrequest')}
             ${h.link_to(_('Show closed pull requests too'), h.url('pullrequest_show_all',repo_name=c.repo_name,from_=c.from_,closed=1))}
         %endif
         </div>
+
+        <div>
+            <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}">${_('Open new pull request')}</a>
+        </div>
+
     </div>
 
     ${c.pullrequest_data}
