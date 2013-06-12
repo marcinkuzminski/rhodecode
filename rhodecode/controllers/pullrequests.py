@@ -442,7 +442,7 @@ class PullrequestsController(BaseRepoController):
         c.comments = cc_model.get_comments(c.rhodecode_db_repo.repo_id,
                                            pull_request=pull_request_id)
 
-        # changeset(pull-request) status calulation based on reviewers
+        # (badly named) pull-request status calculation based on reviewer votes
         c.current_changeset_status = cs_model.calculate_status(
                                         c.pull_request_reviewers,
                                          )
