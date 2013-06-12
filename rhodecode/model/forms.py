@@ -415,7 +415,7 @@ def PullRequestForm(repo_id):
                         v.UniqueList(not_empty=True))
         review_members = v.UniqueList(not_empty=True)
 
-        pullrequest_title = v.UnicodeString(strip=True, required=True, min=3)
+        pullrequest_title = v.UnicodeString(strip=True, required=True)
         pullrequest_desc = v.UnicodeString(strip=True, required=False)
 
         ancestor_rev = v.UnicodeString(strip=True, required=True)

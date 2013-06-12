@@ -335,6 +335,8 @@ class PullrequestsController(BaseRepoController):
         reviewers = _form['review_members']
 
         title = _form['pullrequest_title']
+        if not title:
+            title = '%s#%s to %s' % (org_repo, org_ref.split(':', 2)[1], other_repo)
         description = _form['pullrequest_desc']
         try:
             pull_request = PullRequestModel().create(
