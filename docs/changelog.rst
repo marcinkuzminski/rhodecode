@@ -4,7 +4,26 @@
 Changelog
 =========
 
-1.7.0 (**2013-05-XX**)
+1.7.1 (**2013-06-13**)
+----------------------
+
+news
+++++
+
+- Apply to children flag on repository group also adds users to private
+  repositories, this is now consistent with user groups. Private repos default
+  permissions are not affected by apply to children flag.
+- Removed unionrepo code as it's part of Mercurial 2.6
+- RhodeCode accepts now read only paths for serving repositories.
+
+fixes
++++++
+
+- Fixed issues with how mysql handles float values. Caused gists with
+  expiration dates not work properly on mysql.
+- Fixed issue with ldap enable/disable flag
+
+1.7.0 (**2013-06-08**)
 ----------------------
 
 news
