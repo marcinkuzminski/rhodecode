@@ -147,7 +147,7 @@
 
         var filterTimeout = null;
 
-        updateFilter  = function () {
+        updateFilter = function () {
             // Reset timeout
             filterTimeout = null;
 
@@ -175,4 +175,8 @@
             clearTimeout(filterTimeout);
             filterTimeout = setTimeout(updateFilter,600);
         });
+        
+        if(YUD.get('q_filter').value) {
+        	updateFilter();
+        }
       </script>

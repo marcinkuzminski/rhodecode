@@ -223,6 +223,10 @@ function table_renderer(data){
           filterTimeout = setTimeout(updateFilter,600);
       });
 
+      if(YUD.get('q_filter').value) {
+      	updateFilter();
+      }
+
     }
 </script>
 </%def>
