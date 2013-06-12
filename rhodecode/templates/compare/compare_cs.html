@@ -8,7 +8,7 @@
         <tr>
         <td>
           %if cs.raw_id in c.statuses:
-            <div title="${c.statuses[cs.raw_id][1]}" class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses[cs.raw_id][0])}" /></div>
+            <div title="${_('Changeset status: %s') % c.statuses[cs.raw_id][1]}" class="changeset-status-ico"><img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses[cs.raw_id][0])}" /></div>
           %endif
         </td>
         <td><span class="tooltip" title="${h.tooltip(h.age(cs.date))}">${cs.date}</span></td>

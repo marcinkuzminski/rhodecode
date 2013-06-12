@@ -25,7 +25,7 @@
               %if c.statuses.get(cs.raw_id):
                 <div class="changeset-status-ico">
                 %if c.statuses.get(cs.raw_id)[2]:
-                  <a class="tooltip" title="${_('Click to open associated pull request #%s' % c.statuses.get(cs.raw_id)[2])}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}">
+                  <a class="tooltip" title="${_('Changeset status: %s\nClick to open associated pull request #%s') % (c.statuses.get(cs.raw_id)[0], c.statuses.get(cs.raw_id)[2])}" href="${h.url('pullrequest_show',repo_name=c.statuses.get(cs.raw_id)[3],pull_request_id=c.statuses.get(cs.raw_id)[2])}">
                     <img src="${h.url('/images/icons/flag_status_%s.png' % c.statuses.get(cs.raw_id)[0])}" />
                   </a>
                 %else:
