@@ -12,19 +12,19 @@
                   %if c.group:
                         <span>${h.link_to(_('Add repository'),h.url('new_repo',parent_group=c.group.group_id))}</span>
                         %if h.HasPermissionAny('hg.admin')() or h.HasReposGroupPermissionAny('group.admin')(c.group.group_name):
-                         <span>${h.link_to(_(u'Add group'),h.url('new_repos_group', parent_group=c.group.group_id))}</span>
+                         <span>${h.link_to(_(u'Add repository group'),h.url('new_repos_group', parent_group=c.group.group_id))}</span>
                         %endif
                   %else:
                     <span>${h.link_to(_('Add repository'),h.url('new_repo'))}</span>
                     %if h.HasPermissionAny('hg.admin')():
-                     <span>${h.link_to(_(u'Add group'),h.url('new_repos_group'))}</span>
+                     <span>${h.link_to(_(u'Add repository group'),h.url('new_repos_group'))}</span>
                     %endif
                   %endif
                   </li>
                 %endif
                 %if c.group and h.HasReposGroupPermissionAny('group.admin')(c.group.group_name):
                 <li>
-                    <span>${h.link_to(_('Edit group'),h.url('edit_repos_group',group_name=c.group.group_name), title=_('You have admin right to this group, and can edit it'))}</span>
+                    <span>${h.link_to(_('Edit repository group'),h.url('edit_repos_group',group_name=c.group.group_name), title=_('You have admin right to this group, and can edit it'))}</span>
                 </li>
                 %endif
               </ul>
