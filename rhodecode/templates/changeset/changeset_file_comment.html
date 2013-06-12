@@ -20,7 +20,7 @@
          %if co.pull_request:
             <a href="${h.url('pullrequest_show',repo_name=co.pull_request.other_repo.repo_name,pull_request_id=co.pull_request.pull_request_id)}">
             %if co.status_change:
-              ${_('Status change on pull request #%s') % co.pull_request.pull_request_id}:
+              ${_('Vote on pull request #%s') % co.pull_request.pull_request_id}:
             %else:
               ${_('Comment on pull request #%s') % co.pull_request.pull_request_id}
             %endif
@@ -142,7 +142,7 @@
 </%def>
 
 ## MAIN COMMENT FORM
-<%def name="comments(post_url, cur_status, close_btn=False, change_status=True)">
+<%def name="comments(post_url, cur_status, is_pr=False, change_status=True)">
 
 <div class="comments">
     %if c.rhodecode_user.username != 'default':
@@ -154,7 +154,13 @@
                   '<span style="color:#003367" class="tooltip" title="%s">@mention</span>' %
                   _('Use @username inside this text to send notification to this RhodeCode user')))|n}
               %if change_status:
-                | <a id="show_changeset_link" onClick="change_status_show();"> ${_('Change status')}</a>
+                | <a id="show_changeset_link" onClick="change_status_show();">
+                  %if is_pr:
+                    ${_('Vote for pull request status')}
+                  %else:
+                    ${_('Change changeset status')}
+                  %endif
+                  </a>
                   <input id="show_changeset_status_box" type="checkbox" name="change_changeset_status" style="display: none;" />
               %endif
               <div id="preview-btn" class="preview-btn ui-btn small">${_('Preview')}</div>
@@ -167,7 +173,7 @@
                         <label for="${status}">${lbl}</label>
                     </div>
                 %endfor
-                %if close_btn and change_status:
+                %if is_pr and change_status:
                 <input id="save_close" type="checkbox" name="save_close" disabled="${'1' if cur_status in ['not_reviewed','under_review'] else ''}">
                 <label id="save_close_label" for="save_close" class="${'disabled' if cur_status in ['not_reviewed','under_review'] else ''}">${_("Close (when approved or rejected)")}</label>
                 %endif
