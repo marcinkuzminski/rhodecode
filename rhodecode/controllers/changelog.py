@@ -136,6 +136,13 @@ class ChangelogController(BaseRepoController):
         c.size = max(c.size, 1)
         p = safe_int(request.GET.get('page', 1), 1)
         branch_name = request.GET.get('branch', None)
+        if (branch_name and
+            branch_name not in c.rhodecode_repo.branches and
+            branch_name not in c.rhodecode_repo.closed_branches and
+            not revision):
+            return redirect(url('changelog_file_home', repo_name=c.repo_name,
+                                    revision=branch_name, f_path=f_path or ''))
+
         c.changelog_for_path = f_path
         try:
 
