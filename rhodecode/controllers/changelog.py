@@ -29,6 +29,7 @@ import traceback
 from pylons import request, url, session, tmpl_context as c
 from pylons.controllers.util import redirect
 from pylons.i18n.translation import _
+from webob.exc import HTTPNotFound, HTTPBadRequest
 
 import rhodecode.lib.helpers as h
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -39,7 +40,7 @@ from rhodecode.lib.graphmod import _colored, _dagwalker
 from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError,\
     ChangesetError, NodeDoesNotExistError, EmptyRepositoryError
 from rhodecode.lib.utils2 import safe_int
-from webob.exc import HTTPNotFound
+
 
 log = logging.getLogger(__name__)
 
@@ -67,6 +68,33 @@ class ChangelogController(BaseRepoController):
     def __before__(self):
         super(ChangelogController, self).__before__()
         c.affected_files_cut_off = 60
+
+    def __get_cs_or_redirect(self, rev, repo, redirect_after=True,
+                             partial=False):
+        """
+        Safe way to get changeset if error occur it redirects to changeset with
+        proper message. If partial is set then don't do redirect raise Exception
+        instead
+
+        :param rev: revision to fetch
+        :param repo: repo instance
+        """
+
+        try:
+            return c.rhodecode_repo.get_changeset(rev)
+        except EmptyRepositoryError, e:
+            if not redirect_after:
+                return None
+            h.flash(h.literal(_('There are no changesets yet')),
+                    category='warning')
+            redirect(url('changelog_home', repo_name=repo.repo_name))
+
+        except RepositoryError, e:
+            log.error(traceback.format_exc())
+            h.flash(str(e), category='warning')
+            if not partial:
+                redirect(h.url('changelog_home', repo_name=repo.repo_name))
+            raise HTTPBadRequest()
 
     def _graph(self, repo, revs_int, repo_size, size, p):
         """
@@ -120,7 +148,7 @@ class ChangelogController(BaseRepoController):
                 except (NodeDoesNotExistError, ChangesetError):
                     #this node is not present at tip !
                     try:
-                        cs = self.__get_cs_or_redirect(revision, repo_name)
+                        cs = self.__get_css_or_redirect(revision, repo_name)
                         collection = cs.get_file_history(f_path)
                     except RepositoryError, e:
                         h.flash(str(e), category='warning')
