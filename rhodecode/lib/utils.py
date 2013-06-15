@@ -148,6 +148,11 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
 
     if not sa:
         sa = meta.Session()
+    # if we don't get explicit IP address try to get one from registered user
+    # in tmpl context var
+    from pylons import tmpl_context
+    if not ipaddr and hasattr(tmpl_context, 'rhodecode_user'):
+        ipaddr = tmpl_context.rhodecode_user.ip_addr
 
     try:
         if hasattr(user, 'user_id'):
@@ -160,7 +165,7 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         if hasattr(repo, 'repo_id'):
             repo_obj = Repository.get(repo.repo_id)
             repo_name = repo_obj.repo_name
-        elif  isinstance(repo, basestring):
+        elif isinstance(repo, basestring):
             repo_name = repo.lstrip('/')
             repo_obj = Repository.get_by_repo_name(repo_name)
         else:
