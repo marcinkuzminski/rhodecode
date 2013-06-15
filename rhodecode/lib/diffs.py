@@ -127,8 +127,9 @@ NEW_FILENODE = 1
 DEL_FILENODE = 2
 MOD_FILENODE = 3
 RENAMED_FILENODE = 4
-CHMOD_FILENODE = 5
-BIN_FILENODE = 6
+COPIED_FILENODE = 5
+CHMOD_FILENODE = 6
+BIN_FILENODE = 7
 
 
 class DiffLimitExceeded(Exception):
@@ -179,6 +180,8 @@ class DiffProcessor(object):
         (?:^similarity[ ]index[ ](?P<similarity_index>\d+)%(?:\n|$))?
         (?:^rename[ ]from[ ](?P<rename_from>\S+)\n
            ^rename[ ]to[ ](?P<rename_to>\S+)(?:\n|$))?
+        (?:^copy[ ]from[ ](?P<copy_from>\S+)\n
+           ^copy[ ]to[ ](?P<copy_to>\S+)(?:\n|$))?
         (?:^new[ ]file[ ]mode[ ](?P<new_file_mode>.+)(?:\n|$))?
         (?:^deleted[ ]file[ ]mode[ ](?P<deleted_file_mode>.+)(?:\n|$))?
         (?:^index[ ](?P<a_blob_id>[0-9A-Fa-f]+)
@@ -388,7 +391,12 @@ class DiffProcessor(object):
                     stats['binary'] = True
                     stats['ops'][RENAMED_FILENODE] = ('file renamed from %s to %s'
                                     % (head['rename_from'], head['rename_to']))
-
+                # COPY
+                if head['copy_from'] and head['copy_to']:
+                    op = 'M'
+                    stats['binary'] = True
+                    stats['ops'][COPIED_FILENODE] = ('file copied from %s to %s'
+                                        % (head['copy_from'], head['copy_to']))
                 # FALL BACK: detect missed old style add or remove
                 if op is None:
                     if not head['a_file'] and head['b_file']:
