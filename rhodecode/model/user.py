@@ -94,6 +94,9 @@ class UserModel(BaseModel):
 
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
+
+            from rhodecode.lib.hooks import log_create_user
+            log_create_user(new_user.get_dict())
             return new_user
         except Exception:
             log.error(traceback.format_exc())
@@ -141,6 +144,10 @@ class UserModel(BaseModel):
             new_user.name = firstname
             new_user.lastname = lastname
             self.sa.add(new_user)
+
+            if not edit:
+                from rhodecode.lib.hooks import log_create_user
+                log_create_user(new_user.get_dict())
             return new_user
         except (DatabaseError,):
             log.error(traceback.format_exc())
@@ -169,6 +176,9 @@ class UserModel(BaseModel):
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)
+
+                from rhodecode.lib.hooks import log_create_user
+                log_create_user(new_user.get_dict())
                 return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
@@ -209,6 +219,9 @@ class UserModel(BaseModel):
                 new_user.lastname = attrs['lastname']
 
                 self.sa.add(new_user)
+
+                from rhodecode.lib.hooks import log_create_user
+                log_create_user(new_user.get_dict())
                 return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
@@ -311,6 +324,9 @@ class UserModel(BaseModel):
                     % (user.username, len(repos), ', '.join(repos))
                 )
             self.sa.delete(user)
+
+            from rhodecode.lib.hooks import log_delete_user
+            log_delete_user(user.get_dict())
         except Exception:
             log.error(traceback.format_exc())
             raise

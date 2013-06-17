@@ -30,7 +30,7 @@ EXTRA_INDEX_EXTENSIONS = []
 # POST CREATE REPOSITORY HOOK
 #==============================================================================
 # this function will be executed after each repository is created
-def _crhook(*args, **kwargs):
+def _crrepohook(*args, **kwargs):
     """
     Post create repository HOOK
     kwargs available:
@@ -49,16 +49,48 @@ def _crhook(*args, **kwargs):
      :param created_by:
     """
     return 0
-CREATE_REPO_HOOK = _crhook
+CREATE_REPO_HOOK = _crrepohook
+
+
+#==============================================================================
+# POST CREATE USER HOOK
+#==============================================================================
+# this function will be executed after each user is created
+def _cruserhook(*args, **kwargs):
+    """
+    Post create user HOOK
+    kwargs available:
+      :param username:
+      :param full_name_or_username:
+      :param full_contact:
+      :param user_id:
+      :param name:
+      :param firstname:
+      :param short_contact:
+      :param admin:
+      :param lastname:
+      :param ip_addresses:
+      :param ldap_dn:
+      :param email:
+      :param api_key:
+      :param last_login:
+      :param full_name:
+      :param active:
+      :param password:
+      :param emails:
+      :param inherit_default_permissions:
+    """
+    return 0
+CREATE_USER_HOOK = _cruserhook
 
 
 #==============================================================================
 # POST DELETE REPOSITORY HOOK
 #==============================================================================
 # this function will be executed after each repository deletion
-def _dlhook(*args, **kwargs):
+def _dlrepohook(*args, **kwargs):
     """
-    Post create repository HOOK
+    Post delete repository HOOK
     kwargs available:
      :param repo_name:
      :param repo_type:
@@ -76,7 +108,39 @@ def _dlhook(*args, **kwargs):
      :param deleted_on:
     """
     return 0
-DELETE_REPO_HOOK = _dlhook
+DELETE_REPO_HOOK = _dlrepohook
+
+
+#==============================================================================
+# POST DELETE USER HOOK
+#==============================================================================
+# this function will be executed after each user is deleted
+def _dluserhook(*args, **kwargs):
+    """
+    Post delete user HOOK
+    kwargs available:
+      :param username:
+      :param full_name_or_username:
+      :param full_contact:
+      :param user_id:
+      :param name:
+      :param firstname:
+      :param short_contact:
+      :param admin:
+      :param lastname:
+      :param ip_addresses:
+      :param ldap_dn:
+      :param email:
+      :param api_key:
+      :param last_login:
+      :param full_name:
+      :param active:
+      :param password:
+      :param emails:
+      :param inherit_default_permissions:
+    """
+    return 0
+DELETE_USER_HOOK = _dluserhook
 
 
 #==============================================================================

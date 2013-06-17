@@ -252,6 +252,45 @@ def log_create_repository(repository_dict, created_by, **kwargs):
     return 0
 
 
+def log_create_user(user_dict, **kwargs):
+    """
+    Post create user Hook. This is a dummy function for admins to re-use
+    if needed. It's taken from rhodecode-extensions module and executed
+    if present
+
+    :param user_dict: dict dump of user object
+
+    available keys for user_dict:
+
+     'username',
+     'full_name_or_username',
+     'full_contact',
+     'user_id',
+     'name',
+     'firstname',
+     'short_contact',
+     'admin',
+     'lastname',
+     'ip_addresses',
+     'ldap_dn',
+     'email',
+     'api_key',
+     'last_login',
+     'full_name',
+     'active',
+     'password',
+     'emails',
+     'inherit_default_permissions'
+
+    """
+    from rhodecode import EXTENSIONS
+    callback = getattr(EXTENSIONS, 'CREATE_USER_HOOK', None)
+    if isfunction(callback):
+        return callback(**user_dict)
+
+    return 0
+
+
 def log_delete_repository(repository_dict, deleted_by, **kwargs):
     """
     Post delete repository Hook. This is a dummy function for admins to re-use
@@ -286,6 +325,45 @@ def log_delete_repository(repository_dict, deleted_by, **kwargs):
                    'deleted_on': time.time()})
         kw.update(kwargs)
         return callback(**kw)
+
+    return 0
+
+
+def log_delete_user(user_dict, **kwargs):
+    """
+    Post delete user Hook. This is a dummy function for admins to re-use
+    if needed. It's taken from rhodecode-extensions module and executed
+    if present
+
+    :param user_dict: dict dump of user object
+
+    available keys for user_dict:
+
+     'username',
+     'full_name_or_username',
+     'full_contact',
+     'user_id',
+     'name',
+     'firstname',
+     'short_contact',
+     'admin',
+     'lastname',
+     'ip_addresses',
+     'ldap_dn',
+     'email',
+     'api_key',
+     'last_login',
+     'full_name',
+     'active',
+     'password',
+     'emails',
+     'inherit_default_permissions'
+
+    """
+    from rhodecode import EXTENSIONS
+    callback = getattr(EXTENSIONS, 'DELETE_USER_HOOK', None)
+    if isfunction(callback):
+        return callback(**user_dict)
 
     return 0
 
