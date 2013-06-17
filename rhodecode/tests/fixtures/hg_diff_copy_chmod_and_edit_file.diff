@@ -1,0 +1,13 @@
+diff --git a/file4 b/file5
+old mode 100755
+new mode 100644
+copy from file4
+copy to file5
+--- a/file4
++++ b/file5
+@@ -1,3 +1,4 @@
+-line1
+ line2
+ line3
++line4
++line5

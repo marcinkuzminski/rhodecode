@@ -1,0 +1,9 @@
+diff --git a/file2 b/file3
+copy from file2
+copy to file3
+--- a/file2
++++ b/file3
+@@ -1,2 +1,3 @@
+ line1
+ line2
++line3
