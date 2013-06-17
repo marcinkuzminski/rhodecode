@@ -154,8 +154,9 @@ setup(
     paster_plugins=['PasteScript', 'Pylons'],
     entry_points="""
     [console_scripts]
-    rhodecode-api =  rhodecode.bin.rhodecode_api:main
-    rhodecode-gist =  rhodecode.bin.rhodecode_gist:main
+    rhodecode-api =    rhodecode.bin.rhodecode_api:main
+    rhodecode-gist =   rhodecode.bin.rhodecode_gist:main
+    rhodecode-config = rhodecode.bin.rhodecode_config:main
 
     [paste.app_factory]
     main = rhodecode.config.middleware:make_app
