@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 import platform
@@ -95,23 +96,26 @@ package_data = {'rhodecode': ['i18n/*/LC_MESSAGES/*.mo', ], }
 description = ('RhodeCode is a fast and powerful management tool '
                'for Mercurial and GIT with a built in push/pull server, '
                'full text search and code-review.')
-keywords = ' '.join(['rhodecode', 'rhodiumcode', 'mercurial', 'git',
-                     'code review', 'repo groups', 'ldap'
-                      'repository management', 'hgweb replacement'
-                      'hgwebdir', 'gitweb replacement', 'serving hgweb', ])
+
+keywords = ' '.join([
+    'rhodecode', 'rhodiumcode', 'mercurial', 'git', 'code review',
+    'repo groups', 'ldap', 'repository management', 'hgweb replacement',
+    'hgwebdir', 'gitweb replacement', 'serving hgweb',
+])
+
 # long description
+README_FILE = 'README.rst'
+CHANGELOG_FILE = 'docs/changelog.rst'
 try:
-    readme_file = 'README.rst'
-    changelog_file = 'docs/changelog.rst'
-    long_description = open(readme_file).read() + '\n\n' + \
-        open(changelog_file).read()
+    long_description = open(README_FILE).read() + '\n\n' + \
+        open(CHANGELOG_FILE).read()
 
 except IOError, err:
-    sys.stderr.write("[WARNING] Cannot find file specified as "
-        "long_description (%s)\n or changelog (%s) skipping that file" \
-            % (readme_file, changelog_file))
+    sys.stderr.write(
+        "[WARNING] Cannot find file specified as long_description (%s)\n or "
+        "changelog (%s) skipping that file" % (README_FILE, CHANGELOG_FILE)
+    )
     long_description = description
-
 
 try:
     from setuptools import setup, find_packages
