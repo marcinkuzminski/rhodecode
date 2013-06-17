@@ -26,7 +26,7 @@ class TestSummaryController(TestController):
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
             """title="Public repository" alt="Public """
-            """repository" src="/images/icons/lock_open.png"/>"""
+            """repository" src="/images/icons/public_repo.png"/>"""
         )
 
         #codes stats
@@ -68,7 +68,7 @@ class TestSummaryController(TestController):
         response.mustcontain(
             """<img style="margin-bottom:2px" class="icon" """
             """title="Public repository" alt="Public """
-            """repository" src="/images/icons/lock_open.png"/>"""
+            """repository" src="/images/icons/public_repo.png"/>"""
         )
 
         # clone url...
@@ -88,7 +88,7 @@ class TestSummaryController(TestController):
                         """repository" src="/images/icons/hgicon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="Public repository" alt="Public """
-                        """repository" src="/images/icons/lock_open.png"/>""")
+                        """repository" src="/images/icons/public_repo.png"/>""")
 
     def test_index_by_repo_having_id_path_in_name_hg(self):
         self.log_user()
@@ -116,7 +116,7 @@ class TestSummaryController(TestController):
                         """repository" src="/images/icons/giticon.png"/>""")
         response.mustcontain("""<img style="margin-bottom:2px" class="icon" """
                         """title="Public repository" alt="Public """
-                        """repository" src="/images/icons/lock_open.png"/>""")
+                        """repository" src="/images/icons/public_repo.png"/>""")
 
     def _enable_stats(self):
         r = Repository.get_by_repo_name(HG_REPO)

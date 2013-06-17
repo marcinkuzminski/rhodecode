@@ -26,8 +26,8 @@ class TestHomeController(TestController):
                         r"""alt=\"Mercurial repository\" src=\"/images/icons/hg"""
                         r"""icon.png\"/>""")
         response.mustcontain(r"""<img class=\"icon\" title=\"Public repository\" """
-                        r"""alt=\"Public repository\" src=\"/images/icons/lock_"""
-                        r"""open.png\"/>""")
+                        r"""alt=\"Public repository\" src=\"/images/icons/public_"""
+                        r"""repo.png\"/>""")
 
         response.mustcontain("""fixes issue with having custom format for git-log""")
         response.mustcontain("""/%s/changeset/5f2c6ee195929b0be80749243c18121c9864a3b3""" % GIT_REPO)
