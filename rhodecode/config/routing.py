@@ -95,9 +95,6 @@ def make_map(config):
                  action='repo_switcher')
     rmap.connect('branch_tag_switcher', '/branches-tags/{repo_name:.*?}',
                  controller='home', action='branch_tag_switcher')
-    rmap.connect('bugtracker',
-                 "http://bitbucket.org/marcinkuzminski/rhodecode/issues",
-                 _static=True)
     rmap.connect('rst_help',
                  "http://docutils.sourceforge.net/docs/user/rst/quickref.html",
                  _static=True)

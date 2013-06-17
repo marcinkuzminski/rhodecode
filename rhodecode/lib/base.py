@@ -262,6 +262,7 @@ class BaseController(WSGIController):
         c.rhodecode_version = __version__
         c.rhodecode_instanceid = config.get('instance_id')
         c.rhodecode_name = config.get('rhodecode_title')
+        c.rhodecode_bugtracker = config.get('bugtracker', 'http://bitbucket.org/marcinkuzminski/rhodecode/issues')
         c.use_gravatar = str2bool(config.get('use_gravatar'))
         c.ga_code = config.get('rhodecode_ga_code')
         # Visual options
