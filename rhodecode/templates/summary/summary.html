@@ -74,9 +74,9 @@ ${self.repo_context_bar('summary')}
 
                  ##PUBLIC/PRIVATE
                  %if c.dbrepo.private:
-                    <img style="margin-bottom:2px" class="icon" title="${_('Private repository')}" alt="${_('Private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+                    <img style="margin-bottom:2px" class="icon" title="${_('Private repository')}" alt="${_('Private repository')}" src="${h.url('/images/icons/private_repo.png')}"/>
                  %else:
-                    <img style="margin-bottom:2px" class="icon" title="${_('Public repository')}" alt="${_('Public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+                    <img style="margin-bottom:2px" class="icon" title="${_('Public repository')}" alt="${_('Public repository')}" src="${h.url('/images/icons/public_repo.png')}"/>
                  %endif
 
                   ##REPO NAME

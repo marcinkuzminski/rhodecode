@@ -7,9 +7,9 @@
 %for repo in c.repos_list:
     <li>
       %if repo['dbrepo']['private'] and c.visual.show_private_icon:
-             <img src="${h.url('/images/icons/lock.png')}" alt="${_('Private repository')}" class="repo_switcher_type"/>
+             <img src="${h.url('/images/icons/private_repo.png')}" alt="${_('Private repository')}" class="repo_switcher_type"/>
       %elif not repo['dbrepo']['private'] and c.visual.show_public_icon:
-             <img src="${h.url('/images/icons/lock_open.png')}" alt="${_('Public repository')}" class="repo_switcher_type" />
+             <img src="${h.url('/images/icons/public_repo.png')}" alt="${_('Public repository')}" class="repo_switcher_type" />
       %endif
       ${h.link_to(repo['name'],h.url('summary_home',repo_name=repo['name']),class_="repo_name thin %s" % repo['dbrepo']['repo_type'])}
     </li>

@@ -468,11 +468,11 @@ div:hover > a.permalink {
 }
 
 #header #header-inner #quick li ul li a.private_repo, #header #header-inner #quick li ul li a.private_repo:hover {
-    background-image: url("../images/icons/lock.png")
+    background-image: url("../images/icons/private_repo.png")
 }
 
 #header #header-inner #quick li ul li a.public_repo, #header #header-inner #quick li ul li a.public_repo:hover {
-    background-image: url("../images/icons/lock_open.png");
+    background-image: url("../images/icons/public_repo.png");
 }
 
 #header #header-inner #quick li ul li a.hg, #header #header-inner #quick li ul li a.hg:hover {

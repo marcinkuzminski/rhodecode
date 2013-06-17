@@ -58,9 +58,9 @@
 
    ##PRIVATE/PUBLIC
    %if private and c.visual.show_private_icon:
-     <img class="icon" title="${_('Private repository')}" alt="${_('Private repository')}" src="${h.url('/images/icons/lock.png')}"/>
+     <img class="icon" title="${_('Private repository')}" alt="${_('Private repository')}" src="${h.url('/images/icons/private_repo.png')}"/>
    %elif not private and c.visual.show_public_icon:
-     <img class="icon" title="${_('Public repository')}" alt="${_('Public repository')}" src="${h.url('/images/icons/lock_open.png')}"/>
+     <img class="icon" title="${_('Public repository')}" alt="${_('Public repository')}" src="${h.url('/images/icons/public_repo.png')}"/>
    %endif
 
    ##NAME
