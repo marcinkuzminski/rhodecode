@@ -515,7 +515,7 @@ class RepoModel(BaseModel):
         :param fs_remove: remove(archive) repo from filesystem
         """
         if not cur_user:
-            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
+            cur_user = getattr(get_current_rhodecode_user(), 'username', None)
         repo = self._get_repo(repo)
         if repo:
             if forks == 'detach':

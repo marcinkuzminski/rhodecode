@@ -83,7 +83,7 @@ class UserModel(BaseModel):
 
     def create(self, form_data, cur_user=None):
         if not cur_user:
-            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
+            cur_user = getattr(get_current_rhodecode_user(), 'username', None)
         from rhodecode.lib.auth import get_crypt_password
         try:
             new_user = User()
@@ -120,7 +120,7 @@ class UserModel(BaseModel):
         :param ldap_dn:
         """
         if not cur_user:
-            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
+            cur_user = getattr(get_current_rhodecode_user(), 'username', None)
 
         from rhodecode.lib.auth import get_crypt_password
 
@@ -165,7 +165,7 @@ class UserModel(BaseModel):
         :param attrs:
         """
         if not cur_user:
-            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
+            cur_user = getattr(get_current_rhodecode_user(), 'username', None)
         if self.get_by_username(username, case_insensitive=True) is None:
 
             # autogenerate email for container account without one
@@ -205,7 +205,7 @@ class UserModel(BaseModel):
         :param attrs:
         """
         if not cur_user:
-            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
+            cur_user = getattr(get_current_rhodecode_user(), 'username', None)
         from rhodecode.lib.auth import get_crypt_password
         log.debug('Checking for such ldap account in RhodeCode database')
         if self.get_by_username(username, case_insensitive=True) is None:
@@ -317,7 +317,7 @@ class UserModel(BaseModel):
 
     def delete(self, user, cur_user=None):
         if not cur_user:
-            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
+            cur_user = getattr(get_current_rhodecode_user(), 'username', None)
         user = self._get_user(user)
 
         try:
