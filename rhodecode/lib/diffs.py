@@ -392,7 +392,7 @@ class DiffProcessor(object):
                     stats['ops'][RENAMED_FILENODE] = ('file renamed from %s to %s'
                                     % (head['rename_from'], head['rename_to']))
                 # COPY
-                if head['copy_from'] and head['copy_to']:
+                if head.get('copy_from') and head.get('copy_to'):
                     op = 'M'
                     stats['binary'] = True
                     stats['ops'][COPIED_FILENODE] = ('file copied from %s to %s'
