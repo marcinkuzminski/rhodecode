@@ -642,3 +642,14 @@ def suuid(url=None, truncate_to=22, alphabet=None):
         output.append(_ALPHABET[digit])
         unique_id = int(unique_id / alphabet_length)
     return "".join(output)[:truncate_to]
+
+def get_current_rhodecode_user():
+    """
+    Get's rhodecode user from threadlocal tmpl_context variable if it's
+    defined, else returns None.
+    """
+    from pylons import tmpl_context
+    if hasattr(tmpl_context, 'rhodecode_user'):
+        return tmpl_context.rhodecode_user
+
+    return None

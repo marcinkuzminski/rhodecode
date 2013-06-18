@@ -55,7 +55,7 @@ from rhodecode.model.db import Repository, User, RhodeCodeUi, \
     UserLog, RepoGroup, RhodeCodeSetting, CacheInvalidation, UserGroup
 from rhodecode.model.meta import Session
 from rhodecode.model.repos_group import ReposGroupModel
-from rhodecode.lib.utils2 import safe_str, safe_unicode
+from rhodecode.lib.utils2 import safe_str, safe_unicode, get_current_rhodecode_user
 from rhodecode.lib.vcs.utils.fakemod import create_module
 from rhodecode.model.users_group import UserGroupModel
 
@@ -150,9 +150,8 @@ def action_logger(user, action, repo, ipaddr='', sa=None, commit=False):
         sa = meta.Session()
     # if we don't get explicit IP address try to get one from registered user
     # in tmpl context var
-    from pylons import tmpl_context
-    if not ipaddr and hasattr(tmpl_context, 'rhodecode_user'):
-        ipaddr = tmpl_context.rhodecode_user.ip_addr
+    if not ipaddr:
+        ipaddr = getattr(get_current_rhodecode_user(), 'ip_addr', '')
 
     try:
         if hasattr(user, 'user_id'):
