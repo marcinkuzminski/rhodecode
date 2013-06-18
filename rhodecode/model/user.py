@@ -68,8 +68,7 @@ class UserModel(BaseModel):
         if case_insensitive:
             user = self.sa.query(User).filter(User.username.ilike(username))
         else:
-            user = self.sa.query(User)\
-                .filter(User.username == username)
+            user = self.sa.query(User).filter(User.username == username)
         if cache:
             user = user.options(FromCache("sql_cache_short",
                                           "get_user_%s" % username))
@@ -105,7 +104,8 @@ class UserModel(BaseModel):
             raise
 
     def create_or_update(self, username, password, email, firstname='',
-                         lastname='', active=True, admin=False, ldap_dn=None, cur_user=None):
+                         lastname='', active=True, admin=False, ldap_dn=None,
+                         cur_user=None):
         """
         Creates a new instance if not found, or updates current one
 
@@ -118,6 +118,7 @@ class UserModel(BaseModel):
         :param active:
         :param admin:
         :param ldap_dn:
+        :param cur_user:
         """
         if not cur_user:
             cur_user = getattr(get_current_rhodecode_user(), 'username', None)
@@ -163,6 +164,7 @@ class UserModel(BaseModel):
 
         :param username:
         :param attrs:
+        :param cur_user:
         """
         if not cur_user:
             cur_user = getattr(get_current_rhodecode_user(), 'username', None)
@@ -203,6 +205,7 @@ class UserModel(BaseModel):
         :param password:
         :param user_dn:
         :param attrs:
+        :param cur_user:
         """
         if not cur_user:
             cur_user = getattr(get_current_rhodecode_user(), 'username', None)
@@ -256,8 +259,7 @@ class UserModel(BaseModel):
                     '- Username: %s\n'
                     '- Full Name: %s\n'
                     '- Email: %s\n')
-            body = body % (new_user.username, new_user.full_name,
-                           new_user.email)
+            body = body % (new_user.username, new_user.full_name, new_user.email)
             edit_url = url('edit_user', id=new_user.user_id, qualified=True)
             kw = {'registered_user_url': edit_url}
             NotificationModel().create(created_by=new_user, subject=subject,
@@ -390,7 +392,7 @@ class UserModel(BaseModel):
 
             run_task(tasks.send_email, user_email,
                      _('Your new password'),
-                     _('Your new RhodeCode password:%s') % (new_passwd))
+                     _('Your new RhodeCode password:%s') % (new_passwd,))
             log.info('send new password mail to %s' % user_email)
 
         except Exception:
