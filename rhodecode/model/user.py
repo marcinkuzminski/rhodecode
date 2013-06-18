@@ -33,7 +33,7 @@ from pylons.i18n.translation import _
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import joinedload
 
-from rhodecode.lib.utils2 import safe_unicode, generate_api_key
+from rhodecode.lib.utils2 import safe_unicode, generate_api_key, get_current_rhodecode_user
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
 from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
@@ -81,7 +81,9 @@ class UserModel(BaseModel):
     def get_by_api_key(self, api_key, cache=False):
         return User.get_by_api_key(api_key, cache)
 
-    def create(self, form_data):
+    def create(self, form_data, cur_user=None):
+        if not cur_user:
+            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
         from rhodecode.lib.auth import get_crypt_password
         try:
             new_user = User()
@@ -96,14 +98,14 @@ class UserModel(BaseModel):
             self.sa.add(new_user)
 
             from rhodecode.lib.hooks import log_create_user
-            log_create_user(new_user.get_dict())
+            log_create_user(new_user.get_dict(), cur_user)
             return new_user
         except Exception:
             log.error(traceback.format_exc())
             raise
 
     def create_or_update(self, username, password, email, firstname='',
-                         lastname='', active=True, admin=False, ldap_dn=None):
+                         lastname='', active=True, admin=False, ldap_dn=None, cur_user=None):
         """
         Creates a new instance if not found, or updates current one
 
@@ -117,6 +119,8 @@ class UserModel(BaseModel):
         :param admin:
         :param ldap_dn:
         """
+        if not cur_user:
+            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
 
         from rhodecode.lib.auth import get_crypt_password
 
@@ -147,19 +151,21 @@ class UserModel(BaseModel):
 
             if not edit:
                 from rhodecode.lib.hooks import log_create_user
-                log_create_user(new_user.get_dict())
+                log_create_user(new_user.get_dict(), cur_user)
             return new_user
         except (DatabaseError,):
             log.error(traceback.format_exc())
             raise
 
-    def create_for_container_auth(self, username, attrs):
+    def create_for_container_auth(self, username, attrs, cur_user=None):
         """
         Creates the given user if it's not already in the database
 
         :param username:
         :param attrs:
         """
+        if not cur_user:
+            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
         if self.get_by_username(username, case_insensitive=True) is None:
 
             # autogenerate email for container account without one
@@ -178,7 +184,7 @@ class UserModel(BaseModel):
                 self.sa.add(new_user)
 
                 from rhodecode.lib.hooks import log_create_user
-                log_create_user(new_user.get_dict())
+                log_create_user(new_user.get_dict(), cur_user)
                 return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
@@ -188,7 +194,7 @@ class UserModel(BaseModel):
                   ' for container auth.', username)
         return None
 
-    def create_ldap(self, username, password, user_dn, attrs):
+    def create_ldap(self, username, password, user_dn, attrs, cur_user=None):
         """
         Checks if user is in database, if not creates this user marked
         as ldap user
@@ -198,6 +204,8 @@ class UserModel(BaseModel):
         :param user_dn:
         :param attrs:
         """
+        if not cur_user:
+            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
         from rhodecode.lib.auth import get_crypt_password
         log.debug('Checking for such ldap account in RhodeCode database')
         if self.get_by_username(username, case_insensitive=True) is None:
@@ -221,7 +229,7 @@ class UserModel(BaseModel):
                 self.sa.add(new_user)
 
                 from rhodecode.lib.hooks import log_create_user
-                log_create_user(new_user.get_dict())
+                log_create_user(new_user.get_dict(), cur_user)
                 return new_user
             except (DatabaseError,):
                 log.error(traceback.format_exc())
@@ -307,7 +315,9 @@ class UserModel(BaseModel):
             log.error(traceback.format_exc())
             raise
 
-    def delete(self, user):
+    def delete(self, user, cur_user=None):
+        if not cur_user:
+            cur_user = getattr(get_current_rhodecode_user(), 'username', '?')
         user = self._get_user(user)
 
         try:
@@ -326,7 +336,7 @@ class UserModel(BaseModel):
             self.sa.delete(user)
 
             from rhodecode.lib.hooks import log_delete_user
-            log_delete_user(user.get_dict())
+            log_delete_user(user.get_dict(), cur_user)
         except Exception:
             log.error(traceback.format_exc())
             raise

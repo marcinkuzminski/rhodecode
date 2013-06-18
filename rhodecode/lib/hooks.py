@@ -252,7 +252,7 @@ def log_create_repository(repository_dict, created_by, **kwargs):
     return 0
 
 
-def log_create_user(user_dict, **kwargs):
+def log_create_user(user_dict, created_by, **kwargs):
     """
     Post create user Hook. This is a dummy function for admins to re-use
     if needed. It's taken from rhodecode-extensions module and executed
@@ -286,7 +286,7 @@ def log_create_user(user_dict, **kwargs):
     from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'CREATE_USER_HOOK', None)
     if isfunction(callback):
-        return callback(**user_dict)
+        return callback(created_by=created_by, **user_dict)
 
     return 0
 
@@ -329,7 +329,7 @@ def log_delete_repository(repository_dict, deleted_by, **kwargs):
     return 0
 
 
-def log_delete_user(user_dict, **kwargs):
+def log_delete_user(user_dict, deleted_by, **kwargs):
     """
     Post delete user Hook. This is a dummy function for admins to re-use
     if needed. It's taken from rhodecode-extensions module and executed
@@ -363,7 +363,7 @@ def log_delete_user(user_dict, **kwargs):
     from rhodecode import EXTENSIONS
     callback = getattr(EXTENSIONS, 'DELETE_USER_HOOK', None)
     if isfunction(callback):
-        return callback(**user_dict)
+        return callback(deleted_by=deleted_by, **user_dict)
 
     return 0
 
