@@ -501,12 +501,11 @@ def set_available_permissions(config):
     try:
         sa = meta.Session
         all_perms = sa.query(Permission).all()
+        config['available_permissions'] = [x.permission_name for x in all_perms]
     except Exception:
-        pass
+        log.error(traceback.format_exc())
     finally:
         meta.Session.remove()
-
-    config['available_permissions'] = [x.permission_name for x in all_perms]
 
 
 #==============================================================================
