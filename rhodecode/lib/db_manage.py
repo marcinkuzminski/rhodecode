@@ -696,10 +696,18 @@ class DbManage(object):
     def create_default_user(self):
         log.info('creating default user')
         # create default user for handling default permissions.
-        UserModel().create_or_update(username='default',
-                              password=str(uuid.uuid1())[:8],
-                              email='anonymous@rhodecode.org',
-                              firstname='Anonymous', lastname='User')
+        user = UserModel().create_or_update(username=User.DEFAULT_USER,
+                                            password=str(uuid.uuid1())[:20],
+                                            email='anonymous@rhodecode.org',
+                                            firstname='Anonymous',
+                                            lastname='User')
+        # based on configuration options activate/deactive this user which
+        # controlls anonymous access
+        if self.cli_args.get('public_access') is False:
+            log.info('Public access disabled')
+            user.active = False
+            Session().add(user)
+            Session().commit()
 
     def create_permissions(self):
         """

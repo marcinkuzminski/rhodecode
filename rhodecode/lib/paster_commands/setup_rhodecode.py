@@ -64,7 +64,16 @@ class Command(AbstractInstallCommand):
                        dest='force_ask',
                        default=None,
                        help='Force no to every question')
-
+    parser.add_option('--public-access',
+                       action='store_true',
+                       dest='public_access',
+                       default=None,
+                       help='Enable public access on this installation (default)')
+    parser.add_option('--no-public-access',
+                       action='store_false',
+                       dest='public_access',
+                       default=None,
+                       help='Disable public access on this installation ')
     def command(self):
         config_spec = self.args[0]
         section = self.options.section_name
