@@ -1160,7 +1160,8 @@ var fileBrowserListeners = function(current_url, node_list_url, url_base){
 var initCodeMirror = function(textAreadId,resetUrl){
     var myCodeMirror = CodeMirror.fromTextArea(YUD.get(textAreadId),{
            mode:  "null",
-           lineNumbers:true
+           lineNumbers:true,
+           indentUnit: 4
          });
     YUE.on('reset','click',function(e){
         window.location=resetUrl
@@ -1177,8 +1178,14 @@ var initCodeMirror = function(textAreadId,resetUrl){
         YUD.setStyle('upload_file_container','display','');
         YUD.setStyle('filename_container','display','none');
     });
+
+    return myCodeMirror
 };
 
+var setCodeMirrorMode = function(codeMirrorInstance, mode) {
+   codeMirrorInstance.setOption("mode", mode);
+   CodeMirror.autoLoadMode(codeMirrorInstance, mode);
+}
 
 
 var getIdentNode = function(n){

@@ -6,6 +6,8 @@
 
 <%def name="js_extra()">
 <script type="text/javascript" src="${h.url('/js/codemirror.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/codemirror_loadmode.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/mode/meta.js')}"></script>
 </%def>
 <%def name="css_extra()">
 <link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
@@ -68,6 +70,10 @@ ${self.repo_context_bar('files')}
               </div>
             </div>
             <div id="body" class="codeblock">
+            <div class="code-header">
+                <label class="commit" for="set_mode">${_('New file mode')}</label>
+                ${h.select('set_mode','plain',[('plain',_('plain'))])}
+            </div>
                 <div id="editor_container">
                     <pre id="editor_pre"></pre>
                     <textarea id="editor" name="content" style="display:none"></textarea>
@@ -82,7 +88,21 @@ ${self.repo_context_bar('files')}
             ${h.end_form()}
             <script type="text/javascript">
             var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.f_path)}";
-            initCodeMirror('editor',reset_url);
+            var myCodeMirror = initCodeMirror('editor',reset_url);
+            CodeMirror.modeURL = "${h.url('/js/mode/%N/%N.js')}";
+
+            //inject new modes
+            var modes_select = YUD.get('set_mode');
+            for(var i=0;i<CodeMirror.modeInfo.length;i++){
+                var m = CodeMirror.modeInfo[i];
+                var opt = new Option(m.name, m.mode);
+                modes_select.options[i+1] = opt
+            }
+            YUE.on(modes_select, 'change', function(e){
+                var selected = e.currentTarget;
+                var new_mode = selected.options[selected.selectedIndex].value;
+                setCodeMirrorMode(myCodeMirror, new_mode);
+            })
             </script>
         </div>
     </div>

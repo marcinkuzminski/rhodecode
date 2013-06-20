@@ -6,6 +6,8 @@
 
 <%def name="js_extra()">
 <script type="text/javascript" src="${h.url('/js/codemirror.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/codemirror_loadmode.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/mode/meta.js')}"></script>
 </%def>
 <%def name="css_extra()">
 <link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
@@ -54,7 +56,8 @@ ${self.repo_context_bar('files')}
                       % endif
                     </div>
                 </div>
-                <div class="commit">${_('Editing file')}: ${c.file.unicode_path}</div>
+                <label class="commit" for="set_mode">${_('Editing file')}: ${c.file.unicode_path}</label>
+                ${h.select('set_mode','plain',[('plain',_('plain'))])}
             </div>
                 <pre id="editor_pre"></pre>
                 <textarea id="editor" name="content" style="display:none">${h.escape(c.file.content)|n}</textarea>
@@ -68,7 +71,26 @@ ${self.repo_context_bar('files')}
             ${h.end_form()}
             <script type="text/javascript">
             var reset_url = "${h.url('files_home',repo_name=c.repo_name,revision=c.cs.raw_id,f_path=c.file.path)}";
-            initCodeMirror('editor',reset_url);
+            var myCodeMirror = initCodeMirror('editor',reset_url);
+            CodeMirror.modeURL = "${h.url('/js/mode/%N/%N.js')}";
+
+            //inject new modes
+            var modes_select = YUD.get('set_mode');
+            for(var i=0;i<CodeMirror.modeInfo.length;i++){
+                var m = CodeMirror.modeInfo[i];
+                var opt = new Option(m.name, m.mode);
+                //try to figure out the mode based on the mime-type
+                if(m.mime == "${c.file.mimetype}"){
+                    setCodeMirrorMode(myCodeMirror, m.mode);
+                    opt.selected = "selected";
+                }
+                modes_select.options[i+1] = opt
+            }
+            YUE.on(modes_select, 'change', function(e){
+                var selected = e.currentTarget;
+                var new_mode = selected.options[selected.selectedIndex].value;
+                setCodeMirrorMode(myCodeMirror, new_mode);
+            })
             </script>
         </div>
     </div>
