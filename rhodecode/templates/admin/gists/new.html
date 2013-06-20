@@ -7,6 +7,8 @@
 
 <%def name="js_extra()">
 <script type="text/javascript" src="${h.url('/js/codemirror.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/codemirror_loadmode.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/mode/meta.js')}"></script>
 </%def>
 <%def name="css_extra()">
 <link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
@@ -37,11 +39,12 @@
                 <textarea style="resize:vertical; width:400px;border: 1px solid #ccc;border-radius: 3px;" id="description" name="description" placeholder="${_('Gist description ...')}"></textarea>
             </div>
             <div id="body" class="codeblock">
-                <div style="padding: 10px 10px 10px 22px;color:#666666">
+                <div style="padding: 10px 10px 10px 26px;color:#666666">
                     ##<input type="text" value="" size="30" name="filename" id="filename" placeholder="gistfile1.txt">
                     ${h.text('filename', size=30, placeholder='gistfile1.txt')}
                     ##<input type="text" value="" size="30" name="filename" id="filename" placeholder="gistfile1.txt">
                     ${h.select('lifetime', '', c.lifetime_options)}
+                    ${h.select('set_mode','plain',[('plain',_('plain'))])}
                 </div>
                 <div id="editor_container">
                     <pre id="editor_pre"></pre>
@@ -55,7 +58,21 @@
             </div>
             ${h.end_form()}
             <script type="text/javascript">
-            initCodeMirror('editor','');
+            var myCodeMirror = initCodeMirror('editor', '');
+            CodeMirror.modeURL = "${h.url('/js/mode/%N/%N.js')}";
+
+            //inject new modes
+            var modes_select = YUD.get('set_mode');
+            for(var i=0;i<CodeMirror.modeInfo.length;i++){
+                var m = CodeMirror.modeInfo[i];
+                var opt = new Option(m.name, m.mode);
+                modes_select.options[i+1] = opt
+            }
+            YUE.on(modes_select, 'change', function(e){
+                var selected = e.currentTarget;
+                var new_mode = selected.options[selected.selectedIndex].value;
+                setCodeMirrorMode(myCodeMirror, new_mode);
+            })
             </script>
         </div>
     </div>
