@@ -60,7 +60,7 @@
                           ##%if h.HasPermissionAny('hg.admin')() or c.gist.gist_owner == c.rhodecode_user.user_id:
                             ##${h.link_to(_('Edit'),h.url(''),class_="ui-btn")}
                           ##%endif
-                          ${h.link_to(_('Show as raw'),h.url('formatted_gist', gist_id=c.gist.gist_id, format='raw'),class_="ui-btn")}
+                          ${h.link_to(_('Show as raw'),h.url('formatted_gist', gist_id=c.gist.gist_access_id, format='raw'),class_="ui-btn")}
                         </div>
                     </div>
 
