@@ -431,6 +431,7 @@ def GistForm(lifetime_options):
                        v.UnicodeString(strip=True, required=False))
         description = v.UnicodeString(required=False, if_missing='')
         lifetime = v.OneOf(lifetime_options)
+        mimetype = v.UnicodeString(required=False, if_missing=None)
         content = v.UnicodeString(required=True, not_empty=True)
         public = v.UnicodeString(required=False, if_missing='')
         private = v.UnicodeString(required=False, if_missing='')

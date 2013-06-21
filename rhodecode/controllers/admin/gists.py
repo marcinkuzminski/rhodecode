@@ -94,10 +94,11 @@ class GistsController(BaseController):
         try:
             form_result = gist_form.to_python(dict(request.POST))
             #TODO: multiple files support, from the form
+            filename = form_result['filename'] or 'gistfile1.txt'
             nodes = {
-                form_result['filename'] or 'gistfile1.txt': {
+                filename: {
                     'content': form_result['content'],
-                    'lexer': None  # autodetect
+                    'lexer': form_result['mimetype']  # None is autodetect
                 }
             }
             _public = form_result['public']
