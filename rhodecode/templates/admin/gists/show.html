@@ -81,7 +81,7 @@
                     <a href="${c.gist.gist_url()}">¶</a>
                     <b style="margin:0px 0px 0px 4px">${file.path}</b>
                     <div style="float:right">
-                       ${h.link_to(_('Show as raw'),h.url('formatted_gist_file', gist_id=c.gist.gist_id, format='raw', revision=file.changeset.raw_id, f_path=file.path),class_="ui-btn")}
+                       ${h.link_to(_('Show as raw'),h.url('formatted_gist_file', gist_id=c.gist.gist_access_id, format='raw', revision=file.changeset.raw_id, f_path=file.path),class_="ui-btn")}
                     </div>
                 </div>
                 <div class="code-body">
