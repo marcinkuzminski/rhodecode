@@ -115,7 +115,7 @@ class ChangelogController(BaseRepoController):
 
         dag = _dagwalker(repo, revs, repo.alias)
         dag = _colored(dag)
-        for (id, type, ctx, vtx, edges) in dag:
+        for (_id, _type, ctx, vtx, edges) in dag:
             data.append(['', vtx, edges])
 
         c.jsdata = json.dumps(data)
