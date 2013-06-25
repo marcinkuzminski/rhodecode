@@ -96,16 +96,10 @@ class CompareController(BaseRepoController):
                 redirect(h.url('summary_home', repo_name=repo.repo_name))
             raise HTTPBadRequest()
 
-    def _get_changesets(self, alias, org_repo, org_ref, other_repo, other_ref, merge):
+    def _get_changesets(self, alias, org_repo, org_rev, other_repo, other_rev, merge):
         """
-        Returns a list of changesets that can be merged from org_repo@org_ref
-        to other_repo@other_ref ... and the ancestor that would be used for merge
-
-        :param org_repo:
-        :param org_ref:
-        :param other_repo:
-        :param other_ref:
-        :param tmp:
+        Returns a list of changesets that can be merged from org_repo@org_rev
+        to other_repo@other_rev ... and the ancestor that would be used for merge
         """
 
         ancestor = None
@@ -116,22 +110,6 @@ class CompareController(BaseRepoController):
                 ancestor = org_rev
 
         elif alias == 'hg':
-            # lookup up the exact node id
-            _revset_predicates = {
-                    'branch': 'branch',
-                    'book': 'bookmark',
-                    'tag': 'tag',
-                    'rev': 'id',
-                }
-
-            org_rev_spec = "max(%s(%%s))" % _revset_predicates[org_ref[0]]
-            org_revs = org_repo._repo.revs(org_rev_spec, safe_str(org_ref[1]))
-            org_rev = org_repo._repo[org_revs[-1] if org_revs else -1].hex()
-
-            other_revs_spec = "max(%s(%%s))" % _revset_predicates[other_ref[0]]
-            other_revs = other_repo._repo.revs(other_revs_spec, safe_str(other_ref[1]))
-            other_rev = other_repo._repo[other_revs[-1] if other_revs else -1].hex()
-
             #case two independent repos
             if org_repo != other_repo:
                 hgrepo = unionrepo.unionrepository(other_repo.baseui,
@@ -166,7 +144,7 @@ class CompareController(BaseRepoController):
 
             so, se = org_repo.run_git_command(
                 'log --reverse --pretty="format: %%H" -s -p %s..%s'
-                    % (org_ref[1], other_ref[1])
+                    % (org_rev, other_rev)
             )
             changesets = [org_repo.get_changeset(cs)
                           for cs in re.findall(r'[0-9a-fA-F]{40}', so)]
@@ -235,8 +213,8 @@ class CompareController(BaseRepoController):
         c.other_ref_type = other_ref[0]
 
         c.cs_ranges, c.ancestor = self._get_changesets(org_repo.scm_instance.alias,
-                                                       org_repo.scm_instance, org_ref,
-                                                       other_repo.scm_instance, other_ref,
+                                                       org_repo.scm_instance, org_rev,
+                                                       other_repo.scm_instance, other_rev,
                                                        merge)
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
