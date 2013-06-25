@@ -155,7 +155,7 @@ class ChangelogController(BaseRepoController):
                 except (NodeDoesNotExistError, ChangesetError):
                     #this node is not present at tip !
                     try:
-                        cs = self.__get_css_or_redirect(revision, repo_name)
+                        cs = self.__get_cs_or_redirect(revision, repo_name)
                         collection = cs.get_file_history(f_path)
                     except RepositoryError, e:
                         h.flash(str(e), category='warning')
