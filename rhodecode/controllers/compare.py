@@ -110,7 +110,12 @@ class CompareController(BaseRepoController):
 
         ancestor = None
 
-        if alias == 'hg':
+        if org_rev == other_rev:
+            changesets = []
+            if merge:
+                ancestor = org_rev
+
+        elif alias == 'hg':
             # lookup up the exact node id
             _revset_predicates = {
                     'branch': 'branch',
