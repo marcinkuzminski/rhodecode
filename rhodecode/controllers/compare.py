@@ -222,8 +222,8 @@ class CompareController(BaseRepoController):
 
         c.statuses = c.rhodecode_db_repo.statuses([x.raw_id for x in
                                                    c.cs_ranges])
-        if not c.ancestor:
-            log.warning('Unable to find ancestor revision')
+        if merge and not c.ancestor:
+            log.error('Unable to find ancestor revision')
 
         if partial:
             return render('compare/compare_cs.html')
