@@ -54,7 +54,7 @@ class CompareController(BaseRepoController):
     def __before__(self):
         super(CompareController, self).__before__()
 
-    def __get_cs_or_redirect(self, ref, repo, redirect_after=True,
+    def __get_rev_or_redirect(self, ref, repo, redirect_after=True,
                              partial=False):
         """
         Safe way to get changeset if error occur it redirects to changeset with
@@ -81,7 +81,7 @@ class CompareController(BaseRepoController):
             # else: TODO: just report 'not found'
 
         try:
-            return repo.scm_instance.get_changeset(rev)
+            return repo.scm_instance.get_changeset(rev).raw_id
         except EmptyRepositoryError, e:
             if not redirect_after:
                 return None
@@ -219,8 +219,8 @@ class CompareController(BaseRepoController):
             log.error('compare of two different kind of remote repos not available')
             raise HTTPNotFound
 
-        self.__get_cs_or_redirect(ref=org_ref, repo=org_repo, partial=partial)
-        self.__get_cs_or_redirect(ref=other_ref, repo=other_repo, partial=partial)
+        org_rev = self.__get_rev_or_redirect(ref=org_ref, repo=org_repo, partial=partial)
+        other_rev = self.__get_rev_or_redirect(ref=other_ref, repo=other_repo, partial=partial)
 
         c.org_repo = org_repo
         c.other_repo = other_repo
@@ -249,14 +249,14 @@ class CompareController(BaseRepoController):
             # Make the diff on the other repo (which is known to have other_ref)
             log.debug('Using ancestor %s as org_ref instead of %s'
                       % (c.ancestor, org_ref))
-            org_ref = ('rev', c.ancestor)
+            org_rev = c.ancestor
             org_repo = other_repo
 
         diff_limit = self.cut_off_limit if not c.fulldiff else None
 
         log.debug('running diff between %s and %s in %s'
-                  % (org_ref, other_ref, org_repo.scm_instance.path))
-        txtdiff = org_repo.scm_instance.get_diff(rev1=safe_str(org_ref[1]), rev2=safe_str(other_ref[1]))
+                  % (org_rev, other_rev, org_repo.scm_instance.path))
+        txtdiff = org_repo.scm_instance.get_diff(rev1=org_rev, rev2=other_rev)
 
         diff_processor = diffs.DiffProcessor(txtdiff or '', format='gitdiff',
                                              diff_limit=diff_limit)
