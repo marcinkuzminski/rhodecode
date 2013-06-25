@@ -54,7 +54,7 @@ class CompareController(BaseRepoController):
     def __before__(self):
         super(CompareController, self).__before__()
 
-    def __get_cs_or_redirect(self, rev, repo, redirect_after=True,
+    def __get_cs_or_redirect(self, ref, repo, redirect_after=True,
                              partial=False):
         """
         Safe way to get changeset if error occur it redirects to changeset with
@@ -65,8 +65,22 @@ class CompareController(BaseRepoController):
         :param repo: repo instance
         """
 
+        rev = ref[1] # default and used for git
+        if repo.scm_instance.alias == 'hg':
+            # lookup up the exact node id
+            _revset_predicates = {
+                    'branch': 'branch',
+                    'book': 'bookmark',
+                    'tag': 'tag',
+                    'rev': 'id',
+                }
+            rev_spec = "max(%s(%%s))" % _revset_predicates[ref[0]]
+            revs = repo.scm_instance._repo.revs(rev_spec, safe_str(ref[1]))
+            if revs:
+                rev = revs[-1]
+            # else: TODO: just report 'not found'
+
         try:
-            type_, rev = rev
             return repo.scm_instance.get_changeset(rev)
         except EmptyRepositoryError, e:
             if not redirect_after:
@@ -205,8 +219,8 @@ class CompareController(BaseRepoController):
             log.error('compare of two different kind of remote repos not available')
             raise HTTPNotFound
 
-        self.__get_cs_or_redirect(rev=org_ref, repo=org_repo, partial=partial)
-        self.__get_cs_or_redirect(rev=other_ref, repo=other_repo, partial=partial)
+        self.__get_cs_or_redirect(ref=org_ref, repo=org_repo, partial=partial)
+        self.__get_cs_or_redirect(ref=other_ref, repo=other_repo, partial=partial)
 
         c.org_repo = org_repo
         c.other_repo = other_repo
