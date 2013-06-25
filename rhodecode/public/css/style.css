@@ -216,6 +216,19 @@ div.options a {
     color: #B9B9B9;
 }
 
+.truncate {
+       white-space: nowrap;
+       overflow: hidden;
+       text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
+}
+
+.truncate.autoexpand:hover {
+    text-overflow: none;
+    overflow: visible;
+}
+
 a.permalink {
     visibility: hidden;
     position: absolute;
