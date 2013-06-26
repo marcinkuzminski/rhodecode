@@ -437,6 +437,9 @@ class DiffProcessor(object):
                     stats['ops'][BIN_FILENODE] = 'binary diff not shown'
                 chunks = []
 
+            if op == 'D' and chunks:
+                chunks = []
+
             chunks.insert(0, [{
                 'old_lineno': '',
                 'new_lineno': '',
