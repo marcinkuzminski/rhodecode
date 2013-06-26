@@ -19,6 +19,7 @@
                 </div>
                 <div class="diff-actions">
                   <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('Show full diff for this file'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
+                  <a href="${h.url('files_diff_2way_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('Show full side-by-side diff for this file'))}"><img class="icon" src="${h.url('/images/icons/application_double.png')}"/></a>
                   <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='raw')}" class="tooltip" title="${h.tooltip(_('Raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
                   <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(path),diff2=cs2,diff1=cs1,diff='download')}" class="tooltip" title="${h.tooltip(_('Download diff'))}"><img class="icon" src="${h.url('/images/icons/page_save.png')}"/></a>
                   ${c.ignorews_url(request.GET, h.FID(cs2,path))}

@@ -37,7 +37,7 @@ from rhodecode.lib.utils import jsonify, action_logger
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
 
-from rhodecode.lib.compat import OrderedDict
+from rhodecode.lib.compat import OrderedDict, json
 from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str,\
     str2bool
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -608,6 +608,77 @@ class FilesController(BaseRepoController):
             c.changes = cs_changes
 
         return render('files/file_diff.html')
+
+    @LoginRequired()
+    @HasRepoPermissionAnyDecorator('repository.read', 'repository.write',
+                                   'repository.admin')
+    def diff_2way(self, repo_name, f_path):
+        diff1 = request.GET.get('diff1', '')
+        diff2 = request.GET.get('diff2', '')
+        try:
+            if diff1 not in ['', None, 'None', '0' * 12, '0' * 40]:
+                c.changeset_1 = c.rhodecode_repo.get_changeset(diff1)
+                try:
+                    node1 = c.changeset_1.get_node(f_path)
+                    if node1.is_dir():
+                        raise NodeError('%s path is a %s not a file'
+                                        % (node1, type(node1)))
+                except NodeDoesNotExistError:
+                    c.changeset_1 = EmptyChangeset(cs=diff1,
+                                                   revision=c.changeset_1.revision,
+                                                   repo=c.rhodecode_repo)
+                    node1 = FileNode(f_path, '', changeset=c.changeset_1)
+            else:
+                c.changeset_1 = EmptyChangeset(repo=c.rhodecode_repo)
+                node1 = FileNode(f_path, '', changeset=c.changeset_1)
+
+            if diff2 not in ['', None, 'None', '0' * 12, '0' * 40]:
+                c.changeset_2 = c.rhodecode_repo.get_changeset(diff2)
+                try:
+                    node2 = c.changeset_2.get_node(f_path)
+                    if node2.is_dir():
+                        raise NodeError('%s path is a %s not a file'
+                                        % (node2, type(node2)))
+                except NodeDoesNotExistError:
+                    c.changeset_2 = EmptyChangeset(cs=diff2,
+                                                   revision=c.changeset_2.revision,
+                                                   repo=c.rhodecode_repo)
+                    node2 = FileNode(f_path, '', changeset=c.changeset_2)
+            else:
+                c.changeset_2 = EmptyChangeset(repo=c.rhodecode_repo)
+                node2 = FileNode(f_path, '', changeset=c.changeset_2)
+        except (RepositoryError, NodeError):
+            log.error(traceback.format_exc())
+            return redirect(url('files_home', repo_name=c.repo_name,
+                                f_path=f_path))
+        if node2.is_binary:
+            node2_content = 'binary file'
+        else:
+            node2_content = node2.content
+
+        if node1.is_binary:
+            node1_content = 'binary file'
+        else:
+            node1_content = node1.content
+
+        html_escape_table = {
+            "&": "\u0026",
+            '"': "\u0022",
+            "'": "\u0027",
+            ">": "\u003e",
+            "<": "\<",
+            '\\': "\u005c",
+            '\n': '\\n'
+        }
+
+        c.orig1 = h.html_escape((node1_content), html_escape_table)
+        c.orig2 = h.html_escape((node2_content), html_escape_table)
+        c.node1 = node1
+        c.node2 = node2
+        c.cs1 = c.changeset_1
+        c.cs2 = c.changeset_2
+
+        return render('files/diff_2way.html')
 
     def _get_node_history(self, cs, f_path, changesets=None):
         """

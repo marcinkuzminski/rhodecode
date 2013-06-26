@@ -55,17 +55,16 @@ from rhodecode.model.db import URL_SEP, Permission
 log = logging.getLogger(__name__)
 
 
-html_escape_table = {
-    "&": "&amp;",
-    '"': "&quot;",
-    "'": "&apos;",
-    ">": "&gt;",
-    "<": "&lt;",
-}
-
-
-def html_escape(text):
+def html_escape(text, html_escape_table=None):
     """Produce entities within text."""
+    if not html_escape_table:
+        html_escape_table = {
+            "&": "&amp;",
+            '"': "&quot;",
+            "'": "&apos;",
+            ">": "&gt;",
+            "<": "&lt;",
+        }
     return "".join(html_escape_table.get(c, c) for c in text)
 
 

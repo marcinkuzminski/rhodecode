@@ -1,0 +1,80 @@
+## -*- coding: utf-8 -*-
+
+<%inherit file="/base/base.html"/>
+
+<%def name="js_extra()">
+<script type="text/javascript" src="${h.url('/js/jquery.1.10.1.min.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/codemirror.js')}"></script>
+<script type="text/javascript" src="${h.url('/js/mergerly.js')}"></script>
+</%def>
+<%def name="css_extra()">
+<link rel="stylesheet" type="text/css" href="${h.url('/css/codemirror.css')}"/>
+<link rel="stylesheet" type="text/css" href="${h.url('/css/mergerly.css')}"/>
+</%def>
+
+<%def name="title()">
+    ${_('%s File side-by-side diff') % c.repo_name} &middot; ${c.rhodecode_name}
+</%def>
+
+<%def name="breadcrumbs_links()">
+    ${_('File diff')} r${c.changeset_1.revision}:${h.short_id(c.changeset_1.raw_id)} &rarr; r${c.changeset_2.revision}:${h.short_id(c.changeset_2.raw_id)}
+</%def>
+
+<%def name="page_nav()">
+    ${self.menu('repositories')}
+</%def>
+
+<%def name="main()">
+${self.repo_context_bar('changelog')}
+<div class="box">
+    <!-- box / title -->
+    <div class="title">
+        ${self.breadcrumbs()}
+    </div>
+
+    <div class="diff-container" style="overflow-x: hidden">
+        <div class="diffblock comm" style="margin:3px; padding:1px">
+            <div class="code-header">
+                <div class="changeset_header">
+                    <div class="changeset_file">
+                        ${h.link_to(h.safe_unicode(c.node1.path),h.url('files_home',repo_name=c.repo_name,
+                        revision=c.cs2.raw_id,f_path=h.safe_unicode(c.node1.path)))}
+                    </div>
+                    <div class="diff-actions">
+                      <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('Show full diff for this file'))}"><img class="icon" src="${h.url('/images/icons/page_white_go.png')}"/></a>
+                      <a href="${h.url('files_diff_2way_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('Show full side-by-side diff for this file'))}"><img class="icon" src="${h.url('/images/icons/application_double.png')}"/></a>
+                      <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='raw')}" class="tooltip" title="${h.tooltip(_('Raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
+                      <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='download')}" class="tooltip" title="${h.tooltip(_('Download diff'))}"><img class="icon" src="${h.url('/images/icons/page_save.png')}"/></a>
+                      ##${c.ignorews_url(request.GET, h.FID(c.cs2,path))}
+                      ##${c.context_url(request.GET, h.FID(c.cs2,path))}
+                    </div>
+                </div>
+            </div>
+            <div id="compare"></div>
+        </div>
+    </div>
+
+<script>
+var orig1 = '${(c.orig1)|n}';
+var orig2 = '${(c.orig2)|n}';
+
+$(document).ready(function () {
+	$('#compare').mergely({
+        width: 'auto',
+		height: '600',
+        fgcolor: {a:'#ddffdd',c:'#cccccc',d:'#ffdddd'},
+        bgcolor: '#fff',
+        viewport: true,
+		cmsettings: {mode: 'text/plain', readOnly: true, lineWrapping: false, lineNumbers: true},
+		lhs: function(setValue) {
+			setValue(orig1);
+		},
+		rhs: function(setValue) {
+			setValue(orig2);
+		},
+	});
+});
+</script>
+
+</div>
+</%def>
