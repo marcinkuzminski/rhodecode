@@ -246,7 +246,7 @@ class ChangesetController(BaseRepoController):
             c.changes[changeset.raw_id] = []
 
             cs2 = changeset.raw_id
-            cs1 = changeset.parents[0].raw_id if changeset.parents else EmptyChangeset()
+            cs1 = changeset.parents[0].raw_id if changeset.parents else EmptyChangeset().raw_id
             context_lcl = get_line_ctx('', request.GET)
             ign_whitespace_lcl = ign_whitespace_lcl = get_ignore_ws('', request.GET)
 
