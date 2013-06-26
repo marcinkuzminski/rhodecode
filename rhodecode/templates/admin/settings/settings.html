@@ -288,6 +288,9 @@
                     <span class="help-block">${_('Location where repositories are stored. After changing this value a restart, and rescan is required')}</span>
                 </div>
             </div>
+            %else:
+            ## form still requires this but we cannot internally change it anyway
+            ${h.hidden('paths_root_path',size=30,readonly="readonly", class_="disabled")}
             %endif
             <div class="buttons">
                 ${h.submit('save',_('Save settings'),class_="ui-btn large")}
