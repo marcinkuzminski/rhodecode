@@ -227,8 +227,11 @@ auth_ret_code =
 <%text>## codes don't break the transactions while 4XX codes do</%text>
 lock_ret_code = 423
 
-<%text>## allow chaning the repository store location from web interface</%text>
+<%text>## allows to change the repository location in settings page</%text>
 allow_repo_location_change = True
+
+<%text>## allows to setup custom hooks in settings page</%text>
+allow_custom_hooks_settings = True
 
 <%text>
 ####################################
