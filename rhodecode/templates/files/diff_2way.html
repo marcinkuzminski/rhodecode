@@ -59,20 +59,20 @@ var orig1 = '${(c.orig1)|n}';
 var orig2 = '${(c.orig2)|n}';
 
 $(document).ready(function () {
-	$('#compare').mergely({
+    $('#compare').mergely({
         width: 'auto',
-		height: '600',
+        height: '600',
         fgcolor: {a:'#ddffdd',c:'#cccccc',d:'#ffdddd'},
         bgcolor: '#fff',
         viewport: true,
-		cmsettings: {mode: 'text/plain', readOnly: true, lineWrapping: false, lineNumbers: true},
-		lhs: function(setValue) {
-			setValue(orig1);
-		},
-		rhs: function(setValue) {
-			setValue(orig2);
-		},
-	});
+        cmsettings: {mode: 'text/plain', readOnly: true, lineWrapping: false, lineNumbers: true},
+        lhs: function(setValue) {
+            setValue(orig1);
+        },
+        rhs: function(setValue) {
+            setValue(orig2);
+        },
+    });
 });
 </script>
 
