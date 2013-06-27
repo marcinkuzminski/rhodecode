@@ -4657,7 +4657,7 @@ PULL REQUESTS
     font-weight: bold;
 }
 
-h3.closed,
+div.pr-details-title.closed,
 #pullrequests_container li.closed a
  {
     color: #555;
@@ -4666,6 +4666,11 @@ h3.closed,
 
 div.pr-title {
     font-size: 1.6em;
+}
+div.pr-details-title{
+    font-size: 1.6em;
+    margin: 0px 20px 0px 20px;
+    padding: 5px 0px 5px 10px;
 }
 
 div.pr {
