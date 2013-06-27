@@ -72,7 +72,12 @@ ${self.repo_context_bar('showpullrequest')}
              ##  <img class="icon" title="${_('Git repository')}" alt="${_('Git repository')}" src="${h.url('/images/icons/giticon.png')}"/>
              ##%endif
               <span class="spantag">${c.pull_request.org_ref_parts[0]}: ${c.pull_request.org_ref_parts[1]}</span>
-              <span><a href="${h.url('summary_home', repo_name=c.pull_request.org_repo.repo_name)}">${c.pull_request.org_repo.clone_url()}</a></span>
+              <span>
+               %if h.is_hg(c.pull_request.org_repo):
+                 | ${_('Pull changes')} <span style="font-family: monospace">hg pull -r ${h.short_id(c.cs_ranges[-1].raw_id)} <a href="${h.url('summary_home', repo_name=c.pull_request.org_repo.repo_name)}">${c.pull_request.org_repo.clone_url()}</a></span>
+               %elif h.is_git(c.pull_request.org_repo):
+                 | ${_('Pull changes')}
+               %endif
               </div>
           </div>
          </div>
