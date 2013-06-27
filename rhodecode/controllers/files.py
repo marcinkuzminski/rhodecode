@@ -666,7 +666,7 @@ class FilesController(BaseRepoController):
             '"': "\u0022",
             "'": "\u0027",
             ">": "\u003e",
-            "<": "\<",
+            "<": "\u003c",
             '\\': "\u005c",
             '\n': '\\n'
         }
