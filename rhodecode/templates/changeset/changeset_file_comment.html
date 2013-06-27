@@ -208,16 +208,22 @@ var change_status_show = function(){
 YUE.onDOMReady(function () {
    MentionsAutoComplete('text', 'mentions_container', _USERS_AC_DATA, _GROUPS_AC_DATA);
 
-   YUE.on(YUQ('.status_change_radio'), 'change',function(e){
-       var val = e.currentTarget.value;
-       if (val == 'approved' || val == 'rejected') {
+   var set_close_button_state = function(cur_val){
+       if (cur_val == 'approved' || cur_val == 'rejected') {
            YUD.removeClass('save_close_label', 'disabled');
            YUD.get('save_close').disabled = false;
        }else{
            YUD.addClass('save_close_label', 'disabled');
            YUD.get('save_close').disabled = true;
        }
+   }
+   YUE.on(YUQ('.status_change_radio'), 'change',function(e){
+       var val = e.currentTarget.value;
+       set_close_button_state(val)
    })
+   // if currect checked status is approved or rejected we should unlock the close button
+   var cur_val = YUQ('.status_change_radio[checked]')[0].value;
+   set_close_button_state(cur_val)
    YUE.on('preview-btn', 'click', function(e){
        var _text = YUD.get('text').value;
        if(!_text){
