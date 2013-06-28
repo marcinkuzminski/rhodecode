@@ -45,8 +45,8 @@ ${self.repo_context_bar('changelog')}
                       <a href="${h.url('files_diff_2way_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='diff',fulldiff=1)}" class="tooltip" title="${h.tooltip(_('Show full side-by-side diff for this file'))}"><img class="icon" src="${h.url('/images/icons/application_double.png')}"/></a>
                       <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='raw')}" class="tooltip" title="${h.tooltip(_('Raw diff'))}"><img class="icon" src="${h.url('/images/icons/page_white.png')}"/></a>
                       <a href="${h.url('files_diff_home',repo_name=c.repo_name,f_path=h.safe_unicode(c.node1.path),diff2=c.cs2.raw_id,diff1=c.cs1.raw_id,diff='download')}" class="tooltip" title="${h.tooltip(_('Download diff'))}"><img class="icon" src="${h.url('/images/icons/page_save.png')}"/></a>
-                      ##${c.ignorews_url(request.GET, h.FID(c.cs2,path))}
-                      ##${c.context_url(request.GET, h.FID(c.cs2,path))}
+                      ${h.checkbox('ignorews', label=_('ignore white space'))}
+                      ${h.checkbox('edit_mode', label=_('turn on edit mode'))}
                     </div>
                 </div>
             </div>
@@ -73,6 +73,17 @@ $(document).ready(function () {
             setValue(orig2);
         },
     });
+    $('#ignorews').change(function(e){
+        var val = e.currentTarget.checked;
+        $('#compare').mergely('options', {ignorews: val});
+        $('#compare').mergely('update');
+    })
+    $('#edit_mode').change(function(e){
+        var val = !e.currentTarget.checked;
+        $('#compare').mergely('cm', 'lhs').setOption('readOnly', val);
+        $('#compare').mergely('cm', 'rhs').setOption('readOnly', val);
+        $('#compare').mergely('update');
+    })
 });
 </script>
 
