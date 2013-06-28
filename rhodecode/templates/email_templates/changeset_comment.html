@@ -5,14 +5,15 @@
 
 <h4>${_('%s commented on a %s changeset.') % (cs_comment_user,cs_target_repo) |n}</h4>
 
-<p>${_('Changeset')}: ${h.short_id(raw_id)}</p>
-<p>${_('Description')}:<br/>
-${h.shorter(message, 256)}
-</p>
-
 %if status_change:
     <p>${_('The changeset status was changed to')}: <b>${status_change}</b></p>
 %endif
 <p>${_('Comment')}:<br/>
 ${body}
 </p>
+
+<p>${_('Changeset')}: ${h.short_id(raw_id)}</p>
+<p>${_('Description')}:<br/>
+${h.shorter(message, 256)}
+</p>
+
