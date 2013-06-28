@@ -3111,6 +3111,7 @@ table.code-browser .submodule-dir {
     border-radius: 8px 8px 8px 8px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
     -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+    z-index: 100000;
 }
 
 .hl-tip-box {
