@@ -63,6 +63,58 @@ max_request_body_size = 107374182400
 ## restarted
 #timeout = 3600
 
+## UWSGI ##
+## run with uwsgi --ini-paste-logged <inifile.ini>
+#[uwsgi]
+#socket = /tmp/uwsgi.sock
+#master = true
+#http = 127.0.0.1:5000
+
+## set as deamon and redirect all output to file
+#daemonize = ./uwsgi_rhodecode.log
+
+## master process PID
+#pidfile = ./uwsgi_rhodecode.pid
+
+## stats server with workers statistics, use uwsgitop
+## for monitoring, `uwsgitop 127.0.0.1:1717`
+#stats = 127.0.0.1:1717
+
+## log 5XX errors
+#log-5xx = true
+
+## Set the socket listen queue size.
+#listen = 256
+
+## Gracefully Reload workers after the specified amount of managed requests
+## (avoid memory leaks).
+#max-requests = 1000
+
+## Log requests slower than the specified number of milliseconds.
+#log-slow = 10
+
+## Exit if no app can be loaded.
+#need-app = true
+
+## Set lazy mode (load apps in workers instead of master).
+#lazy = true
+
+## scaling ##
+## set cheaper algorithm to use, if not set default will be used
+#cheaper-algo = spare
+
+# minimum number of workers to keep at all times
+#cheaper = 1
+
+# number of workers to spawn at startup
+#cheaper-initial = 1
+
+# maximum number of workers that can be spawned
+#workers = 4
+
+# how many workers should be spawned at a time
+#cheaper-step = 1
+
 ## COMMON ##
 host = 127.0.0.1
 port = 5000
@@ -130,7 +182,7 @@ show_sha_length = 12
 show_revision_number = true
 
 ## gist URL alias, used to create nicer urls for gist. This should be an
-## url that does rewrites to _admin/gists/<gistid>. 
+## url that does rewrites to _admin/gists/<gistid>.
 ## example: http://gist.rhodecode.org/{gistid}. Empty means use the internal
 ## RhodeCode url, ie. http[s]://rhodecode.server/_admin/gists/<gistid>
 gist_alias_url =
@@ -140,7 +192,12 @@ gist_alias_url =
 ## api access to raw_files put `FilesController:raw`, to enable access to patches
 ## add `ChangesetController:changeset_patch`. This list should be "," separated
 ## Syntax is <ControllerClass>:<function>. Check debug logs for generated names
+## Recommended settings bellow are commented out:
 api_access_controllers_whitelist =
+#    ChangesetController:changeset_patch,
+#    ChangesetController:changeset_raw,
+#    FilesController:raw,
+#    FilesController:archivefile
 
 ## alternative_gravatar_url allows you to use your own avatar server application
 ## the following parts of the URL will be replaced
@@ -208,7 +265,7 @@ issue_prefix = #
 ## a prefix key for this instance used for cache invalidation when running 
 ## multiple instances of rhodecode, make sure it's globally unique for 
 ## all running rhodecode instances. Leave empty if you don't use it
-instance_id = 
+instance_id =
 
 ## alternative return HTTP header for failed authentication. Default HTTP
 ## response is 401 HTTPUnauthorized. Currently HG clients have troubles with 
@@ -427,7 +484,7 @@ logview.pylons.util = #eee
 #########################################################
 
 # SQLITE [default]
-sqlalchemy.db1.url = sqlite:///%(here)s/rhodecode.db
+sqlalchemy.db1.url = sqlite:///%(here)s/rhodecode.db?timeout=30
  
 # POSTGRESQL
 # sqlalchemy.db1.url = postgresql://user:pass@localhost/rhodecode
