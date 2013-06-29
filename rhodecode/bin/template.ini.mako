@@ -13,7 +13,7 @@ debug = true
 pdebug = false
 <%text>
 ################################################################################
-## Uncomment and replace with the address which should receive                ## 
+## Uncomment and replace with the address which should receive                ##
 ## any error reports after application crash                                  ##
 ## Additionally those settings will be used by RhodeCode mailing system       ##
 ################################################################################
@@ -25,13 +25,13 @@ pdebug = false
 #email_prefix = [RhodeCode]
 
 #smtp_server = mail.server.com
-#smtp_username = 
-#smtp_password = 
-#smtp_port = 
+#smtp_username =
+#smtp_password =
+#smtp_port =
 #smtp_use_tls = false
 #smtp_use_ssl = true
 <%text>## Specify available auth parameters here (e.g. LOGIN PLAIN CRAM-MD5, etc.)</%text>
-#smtp_auth = 
+#smtp_auth =
 
 [server:main]
 %if http_server == 'paste':
@@ -70,6 +70,59 @@ max_requests = 1000
 <%text>## ammount of time a worker can handle request before it get's killed and</%text>
 <%text>## restarted</%text>
 timeout = 3600
+%endif
+%if http_server == 'uwsgi':
+<%text>## UWSGI ##</%text>
+<%text>## run with uwsgi --ini-paste-logged <inifile.ini></%text>
+[uwsgi]
+socket = /tmp/uwsgi.sock
+master = true
+http = 0.0.0.0:5000
+
+<%text>## set as deamon and redirect all output to file</%text>
+#daemonize = ./uwsgi_rhodecode.log
+
+<%text>## master process PID</%text>
+pidfile = ./uwsgi_rhodecode.pid
+
+<%text>## stats server with workers statistics, use uwsgitop</%text>
+<%text>## for monitoring</%text>
+stats = 127.0.0.1:1717
+
+<%text>## log 5XX errors</%text>
+log-5xx = true
+
+<%text>## Set the socket listen queue size.</%text>
+listen = 256
+
+<%text>## Gracefully Reload workers after the specified amount of managed requests</%text>
+<%text>## (avoid memory leaks).</%text>
+max-requests = 1000
+
+<%text>## Log requests slower than the specified number of milliseconds.</%text>
+log-slow = 10
+
+<%text>## Exit if no app can be loaded.</%text>
+need-app = true
+
+<%text>## Set lazy mode (load apps in workers instead of master).</%text>
+lazy = true
+
+<%text>## scaling ##</%text>
+<%text>## set cheaper algorithm to use, if not set default will be used</%text>
+cheaper-algo = spare
+
+<%text>## minimum number of workers to keep at all times</%text>
+cheaper = 1
+
+<%text>## number of workers to spawn at startup</%text>
+cheaper-initial = 1
+
+<%text>## maximum number of workers that can be spawned</%text>
+workers = 4
+
+<%text>## how many workers should be spawned at a time</%text>
+cheaper-step = 1
 %endif
 <%text>## COMMON ##</%text>
 host = ${host}
@@ -216,7 +269,7 @@ issue_prefix = #
 <%text>## a prefix key for this instance used for cache invalidation when running</%text>
 <%text>## multiple instances of rhodecode, make sure it's globally unique for</%text>
 <%text>## all running rhodecode instances. Leave empty if you don't use it</%text>
-instance_id = 
+instance_id =
 
 <%text>## alternative return HTTP header for failed authentication. Default HTTP</%text>
 <%text>## response is 401 HTTPUnauthorized. Currently HG clients have troubles with</%text>
@@ -298,15 +351,15 @@ beaker.cache.sql_cache_long.key_length = 256
 ####################################
 ###       BEAKER SESSION        ####
 ####################################
-## Type of storage used for the session, current types are 
-## dbm, file, memcached, database, and memory. 
-## The storage uses the Container API 
+## Type of storage used for the session, current types are
+## dbm, file, memcached, database, and memory.
+## The storage uses the Container API
 ## that is also used by the cache system.
 </%text>
 <%text>## db session ##</%text>
 #beaker.session.type = ext:database
 #beaker.session.sa.url = postgresql://postgres:qwe@localhost/rhodecode
-#beaker.session.table_name = db_session 
+#beaker.session.table_name = db_session
 
 <%text>## encrypted cookie client side session, good for many instances ##</%text>
 #beaker.session.type = cookie
@@ -346,7 +399,7 @@ beaker.session.auto = False
 ### [errormator] ###
 ####################
 
-## Errormator is tailored to work with RhodeCode, see 
+## Errormator is tailored to work with RhodeCode, see
 ## http://errormator.com for details how to obtain an account
 ## you must install python package `errormator_client` to make it work
 </%text>
@@ -383,7 +436,7 @@ errormator.logging_on_error = false
 <%text>## (by default client will always send following info:</%text>
 <%text>## 'REMOTE_USER', 'REMOTE_ADDR', 'SERVER_NAME', 'CONTENT_TYPE' + all keys that</%text>
 <%text>## start with HTTP* this list be extended with additional keywords here</%text>
-errormator.environ_keys_whitelist = 
+errormator.environ_keys_whitelist =
 
 
 <%text>## list of keywords that should be blanked from request object</%text>
@@ -397,7 +450,7 @@ errormator.request_keys_blacklist =
 <%text>## list of namespaces that should be ignores when gathering log entries</%text>
 <%text>## can be string with comma separated list of namespaces</%text>
 <%text>## (by default the client ignores own entries: errormator_client.client)</%text>
-errormator.log_namespace_blacklist =  
+errormator.log_namespace_blacklist =
 %elif error_aggregation_service == 'sentry':
 <%text>
 ################
@@ -405,7 +458,7 @@ errormator.log_namespace_blacklist =
 ################
 
 ## sentry is a alternative open source error aggregator
-## you must install python packages `sentry` and `raven` to enable 
+## you must install python packages `sentry` and `raven` to enable
 </%text>
 sentry.dsn = YOUR_DNS
 sentry.servers =
@@ -478,26 +531,26 @@ handlers = console
 
 [logger_routes]
 level = DEBUG
-handlers = 
+handlers =
 qualname = routes.middleware
 <%text>## "level = DEBUG" logs the route matched and routing variables.</%text>
 propagate = 1
 
 [logger_beaker]
 level = DEBUG
-handlers = 
+handlers =
 qualname = beaker.container
 propagate = 1
 
 [logger_templates]
 level = INFO
-handlers = 
+handlers =
 qualname = pylons.templating
 propagate = 1
 
 [logger_rhodecode]
 level = DEBUG
-handlers = 
+handlers =
 qualname = rhodecode
 propagate = 1
 
@@ -509,7 +562,7 @@ propagate = 0
 
 [logger_whoosh_indexer]
 level = DEBUG
-handlers = 
+handlers =
 qualname = whoosh_indexer
 propagate = 1
 <%text>
