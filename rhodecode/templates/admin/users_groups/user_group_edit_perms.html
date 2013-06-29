@@ -21,7 +21,7 @@
             </td>
             <td>
               %if r2p.user.username !='default':
-                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${r2p.user.user_id}, 'user', '${'id%s'%id(r2p.user.username)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${r2p.user.user_id}, 'user', '${'id%s'%id(r2p.user.username)}', '${r2p.user.username}')">
                 ${_('revoke')}
                 </span>
               %endif
@@ -51,7 +51,7 @@
                 <img class="perm-gravatar" src="${h.url('/images/icons/group.png')}"/>${g2p.user_group.users_group_name}
             </td>
             <td>
-                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${g2p.user_group.users_group_id}, 'user_group', '${'id%s'%id(g2p.user_group.users_group_name)}')">
+                <span class="delete_icon action_button" onclick="ajaxActionRevoke(${g2p.user_group.users_group_id}, 'user_group', '${'id%s'%id(g2p.user_group.users_group_name)}', '${g2p.user_group.users_group_name}')">
                 ${_('revoke')}
                 </span>
             </td>
@@ -84,9 +84,12 @@
     </tr>
 </table>
 <script type="text/javascript">
-function ajaxActionRevoke(obj_id, obj_type, field_id) {
+function ajaxActionRevoke(obj_id, obj_type, field_id, obj_name) {
     url = "${h.url('delete_user_group_perm_member', id=c.users_group.users_group_id)}";
-    ajaxActionRevokePermission(url, obj_id, obj_type, field_id);
+    var revoke_msg = _TM['Confirm to revoke permission for {0}: {1} ?'].format(obj_type.replace('_', ' '), obj_name);
+    if (confirm(revoke_msg)){
+        ajaxActionRevokePermission(url, obj_id, obj_type, field_id);
+    }
 };
 
 YUE.onDOMReady(function () {
