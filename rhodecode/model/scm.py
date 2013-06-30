@@ -54,7 +54,7 @@ from rhodecode.model import BaseModel
 from rhodecode.model.db import Repository, RhodeCodeUi, CacheInvalidation, \
     UserFollowing, UserLog, User, RepoGroup, PullRequest
 from rhodecode.lib.hooks import log_push_action
-from rhodecode.lib.exceptions import NonRelativePathError
+from rhodecode.lib.exceptions import NonRelativePathError, IMCCommitError
 
 log = logging.getLogger(__name__)
 
@@ -546,11 +546,15 @@ class ScmModel(BaseModel):
         author = safe_unicode(author)
         imc = IMC(repo)
         imc.change(FileNode(path, content, mode=cs.get_file_mode(f_path)))
-        tip = imc.commit(message=message,
-                       author=author,
-                       parents=[cs], branch=cs.branch)
-
-        self.mark_for_invalidation(repo_name)
+        try:
+            tip = imc.commit(message=message, author=author,
+                             parents=[cs], branch=cs.branch)
+        except Exception, e:
+            log.error(traceback.format_exc())
+            raise IMCCommitError(str(e))
+        finally:
+            # always clear caches, if commit fails we want fresh object also
+            self.mark_for_invalidation(repo_name)
         self._handle_push(repo,
                           username=user.username,
                           action='push_local',

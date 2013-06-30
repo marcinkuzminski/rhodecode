@@ -86,3 +86,7 @@ class HTTPLockedRC(HTTPClientError):
         self.title = self.explanation = ('Repository `%s` locked by '
                                          'user `%s`' % (reponame, username))
         super(HTTPLockedRC, self).__init__(*args, **kwargs)
+
+
+class IMCCommitError(Exception):
+    pass

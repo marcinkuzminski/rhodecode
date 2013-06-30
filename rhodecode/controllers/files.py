@@ -37,7 +37,7 @@ from rhodecode.lib.utils import jsonify, action_logger
 from rhodecode.lib import diffs
 from rhodecode.lib import helpers as h
 
-from rhodecode.lib.compat import OrderedDict, json
+from rhodecode.lib.compat import OrderedDict
 from rhodecode.lib.utils2 import convert_line_endings, detect_mode, safe_str,\
     str2bool
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
@@ -57,7 +57,7 @@ from rhodecode.model.db import Repository
 from rhodecode.controllers.changeset import anchor_url, _ignorews_url,\
     _context_url, get_line_ctx, get_ignore_ws
 from webob.exc import HTTPNotFound
-from rhodecode.lib.exceptions import NonRelativePathError
+from rhodecode.lib.exceptions import NonRelativePathError, IMCCommitError
 
 
 log = logging.getLogger(__name__)
@@ -271,7 +271,7 @@ class FilesController(BaseRepoController):
             h.flash(_('This repository is has been locked by %s on %s')
                 % (h.person_by_id(repo.locked[0]),
                    h.fmt_date(h.time_to_datetime(repo.locked[1]))),
-                  'warning')
+                'warning')
             return redirect(h.url('files_home',
                                   repo_name=repo_name, revision='tip'))
 
@@ -293,7 +293,7 @@ class FilesController(BaseRepoController):
 
         if c.file.is_binary:
             return redirect(url('files_home', repo_name=c.repo_name,
-                         revision=c.cs.raw_id, f_path=f_path))
+                            revision=c.cs.raw_id, f_path=f_path))
         c.default_message = _('Edited file %s via RhodeCode') % (f_path)
         c.f_path = f_path
 
@@ -321,7 +321,6 @@ class FilesController(BaseRepoController):
                                              content=content, f_path=f_path)
                 h.flash(_('Successfully committed to %s') % f_path,
                         category='success')
-
             except Exception:
                 log.error(traceback.format_exc())
                 h.flash(_('Error occurred during commit'), category='error')
