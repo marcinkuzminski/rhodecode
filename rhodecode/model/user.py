@@ -86,13 +86,13 @@ class UserModel(BaseModel):
 
         from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
         _fd = form_data
-        form_data = {
+        user_data = {
             'username': _fd['username'], 'password': _fd['password'],
             'email': _fd['email'], 'firstname': _fd['firstname'], 'lastname': _fd['lastname'],
             'active': _fd['active'], 'admin': False
         }
         # raises UserCreationError if it's not allowed
-        check_allowed_create_user(form_data, cur_user)
+        check_allowed_create_user(user_data, cur_user)
 
         from rhodecode.lib.auth import get_crypt_password
         try:
@@ -135,13 +135,13 @@ class UserModel(BaseModel):
 
         from rhodecode.lib.auth import get_crypt_password
         from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
-        form_data = {
+        user_data = {
             'username': username, 'password': password,
             'email': email, 'firstname': firstname, 'lastname': lastname,
             'active': active, 'admin': admin
         }
         # raises UserCreationError if it's not allowed
-        check_allowed_create_user(form_data, cur_user)
+        check_allowed_create_user(user_data, cur_user)
 
         log.debug('Checking for %s account in RhodeCode database' % username)
         user = User.get_by_username(username, case_insensitive=True)
@@ -194,13 +194,13 @@ class UserModel(BaseModel):
             email = attrs['email'] or generate_email(username)
 
             from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
-            form_data = {
+            user_data = {
                 'username': username, 'password': None,
                 'email': email, 'firstname': firstname, 'lastname': lastname,
                 'active': attrs.get('active', True), 'admin': False
             }
             # raises UserCreationError if it's not allowed
-            check_allowed_create_user(form_data, cur_user)
+            check_allowed_create_user(user_data, cur_user)
 
             try:
                 new_user = User()
@@ -248,13 +248,13 @@ class UserModel(BaseModel):
             email = attrs['email'] or generate_email(username)
 
             from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
-            form_data = {
+            user_data = {
                 'username': username, 'password': password,
                 'email': email, 'firstname': firstname, 'lastname': lastname,
                 'active': attrs.get('active', True), 'admin': False
             }
             # raises UserCreationError if it's not allowed
-            check_allowed_create_user(form_data, cur_user)
+            check_allowed_create_user(user_data, cur_user)
 
             try:
                 new_user = User()
@@ -411,23 +411,21 @@ class UserModel(BaseModel):
         from rhodecode.lib.celerylib import tasks, run_task
         from rhodecode.lib import auth
         user_email = data['email']
+        pre_db = True
         try:
-            try:
-                user = User.get_by_email(user_email)
-                new_passwd = auth.PasswordGenerator().gen_password(8,
-                                 auth.PasswordGenerator.ALPHABETS_BIG_SMALL)
-                if user:
-                    user.password = auth.get_crypt_password(new_passwd)
-                    user.api_key = auth.generate_api_key(user.username)
-                    Session().add(user)
-                    Session().commit()
-                    log.info('change password for %s' % user_email)
-                if new_passwd is None:
-                    raise Exception('unable to generate new password')
-            except Exception:
-                log.error(traceback.format_exc())
-                Session().rollback()
+            user = User.get_by_email(user_email)
+            new_passwd = auth.PasswordGenerator().gen_password(8,
+                            auth.PasswordGenerator.ALPHABETS_BIG_SMALL)
+            if user:
+                user.password = auth.get_crypt_password(new_passwd)
+                user.api_key = auth.generate_api_key(user.username)
+                Session().add(user)
+                Session().commit()
+                log.info('change password for %s' % user_email)
+            if new_passwd is None:
+                raise Exception('unable to generate new password')
 
+            pre_db = False
             run_task(tasks.send_email, user_email,
                      _('Your new password'),
                      _('Your new RhodeCode password:%s') % (new_passwd,))
@@ -436,6 +434,10 @@ class UserModel(BaseModel):
         except Exception:
             log.error('Failed to update user password')
             log.error(traceback.format_exc())
+            if pre_db:
+                # we rollback only if local db stuff fails. If it goes into
+                # run_task, we're pass rollback state this wouldn't work then
+                Session().rollback()
 
         return True
 
