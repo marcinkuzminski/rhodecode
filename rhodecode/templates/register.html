@@ -6,7 +6,16 @@
 </%def>
 
 <div id="register">
-
+<div class="flash_msg">
+    <% messages = h.flash.pop_messages() %>
+    % if messages:
+    <ul id="flash-messages">
+        % for message in messages:
+        <li class="${message.category}_msg">${message}</li>
+        % endfor
+    </ul>
+    % endif
+</div>
     <div class="title top-left-rounded-corner top-right-rounded-corner">
         <h5>${_('Sign Up to')} ${c.rhodecode_name}</h5>
     </div>

@@ -90,3 +90,11 @@ class HTTPLockedRC(HTTPClientError):
 
 class IMCCommitError(Exception):
     pass
+
+
+class UserCreationError(Exception):
+    pass
+
+
+class RepositoryCreationError(Exception):
+    pass

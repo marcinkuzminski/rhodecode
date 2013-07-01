@@ -53,6 +53,29 @@ CREATE_REPO_HOOK = _crrepohook
 
 
 #==============================================================================
+# PRE CREATE USER HOOK
+#==============================================================================
+# this function will be executed before each user is created
+def _pre_cruserhook(*args, **kwargs):
+    """
+    Pre create user HOOK, it returns a tuple of bool, reason.
+    If bool is False the user creation will be stopped and reason
+    will be displayed to the user.
+    kwargs available:
+    :param username:
+    :param password:
+    :param email:
+    :param firstname:
+    :param lastname:
+    :param active:
+    :param admin:
+    :param created_by:
+    """
+    reason = 'allowed'
+    return True, reason
+PRE_CREATE_USER_HOOK = _pre_cruserhook
+
+#==============================================================================
 # POST CREATE USER HOOK
 #==============================================================================
 # this function will be executed after each user is created

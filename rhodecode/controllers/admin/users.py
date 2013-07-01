@@ -35,7 +35,7 @@ from pylons.i18n.translation import _
 
 import rhodecode
 from rhodecode.lib.exceptions import DefaultUserException, \
-    UserOwnsReposException
+    UserOwnsReposException, UserCreationError
 from rhodecode.lib import helpers as h
 from rhodecode.lib.auth import LoginRequired, HasPermissionAllDecorator, \
     AuthUser
@@ -137,6 +137,8 @@ class UsersController(BaseController):
                 errors=errors.error_dict or {},
                 prefix_error=False,
                 encoding="UTF-8")
+        except UserCreationError, e:
+            h.flash(e, 'error')
         except Exception:
             log.error(traceback.format_exc())
             h.flash(_('Error occurred during creation of user %s') \

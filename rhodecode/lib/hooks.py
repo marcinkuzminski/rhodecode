@@ -34,7 +34,7 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.utils import action_logger
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
 from rhodecode.lib.compat import json
-from rhodecode.lib.exceptions import HTTPLockedRC
+from rhodecode.lib.exceptions import HTTPLockedRC, UserCreationError
 from rhodecode.lib.utils2 import safe_str, _extract_extras
 from rhodecode.model.db import Repository, User
 
@@ -250,6 +250,15 @@ def log_create_repository(repository_dict, created_by, **kwargs):
         return callback(**kw)
 
     return 0
+
+
+def check_allowed_create_user(user_dict, created_by, **kwargs):
+    from rhodecode import EXTENSIONS
+    callback = getattr(EXTENSIONS, 'PRE_CREATE_USER_HOOK', None)
+    if isfunction(callback):
+        allowed, reason = callback(created_by=created_by, **user_dict)
+        if not allowed:
+            raise UserCreationError(reason)
 
 
 def log_create_user(user_dict, created_by, **kwargs):

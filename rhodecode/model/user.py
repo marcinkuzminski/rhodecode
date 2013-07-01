@@ -36,9 +36,9 @@ from sqlalchemy.orm import joinedload
 from rhodecode.lib.utils2 import safe_unicode, generate_api_key, get_current_rhodecode_user
 from rhodecode.lib.caching_query import FromCache
 from rhodecode.model import BaseModel
-from rhodecode.model.db import User, UserRepoToPerm, Repository, Permission, \
+from rhodecode.model.db import User, Repository, Permission, \
     UserToPerm, UserGroupRepoToPerm, UserGroupToPerm, UserGroupMember, \
-    Notification, RepoGroup, UserRepoGroupToPerm, UserGroupRepoGroupToPerm, \
+    Notification, RepoGroup, UserGroupRepoGroupToPerm, \
     UserEmailMap, UserIpMap, UserGroupUserGroupToPerm, UserGroup
 from rhodecode.lib.exceptions import DefaultUserException, \
     UserOwnsReposException
@@ -83,6 +83,17 @@ class UserModel(BaseModel):
     def create(self, form_data, cur_user=None):
         if not cur_user:
             cur_user = getattr(get_current_rhodecode_user(), 'username', None)
+
+        from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
+        _fd = form_data
+        form_data = {
+            'username': _fd['username'], 'password': _fd['password'],
+            'email': _fd['email'], 'firstname': _fd['firstname'], 'lastname': _fd['lastname'],
+            'active': _fd['active'], 'admin': False
+        }
+        # raises UserCreationError if it's not allowed
+        check_allowed_create_user(form_data, cur_user)
+
         from rhodecode.lib.auth import get_crypt_password
         try:
             new_user = User()
@@ -96,7 +107,6 @@ class UserModel(BaseModel):
             new_user.api_key = generate_api_key(form_data['username'])
             self.sa.add(new_user)
 
-            from rhodecode.lib.hooks import log_create_user
             log_create_user(new_user.get_dict(), cur_user)
             return new_user
         except Exception:
@@ -124,6 +134,14 @@ class UserModel(BaseModel):
             cur_user = getattr(get_current_rhodecode_user(), 'username', None)
 
         from rhodecode.lib.auth import get_crypt_password
+        from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
+        form_data = {
+            'username': username, 'password': password,
+            'email': email, 'firstname': firstname, 'lastname': lastname,
+            'active': active, 'admin': admin
+        }
+        # raises UserCreationError if it's not allowed
+        check_allowed_create_user(form_data, cur_user)
 
         log.debug('Checking for %s account in RhodeCode database' % username)
         user = User.get_by_username(username, case_insensitive=True)
@@ -151,7 +169,6 @@ class UserModel(BaseModel):
             self.sa.add(new_user)
 
             if not edit:
-                from rhodecode.lib.hooks import log_create_user
                 log_create_user(new_user.get_dict(), cur_user)
             return new_user
         except (DatabaseError,):
@@ -169,23 +186,33 @@ class UserModel(BaseModel):
         if not cur_user:
             cur_user = getattr(get_current_rhodecode_user(), 'username', None)
         if self.get_by_username(username, case_insensitive=True) is None:
-
             # autogenerate email for container account without one
             generate_email = lambda usr: '%s@container_auth.account' % usr
+            firstname = attrs['name']
+            lastname = attrs['lastname']
+            active = attrs.get('active', True)
+            email = attrs['email'] or generate_email(username)
+
+            from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
+            form_data = {
+                'username': username, 'password': None,
+                'email': email, 'firstname': firstname, 'lastname': lastname,
+                'active': attrs.get('active', True), 'admin': False
+            }
+            # raises UserCreationError if it's not allowed
+            check_allowed_create_user(form_data, cur_user)
 
             try:
                 new_user = User()
                 new_user.username = username
                 new_user.password = None
                 new_user.api_key = generate_api_key(username)
-                new_user.email = attrs['email']
-                new_user.active = attrs.get('active', True)
-                new_user.name = attrs['name'] or generate_email(username)
-                new_user.lastname = attrs['lastname']
+                new_user.email = email
+                new_user.active = active
+                new_user.name = firstname
+                new_user.lastname = lastname
 
                 self.sa.add(new_user)
-
-                from rhodecode.lib.hooks import log_create_user
                 log_create_user(new_user.get_dict(), cur_user)
                 return new_user
             except (DatabaseError,):
@@ -212,26 +239,37 @@ class UserModel(BaseModel):
         from rhodecode.lib.auth import get_crypt_password
         log.debug('Checking for such ldap account in RhodeCode database')
         if self.get_by_username(username, case_insensitive=True) is None:
-
-            # autogenerate email for ldap account without one
+            # autogenerate email for container account without one
             generate_email = lambda usr: '%s@ldap.account' % usr
+            password = get_crypt_password(password)
+            firstname = attrs['name']
+            lastname = attrs['lastname']
+            active = attrs.get('active', True)
+            email = attrs['email'] or generate_email(username)
+
+            from rhodecode.lib.hooks import log_create_user, check_allowed_create_user
+            form_data = {
+                'username': username, 'password': password,
+                'email': email, 'firstname': firstname, 'lastname': lastname,
+                'active': attrs.get('active', True), 'admin': False
+            }
+            # raises UserCreationError if it's not allowed
+            check_allowed_create_user(form_data, cur_user)
 
             try:
                 new_user = User()
                 username = username.lower()
                 # add ldap account always lowercase
                 new_user.username = username
-                new_user.password = get_crypt_password(password)
+                new_user.password = password
                 new_user.api_key = generate_api_key(username)
-                new_user.email = attrs['email'] or generate_email(username)
-                new_user.active = attrs.get('active', True)
+                new_user.email = email
+                new_user.active = active
                 new_user.ldap_dn = safe_unicode(user_dn)
-                new_user.name = attrs['name']
-                new_user.lastname = attrs['lastname']
-
+                new_user.name = firstname
+                new_user.lastname = lastname
                 self.sa.add(new_user)
 
-                from rhodecode.lib.hooks import log_create_user
                 log_create_user(new_user.get_dict(), cur_user)
                 return new_user
             except (DatabaseError,):
