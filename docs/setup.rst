@@ -590,6 +590,9 @@ pushes or large pushes::
 
     proxy_redirect              off;
     proxy_set_header            Host $host;
+    ## needed for container auth
+    #proxy_set_header            REMOTE_USER $remote_user;
+    #proxy_set_header            X-Forwarded-User $remote_user;
     proxy_set_header            X-Url-Scheme $scheme;
     proxy_set_header            X-Host $http_host;
     proxy_set_header            X-Real-IP $remote_addr;
