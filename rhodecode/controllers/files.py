@@ -363,6 +363,10 @@ class FilesController(BaseRepoController):
                 filename = file_obj.filename
                 content = file_obj.file
 
+                if hasattr(content, 'file'):
+                    # non posix systems store real file under file attr
+                    content = content.file
+
             if not content:
                 h.flash(_('No content'), category='warning')
                 return redirect(url('changeset_home', repo_name=c.repo_name,
