@@ -39,7 +39,7 @@ from rhodecode.lib.compat import json
 from rhodecode.lib.graphmod import _colored, _dagwalker
 from rhodecode.lib.vcs.exceptions import RepositoryError, ChangesetDoesNotExistError,\
     ChangesetError, NodeDoesNotExistError, EmptyRepositoryError
-from rhodecode.lib.utils2 import safe_int
+from rhodecode.lib.utils2 import safe_int, safe_str
 
 
 log = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ class ChangelogController(BaseRepoController):
 
         except RepositoryError, e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='warning')
+            h.flash(safe_str(e), category='warning')
             if not partial:
                 redirect(h.url('changelog_home', repo_name=repo.repo_name))
             raise HTTPBadRequest()
@@ -158,7 +158,7 @@ class ChangelogController(BaseRepoController):
                         cs = self.__get_cs_or_redirect(revision, repo_name)
                         collection = cs.get_file_history(f_path)
                     except RepositoryError, e:
-                        h.flash(str(e), category='warning')
+                        h.flash(safe_str(e), category='warning')
                         redirect(h.url('changelog_home', repo_name=repo_name))
                 collection = list(reversed(collection))
             else:
@@ -173,11 +173,11 @@ class ChangelogController(BaseRepoController):
             c.comments = c.rhodecode_db_repo.get_comments(page_revisions)
             c.statuses = c.rhodecode_db_repo.statuses(page_revisions)
         except (EmptyRepositoryError), e:
-            h.flash(str(e), category='warning')
+            h.flash(safe_str(e), category='warning')
             return redirect(url('summary_home', repo_name=c.repo_name))
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='error')
+            h.flash(safe_str(e), category='error')
             return redirect(url('changelog_home', repo_name=c.repo_name))
 
         c.branch_name = branch_name

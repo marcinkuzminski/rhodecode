@@ -92,7 +92,7 @@ class FilesController(BaseRepoController):
             redirect(h.url('summary_home', repo_name=repo_name))
 
         except RepositoryError, e:  # including ChangesetDoesNotExistError
-            h.flash(str(e), category='error')
+            h.flash(safe_str(e), category='error')
             raise HTTPNotFound()
 
     def __get_filenode_or_redirect(self, repo_name, cs, path):
@@ -110,7 +110,7 @@ class FilesController(BaseRepoController):
             if file_node.is_dir():
                 raise RepositoryError('given path is a directory')
         except RepositoryError, e:
-            h.flash(str(e), category='error')
+            h.flash(safe_str(e), category='error')
             raise HTTPNotFound()
 
         return file_node
@@ -175,7 +175,7 @@ class FilesController(BaseRepoController):
             else:
                 c.authors = c.file_history = []
         except RepositoryError, e:
-            h.flash(str(e), category='error')
+            h.flash(safe_str(e), category='error')
             raise HTTPNotFound()
 
         if request.environ.get('HTTP_X_PARTIAL_XHR'):

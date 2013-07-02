@@ -28,7 +28,7 @@ import logging
 import traceback
 import re
 
-from webob.exc import HTTPNotFound
+from webob.exc import HTTPNotFound, HTTPBadRequest
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.i18n.translation import _
@@ -40,9 +40,8 @@ from rhodecode.lib import helpers as h
 from rhodecode.lib.base import BaseRepoController, render
 from rhodecode.lib.auth import LoginRequired, HasRepoPermissionAnyDecorator
 from rhodecode.lib import diffs
-
+from rhodecode.lib.utils2 import safe_str
 from rhodecode.model.db import Repository
-from webob.exc import HTTPBadRequest
 from rhodecode.lib.diffs import LimitedDiffContainer
 
 
@@ -91,7 +90,7 @@ class CompareController(BaseRepoController):
 
         except RepositoryError, e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='warning')
+            h.flash(safe_str(e), category='warning')
             if not partial:
                 redirect(h.url('summary_home', repo_name=repo.repo_name))
             raise HTTPBadRequest()

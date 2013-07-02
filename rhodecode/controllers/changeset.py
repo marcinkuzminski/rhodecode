@@ -51,7 +51,7 @@ from rhodecode.model.repo import RepoModel
 from rhodecode.lib.diffs import LimitedDiffContainer
 from rhodecode.lib.exceptions import StatusChangeOnClosedPullRequestError
 from rhodecode.lib.vcs.backends.base import EmptyChangeset
-from rhodecode.lib.utils2 import safe_unicode
+from rhodecode.lib.utils2 import safe_unicode, safe_str
 
 log = logging.getLogger(__name__)
 
@@ -201,7 +201,7 @@ class ChangesetController(BaseRepoController):
 
         except (RepositoryError, ChangesetDoesNotExistError, Exception), e:
             log.error(traceback.format_exc())
-            h.flash(str(e), category='error')
+            h.flash(safe_str(e), category='error')
             raise HTTPNotFound()
 
         c.changes = OrderedDict()
