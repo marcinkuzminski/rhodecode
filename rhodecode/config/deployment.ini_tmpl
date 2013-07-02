@@ -79,6 +79,7 @@ max_request_body_size = 107374182400
 ## stats server with workers statistics, use uwsgitop
 ## for monitoring, `uwsgitop 127.0.0.1:1717`
 #stats = 127.0.0.1:1717
+#memory-report = true
 
 ## log 5XX errors
 #log-5xx = true

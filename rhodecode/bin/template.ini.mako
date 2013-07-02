@@ -88,6 +88,7 @@ pidfile = ./uwsgi_rhodecode.pid
 <%text>## stats server with workers statistics, use uwsgitop</%text>
 <%text>## for monitoring</%text>
 stats = 127.0.0.1:1717
+memory-report = true
 
 <%text>## log 5XX errors</%text>
 log-5xx = true
