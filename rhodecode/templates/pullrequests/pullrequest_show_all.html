@@ -23,6 +23,17 @@ ${self.repo_context_bar('showpullrequest')}
     <!-- box / title -->
     <div class="title">
         ${self.breadcrumbs()}
+        %if c.rhodecode_user.username != 'default':
+            <ul class="links">
+            %if h.HasPermissionAny('hg.admin','hg.create.repository')() or h.HasReposGroupPermissionAny('group.write', 'group.admin')(c.group.group_name if c.group else None):
+              <li>
+                  <span>
+                      <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}">${_('Open new pull request')}</a>
+                  </span>
+              </li>
+            %endif
+            </ul>
+        %endif
     </div>
 
     <div style="margin: 0 20px">
@@ -41,15 +52,9 @@ ${self.repo_context_bar('showpullrequest')}
             ${h.link_to(_('Show closed pull requests too'), h.url('pullrequest_show_all',repo_name=c.repo_name,from_=c.from_,closed=1))}
         %endif
         </div>
-
-        <div>
-            <a id="open_new_pr" href="${h.url('pullrequest_home',repo_name=c.repo_name)}">${_('Open new pull request')}</a>
-        </div>
-
     </div>
 
     ${c.pullrequest_data}
 
 </div>
-
 </%def>
