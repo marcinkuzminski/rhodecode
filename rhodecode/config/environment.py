@@ -2,6 +2,7 @@
 
 import os
 import logging
+import shlex
 import rhodecode
 
 from mako.lookup import TemplateLookup
@@ -42,6 +43,12 @@ def load_environment(global_conf, app_conf, initial=False):
         static_files=os.path.join(root, 'public'),
         templates=[os.path.join(root, 'templates')]
     )
+
+    # Allow to override Mako templates
+    extra_templates = app_conf.get('extra_templates')
+    if extra_templates:
+        extra_templates = shlex.split(extra_templates)
+        paths['templates'].extend(extra_templates)
 
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='rhodecode', paths=paths)
