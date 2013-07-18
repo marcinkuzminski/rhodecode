@@ -1,5 +1,7 @@
 """Pylons middleware initialization"""
 
+import shlex
+
 from beaker.middleware import SessionMiddleware
 from routes.middleware import RoutesMiddleware
 from paste.cascade import Cascade
@@ -84,8 +86,11 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
 
     if asbool(static_files):
         # Serve static files
-        static_app = StaticURLParser(config['pylons.paths']['static_files'])
-        app = Cascade([static_app, app])
+        st_apps = [app, StaticURLParser(config['pylons.paths']['static_files'])]
+        for sa in shlex.split(app_conf.get('extra_static_files', "")):
+            st_apps.append(StaticURLParser(sa))
+        st_apps.reverse()
+        app = Cascade(st_apps)
         app = make_gzip_middleware(app, global_conf, compress_level=1)
 
     app.config = config
